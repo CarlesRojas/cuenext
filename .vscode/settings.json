@@ -1,0 +1,19 @@
+{
+  "files.watcherExclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "search.exclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["(?<=cva\\([\\s\\S]*?)[\"']([^\"']+)[\"']"]
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.sortImports": "always",
+    "source.organizeImports": "always"
+  }
+}

@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-montserrat: 'Montserrat', sans-serif;
+  --color-neutral-150: #ededed;
+}
+
+@layer components {
+  .full-page {
+    @apply h-[calc(100dvh-3rem)] max-h-[calc(100dvh-3rem)] min-h-[calc(100dvh-3rem)] w-dvw max-w-dvw min-w-dvw;
+  }
+}
+
+@layer base {
+  * {
+    @apply m-0 box-border p-0 antialiased outline-none! select-none!;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100%;
+  }
+
+  img,
+  video,
+  svg {
+    @apply block;
+  }
+
+  a {
+    @apply no-underline;
+  }
+}
