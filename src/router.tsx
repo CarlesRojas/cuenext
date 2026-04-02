@@ -1,7 +1,9 @@
 import { env } from '#/env'
 import { routeTree } from '#/routeTree.gen'
 import { ConvexQueryClient } from '@convex-dev/react-query'
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
@@ -11,9 +13,19 @@ export function getRouter() {
   const convexQueryClient = new ConvexQueryClient(convexClient)
 
   const queryClient: QueryClient = new QueryClient({
-    defaultOptions: { queries: { queryKeyHashFn: convexQueryClient.hashFn(), queryFn: convexQueryClient.queryFn() } },
+    defaultOptions: {
+      queries: {
+        queryKeyHashFn: convexQueryClient.hashFn(),
+        queryFn: convexQueryClient.queryFn(),
+        staleTime: 1000 * 60 * 60, // 1 hour
+      },
+    },
   })
   convexQueryClient.connect(queryClient)
+
+  const persister = createAsyncStoragePersister({
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  })
 
   const router = createTanStackRouter({
     routeTree,
@@ -25,7 +37,11 @@ export function getRouter() {
     defaultStructuralSharing: true,
     defaultPreloadStaleTime: 0,
 
-    Wrap: ({ children }) => <ConvexProvider client={convexQueryClient.convexClient}>{children}</ConvexProvider>,
+    Wrap: ({ children }) => (
+      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+        <ConvexProvider client={convexQueryClient.convexClient}>{children}</ConvexProvider>
+      </PersistQueryClientProvider>
+    ),
   })
 
   setupRouterSsrQueryIntegration({ router, queryClient })

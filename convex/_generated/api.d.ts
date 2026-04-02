@@ -8,10 +8,12 @@
  * @module
  */
 
+import type * as lib_tmdbClient from "../lib/tmdbClient.js";
 import type * as library from "../library.js";
 import type * as progress from "../progress.js";
 import type * as requireUser from "../requireUser.js";
 import type * as stats from "../stats.js";
+import type * as tmdb from "../tmdb.js";
 import type * as watchlist from "../watchlist.js";
 
 import type {
@@ -21,10 +23,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "lib/tmdbClient": typeof lib_tmdbClient;
   library: typeof library;
   progress: typeof progress;
   requireUser: typeof requireUser;
   stats: typeof stats;
+  tmdb: typeof tmdb;
   watchlist: typeof watchlist;
 }>;
 
