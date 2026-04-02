@@ -30,10 +30,10 @@ function RouteComponent() {
                 <img
                   src={getTmdbImageUrl(show.poster_path, 'w342') || ''}
                   alt={show.name}
-                  className="aspect-[2/3] w-full rounded-md object-cover shadow-md"
+                  className="aspect-2/3 w-full rounded-md object-cover shadow-md"
                 />
               ) : (
-                <div className="flex aspect-[2/3] w-full items-center justify-center rounded-md bg-neutral-200 p-4 text-center dark:bg-neutral-800">
+                <div className="flex aspect-2/3 w-full items-center justify-center rounded-md bg-neutral-200 p-4 text-center dark:bg-neutral-800">
                   <span className="text-sm text-neutral-500">{show.name}</span>
                 </div>
               )}
