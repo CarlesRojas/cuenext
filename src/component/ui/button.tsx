@@ -13,10 +13,7 @@ const buttonVariants = cva(
           'border border-sky-600 bg-sky-400/40 text-black hover:bg-sky-400/60 focus-visible:bg-sky-400/60',
           'dark:border-sky-900 dark:bg-sky-900/40 dark:text-white dark:hover:bg-sky-900/60 dark:focus-visible:bg-sky-900/60',
         ],
-        ghost: [
-          'text-black/70 hover:text-black',
-          'dark:text-white/80 dark:hover:text-white',
-        ],
+        ghost: ['text-black/70 hover:text-black', 'dark:text-white/80 dark:hover:text-white'],
         white: [
           'border border-neutral-300 bg-neutral-300/40 text-black hover:bg-neutral-300/60 focus-visible:bg-neutral-300/60',
           'dark:border-neutral-800 dark:bg-neutral-800/40 dark:text-white dark:hover:bg-neutral-800/60 dark:focus-visible:bg-neutral-800/60',
@@ -53,37 +50,18 @@ type Props = ComponentProps<'button'> &
     asChild?: boolean
   }
 
-function Button({
-  className,
-  children,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: Props) {
+function Button({ className, children, variant, size, asChild = false, ...props }: Props) {
   const Comp = asChild ? Slot : 'button'
 
   return (
-    <Comp
-      data-slot="button"
-      type="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    >
-      <div
-        className={cn(
-          'size-fit',
-          (size === 'icon' || size === 'smallIcon') && 'size-5',
-        )}
-      >
+    <Comp data-slot="button" type="button" className={cn(buttonVariants({ variant, size, className }))} {...props}>
+      <div className={cn('size-fit', (size === 'icon' || size === 'smallIcon') && 'size-5')}>
         <div className="target-tl pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-hover:block group-focus-visible:block dark:bg-white/70" />
         <div className="target-tr pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-hover:block group-focus-visible:block dark:bg-white/70" />
         <div className="target-bl pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-hover:block group-focus-visible:block dark:bg-white/70" />
         <div className="target-br pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-hover:block group-focus-visible:block dark:bg-white/70" />
 
-        <div className="z-10 inline-flex size-full items-center justify-center gap-2">
-          {children}
-        </div>
+        <div className="z-10 inline-flex size-full items-center justify-center gap-2">{children}</div>
       </div>
     </Comp>
   )

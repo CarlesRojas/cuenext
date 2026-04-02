@@ -8,14 +8,7 @@ type Props = ComponentProps<'input'> & {
   onClear?: () => void
 }
 
-function Input({
-  className,
-  type,
-  backgroundColor,
-  icon,
-  onClear,
-  ...props
-}: Props) {
+function Input({ className, type, backgroundColor, icon, onClear, ...props }: Props) {
   return (
     <div
       className={cn(

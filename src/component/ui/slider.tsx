@@ -10,11 +10,7 @@ function Slider({
   max = 100,
   ...props
 }: ComponentProps<typeof SliderPrimitive.Root>) {
-  const _values = Array.isArray(value)
-    ? value
-    : Array.isArray(defaultValue)
-      ? defaultValue
-      : [min, max]
+  const _values = Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]
 
   return (
     <SliderPrimitive.Root
@@ -37,9 +33,7 @@ function Slider({
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
-          className={cn(
-            'absolute bg-sky-500 data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full',
-          )}
+          className={cn('absolute bg-sky-500 data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full')}
         />
       </SliderPrimitive.Track>
       {Array.from({ length: _values.length }, (_, index) => (
