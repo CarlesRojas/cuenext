@@ -15,7 +15,6 @@ import '@fontsource/montserrat/700.css'
 import '@fontsource/montserrat/800.css'
 import '@fontsource/montserrat/900.css'
 import type { QueryClient } from '@tanstack/react-query'
-import { QueryClientProvider } from '@tanstack/react-query'
 import { HeadContent, Scripts, createRootRouteWithContext, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import type { ConvexReactClient } from 'convex/react'
@@ -26,8 +25,7 @@ const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getIte
 
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const { userId, getToken } = await auth()
-  const token = await getToken()
-
+  const token = await getToken({ template: 'convex' })
   return { userId, token }
 })
 
@@ -62,10 +60,10 @@ export const Route = createRootRouteWithContext<{
     ],
   }),
 
-  beforeLoad: async ctx => {
+  beforeLoad: async context => {
     const { userId, token } = await fetchClerkAuth()
 
-    if (token) ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
+    if (token) context.context.convexQueryClient.serverHttpClient?.setAuth(token)
     return { userId, token }
   },
 
@@ -80,24 +78,22 @@ function RootDocument({ children }: Props) {
   const context = useRouteContext({ from: Route.id })
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <HeadContent />
-      </head>
+    <ClerkProvider publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
+        <html lang="en" suppressHydrationWarning>
+          <head>
+            <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+            <HeadContent />
+          </head>
 
-      <body className="font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
-        <ClerkProvider publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
-          <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-            <QueryClientProvider client={context.queryClient}>
-              <Header />
-              {children}
-            </QueryClientProvider>
-          </ConvexProviderWithClerk>
-        </ClerkProvider>
+          <body className="font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
+            <Header />
+            {children}
 
-        <Scripts />
-      </body>
-    </html>
+            <Scripts />
+          </body>
+        </html>
+      </ConvexProviderWithClerk>
+    </ClerkProvider>
   )
 }

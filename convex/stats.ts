@@ -1,0 +1,63 @@
+import { query } from './_generated/server'
+import { requireUser } from './auth.config'
+
+export const getProfileSummary = query({
+  args: {},
+  handler: async context => {
+    const userId = await requireUser(context)
+
+    const movies = await context.db
+      .query('movie')
+      .withIndex('by_user_tmdbId', q => q.eq('userId', userId))
+      .collect()
+
+    const watchedMovies = movies.filter(m => m.watchedAt !== null)
+    const moviesWatchedCount = watchedMovies.length
+
+    const episodes = await context.db
+      .query('episode')
+      .withIndex('by_user_show', q => q.eq('userId', userId))
+      .collect()
+
+    const episodesWatchedCount = episodes.length
+
+    const follows = await context.db
+      .query('follow')
+      .withIndex('by_user_type', q => q.eq('userId', userId))
+      .collect()
+
+    const followedMoviesCount = follows.filter(f => f.type === 'movie').length
+    const followedShowsCount = follows.filter(f => f.type === 'show').length
+
+    let lastActivityTimestamp = 0
+
+    for (const m of watchedMovies) {
+      if (m.watchedAt && m.watchedAt > lastActivityTimestamp) {
+        lastActivityTimestamp = m.watchedAt
+      }
+    }
+
+    for (const ep of episodes) {
+      if (ep.watchedAt > lastActivityTimestamp) {
+        lastActivityTimestamp = ep.watchedAt
+      }
+    }
+
+    for (const f of follows) {
+      if (f.followedAt > lastActivityTimestamp) {
+        lastActivityTimestamp = f.followedAt
+      }
+      if (f.updatedAt > lastActivityTimestamp) {
+        lastActivityTimestamp = f.updatedAt
+      }
+    }
+
+    return {
+      moviesWatchedCount,
+      episodesWatchedCount,
+      followedMoviesCount,
+      followedShowsCount,
+      lastActivityTimestamp: lastActivityTimestamp || null,
+    }
+  },
+})

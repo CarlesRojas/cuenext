@@ -8,7 +8,10 @@
  * @module
  */
 
-import type * as todos from "../todos.js";
+import type * as library from "../library.js";
+import type * as progress from "../progress.js";
+import type * as stats from "../stats.js";
+import type * as watchlist from "../watchlist.js";
 
 import type {
   ApiFromModules,
@@ -17,7 +20,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  todos: typeof todos;
+  library: typeof library;
+  progress: typeof progress;
+  stats: typeof stats;
+  watchlist: typeof watchlist;
 }>;
 
 /**
