@@ -17,7 +17,8 @@ export function getRouter() {
       queries: {
         queryKeyHashFn: convexQueryClient.hashFn(),
         queryFn: convexQueryClient.queryFn(),
-        staleTime: 5_000, // 5 seconds
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        refetchOnMount: 'always',
       },
     },
   })
@@ -38,7 +39,13 @@ export function getRouter() {
     defaultPreloadStaleTime: 0,
 
     Wrap: ({ children }) => (
-      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister,
+          maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        }}
+      >
         <ConvexProvider client={convexQueryClient.convexClient}>{children}</ConvexProvider>
       </PersistQueryClientProvider>
     ),
