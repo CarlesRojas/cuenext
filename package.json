@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
+    "start": "node .output/server/index.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
@@ -41,6 +42,7 @@
     "clsx": "^2.1.1",
     "convex": "^1.32.0",
     "lucide-react": "^0.577.0",
+    "nitro": "3.0.260311-beta",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
