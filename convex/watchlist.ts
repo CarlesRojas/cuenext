@@ -1,5 +1,5 @@
 import { query } from './_generated/server'
-import { requireUser } from './auth.config'
+import { requireUser } from './requireUser'
 
 export const getTvSections = query({
   args: {},

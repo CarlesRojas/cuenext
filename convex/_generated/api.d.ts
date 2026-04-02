@@ -10,6 +10,7 @@
 
 import type * as library from "../library.js";
 import type * as progress from "../progress.js";
+import type * as requireUser from "../requireUser.js";
 import type * as stats from "../stats.js";
 import type * as watchlist from "../watchlist.js";
 
@@ -22,6 +23,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   library: typeof library;
   progress: typeof progress;
+  requireUser: typeof requireUser;
   stats: typeof stats;
   watchlist: typeof watchlist;
 }>;

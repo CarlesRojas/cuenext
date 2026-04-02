@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { mutation } from './_generated/server'
-import { requireUser } from './auth.config'
+import { requireUser } from './requireUser'
 
 export const markMovieWatched = mutation({
   args: { tmdbId: v.number() },
