@@ -24,9 +24,9 @@ import type { ReactNode } from 'react'
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
-  const { userId, getToken } = await auth()
+  const { userId, getToken, isAuthenticated } = await auth()
   const token = await getToken({ template: 'convex' })
-  return { userId, token }
+  return { userId, token, isAuthenticated }
 })
 
 export const Route = createRootRouteWithContext<{
@@ -61,10 +61,10 @@ export const Route = createRootRouteWithContext<{
   }),
 
   beforeLoad: async context => {
-    const { userId, token } = await fetchClerkAuth()
+    const { userId, token, isAuthenticated } = await fetchClerkAuth()
 
     if (token) context.context.convexQueryClient.serverHttpClient?.setAuth(token)
-    return { userId, token }
+    return { userId, token, isAuthenticated }
   },
 
   notFoundComponent: () => <div>Not Found</div>,
@@ -79,7 +79,7 @@ function RootDocument({ children }: Props) {
   const context = useRouteContext({ from: Route.id })
 
   return (
-    <ClerkProvider publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <ClerkProvider publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/watchlist">
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html lang="en" suppressHydrationWarning>
           <head>
