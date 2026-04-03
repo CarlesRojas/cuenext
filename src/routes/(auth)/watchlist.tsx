@@ -16,7 +16,7 @@ function RouteComponent() {
   const { data: popularShows, isLoading, error } = useQuery({ ...convexAction(api.tmdb.getPopularShows, { page: 1 }) })
 
   return (
-    <div className="page-wrap py-8">
+    <div>
       <h1 className="mb-6 text-2xl font-bold">Watchlist (Popular Shows Preview)</h1>
 
       {isLoading && <p>Loading popular shows...</p>}

@@ -1,4 +1,5 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
+import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -66,7 +67,11 @@ export default function AppShell({ children }: AppShellProps) {
         </aside>
       )}
 
-      <main className="full-page relative flex overflow-y-auto">{children}</main>
+      <main className="full-page relative flex overflow-y-auto">
+        <div className={cn('h-fit w-full', isMobile && 'pb-[calc(60px+2*max(env(safe-area-inset-bottom),0.75rem))]')}>
+          {children}
+        </div>
+      </main>
 
       {isMobile && (
         <div className="fixed right-0 bottom-0 left-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden">
