@@ -5,7 +5,11 @@
 
 @theme {
   --font-montserrat: 'Montserrat', sans-serif;
+
+  --spacing-aside: calc(18rem + 0.75rem + 2rem);
 }
+
+@custom-variant mouse (@media (hover: hover) and (pointer: fine));
 
 @layer components {
   .full-page {

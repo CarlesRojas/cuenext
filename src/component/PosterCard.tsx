@@ -33,6 +33,7 @@ export function PosterCard({
   return (
     <div
       className={cn(
+        // If the size changes, also update src/component/Section.tsx
         'group relative flex aspect-2/3 w-32 max-w-32 min-w-32 flex-col gap-2 overflow-hidden rounded-xl bg-neutral-800 transition-transform duration-300 hover:scale-105 hover:shadow-xl md:w-44 md:max-w-44 md:min-w-44',
         className,
       )}

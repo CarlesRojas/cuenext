@@ -90,13 +90,7 @@ export default function AppShell({ children }: AppShellProps) {
       )}
 
       <main className="full-page relative flex overflow-y-auto" onScroll={onScroll} ref={scrollContainer}>
-        <div
-          className={cn(
-            'h-fit w-full',
-            isMobile && 'pb-[calc(60px+2*max(env(safe-area-inset-bottom),0.75rem))]',
-            !isMobile && 'pl-[calc(18rem+0.75rem+2rem)]',
-          )}
-        >
+        <div className={cn('h-fit w-full', isMobile && 'pb-[calc(60px+2*max(env(safe-area-inset-bottom),0.75rem))]')}>
           {children}
         </div>
       </main>
