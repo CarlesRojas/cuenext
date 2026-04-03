@@ -4,7 +4,7 @@ import { v } from 'convex/values'
 export default defineSchema({
   follow: defineTable({
     userId: v.string(),
-    type: v.union(v.literal('movie'), v.literal('show')),
+    type: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
     followedAt: v.number(),
     manuallyStopped: v.boolean(),

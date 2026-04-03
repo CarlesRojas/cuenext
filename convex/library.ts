@@ -4,7 +4,7 @@ import { requireUser } from './requireUser'
 
 export const follow = mutation({
   args: {
-    type: v.union(v.literal('movie'), v.literal('show')),
+    type: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
   },
   handler: async (context, args) => {
@@ -26,13 +26,13 @@ export const follow = mutation({
         updatedAt: now,
       })
 
-      if (args.type === 'show') {
+      if (args.type === 'tv') {
         const existingNextEpisode = await context.db
           .query('nextEpisode')
           .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.tmdbId))
           .unique()
 
-        if (!existingNextEpisode) {
+        if (!existingNextEpisode)
           await context.db.insert('nextEpisode', {
             userId,
             showTmdbId: args.tmdbId,
@@ -41,7 +41,6 @@ export const follow = mutation({
             nextEpisodeNumber: 1,
             updatedAt: now,
           })
-        }
       }
     }
   },
@@ -49,7 +48,7 @@ export const follow = mutation({
 
 export const unfollow = mutation({
   args: {
-    type: v.union(v.literal('movie'), v.literal('show')),
+    type: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
   },
   handler: async (context, args) => {
@@ -69,6 +68,7 @@ export const unfollow = mutation({
         .query('movie')
         .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
         .unique()
+
       if (movie) await context.db.delete(movie._id)
     } else {
       const nextEp = await context.db
@@ -91,7 +91,7 @@ export const unfollow = mutation({
 
 export const setStopped = mutation({
   args: {
-    type: v.union(v.literal('movie'), v.literal('show')),
+    type: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
     stopped: v.boolean(),
   },
@@ -113,7 +113,7 @@ export const setStopped = mutation({
 })
 
 export const listFollowed = query({
-  args: { type: v.union(v.literal('movie'), v.literal('show')) },
+  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
   handler: async (context, args) => {
     const userId = await requireUser(context)
 

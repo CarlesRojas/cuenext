@@ -27,7 +27,7 @@ export const getProfileSummary = query({
       .collect()
 
     const followedMoviesCount = follows.filter(f => f.type === 'movie').length
-    const followedShowsCount = follows.filter(f => f.type === 'show').length
+    const followedShowsCount = follows.filter(f => f.type === 'tv').length
 
     let lastActivityTimestamp = 0
 

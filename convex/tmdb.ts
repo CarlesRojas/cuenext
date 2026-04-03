@@ -4,7 +4,7 @@ import {
   tmdbMovieSchema,
   tmdbMultiSearchResultSchema,
   tmdbSeasonSchema,
-  tmdbShowSchema,
+  tmdbTvSchema,
 } from '../src/type/tmdb'
 import { action } from './_generated/server'
 import { fetchTmdb } from './lib/tmdbClient'
@@ -20,7 +20,7 @@ export const getPopularShows = action({
   args: { page: v.optional(v.number()) },
   handler: async (_, args) => {
     console.warn('getPopularShows called')
-    return fetchTmdb(paginated(tmdbShowSchema), '/tv/popular', { page: String(args.page || 1) })
+    return fetchTmdb(paginated(tmdbTvSchema), '/tv/popular', { page: String(args.page || 1) })
   },
 })
 
@@ -44,7 +44,7 @@ export const getMovieDetails = action({
 export const getShowDetails = action({
   args: { tmdbId: v.number() },
   handler: async (_, args) => {
-    return fetchTmdb(tmdbShowSchema, `/tv/${args.tmdbId}`)
+    return fetchTmdb(tmdbTvSchema, `/tv/${args.tmdbId}`)
   },
 })
 

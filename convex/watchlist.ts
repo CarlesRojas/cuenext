@@ -8,7 +8,7 @@ export const getTvSections = query({
 
     const tvFollows = await context.db
       .query('follow')
-      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'show'))
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
       .collect()
 
     const watchNext: any[] = []

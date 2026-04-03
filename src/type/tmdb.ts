@@ -12,7 +12,7 @@ export const tmdbMovieSchema = z.object({
   media_type: z.literal('movie').optional(),
 })
 
-export const tmdbShowSchema = z.object({
+export const tmdbTvSchema = z.object({
   id: z.number(),
   name: z.string(),
   overview: z.string(),
@@ -45,7 +45,7 @@ export const tmdbPersonSchema = z.object({
 
 export const tmdbMultiSearchResultSchema = z.discriminatedUnion('media_type', [
   tmdbMovieSchema.extend({ media_type: z.literal('movie') }),
-  tmdbShowSchema.extend({ media_type: z.literal('tv') }),
+  tmdbTvSchema.extend({ media_type: z.literal('tv') }),
   tmdbPersonSchema.extend({ media_type: z.literal('person') }),
 ])
 
@@ -85,7 +85,7 @@ export function paginated<T extends z.ZodTypeAny>(itemSchema: T) {
 }
 
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
-export type TmdbShow = z.infer<typeof tmdbShowSchema>
+export type TmdbTv = z.infer<typeof tmdbTvSchema>
 export type TmdbPerson = z.infer<typeof tmdbPersonSchema>
 export type TmdbMultiSearchResult = z.infer<typeof tmdbMultiSearchResultSchema>
 export type TmdbEpisode = z.infer<typeof tmdbEpisodeSchema>
