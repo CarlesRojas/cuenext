@@ -3,13 +3,10 @@ import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbTv } from '#/type/tmdb'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(auth)/watchlist')({
   component: RouteComponent,
-  beforeLoad: async ({ context: { isAuthenticated } }) => {
-    if (!isAuthenticated) throw redirect({ to: '/' })
-  },
 })
 
 function RouteComponent() {

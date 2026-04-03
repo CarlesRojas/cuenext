@@ -1,5 +1,7 @@
 import { Button } from '#/component/ui/button'
 import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
+import { faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Authenticated, Unauthenticated } from 'convex/react'
 
 interface UserProps {
@@ -29,8 +31,9 @@ export function User({ isMobile }: UserProps) {
 
       <Unauthenticated>
         <SignInButton mode="modal">
-          <Button variant="default" className="">
-            Sign In
+          <Button size={isMobile ? 'default' : 'full'}>
+            <FontAwesomeIcon icon={faSignIn} size="xl" className="h-5 max-h-5 min-h-5" />
+            <span>Sign In</span>
           </Button>
         </SignInButton>
       </Unauthenticated>

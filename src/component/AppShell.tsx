@@ -19,7 +19,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { to: '/watchlist', label: 'Watchlist', icon: faCirclePlay },
   { to: '/upcoming', label: 'Upcoming', icon: faCalendarDays },
-  { to: '/explore', label: 'Explore', icon: faCompass },
+  { to: '/', label: 'Explore', icon: faCompass },
   { to: '/profile', label: 'Profile', icon: faUser },
 ]
 
