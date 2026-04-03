@@ -1,10 +1,12 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
 import { cn } from '#/lib/cn'
+import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { ClientOnly, Link, useRouterState } from '@tanstack/react-router'
+import { Authenticated, Unauthenticated } from 'convex/react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { useWindowSize } from 'usehooks-ts'
@@ -34,6 +36,16 @@ export default function AppShell({ children }: AppShellProps) {
 
   return (
     <ClientOnly>
+      <header className="fixed top-0 right-0 z-50 m-3 size-16">
+        <Authenticated>
+          <UserButton appearance={{ elements: { avatarBox: 'h-10 w-10' } }} />
+        </Authenticated>
+
+        <Unauthenticated>
+          <SignInButton />
+        </Unauthenticated>
+      </header>
+
       {!isMobile && (
         <aside className="z-50 hidden w-64 border-r border-neutral-200 md:block dark:border-neutral-800">
           <LiquidGlass blur={2} className="flex h-full w-full flex-col">
