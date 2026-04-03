@@ -14,7 +14,7 @@ function ProfilePage() {
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
-      <header className="screen-px mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <header className="screen-px mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Profile</h1>
           <p className="mt-2 text-neutral-400">

@@ -4,9 +4,11 @@ import { Section } from '#/component/Section'
 import { useMediaType } from '#/hooks/useMediaType'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
-import { convexAction } from '@convex-dev/react-query'
+import { useClerk } from '@clerk/tanstack-react-start'
+import { convexAction, convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useMutation } from 'convex/react'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/explore')({
@@ -14,6 +16,8 @@ export const Route = createFileRoute('/explore')({
 })
 
 function RouteComponent() {
+  const clerk = useClerk()
+
   const [mediaType] = useMediaType()
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -79,9 +83,24 @@ function RouteComponent() {
     enabled: mediaType === 'movie',
   })
 
+  // FOLLOWED
+
+  const { data: followedMedia } = useQuery({
+    ...convexQuery(api.library.listFollowed, { type: mediaType }),
+  })
+
+  const follow = useMutation(api.library.follow)
+  const unfollow = useMutation(api.library.unfollow)
+
+  const toggleFollow = (id: number) => {
+    if (!clerk.isSignedIn) return clerk.openSignIn()
+    if (Array.isArray(followedMedia) && followedMedia.includes(id)) unfollow({ type: mediaType, tmdbId: id })
+    else follow({ type: mediaType, tmdbId: id })
+  }
+
   return (
     <div className="screen-py flex w-full flex-col gap-2">
-      <header className="screen-px mb-10">
+      <header className="screen-px mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Explore</h1>
 
         <div className="relative mt-6 w-full max-w-md">
@@ -106,7 +125,9 @@ function RouteComponent() {
                   id={tv.id}
                   title={tv.name}
                   imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
-                  onToggleFollow={() => {}}
+                  showFollow
+                  isFollowed={Array.isArray(followedMedia) && followedMedia.includes(tv.id)}
+                  onToggleFollow={() => toggleFollow(tv.id)}
                 />
               ))}
 
@@ -127,7 +148,9 @@ function RouteComponent() {
                     title={tv.name}
                     number={index + 1}
                     imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
-                    onToggleFollow={() => {}}
+                    showFollow
+                    isFollowed={Array.isArray(followedMedia) && followedMedia.includes(tv.id)}
+                    onToggleFollow={() => toggleFollow(tv.id)}
                   />
                 ))}
 
@@ -145,7 +168,9 @@ function RouteComponent() {
                   id={tv.id}
                   title={tv.name}
                   imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
-                  onToggleFollow={() => {}}
+                  showFollow
+                  isFollowed={Array.isArray(followedMedia) && followedMedia.includes(tv.id)}
+                  onToggleFollow={() => toggleFollow(tv.id)}
                 />
               ))}
 
@@ -165,7 +190,9 @@ function RouteComponent() {
                   id={movie.id}
                   title={movie.title}
                   imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
-                  onToggleFollow={() => {}}
+                  showFollow
+                  isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
+                  onToggleFollow={() => toggleFollow(movie.id)}
                 />
               ))}
 
@@ -186,7 +213,9 @@ function RouteComponent() {
                     title={movie.title}
                     number={index + 1}
                     imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
-                    onToggleFollow={() => {}}
+                    showFollow
+                    isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
+                    onToggleFollow={() => toggleFollow(movie.id)}
                   />
                 ))}
 
@@ -204,7 +233,9 @@ function RouteComponent() {
                   id={movie.id}
                   title={movie.title}
                   imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
-                  onToggleFollow={() => {}}
+                  showFollow
+                  isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
+                  onToggleFollow={() => toggleFollow(movie.id)}
                 />
               ))}
 

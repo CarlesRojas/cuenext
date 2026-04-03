@@ -15,11 +15,17 @@ const buttonVariants = cva(
           'text-white hover:bg-neutral-400/10 hover:text-white focus-visible:bg-neutral-400/10 focus-visible:text-white',
         ],
         link: ['text-white hover:text-sky-500 focus-visible:text-sky-500'],
+        frost: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden hover:bg-black/80 focus-visible:bg-black/80',
+          'mouse:opacity-0 mouse:group-hover/poster:opacity-100',
+          'data-[checked=true]:bg-sky-500/80 data-[checked=true]:text-white data-[checked=true]:hover:bg-sky-600/80 data-[checked=true]:focus-visible:bg-sky-600/80',
+        ],
       },
       size: {
         default: 'h-11 w-fit gap-2 px-4 py-2.5',
         full: 'h-11 w-full gap-2 px-4 py-2.5',
         icon: 'size-11',
+        iconSmall: 'size-9',
         selector: 'm-1 h-9 w-fit gap-1 px-4',
         link: 'w-fit gap-2',
       },

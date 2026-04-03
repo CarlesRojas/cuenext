@@ -1,19 +1,19 @@
 type DisplacementOptions = {
-  height: number;
-  width: number;
-  radius: number;
-  depth: number;
-  strength?: number;
-  chromaticAberration?: number;
-};
+  height: number
+  width: number
+  radius: number
+  depth: number
+  strength?: number
+  chromaticAberration?: number
+}
 
 export const getDisplacementMap = ({
   height,
   width,
   radius,
   depth,
-}: Omit<DisplacementOptions, "chromaticAberration" | "strength">) =>
-  "data:image/svg+xml;utf8," +
+}: Omit<DisplacementOptions, 'chromaticAberration' | 'strength'>) =>
+  'data:image/svg+xml;utf8,' +
   encodeURIComponent(`<svg height="${height}" width="${width}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <style>
         .mix { mix-blend-mode: screen; }
@@ -69,7 +69,7 @@ export const getDisplacementMap = ({
           filter="blur(${depth}px)"
       />
     </g>
-</svg>`);
+</svg>`)
 
 export const getDisplacementFilter = ({
   height,
@@ -79,18 +79,16 @@ export const getDisplacementFilter = ({
   strength = 100,
   chromaticAberration = 0,
 }: DisplacementOptions) =>
-  "data:image/svg+xml;utf8," +
+  'data:image/svg+xml;utf8,' +
   encodeURIComponent(`<svg height="${height}" width="${width}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
         <filter id="displace" color-interpolation-filters="sRGB">
-            <feImage x="0" y="0" height="${height}" width="${width}" href="${getDisplacementMap(
-              {
-                height,
-                width,
-                radius,
-                depth,
-              },
-            )}" result="displacementMap" />
+            <feImage x="0" y="0" height="${height}" width="${width}" href="${getDisplacementMap({
+              height,
+              width,
+              radius,
+              depth,
+            })}" result="displacementMap" />
             <feDisplacementMap
                 transform-origin="center"
                 in="SourceGraphic"
@@ -142,4 +140,4 @@ export const getDisplacementFilter = ({
         </filter>
     </defs>
 </svg>`) +
-  "#displace";
+  '#displace'
