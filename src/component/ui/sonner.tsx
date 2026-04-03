@@ -14,6 +14,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={'dark'}
       className="toaster group"
+      position="top-right"
+      offset={16}
       icons={{
         success: <FontAwesomeIcon icon={faCheckCircle} className="size-4" />,
         info: <FontAwesomeIcon icon={faCircleInfo} className="size-4" />,
@@ -26,11 +28,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
           '--normal-bg': 'rgba(0, 0, 0, 0.5)',
           '--normal-text': 'white',
           '--normal-border': 'rgba(115, 115, 115, 0.4)',
-          '--border-radius': '9999px',
+          '--border-radius': '32px',
         } as React.CSSProperties
       }
       toastOptions={{
-        className: 'backdrop-blur-md',
+        className: 'backdrop-blur-md! flex! justify-between! gap-3! p-2! pl-5! h-fit!',
+        classNames: {
+          title: 'text-base font-semibold',
+        },
       }}
       {...props}
     />

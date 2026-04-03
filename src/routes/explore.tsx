@@ -1,15 +1,18 @@
 import { api } from '#/../convex/_generated/api'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
+import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexAction, convexQuery } from '@convex-dev/react-query'
+import { faCheckCircle, faTimesCircle, faUndo } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
-import { useState } from 'react'
+import { useRef } from 'react'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/explore')({
@@ -18,9 +21,9 @@ export const Route = createFileRoute('/explore')({
 
 function RouteComponent() {
   const clerk = useClerk()
+  const toastIds = useRef<Record<string, string>>({})
 
   const [mediaType] = useMediaType()
-  const [searchQuery, setSearchQuery] = useState('')
 
   const today = new Date()
   const nextWeek = new Date(today)
@@ -97,25 +100,60 @@ function RouteComponent() {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
     const isFollowing = Array.isArray(followedMedia) && followedMedia.includes(id)
+    const mediaKey = `${mediaType}-${id}`
+
+    if (toastIds.current[mediaKey]) toast.dismiss(toastIds.current[mediaKey])
+
+    const newToastId = `${mediaKey}-${Date.now()}`
+    toastIds.current[mediaKey] = newToastId
 
     if (isFollowing) {
       unfollow({ type: mediaType, tmdbId: id })
 
-      toast(`Unfollowed ${title}`, {
-        action: {
-          label: 'Undo',
-          onClick: () => follow({ type: mediaType, tmdbId: id }),
+      toast(
+        <div className="flex w-full items-center gap-2">
+          <FontAwesomeIcon icon={faTimesCircle} className="size-6 min-h-6 min-w-6 text-neutral-400" />
+          <span className="line-clamp-2 leading-5">Unfollowed {title}</span>
+        </div>,
+        {
+          id: newToastId,
+          action: (
+            <Button
+              onClick={() => {
+                follow({ type: mediaType, tmdbId: id })
+                toast.dismiss(newToastId)
+              }}
+            >
+              <FontAwesomeIcon icon={faUndo} className="size-4" />
+              Undo
+            </Button>
+          ),
         },
-      })
+      )
     } else {
       follow({ type: mediaType, tmdbId: id })
 
-      toast(`Followed ${title}`, {
-        action: {
-          label: 'Undo',
-          onClick: () => unfollow({ type: mediaType, tmdbId: id }),
+      toast(
+        <div className="flex w-full items-center gap-2">
+          <FontAwesomeIcon icon={faCheckCircle} className="size-6 min-h-6 min-w-6 text-sky-500" />
+          <span className="line-clamp-2 leading-5">Followed {title}</span>
+        </div>,
+        {
+          id: newToastId,
+          action: (
+            <Button
+              className="place-self-end"
+              onClick={() => {
+                unfollow({ type: mediaType, tmdbId: id })
+                toast.dismiss(newToastId)
+              }}
+            >
+              <FontAwesomeIcon icon={faUndo} className="size-4" />
+              Undo
+            </Button>
+          ),
         },
-      })
+      )
     }
   }
 
@@ -123,16 +161,6 @@ function RouteComponent() {
     <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Explore</h1>
-
-        <div className="relative mt-6 w-full max-w-md">
-          <input
-            type="text"
-            placeholder={`Search for ${mediaType === 'tv' ? 'TV shows' : 'movies'}...`}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full rounded-full border border-neutral-700/50 bg-neutral-800/40 px-6 py-3 text-white placeholder-neutral-500 backdrop-blur-md transition-colors focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none"
-          />
-        </div>
       </header>
 
       {mediaType === 'tv' ? (
