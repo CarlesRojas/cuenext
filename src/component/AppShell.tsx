@@ -1,12 +1,11 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
+import { User } from '#/component/User'
 import { cn } from '#/lib/cn'
-import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
-import { ClientOnly, Link, useRouterState } from '@tanstack/react-router'
-import { Authenticated, Unauthenticated } from 'convex/react'
+import { ClientOnly, Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { useWindowSize } from 'usehooks-ts'
@@ -29,8 +28,6 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
-  const routerState = useRouterState()
-
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
@@ -49,36 +46,28 @@ export default function AppShell({ children }: AppShellProps) {
                   key={item.to}
                   to={item.to}
                   activeProps={{ className: 'text-sky-500' }}
-                  inactiveProps={{ className: 'text-white' }}
-                  className="relative flex h-fit w-full items-center gap-3 p-2.5 transition-colors"
+                  inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
+                  className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"
                 >
                   {({ isActive }) => (
                     <>
                       {isActive && (
                         <motion.div
                           layoutId="nav-indicator"
-                          className="absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                          className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
                           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                         />
                       )}
 
                       <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
-                      <span className="z-60 leading-2 font-semibold">{item.label}</span>
+                      <span className="z-60 font-semibold">{item.label}</span>
                     </>
                   )}
                 </Link>
               ))}
             </nav>
 
-            <div>
-              <Authenticated>
-                <UserButton appearance={{ elements: { avatarBox: 'h-10 w-10' } }} />
-              </Authenticated>
-
-              <Unauthenticated>
-                <SignInButton />
-              </Unauthenticated>
-            </div>
+            <User />
           </LiquidGlass>
         </aside>
       )}
@@ -97,14 +86,8 @@ export default function AppShell({ children }: AppShellProps) {
 
       {isMobile && (
         <>
-          <header className="fixed top-0 right-0 z-50 m-3 size-16">
-            <Authenticated>
-              <UserButton appearance={{ elements: { avatarBox: 'h-10 w-10' } }} />
-            </Authenticated>
-
-            <Unauthenticated>
-              <SignInButton />
-            </Unauthenticated>
+          <header className="fixed top-3 right-3 z-50 h-fit">
+            <User isMobile />
           </header>
 
           <div className="fixed right-0 bottom-0 left-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden">
@@ -114,15 +97,15 @@ export default function AppShell({ children }: AppShellProps) {
                   key={item.to}
                   to={item.to}
                   activeProps={{ className: 'text-sky-500' }}
-                  inactiveProps={{ className: 'text-white' }}
-                  className="relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 p-1.5 transition-colors"
+                  inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
+                  className="relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-colors"
                 >
                   {({ isActive }) => (
                     <>
                       {isActive && (
                         <motion.div
                           layoutId="nav-indicator"
-                          className="absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                          className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
                           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                         />
                       )}

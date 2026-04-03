@@ -77,7 +77,11 @@ function RootDocument({ children }: Props) {
   const context = useRouteContext({ from: Route.id })
 
   return (
-    <ClerkProvider publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/watchlist">
+    <ClerkProvider
+      publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY}
+      afterSignOutUrl="/watchlist"
+      appearance={{ elements: { modalBackdrop: '!bg-black/70 !backdrop-blur-sm' } }}
+    >
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html
           lang="en"
