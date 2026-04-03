@@ -16,6 +16,7 @@ interface Props {
   button?: boolean
   inline?: boolean
   style?: React.CSSProperties
+  wrapperClassName?: string
 }
 
 const supportsBackdropFilterUrl = (() => {
@@ -39,6 +40,7 @@ export function LiquidGlass({
   button,
   inline,
   style,
+  wrapperClassName,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | HTMLSpanElement>(null)
   const glassRef = useRef<HTMLDivElement | HTMLSpanElement>(null)
@@ -146,7 +148,11 @@ export function LiquidGlass({
 
       <Component
         ref={contentRef as any}
-        className={cn('relative z-3 flex w-full items-center justify-center text-center', inline ? '' : 'h-full')}
+        className={cn(
+          'relative z-3 flex w-full items-center justify-center text-center',
+          inline ? '' : 'h-full',
+          wrapperClassName,
+        )}
       >
         {children}
       </Component>
