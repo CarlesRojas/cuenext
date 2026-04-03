@@ -13,8 +13,8 @@ function ProfilePage() {
   const { user } = useUser()
 
   return (
-    <main className="flex w-full flex-col gap-8 p-4 md:p-8">
-      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <div className="screen-py flex w-full flex-col gap-8">
+      <header className="screen-px flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Profile</h1>
           <p className="mt-2 text-neutral-400">
@@ -33,7 +33,7 @@ function ProfilePage() {
         )}
       </header>
 
-      <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <section className="screen-px grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6">
           <span className="text-3xl font-bold text-white">42</span>
           <span className="text-sm font-medium text-neutral-500">Shows Finished</span>
@@ -53,20 +53,16 @@ function ProfilePage() {
       </section>
 
       {mediaType === 'tv' ? (
-        <div className="flex flex-col gap-6">
-          <Section title="Finished Shows">
-            <PosterCard id="21" title="Breaking Bad" isFollowed onToggleFollow={() => {}} />
-            <PosterCard id="22" title="Better Call Saul" isFollowed onToggleFollow={() => {}} />
-          </Section>
-        </div>
+        <Section title="Finished Shows">
+          <PosterCard mediaType={mediaType} id="21" title="Breaking Bad" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id="22" title="Better Call Saul" isFollowed onToggleFollow={() => {}} />
+        </Section>
       ) : (
-        <div className="flex flex-col gap-6">
-          <Section title="Watched Movies">
-            <PosterCard id="23" title="The Matrix" isFollowed onToggleFollow={() => {}} />
-            <PosterCard id="24" title="Inception" isFollowed onToggleFollow={() => {}} />
-          </Section>
-        </div>
+        <Section title="Watched Movies">
+          <PosterCard mediaType={mediaType} id="23" title="The Matrix" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id="24" title="Inception" isFollowed onToggleFollow={() => {}} />
+        </Section>
       )}
-    </main>
+    </div>
   )
 }

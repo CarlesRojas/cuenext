@@ -1,13 +1,12 @@
 import { Button } from '#/component/ui/button'
-import type { CarouselApi } from '#/component/ui/carousel'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
 import { cn } from '#/lib/cn'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AnimatePresence, motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import React, { useRef, useState } from 'react'
-import { useResizeObserver, useWindowSize } from 'usehooks-ts'
+import React, { useState } from 'react'
+import { useWindowSize } from 'usehooks-ts'
 
 interface SectionProps {
   title: string
@@ -21,24 +20,7 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
-  const [api, setApi] = useState<CarouselApi>()
-
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
-  const carouselRef = useRef<HTMLDivElement>(null)
-
-  const { width: carouselWidth = 0 } = useResizeObserver({
-    ref: carouselRef as React.RefObject<HTMLDivElement>,
-    box: 'border-box',
-  })
-
-  const itemWidth = isMobile ? 128 : 176
-  const itemGap = 16
-  const leftPadding = isMobile ? 16 : 332
-  const rightPadding = 16
-  const visibleSlides = Math.max(
-    1,
-    Math.floor((carouselWidth - rightPadding - leftPadding + itemGap * 2) / (itemWidth + itemGap)),
-  )
 
   return (
     <section className={cn('flex flex-col gap-4 py-4', className)}>
@@ -69,14 +51,14 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="group relative w-full overflow-hidden"
-            ref={carouselRef}
           >
             <Carousel
-              setApi={setApi}
-              opts={{ align: 'start', dragFree: true, slidesToScroll: isMobile ? 'auto' : visibleSlides }}
-              className={cn('w-full', !isMobile && 'w-dvw')}
+              opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
+              className={cn('w-full px-4', !isMobile && 'pl-aside w-dvw px-8')}
             >
-              <CarouselContent className={cn('mr-4 -ml-4 px-4 py-4', !isMobile && 'pl-aside')}>
+              <CarouselPrevious className={cn('mouse:block z-10 hidden', !isMobile && 'left-aside ml-2')} />
+
+              <CarouselContent className={cn('z-0 -ml-4 py-4')}>
                 {React.Children.map(children, (child, index) => (
                   <CarouselItem key={index} className="basis-auto">
                     {child}
@@ -84,8 +66,7 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
                 ))}
               </CarouselContent>
 
-              <CarouselPrevious className={cn('mouse:block hidden', !isMobile && 'left-aside ml-2')} />
-              <CarouselNext className={cn('mouse:block hidden')} />
+              <CarouselNext className={cn('mouse:block z-10 hidden')} />
             </Carousel>
           </motion.div>
         )}

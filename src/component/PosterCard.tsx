@@ -1,10 +1,14 @@
+import type { MediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
 import { faCheckCircle, faCirclePlus, faEye } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import type { LinkProps } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 
 interface PosterCardProps {
   id: string | number
   title: string
+  mediaType: MediaType
   imageUrl?: string
   className?: string
 
@@ -18,7 +22,9 @@ interface PosterCardProps {
 }
 
 export function PosterCard({
+  id,
   title,
+  mediaType,
   imageUrl,
   className,
 
@@ -31,10 +37,11 @@ export function PosterCard({
   onToggleFollow,
 }: PosterCardProps) {
   return (
-    <div
+    <Link
+      to={`/${mediaType}/${id}` as LinkProps['to']}
       className={cn(
         // If the size changes, also update src/component/Section.tsx
-        'group relative flex aspect-2/3 w-32 max-w-32 min-w-32 flex-col gap-2 overflow-hidden rounded-xl bg-neutral-800 transition-transform duration-300 hover:scale-105 hover:shadow-xl md:w-44 md:max-w-44 md:min-w-44',
+        'group relative flex aspect-2/3 w-32 max-w-32 min-w-32 flex-col gap-2 overflow-hidden rounded-xl bg-neutral-800 transition-transform duration-300 hover:scale-110 focus-visible:scale-110 md:w-44 md:max-w-44 md:min-w-44',
         className,
       )}
     >
@@ -89,6 +96,6 @@ export function PosterCard({
           )}
         </div>
       )}
-    </div>
+    </Link>
   )
 }

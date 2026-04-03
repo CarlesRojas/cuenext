@@ -11,17 +11,30 @@ function App() {
   const [mediaType] = useMediaType()
 
   return (
-    <main className="flex w-full flex-col gap-8 p-4 md:p-8">
-      <header>
+    <div className="screen-py flex w-full flex-col gap-8">
+      <header className="screen-px">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Watchlist</h1>
-        <p className="mt-2 text-neutral-400">Keep track of what you're watching.</p>
       </header>
 
       {mediaType === 'tv' ? (
         <div className="flex flex-col gap-6">
           <Section title="Watch next">
-            <PosterCard id="1" title="Stranger Things" isFollowed onToggleFollow={() => {}} onToggleWatch={() => {}} />
-            <PosterCard id="2" title="The Last of Us" isFollowed onToggleFollow={() => {}} onToggleWatch={() => {}} />
+            <PosterCard
+              id="1"
+              title="Stranger Things"
+              isFollowed
+              onToggleFollow={() => {}}
+              onToggleWatch={() => {}}
+              mediaType={'tv'}
+            />
+            <PosterCard
+              id="2"
+              title="The Last of Us"
+              isFollowed
+              onToggleFollow={() => {}}
+              onToggleWatch={() => {}}
+              mediaType={'tv'}
+            />
           </Section>
 
           <Section title="Haven't started">
@@ -41,6 +54,6 @@ function App() {
           </Section>
         </div>
       )}
-    </main>
+    </div>
   )
 }

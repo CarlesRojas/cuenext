@@ -97,7 +97,7 @@ export default function AppShell({ children }: AppShellProps) {
 
       {isMobile && (
         <>
-          <header
+          <div
             className={cn(
               'fixed top-3 right-3 left-3 z-50 flex h-fit items-center justify-between gap-3 opacity-100 transition-opacity',
               !showHeader && 'pointer-events-none! opacity-0',
@@ -105,7 +105,7 @@ export default function AppShell({ children }: AppShellProps) {
           >
             <MediaTypeSelector isMobile />
             <User isMobile />
-          </header>
+          </div>
 
           <div className="fixed right-0 bottom-0 left-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden">
             <LiquidGlass blur={3} className="relative w-full rounded-full bg-neutral-800/40">
