@@ -1,19 +1,15 @@
 import { api } from '#/../convex/_generated/api'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
-import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
+import { useUndoToast } from '#/hooks/useUndoToast'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexAction, convexQuery } from '@convex-dev/react-query'
-import { faCheckCircle, faTimesCircle, faUndo } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
-import { useRef } from 'react'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/explore')({
   component: RouteComponent,
@@ -21,7 +17,7 @@ export const Route = createFileRoute('/explore')({
 
 function RouteComponent() {
   const clerk = useClerk()
-  const toastIds = useRef<Record<string, string>>({})
+  const { showUndoToast } = useUndoToast()
 
   const [mediaType] = useMediaType()
 
@@ -102,58 +98,12 @@ function RouteComponent() {
     const isFollowing = Array.isArray(followedMedia) && followedMedia.includes(id)
     const mediaKey = `${mediaType}-${id}`
 
-    if (toastIds.current[mediaKey]) toast.dismiss(toastIds.current[mediaKey])
-
-    const newToastId = `${mediaKey}-${Date.now()}`
-    toastIds.current[mediaKey] = newToastId
-
     if (isFollowing) {
       unfollow({ type: mediaType, tmdbId: id })
-
-      toast(
-        <div className="flex w-full items-center gap-2">
-          <FontAwesomeIcon icon={faTimesCircle} className="size-6 min-h-6 min-w-6 text-neutral-400" />
-          <span className="line-clamp-2 leading-5">Unfollowed {title}</span>
-        </div>,
-        {
-          id: newToastId,
-          action: (
-            <Button
-              onClick={() => {
-                follow({ type: mediaType, tmdbId: id })
-                toast.dismiss(newToastId)
-              }}
-            >
-              <FontAwesomeIcon icon={faUndo} className="size-4" />
-              Undo
-            </Button>
-          ),
-        },
-      )
+      showUndoToast(title, 'unfollow', mediaKey, () => follow({ type: mediaType, tmdbId: id }))
     } else {
       follow({ type: mediaType, tmdbId: id })
-
-      toast(
-        <div className="flex w-full items-center gap-2">
-          <FontAwesomeIcon icon={faCheckCircle} className="size-6 min-h-6 min-w-6 text-sky-500" />
-          <span className="line-clamp-2 leading-5">Followed {title}</span>
-        </div>,
-        {
-          id: newToastId,
-          action: (
-            <Button
-              className="place-self-end"
-              onClick={() => {
-                unfollow({ type: mediaType, tmdbId: id })
-                toast.dismiss(newToastId)
-              }}
-            >
-              <FontAwesomeIcon icon={faUndo} className="size-4" />
-              Undo
-            </Button>
-          ),
-        },
-      )
+      showUndoToast(title, 'follow', mediaKey, () => unfollow({ type: mediaType, tmdbId: id }))
     }
   }
 

@@ -1,7 +1,7 @@
 import { Button } from '#/component/ui/button'
 import type { MediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
-import { faCheck, faEye, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faEye } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
@@ -109,14 +109,15 @@ export function PosterCard({
         <Button
           variant="frost"
           size="iconSmall"
+          className="absolute top-2 right-2 z-10"
           onClick={e => {
             e.preventDefault()
             onToggleWatch()
           }}
           data-checked={isWatched}
+          title={isWatched ? 'Watched' : 'Mark Watched'}
         >
           <FontAwesomeIcon icon={faEye} />
-          {isWatched ? 'Watched' : 'Mark Watched'}
         </Button>
       )}
 
@@ -132,7 +133,7 @@ export function PosterCard({
           data-checked={isFollowed}
           title={isFollowed ? 'Unfollow' : 'Follow'}
         >
-          <FontAwesomeIcon icon={isFollowed ? faCheck : faPlus} />
+          <FontAwesomeIcon icon={faCheck} />
         </Button>
       )}
     </div>

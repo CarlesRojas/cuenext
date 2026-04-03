@@ -19,14 +19,14 @@ function UpcomingPage() {
       {mediaType === 'tv' ? (
         <div className="flex flex-col gap-6">
           <Section title="This Week">
-            <PosterCard mediaType={mediaType} id="11" title="Severance" isFollowed onToggleFollow={() => {}} />
-            <PosterCard mediaType={mediaType} id="12" title="The White Lotus" isFollowed onToggleFollow={() => {}} />
+            <PosterCard mediaType={mediaType} id={11} title="Severance" isFollowed onToggleFollow={() => {}} />
+            <PosterCard mediaType={mediaType} id={12} title="The White Lotus" isFollowed onToggleFollow={() => {}} />
           </Section>
 
           <Section title="Next Month">
             <PosterCard
               mediaType={mediaType}
-              id="13"
+              id={13}
               title="House of the Dragon"
               isFollowed
               onToggleFollow={() => {}}
@@ -35,8 +35,8 @@ function UpcomingPage() {
         </div>
       ) : (
         <Section title="Next Month">
-          <PosterCard mediaType={mediaType} id="14" title="Dune: Part Three" isFollowed onToggleFollow={() => {}} />
-          <PosterCard mediaType={mediaType} id="15" title="Spider-Man 4" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id={14} title="Dune: Part Three" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id={15} title="Spider-Man 4" isFollowed onToggleFollow={() => {}} />
         </Section>
       )}
     </div>

@@ -54,13 +54,13 @@ function ProfilePage() {
 
       {mediaType === 'tv' ? (
         <Section title="Finished Shows">
-          <PosterCard mediaType={mediaType} id="21" title="Breaking Bad" isFollowed onToggleFollow={() => {}} />
-          <PosterCard mediaType={mediaType} id="22" title="Better Call Saul" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id={21} title="Breaking Bad" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id={22} title="Better Call Saul" isFollowed onToggleFollow={() => {}} />
         </Section>
       ) : (
         <Section title="Watched Movies">
-          <PosterCard mediaType={mediaType} id="23" title="The Matrix" isFollowed onToggleFollow={() => {}} />
-          <PosterCard mediaType={mediaType} id="24" title="Inception" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id={23} title="The Matrix" isFollowed onToggleFollow={() => {}} />
+          <PosterCard mediaType={mediaType} id={24} title="Inception" isFollowed onToggleFollow={() => {}} />
         </Section>
       )}
     </div>

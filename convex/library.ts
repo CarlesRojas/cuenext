@@ -59,33 +59,7 @@ export const unfollow = mutation({
       .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (existing) {
-      await context.db.delete(existing._id)
-    }
-
-    if (args.type === 'movie') {
-      const movie = await context.db
-        .query('movie')
-        .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
-        .unique()
-
-      if (movie) await context.db.delete(movie._id)
-    } else {
-      const nextEp = await context.db
-        .query('nextEpisode')
-        .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.tmdbId))
-        .unique()
-      if (nextEp) await context.db.delete(nextEp._id)
-
-      const episodes = await context.db
-        .query('episode')
-        .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.tmdbId))
-        .collect()
-
-      for (const ep of episodes) {
-        await context.db.delete(ep._id)
-      }
-    }
+    if (existing) await context.db.delete(existing._id)
   },
 })
 
