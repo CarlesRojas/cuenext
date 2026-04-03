@@ -24,6 +24,8 @@ function RouteComponent() {
   const minDate = today.toISOString().split('T')[0]
   const maxDate = nextWeek.toISOString().split('T')[0]
 
+  // SHOWS
+
   const { data: onTheAirShows } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, {
       page: 1,
@@ -39,14 +41,37 @@ function RouteComponent() {
     enabled: mediaType === 'tv',
   })
 
-  const { data: popularMovies } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc' }),
-    enabled: mediaType === 'movie',
-  })
-
   const { data: topRatedShows } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
     enabled: mediaType === 'tv',
+  })
+
+  // MOVIES
+
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  const minDateMovie = tomorrow.toISOString().split('T')[0]
+
+  const nextMonth = new Date(today)
+  nextMonth.setDate(today.getDate() + 35)
+  const maxDateMovie = nextMonth.toISOString().split('T')[0]
+
+  const { data: upcomingMovies } = useQuery({
+    ...convexAction(api.tmdb.getDiscoverMovies, {
+      page: 1,
+      sort_by: 'popularity.desc',
+      with_release_type: '2|3',
+      release_date_gte: minDateMovie,
+      release_date_lte: maxDateMovie,
+      include_adult: false,
+      include_video: false,
+    }),
+    enabled: mediaType === 'movie',
+  })
+
+  const { data: top10Movies } = useQuery({
+    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc' }),
+    enabled: mediaType === 'movie',
   })
 
   const { data: topRatedMovies } = useQuery({
@@ -119,9 +144,9 @@ function RouteComponent() {
         </>
       ) : (
         <>
-          <Section title="Popular Movies" canCollapse={false}>
-            {popularMovies &&
-              popularMovies.results.map((movie: TmdbMovie) => (
+          <Section title="Upcoming Movies" canCollapse={false}>
+            {upcomingMovies &&
+              upcomingMovies.results.map((movie: TmdbMovie) => (
                 <PosterCard
                   mediaType={mediaType}
                   key={movie.id}
@@ -131,6 +156,23 @@ function RouteComponent() {
                   onToggleFollow={() => {}}
                 />
               ))}
+          </Section>
+
+          <Section title="Top 10 Movies" canCollapse={false}>
+            {top10Movies &&
+              top10Movies.results
+                .slice(0, 10)
+                .map((movie: TmdbMovie, index: number) => (
+                  <PosterCard
+                    mediaType={mediaType}
+                    key={movie.id}
+                    id={movie.id}
+                    title={movie.title}
+                    number={index + 1}
+                    imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
+                    onToggleFollow={() => {}}
+                  />
+                ))}
           </Section>
 
           <Section title="Top Rated Movies" canCollapse={false}>

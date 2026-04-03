@@ -14,8 +14,8 @@ export const getDiscoverMovies = action({
     page: v.optional(v.number()),
     certification: v.optional(v.string()),
     certification_country: v.optional(v.string()),
-    'certification.gte': v.optional(v.string()),
-    'certification.lte': v.optional(v.string()),
+    certification_gte: v.optional(v.string()),
+    certification_lte: v.optional(v.string()),
     include_adult: v.optional(v.boolean()),
     include_video: v.optional(v.boolean()),
     language: v.optional(v.string()),
@@ -57,7 +57,15 @@ export const getDiscoverMovies = action({
     with_original_language: v.optional(v.string()),
     with_people: v.optional(v.string()),
     with_release_type: v.optional(
-      v.union(v.literal('1'), v.literal('2'), v.literal('3'), v.literal('4'), v.literal('5'), v.literal('6')),
+      v.union(
+        v.literal('1'),
+        v.literal('2'),
+        v.literal('3'),
+        v.literal('4'),
+        v.literal('5'),
+        v.literal('6'),
+        v.string(), // To support comma/pipe separated values like '2|3'
+      ),
     ),
     with_runtime_gte: v.optional(v.number()),
     with_runtime_lte: v.optional(v.number()),
@@ -76,8 +84,8 @@ export const getDiscoverMovies = action({
 
     if (args.certification) params.certification = args.certification
     if (args.certification_country) params.certification_country = args.certification_country
-    if (args['certification.gte']) params['certification.gte'] = args['certification.gte']
-    if (args['certification.lte']) params['certification.lte'] = args['certification.lte']
+    if (args.certification_gte) params['certification.gte'] = args.certification_gte
+    if (args.certification_lte) params['certification.lte'] = args.certification_lte
     if (args.include_adult !== undefined) params.include_adult = String(args.include_adult)
     if (args.include_video !== undefined) params.include_video = String(args.include_video)
     if (args.language) params.language = args.language
