@@ -12,19 +12,13 @@
 
 @layer components {
   .full-page {
-    @apply h-[calc(100dvh-3rem)] max-h-[calc(100dvh-3rem)] min-h-[calc(100dvh-3rem)] w-dvw max-w-dvw min-w-dvw;
+    @apply h-dvh max-h-dvh min-h-dvh w-dvw max-w-dvw min-w-dvw touch-none overflow-hidden;
   }
 }
 
 @layer base {
   * {
     @apply m-0 box-border p-0 antialiased outline-none! select-none!;
-  }
-
-  html,
-  body,
-  #app {
-    min-height: 100%;
   }
 
   img,

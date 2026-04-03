@@ -1,7 +1,8 @@
 import { Button } from '#/component/ui/button'
 import { cn } from '#/lib/cn'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { XIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
 
 function Dialog({ ...props }: ComponentProps<typeof DialogPrimitive.Root>) {
@@ -57,7 +58,7 @@ function DialogContent({
         {showCloseButton && (
           <Button className="absolute top-4 right-4" size="smallIcon" variant="ghost" asChild>
             <DialogPrimitive.Close data-slot="dialog-close">
-              <XIcon />
+              <FontAwesomeIcon icon={faXmark} />
               <span className="sr-only">Close</span>
             </DialogPrimitive.Close>
           </Button>

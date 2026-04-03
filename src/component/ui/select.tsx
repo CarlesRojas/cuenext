@@ -1,6 +1,7 @@
 import { cn } from '#/lib/cn'
+import { faCheck, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 
 function Select({ ...props }: ComponentProps<typeof SelectPrimitive.Root>) {
@@ -36,13 +37,31 @@ function SelectTrigger({ className, children, icon, ...props }: Props) {
       <div className="target-bl pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-focus-within:block group-hover:block dark:bg-white/70" />
       <div className="target-br pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-focus-within:block group-hover:block dark:bg-white/70" />
 
-      <div className="z-10 flex w-full min-w-0 items-center justify-between gap-2 bg-transparent px-3 py-1 text-base outline-none md:text-sm">
-        {children}
+      {icon && (
+        <div
+          className={cn(
+            'absolute top-1/2 left-2 -translate-y-1/2 text-black/60 group-focus-within:text-black group-hover:text-black',
+            'dark:text-white/50 dark:group-focus-within:text-white dark:group-hover:text-white',
+          )}
+        >
+          {icon}
+        </div>
+      )}
 
+      <span
+        className={cn(
+          'relative z-10 flex h-full w-full min-w-0 items-center justify-between gap-2 px-3 py-1 pr-9 text-base md:text-sm',
+          icon && 'pl-0',
+        )}
+      >
+        {children}
         <SelectPrimitive.Icon asChild>
-          <ChevronDownIcon className="size-4 text-black opacity-50 dark:text-white" />
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            className="absolute top-1/2 right-2 size-4 -translate-y-1/2 text-black/60 group-focus-within:text-black group-hover:text-black dark:text-white/50 dark:group-focus-within:text-white dark:group-hover:text-white"
+          />
         </SelectPrimitive.Icon>
-      </div>
+      </span>
     </SelectPrimitive.Trigger>
   )
 }
@@ -110,7 +129,7 @@ function SelectItem({ className, children, ...props }: ComponentProps<typeof Sel
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4 text-black dark:text-white" />
+          <FontAwesomeIcon icon={faCheck} className="size-4 text-black dark:text-white" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -135,7 +154,7 @@ function SelectScrollUpButton({ className, ...props }: ComponentProps<typeof Sel
       className={cn('flex cursor-default items-center justify-center py-1', className)}
       {...props}
     >
-      <ChevronUpIcon className="size-4" />
+      <FontAwesomeIcon icon={faChevronUp} className="size-4" />
     </SelectPrimitive.ScrollUpButton>
   )
 }
@@ -147,7 +166,7 @@ function SelectScrollDownButton({ className, ...props }: ComponentProps<typeof S
       className={cn('flex cursor-default items-center justify-center py-1', className)}
       {...props}
     >
-      <ChevronDownIcon className="size-4" />
+      <FontAwesomeIcon icon={faChevronDown} className="size-4" />
     </SelectPrimitive.ScrollDownButton>
   )
 }

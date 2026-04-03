@@ -1,4 +1,4 @@
-import Header from '#/component/Header'
+import AppShell from '#/component/AppShell'
 import { env } from '#/env'
 import { seo } from '#/lib/seo'
 import appCss from '#/styles.css?url'
@@ -81,15 +81,14 @@ function RootDocument({ children }: Props) {
   return (
     <ClerkProvider publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/watchlist">
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en" className="full-page" suppressHydrationWarning>
           <head>
             <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
             <HeadContent />
           </head>
 
-          <body className="font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
-            <Header />
-            {children}
+          <body className="full-page font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
+            <AppShell>{children}</AppShell>
 
             <Scripts />
           </body>

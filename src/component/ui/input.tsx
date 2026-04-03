@@ -1,5 +1,6 @@
 import { cn } from '#/lib/cn'
-import { X } from 'lucide-react'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { ComponentProps, ReactNode } from 'react'
 
 type Props = ComponentProps<'input'> & {
@@ -54,7 +55,7 @@ function Input({ className, type, backgroundColor, icon, onClear, ...props }: Pr
           onClick={onClear}
           type="button"
         >
-          <X className="size-4" />
+          <FontAwesomeIcon icon={faXmark} className="size-4" />
         </button>
       )}
     </div>

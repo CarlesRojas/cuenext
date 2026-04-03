@@ -11,6 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authWatchlistRouteImport } from './routes/(auth)/watchlist'
+import { Route as authUpcomingRouteImport } from './routes/(auth)/upcoming'
+import { Route as authProfileRouteImport } from './routes/(auth)/profile'
+import { Route as authExploreRouteImport } from './routes/(auth)/explore'
+import { Route as authTvTmdbIdRouteImport } from './routes/(auth)/tv/$tmdbId'
+import { Route as authMovieTmdbIdRouteImport } from './routes/(auth)/movie/$tmdbId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +27,98 @@ const authWatchlistRoute = authWatchlistRouteImport.update({
   path: '/watchlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authUpcomingRoute = authUpcomingRouteImport.update({
+  id: '/(auth)/upcoming',
+  path: '/upcoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authProfileRoute = authProfileRouteImport.update({
+  id: '/(auth)/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authExploreRoute = authExploreRouteImport.update({
+  id: '/(auth)/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authTvTmdbIdRoute = authTvTmdbIdRouteImport.update({
+  id: '/(auth)/tv/$tmdbId',
+  path: '/tv/$tmdbId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authMovieTmdbIdRoute = authMovieTmdbIdRouteImport.update({
+  id: '/(auth)/movie/$tmdbId',
+  path: '/movie/$tmdbId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/explore': typeof authExploreRoute
+  '/profile': typeof authProfileRoute
+  '/upcoming': typeof authUpcomingRoute
   '/watchlist': typeof authWatchlistRoute
+  '/movie/$tmdbId': typeof authMovieTmdbIdRoute
+  '/tv/$tmdbId': typeof authTvTmdbIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/explore': typeof authExploreRoute
+  '/profile': typeof authProfileRoute
+  '/upcoming': typeof authUpcomingRoute
   '/watchlist': typeof authWatchlistRoute
+  '/movie/$tmdbId': typeof authMovieTmdbIdRoute
+  '/tv/$tmdbId': typeof authTvTmdbIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(auth)/explore': typeof authExploreRoute
+  '/(auth)/profile': typeof authProfileRoute
+  '/(auth)/upcoming': typeof authUpcomingRoute
   '/(auth)/watchlist': typeof authWatchlistRoute
+  '/(auth)/movie/$tmdbId': typeof authMovieTmdbIdRoute
+  '/(auth)/tv/$tmdbId': typeof authTvTmdbIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/watchlist'
+  fullPaths:
+    | '/'
+    | '/explore'
+    | '/profile'
+    | '/upcoming'
+    | '/watchlist'
+    | '/movie/$tmdbId'
+    | '/tv/$tmdbId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/watchlist'
-  id: '__root__' | '/' | '/(auth)/watchlist'
+  to:
+    | '/'
+    | '/explore'
+    | '/profile'
+    | '/upcoming'
+    | '/watchlist'
+    | '/movie/$tmdbId'
+    | '/tv/$tmdbId'
+  id:
+    | '__root__'
+    | '/'
+    | '/(auth)/explore'
+    | '/(auth)/profile'
+    | '/(auth)/upcoming'
+    | '/(auth)/watchlist'
+    | '/(auth)/movie/$tmdbId'
+    | '/(auth)/tv/$tmdbId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  authExploreRoute: typeof authExploreRoute
+  authProfileRoute: typeof authProfileRoute
+  authUpcomingRoute: typeof authUpcomingRoute
   authWatchlistRoute: typeof authWatchlistRoute
+  authMovieTmdbIdRoute: typeof authMovieTmdbIdRoute
+  authTvTmdbIdRoute: typeof authTvTmdbIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +137,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authWatchlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/upcoming': {
+      id: '/(auth)/upcoming'
+      path: '/upcoming'
+      fullPath: '/upcoming'
+      preLoaderRoute: typeof authUpcomingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/profile': {
+      id: '/(auth)/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof authProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/explore': {
+      id: '/(auth)/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof authExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/tv/$tmdbId': {
+      id: '/(auth)/tv/$tmdbId'
+      path: '/tv/$tmdbId'
+      fullPath: '/tv/$tmdbId'
+      preLoaderRoute: typeof authTvTmdbIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/movie/$tmdbId': {
+      id: '/(auth)/movie/$tmdbId'
+      path: '/movie/$tmdbId'
+      fullPath: '/movie/$tmdbId'
+      preLoaderRoute: typeof authMovieTmdbIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  authExploreRoute: authExploreRoute,
+  authProfileRoute: authProfileRoute,
+  authUpcomingRoute: authUpcomingRoute,
   authWatchlistRoute: authWatchlistRoute,
+  authMovieTmdbIdRoute: authMovieTmdbIdRoute,
+  authTvTmdbIdRoute: authTvTmdbIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
