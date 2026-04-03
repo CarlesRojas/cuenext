@@ -1,49 +1,87 @@
 import { api } from '#/../convex/_generated/api'
+import { PosterCard } from '#/component/PosterCard'
+import { Section } from '#/component/Section'
+import { useMediaType } from '#/hooks/useMediaType'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
-import type { TmdbTv } from '#/type/tmdb'
+import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/explore')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { data: popularShows, isLoading, error } = useQuery({ ...convexAction(api.tmdb.getPopularShows, { page: 1 }) })
+  const [mediaType] = useMediaType()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const {
+    data: popularShows,
+    isLoading: showsLoading,
+    error: showsError,
+  } = useQuery({ ...convexAction(api.tmdb.getPopularShows, { page: 1 }) })
+  const {
+    data: popularMovies,
+    isLoading: moviesLoading,
+    error: moviesError,
+  } = useQuery({ ...convexAction(api.tmdb.getPopularMovies, { page: 1 }) })
 
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-bold">Explore</h1>
+    <main className="flex w-full flex-col gap-8 p-4 md:p-8">
+      <header>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Explore</h1>
+        <p className="mt-2 text-neutral-400">Discover new {mediaType === 'tv' ? 'shows' : 'movies'} to watch.</p>
 
-      {isLoading && <p>Loading popular shows...</p>}
-      {error && <p className="text-red-500">Error loading shows: {error.message}</p>}
+        <div className="relative mt-6 w-full max-w-md">
+          <input
+            type="text"
+            placeholder={`Search for ${mediaType === 'tv' ? 'TV shows' : 'movies'}...`}
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full rounded-full border border-neutral-700/50 bg-neutral-800/40 px-6 py-3 text-white placeholder-neutral-500 backdrop-blur-md transition-colors focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none"
+          />
+        </div>
+      </header>
 
-      {popularShows && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {popularShows.results.map((tv: TmdbTv) => (
-            <div key={tv.id} className="flex flex-col gap-2">
-              {tv.poster_path ? (
-                <img
-                  src={getTmdbImageUrl(tv.poster_path, 'w342') || ''}
-                  alt={tv.name}
-                  className="aspect-2/3 w-full rounded-md object-cover shadow-md"
+      {mediaType === 'tv' ? (
+        <div className="flex flex-col gap-6">
+          <Section title="Popular Shows" canCollapse={false}>
+            {showsLoading && <p className="p-4 text-neutral-500">Loading popular shows...</p>}
+            {showsError && <p className="p-4 text-red-500">Error loading shows: {showsError.message}</p>}
+
+            {popularShows &&
+              popularShows.results.map((tv: TmdbTv) => (
+                <PosterCard
+                  key={tv.id}
+                  id={tv.id}
+                  title={tv.name}
+                  imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
+                  onToggleFollow={() => {}}
                 />
-              ) : (
-                <div className="flex aspect-2/3 w-full items-center justify-center rounded-md bg-neutral-800 p-4 text-center">
-                  <span className="text-sm text-neutral-500">{tv.name}</span>
-                </div>
-              )}
-              <div className="line-clamp-1 font-medium" title={tv.name}>
-                {tv.name}
-              </div>
-              <div className="text-sm text-neutral-500">
-                {tv.first_air_date ? new Date(tv.first_air_date).getFullYear() : 'Unknown'}
-              </div>
-            </div>
-          ))}
+              ))}
+          </Section>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <Section title="Popular Movies" canCollapse={false}>
+            {moviesLoading && <p className="p-4 text-neutral-500">Loading popular movies...</p>}
+            {moviesError && <p className="p-4 text-red-500">Error loading movies: {moviesError.message}</p>}
+
+            {popularMovies &&
+              popularMovies.results.map((movie: TmdbMovie) => (
+                <PosterCard
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title}
+                  imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
+                  onToggleFollow={() => {}}
+                />
+              ))}
+          </Section>
         </div>
       )}
-    </div>
+    </main>
   )
 }

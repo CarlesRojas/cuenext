@@ -1,4 +1,5 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
+import { MediaTypeSelector } from '#/component/MediaTypeSelector'
 import { User } from '#/component/User'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
@@ -8,7 +9,8 @@ import type { LinkProps } from '@tanstack/react-router'
 import { ClientOnly, Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import { useWindowSize } from 'usehooks-ts'
+import { useRef, useState } from 'react'
+import { useEventListener, useWindowSize } from 'usehooks-ts'
 
 type NavItem = {
   to: NonNullable<LinkProps['to']>
@@ -31,53 +33,68 @@ export default function AppShell({ children }: AppShellProps) {
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
+  const scrollContainer = useRef<HTMLDivElement>(null)
+  const [showHeader, setShowHeader] = useState(true)
+
+  const onScroll = () => {
+    setShowHeader(!scrollContainer.current || scrollContainer.current.scrollTop < 20)
+  }
+
+  useEventListener('scroll', onScroll)
+
   return (
     <ClientOnly>
       {!isMobile && (
-        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-64 p-3 md:block">
+        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 p-3 md:block">
           <LiquidGlass
             blur={3}
-            className="relative h-full min-w-64 rounded-3xl bg-neutral-800/40"
+            className="relative h-full min-w-72 rounded-3xl bg-neutral-800/40"
             wrapperClassName="flex-col justify-between items-start p-4 "
           >
-            <nav className="mt-10 flex w-full flex-col gap-2">
-              {NAV_ITEMS.map(item => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  activeProps={{ className: 'text-sky-500' }}
-                  inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
-                  className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"
-                >
-                  {({ isActive }) => (
-                    <>
-                      {isActive && (
-                        <motion.div
-                          layoutId="nav-indicator"
-                          className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
-                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        />
-                      )}
+            <div className="mt-10 flex w-full flex-col gap-8">
+              <nav className="flex w-full flex-col gap-2">
+                {NAV_ITEMS.map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    activeProps={{ className: 'text-sky-500' }}
+                    inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
+                    className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <motion.div
+                            layoutId="nav-indicator"
+                            className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          />
+                        )}
 
-                      <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
-                      <span className="z-60 font-semibold">{item.label}</span>
-                    </>
-                  )}
-                </Link>
-              ))}
-            </nav>
+                        <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
+                        <span className="z-60 font-semibold">{item.label}</span>
+                      </>
+                    )}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
+
+              <MediaTypeSelector />
+            </div>
 
             <User />
           </LiquidGlass>
         </aside>
       )}
 
-      <main className="full-page relative flex overflow-y-auto">
+      <main className="full-page relative flex overflow-y-auto" onScroll={onScroll} ref={scrollContainer}>
         <div
           className={cn(
             'h-fit w-full',
             isMobile && 'pb-[calc(60px+2*max(env(safe-area-inset-bottom),0.75rem))]',
-            !isMobile && 'pl-[calc(16rem+0.75rem+2rem)]',
+            !isMobile && 'pl-[calc(18rem+0.75rem+2rem)]',
           )}
         >
           {children}
@@ -86,7 +103,13 @@ export default function AppShell({ children }: AppShellProps) {
 
       {isMobile && (
         <>
-          <header className="fixed top-3 right-3 z-50 h-fit">
+          <header
+            className={cn(
+              'fixed top-3 right-3 left-3 z-50 flex h-fit items-center justify-between gap-3 opacity-100 transition-opacity',
+              !showHeader && 'pointer-events-none! opacity-0',
+            )}
+          >
+            <MediaTypeSelector isMobile />
             <User isMobile />
           </header>
 
