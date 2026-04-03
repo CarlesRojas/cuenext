@@ -48,7 +48,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 border border-neutral-200 bg-white p-6 shadow-lg duration-200 sm:max-w-lg dark:border-neutral-800 dark:bg-neutral-950',
+          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 border border-neutral-800 bg-neutral-950 p-6 shadow-lg duration-200 sm:max-w-lg',
           className,
         )}
         {...props}
@@ -92,10 +92,7 @@ function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimit
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn(
-        'font-goldman w-full text-xl leading-none tracking-wide text-sky-600 opacity-80 dark:text-sky-500',
-        className,
-      )}
+      className={cn('font-goldman w-full text-xl leading-none tracking-wide text-sky-500 opacity-80', className)}
       {...props}
     />
   )
@@ -105,7 +102,7 @@ function DialogDescription({ className, ...props }: ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn('text-sm text-neutral-500 dark:text-neutral-400', className)}
+      className={cn('text-sm text-neutral-400', className)}
       {...props}
     />
   )

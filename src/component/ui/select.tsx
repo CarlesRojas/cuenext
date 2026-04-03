@@ -25,25 +25,19 @@ function SelectTrigger({ className, children, icon, ...props }: Props) {
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        "group relative h-10 max-h-10 min-h-10 w-fit border border-neutral-400 bg-neutral-300/50 whitespace-nowrap outline-none focus-within:bg-neutral-300/70 hover:bg-neutral-300/70 disabled:cursor-not-allowed disabled:opacity-50 data-placeholder:text-neutral-900/60 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-neutral-900/60",
-        'dark:border-neutral-600 dark:bg-neutral-700/50 dark:focus-within:bg-neutral-700/70 dark:hover:bg-neutral-700/70 dark:data-placeholder:text-neutral-900/60',
+        "group relative h-10 max-h-10 min-h-10 w-fit border border-neutral-600 bg-neutral-700/50 whitespace-nowrap outline-none focus-within:bg-neutral-700/70 hover:bg-neutral-700/70 disabled:cursor-not-allowed disabled:opacity-50 data-placeholder:text-neutral-900/60 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-neutral-900/60",
         icon && 'pl-9',
         className,
       )}
       {...props}
     >
-      <div className="target-tl pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-focus-within:block group-hover:block dark:bg-white/70" />
-      <div className="target-tr pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-focus-within:block group-hover:block dark:bg-white/70" />
-      <div className="target-bl pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-focus-within:block group-hover:block dark:bg-white/70" />
-      <div className="target-br pointer-events-none absolute -inset-1.5 z-10 hidden bg-black/70 group-focus-within:block group-hover:block dark:bg-white/70" />
+      <div className="target-tl pointer-events-none absolute -inset-1.5 z-10 hidden bg-white/70 group-focus-within:block group-hover:block" />
+      <div className="target-tr pointer-events-none absolute -inset-1.5 z-10 hidden bg-white/70 group-focus-within:block group-hover:block" />
+      <div className="target-bl pointer-events-none absolute -inset-1.5 z-10 hidden bg-white/70 group-focus-within:block group-hover:block" />
+      <div className="target-br pointer-events-none absolute -inset-1.5 z-10 hidden bg-white/70 group-focus-within:block group-hover:block" />
 
       {icon && (
-        <div
-          className={cn(
-            'absolute top-1/2 left-2 -translate-y-1/2 text-black/60 group-focus-within:text-black group-hover:text-black',
-            'dark:text-white/50 dark:group-focus-within:text-white dark:group-hover:text-white',
-          )}
-        >
+        <div className="absolute top-1/2 left-2 -translate-y-1/2 text-white/50 group-focus-within:text-white group-hover:text-white">
           {icon}
         </div>
       )}
@@ -58,7 +52,7 @@ function SelectTrigger({ className, children, icon, ...props }: Props) {
         <SelectPrimitive.Icon asChild>
           <FontAwesomeIcon
             icon={faChevronDown}
-            className="absolute top-1/2 right-2 size-4 -translate-y-1/2 text-black/60 group-focus-within:text-black group-hover:text-black dark:text-white/50 dark:group-focus-within:text-white dark:group-hover:text-white"
+            className="absolute top-1/2 right-2 size-4 -translate-y-1/2 text-white/50 group-focus-within:text-white group-hover:text-white"
           />
         </SelectPrimitive.Icon>
       </span>
@@ -80,7 +74,7 @@ function SelectContent({
         onCloseAutoFocus={e => e.preventDefault()}
         className={cn(
           'text-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto border border-neutral-400 bg-neutral-200',
-          'dark:border-neutral-600 dark:bg-neutral-800',
+          'border-neutral-600 bg-neutral-800',
           position === 'popper' &&
             'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
           className,
@@ -122,14 +116,13 @@ function SelectItem({ className, children, ...props }: ComponentProps<typeof Sel
       data-slot="select-item"
       className={cn(
         "relative flex w-full cursor-default items-center gap-2 py-2 pr-8 pl-2 text-sm font-medium outline-hidden select-none focus:bg-sky-500/30 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-neutral-900/60 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-        'dark:focus:bg-sky-500/30',
         className,
       )}
       {...props}
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <FontAwesomeIcon icon={faCheck} className="size-4 text-black dark:text-white" />
+          <FontAwesomeIcon icon={faCheck} className="size-4 text-white" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

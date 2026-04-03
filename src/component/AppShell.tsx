@@ -47,7 +47,7 @@ export default function AppShell({ children }: AppShellProps) {
       </header>
 
       {!isMobile && (
-        <aside className="z-50 hidden w-64 border-r border-neutral-200 md:block dark:border-neutral-800">
+        <aside className="z-50 hidden w-64 border-r border-neutral-800 md:block">
           <LiquidGlass blur={2} className="flex h-full w-full flex-col">
             <div className="p-6">
               <h1 className="text-xl font-bold tracking-tight">CueNext</h1>
@@ -63,11 +63,9 @@ export default function AppShell({ children }: AppShellProps) {
                   <Link
                     key={item.to}
                     to={item.to}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
-                      isActive
-                        ? 'bg-neutral-200/80 font-medium text-black dark:bg-neutral-800 dark:text-white'
-                        : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800/50'
-                    }`}
+                    activeProps={{ className: 'bg-neutral-800 font-medium text-white' }}
+                    inactiveProps={{ className: 'bg-neutral-800 font-medium text-white' }}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors"
                   >
                     <FontAwesomeIcon icon={item.icon} className="h-5 w-5" />
                     <span className="text-sm">{item.label}</span>

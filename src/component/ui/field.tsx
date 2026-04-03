@@ -48,29 +48,26 @@ function FieldGroup({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
-const fieldVariants = cva(
-  'group/field flex w-full gap-3 data-[invalid=true]:text-red-500 dark:data-[invalid=true]:text-red-900',
-  {
-    variants: {
-      orientation: {
-        vertical: ['flex-col *:w-full [&>.sr-only]:w-auto'],
-        horizontal: [
-          'flex-row items-center',
-          '*:data-[slot=field-label]:flex-auto',
-          'has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
-        ],
-        responsive: [
-          'flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto [&>.sr-only]:w-auto',
-          '@md/field-group:*:data-[slot=field-label]:flex-auto',
-          '@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
-        ],
-      },
-    },
-    defaultVariants: {
-      orientation: 'vertical',
+const fieldVariants = cva('group/field flex w-full gap-3 data-[invalid=true]:text-red-900', {
+  variants: {
+    orientation: {
+      vertical: ['flex-col *:w-full [&>.sr-only]:w-auto'],
+      horizontal: [
+        'flex-row items-center',
+        '*:data-[slot=field-label]:flex-auto',
+        'has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
+      ],
+      responsive: [
+        'flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto [&>.sr-only]:w-auto',
+        '@md/field-group:*:data-[slot=field-label]:flex-auto',
+        '@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
+      ],
     },
   },
-)
+  defaultVariants: {
+    orientation: 'vertical',
+  },
+})
 
 function Field({
   className,
@@ -105,7 +102,7 @@ function FieldLabel({ className, ...props }: ComponentProps<typeof Label>) {
       className={cn(
         'group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50',
         'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border *:data-[slot=field]:p-4',
-        'has-data-[state=checked]:border-neutral-900 has-data-[state=checked]:bg-neutral-900/5 dark:has-data-[state=checked]:border-neutral-50 dark:dark:has-data-[state=checked]:bg-neutral-50/10 dark:has-data-[state=checked]:bg-neutral-50/5',
+        'has-data-[state=checked]:border-neutral-50 has-data-[state=checked]:bg-neutral-50/5',
         className,
       )}
       {...props}
@@ -131,9 +128,9 @@ function FieldDescription({ className, ...props }: ComponentProps<'p'>) {
     <p
       data-slot="field-description"
       className={cn(
-        'text-sm leading-normal font-normal text-neutral-500 group-has-data-[orientation=horizontal]/field:text-balance dark:text-neutral-400',
+        'text-sm leading-normal font-normal text-neutral-400 group-has-data-[orientation=horizontal]/field:text-balance',
         'last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5',
-        '[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-neutral-900 dark:[&>a:hover]:text-neutral-50',
+        '[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-neutral-50',
         className,
       )}
       {...props}
@@ -158,7 +155,7 @@ function FieldSeparator({
       <Separator className="absolute inset-0 top-1/2" />
       {children && (
         <span
-          className="relative mx-auto block w-fit bg-white px-2 text-neutral-500 dark:bg-neutral-950 dark:text-neutral-400"
+          className="relative mx-auto block w-fit bg-neutral-950 px-2 text-neutral-400"
           data-slot="field-separator-content"
         >
           {children}
@@ -201,12 +198,7 @@ function FieldError({
   }
 
   return (
-    <div
-      role="alert"
-      data-slot="field-error"
-      className={cn('text-sm font-normal text-red-500 dark:text-red-900', className)}
-      {...props}
-    >
+    <div role="alert" data-slot="field-error" className={cn('text-sm font-normal text-red-900', className)} {...props}>
       {content}
     </div>
   )

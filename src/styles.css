@@ -3,11 +3,8 @@
 @plugin '@tailwindcss/typography';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is(.dark *));
-
 @theme {
   --font-montserrat: 'Montserrat', sans-serif;
-  --color-neutral-150: #ededed;
 }
 
 @layer components {
