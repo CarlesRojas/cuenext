@@ -5,7 +5,7 @@ import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/(auth)/watchlist')({
+export const Route = createFileRoute('/explore')({
   component: RouteComponent,
 })
 
@@ -14,7 +14,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Watchlist (Popular Shows Preview)</h1>
+      <h1 className="mb-6 text-2xl font-bold">Explore</h1>
 
       {isLoading && <p>Loading popular shows...</p>}
       {error && <p className="text-red-500">Error loading shows: {error.message}</p>}
