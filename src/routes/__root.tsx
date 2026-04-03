@@ -1,4 +1,5 @@
 import AppShell from '#/component/AppShell'
+import { Toaster } from '#/component/ui/sonner'
 import { env } from '#/env'
 import { seo } from '#/lib/seo'
 import appCss from '#/styles.css?url'
@@ -96,6 +97,7 @@ function RootDocument({ children }: Props) {
 
           <body className="full-page bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
             <AppShell>{children}</AppShell>
+            <Toaster />
 
             <Scripts />
           </body>

@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/explore')({
   component: RouteComponent,
@@ -92,10 +93,30 @@ function RouteComponent() {
   const follow = useMutation(api.library.follow)
   const unfollow = useMutation(api.library.unfollow)
 
-  const toggleFollow = (id: number) => {
-    if (!clerk.isSignedIn) return clerk.openSignIn()
-    if (Array.isArray(followedMedia) && followedMedia.includes(id)) unfollow({ type: mediaType, tmdbId: id })
-    else follow({ type: mediaType, tmdbId: id })
+  const toggleFollow = (id: number, title: string) => {
+    if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
+
+    const isFollowing = Array.isArray(followedMedia) && followedMedia.includes(id)
+
+    if (isFollowing) {
+      unfollow({ type: mediaType, tmdbId: id })
+
+      toast(`Unfollowed ${title}`, {
+        action: {
+          label: 'Undo',
+          onClick: () => follow({ type: mediaType, tmdbId: id }),
+        },
+      })
+    } else {
+      follow({ type: mediaType, tmdbId: id })
+
+      toast(`Followed ${title}`, {
+        action: {
+          label: 'Undo',
+          onClick: () => unfollow({ type: mediaType, tmdbId: id }),
+        },
+      })
+    }
   }
 
   return (
@@ -127,7 +148,7 @@ function RouteComponent() {
                   imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
                   showFollow
                   isFollowed={Array.isArray(followedMedia) && followedMedia.includes(tv.id)}
-                  onToggleFollow={() => toggleFollow(tv.id)}
+                  onToggleFollow={() => toggleFollow(tv.id, tv.name)}
                 />
               ))}
 
@@ -150,7 +171,7 @@ function RouteComponent() {
                     imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
                     showFollow
                     isFollowed={Array.isArray(followedMedia) && followedMedia.includes(tv.id)}
-                    onToggleFollow={() => toggleFollow(tv.id)}
+                    onToggleFollow={() => toggleFollow(tv.id, tv.name)}
                   />
                 ))}
 
@@ -170,7 +191,7 @@ function RouteComponent() {
                   imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
                   showFollow
                   isFollowed={Array.isArray(followedMedia) && followedMedia.includes(tv.id)}
-                  onToggleFollow={() => toggleFollow(tv.id)}
+                  onToggleFollow={() => toggleFollow(tv.id, tv.name)}
                 />
               ))}
 
@@ -192,7 +213,7 @@ function RouteComponent() {
                   imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
                   showFollow
                   isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
-                  onToggleFollow={() => toggleFollow(movie.id)}
+                  onToggleFollow={() => toggleFollow(movie.id, movie.title)}
                 />
               ))}
 
@@ -215,7 +236,7 @@ function RouteComponent() {
                     imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
                     showFollow
                     isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
-                    onToggleFollow={() => toggleFollow(movie.id)}
+                    onToggleFollow={() => toggleFollow(movie.id, movie.title)}
                   />
                 ))}
 
@@ -235,7 +256,7 @@ function RouteComponent() {
                   imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
                   showFollow
                   isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
-                  onToggleFollow={() => toggleFollow(movie.id)}
+                  onToggleFollow={() => toggleFollow(movie.id, movie.title)}
                 />
               ))}
 

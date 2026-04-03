@@ -25,7 +25,7 @@ type PosterCardProps = {
     }
   | {
       isLoading?: false
-      id: string | number
+      id: number
       title: string
       mediaType: MediaType
       imageUrl?: string
