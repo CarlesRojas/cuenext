@@ -19,7 +19,6 @@ export const getPopularMovies = action({
 export const getPopularShows = action({
   args: { page: v.optional(v.number()) },
   handler: async (_, args) => {
-    console.warn('getPopularShows called')
     return fetchTmdb(paginated(tmdbTvSchema), '/tv/popular', { page: String(args.page || 1) })
   },
 })
