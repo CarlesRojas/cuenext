@@ -79,7 +79,7 @@ function RootDocument({ children }: Props) {
   return (
     <ClerkProvider
       publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY}
-      afterSignOutUrl="/watchlist"
+      afterSignOutUrl="/"
       appearance={{ elements: { modalBackdrop: '!bg-black/70 !backdrop-blur-sm' } }}
     >
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
