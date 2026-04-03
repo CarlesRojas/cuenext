@@ -23,14 +23,14 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
 
   return (
-    <section className={cn('flex flex-col gap-4 py-4', className)}>
+    <section className={cn('flex flex-col', className)}>
       <Button
         variant="link"
         size="link"
         className={cn('px-4', !isMobile && 'pl-aside', !canCollapse && 'pointer-events-none!')}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <h2 className="tracking text-xl font-semibold">{title}</h2>
+        <h2 className="tracking text-lg font-semibold opacity-80">{title}</h2>
 
         {canCollapse && (
           <motion.div
@@ -58,7 +58,7 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
             >
               <CarouselPrevious className={cn('mouse:block z-10 hidden', !isMobile && 'left-aside ml-2')} />
 
-              <CarouselContent className={cn('z-0 -ml-4 py-4')}>
+              <CarouselContent className={cn('z-0 -ml-4 pt-2 pb-10')}>
                 {React.Children.map(children, (child, index) => (
                   <CarouselItem key={index} className="basis-auto">
                     {child}

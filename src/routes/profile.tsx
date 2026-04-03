@@ -13,7 +13,7 @@ function ProfilePage() {
   const { user } = useUser()
 
   return (
-    <div className="screen-py flex w-full flex-col gap-8">
+    <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Profile</h1>

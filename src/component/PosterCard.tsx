@@ -11,6 +11,7 @@ interface PosterCardProps {
   mediaType: MediaType
   imageUrl?: string
   className?: string
+  number?: number
 
   showWatch?: boolean
   isWatched?: boolean
@@ -27,6 +28,7 @@ export function PosterCard({
   mediaType,
   imageUrl,
   className,
+  number,
 
   showWatch = false,
   isWatched = false,
@@ -40,8 +42,7 @@ export function PosterCard({
     <Link
       to={`/${mediaType}/${id}` as LinkProps['to']}
       className={cn(
-        // If the size changes, also update src/component/Section.tsx
-        'group relative flex aspect-2/3 w-32 max-w-32 min-w-32 flex-col gap-2 overflow-hidden rounded-xl bg-neutral-800 transition-transform duration-300 hover:scale-110 focus-visible:scale-110 md:w-44 md:max-w-44 md:min-w-44',
+        'group relative flex aspect-2/3 w-32 max-w-32 min-w-32 flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] hover:shadow-xl/20 focus-visible:scale-[1.07] focus-visible:shadow-xl/20 md:w-36 md:max-w-36 md:min-w-36',
         className,
       )}
     >
@@ -95,6 +96,18 @@ export function PosterCard({
             </button>
           )}
         </div>
+      )}
+
+      {number && (
+        <>
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-black/50 via-transparent to-transparent" />
+
+          <div className="pointer-events-none absolute top-3 left-3 flex items-center justify-center">
+            <p className="bg-linear-to-b from-white to-white/50 bg-clip-text text-5xl leading-10 font-bold text-transparent">
+              {number}
+            </p>
+          </div>
+        </>
       )}
     </Link>
   )

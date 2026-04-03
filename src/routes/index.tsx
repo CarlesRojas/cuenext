@@ -11,7 +11,7 @@ function App() {
   const [mediaType] = useMediaType()
 
   return (
-    <div className="screen-py flex w-full flex-col gap-8">
+    <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Watchlist</h1>
       </header>

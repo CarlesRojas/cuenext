@@ -94,7 +94,7 @@ function RootDocument({ children }: Props) {
             <HeadContent />
           </head>
 
-          <body className="full-page bg-neutral-950 font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
+          <body className="full-page bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
             <AppShell>{children}</AppShell>
 
             <Scripts />

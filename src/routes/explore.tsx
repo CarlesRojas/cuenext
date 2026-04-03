@@ -17,18 +17,45 @@ function RouteComponent() {
   const [mediaType] = useMediaType()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data: popularShows } = useQuery({
-    ...convexAction(api.tmdb.getPopularShows, { page: 1 }),
+  const today = new Date()
+  const nextWeek = new Date(today)
+  nextWeek.setDate(today.getDate() + 7)
+
+  const minDate = today.toISOString().split('T')[0]
+  const maxDate = nextWeek.toISOString().split('T')[0]
+
+  const { data: onTheAirShows } = useQuery({
+    ...convexAction(api.tmdb.getDiscoverShows, {
+      page: 1,
+      sort_by: 'popularity.desc',
+      air_date_gte: minDate,
+      air_date_lte: maxDate,
+    }),
+    enabled: mediaType === 'tv',
+  })
+
+  const { data: top10Shows } = useQuery({
+    ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'popularity.desc' }),
     enabled: mediaType === 'tv',
   })
 
   const { data: popularMovies } = useQuery({
-    ...convexAction(api.tmdb.getPopularMovies, { page: 1 }),
+    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc' }),
+    enabled: mediaType === 'movie',
+  })
+
+  const { data: topRatedShows } = useQuery({
+    ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+    enabled: mediaType === 'tv',
+  })
+
+  const { data: topRatedMovies } = useQuery({
+    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
     enabled: mediaType === 'movie',
   })
 
   return (
-    <div className="screen-py flex w-full flex-col gap-8">
+    <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Explore</h1>
 
@@ -44,33 +71,82 @@ function RouteComponent() {
       </header>
 
       {mediaType === 'tv' ? (
-        <Section title="Popular Shows" canCollapse={false}>
-          {popularShows &&
-            popularShows.results.map((tv: TmdbTv) => (
-              <PosterCard
-                mediaType={mediaType}
-                key={tv.id}
-                id={tv.id}
-                title={tv.name}
-                imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
-                onToggleFollow={() => {}}
-              />
-            ))}
-        </Section>
+        <>
+          <Section title="Dropping This Week" canCollapse={false}>
+            {onTheAirShows &&
+              onTheAirShows.results.map((tv: TmdbTv) => (
+                <PosterCard
+                  mediaType={mediaType}
+                  key={tv.id}
+                  id={tv.id}
+                  title={tv.name}
+                  imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
+                  onToggleFollow={() => {}}
+                />
+              ))}
+          </Section>
+
+          <Section title="Top 10 Shows" canCollapse={false}>
+            {top10Shows &&
+              top10Shows.results
+                .slice(0, 10)
+                .map((tv: TmdbTv, index: number) => (
+                  <PosterCard
+                    mediaType={mediaType}
+                    key={tv.id}
+                    id={tv.id}
+                    title={tv.name}
+                    number={index + 1}
+                    imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
+                    onToggleFollow={() => {}}
+                  />
+                ))}
+          </Section>
+
+          <Section title="Top Rated Shows" canCollapse={false}>
+            {topRatedShows &&
+              topRatedShows.results.map((tv: TmdbTv) => (
+                <PosterCard
+                  mediaType={mediaType}
+                  key={tv.id}
+                  id={tv.id}
+                  title={tv.name}
+                  imageUrl={getTmdbImageUrl(tv.poster_path, 'w342') || undefined}
+                  onToggleFollow={() => {}}
+                />
+              ))}
+          </Section>
+        </>
       ) : (
-        <Section title="Popular Movies" canCollapse={false}>
-          {popularMovies &&
-            popularMovies.results.map((movie: TmdbMovie) => (
-              <PosterCard
-                mediaType={mediaType}
-                key={movie.id}
-                id={movie.id}
-                title={movie.title}
-                imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
-                onToggleFollow={() => {}}
-              />
-            ))}
-        </Section>
+        <>
+          <Section title="Popular Movies" canCollapse={false}>
+            {popularMovies &&
+              popularMovies.results.map((movie: TmdbMovie) => (
+                <PosterCard
+                  mediaType={mediaType}
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title}
+                  imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
+                  onToggleFollow={() => {}}
+                />
+              ))}
+          </Section>
+
+          <Section title="Top Rated Movies" canCollapse={false}>
+            {topRatedMovies &&
+              topRatedMovies.results.map((movie: TmdbMovie) => (
+                <PosterCard
+                  mediaType={mediaType}
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title}
+                  imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
+                  onToggleFollow={() => {}}
+                />
+              ))}
+          </Section>
+        </>
       )}
     </div>
   )
