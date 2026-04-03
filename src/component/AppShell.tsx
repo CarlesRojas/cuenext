@@ -4,6 +4,7 @@ import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/fr
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { ClientOnly, Link, useRouterState } from '@tanstack/react-router'
+import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { useWindowSize } from 'usehooks-ts'
 
@@ -68,26 +69,32 @@ export default function AppShell({ children }: AppShellProps) {
       <main className="full-page relative flex overflow-y-auto">{children}</main>
 
       {isMobile && (
-        <div className="fixed right-0 bottom-0 left-0 z-50 px-4 pb-[max(env(safe-area-inset-bottom),1rem)] md:hidden">
-          <LiquidGlass blur={2} className="flex w-full items-center justify-between rounded-full">
-            {NAV_ITEMS.map(item => {
-              const isActive =
-                routerState.location.pathname === item.to ||
-                (item.to !== '/' && routerState.location.pathname.startsWith(item.to))
+        <div className="fixed right-0 bottom-0 left-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden">
+          <LiquidGlass blur={3} className="relative flex w-full items-center justify-between rounded-full">
+            {NAV_ITEMS.map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                activeProps={{ className: 'text-sky-500' }}
+                inactiveProps={{ className: 'text-white' }}
+                className="relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 p-1.5 transition-colors"
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-indicator"
+                        className="absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
 
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`flex w-16 flex-col items-center justify-center p-2 transition-colors ${
-                    isActive ? 'text-sky-500' : 'text-white'
-                  }`}
-                >
-                  <FontAwesomeIcon icon={item.icon} className={`h-6 w-6 ${isActive ? 'opacity-100' : 'opacity-50'}`} />
-                  <span className="text-[8px] font-medium">{item.label}</span>
-                </Link>
-              )
-            })}
+                    <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
+                    <span className="z-60 text-[9px] leading-2 font-bold">{item.label}</span>
+                  </>
+                )}
+              </Link>
+            ))}
           </LiquidGlass>
         </div>
       )}

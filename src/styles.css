@@ -12,7 +12,7 @@
 
 @layer components {
   .full-page {
-    @apply h-dvh max-h-dvh min-h-dvh w-dvw max-w-dvw min-w-dvw touch-none overflow-hidden;
+    @apply h-dvh max-h-dvh min-h-dvh w-dvw max-w-dvw min-w-dvw overflow-hidden;
   }
 }
 
