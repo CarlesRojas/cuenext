@@ -5,22 +5,37 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 
-interface PosterCardProps {
-  id: string | number
-  title: string
-  mediaType: MediaType
-  imageUrl?: string
+type PosterCardProps = {
   className?: string
   number?: number
-
-  showWatch?: boolean
-  isWatched?: boolean
-  onToggleWatch?: () => void
-
-  showFollow?: boolean
-  isFollowed?: boolean
-  onToggleFollow?: () => void
-}
+} & (
+  | {
+      isLoading: true
+      id?: never
+      title?: never
+      mediaType?: never
+      imageUrl?: never
+      showWatch?: never
+      isWatched?: never
+      onToggleWatch?: never
+      showFollow?: never
+      isFollowed?: never
+      onToggleFollow?: never
+    }
+  | {
+      isLoading?: false
+      id: string | number
+      title: string
+      mediaType: MediaType
+      imageUrl?: string
+      showWatch?: boolean
+      isWatched?: boolean
+      onToggleWatch?: () => void
+      showFollow?: boolean
+      isFollowed?: boolean
+      onToggleFollow?: () => void
+    }
+)
 
 export function PosterCard({
   id,
@@ -29,6 +44,7 @@ export function PosterCard({
   imageUrl,
   className,
   number,
+  isLoading,
 
   showWatch = false,
   isWatched = false,
@@ -38,11 +54,24 @@ export function PosterCard({
   isFollowed = false,
   onToggleFollow,
 }: PosterCardProps) {
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl',
+          'w-32 max-w-32 min-w-32 md:w-36 md:max-w-36 md:min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
+          className,
+        )}
+      />
+    )
+  }
+
   return (
     <Link
       to={`/${mediaType}/${id}` as LinkProps['to']}
       className={cn(
-        'group relative flex aspect-2/3 w-32 max-w-32 min-w-32 flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] hover:shadow-xl/20 focus-visible:scale-[1.07] focus-visible:shadow-xl/20 md:w-36 md:max-w-36 md:min-w-36',
+        'group relative flex aspect-2/3 flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] hover:shadow-xl/20 focus-visible:scale-[1.07] focus-visible:shadow-xl/20',
+        'w-32 max-w-32 min-w-32 md:w-36 md:max-w-36 md:min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
         className,
       )}
     >

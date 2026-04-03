@@ -12,8 +12,8 @@ function UpcomingPage() {
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
-      <header className="screen-px">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Upcoming</h1>
+      <header className="screen-px mb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Upcoming</h1>
       </header>
 
       {mediaType === 'tv' ? (

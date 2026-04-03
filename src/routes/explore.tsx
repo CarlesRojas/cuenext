@@ -26,7 +26,7 @@ function RouteComponent() {
 
   // SHOWS
 
-  const { data: onTheAirShows } = useQuery({
+  const { data: onTheAirShows, isPending: onTheAirShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, {
       page: 1,
       sort_by: 'popularity.desc',
@@ -36,12 +36,12 @@ function RouteComponent() {
     enabled: mediaType === 'tv',
   })
 
-  const { data: top10Shows } = useQuery({
+  const { data: top10Shows, isPending: top10ShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'popularity.desc' }),
     enabled: mediaType === 'tv',
   })
 
-  const { data: topRatedShows } = useQuery({
+  const { data: topRatedShows, isPending: topRatedShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
     enabled: mediaType === 'tv',
   })
@@ -56,7 +56,7 @@ function RouteComponent() {
   nextMonth.setDate(today.getDate() + 35)
   const maxDateMovie = nextMonth.toISOString().split('T')[0]
 
-  const { data: upcomingMovies } = useQuery({
+  const { data: upcomingMovies, isPending: upcomingMoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverMovies, {
       page: 1,
       sort_by: 'popularity.desc',
@@ -69,20 +69,20 @@ function RouteComponent() {
     enabled: mediaType === 'movie',
   })
 
-  const { data: top10Movies } = useQuery({
+  const { data: top10Movies, isPending: top10MoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc' }),
     enabled: mediaType === 'movie',
   })
 
-  const { data: topRatedMovies } = useQuery({
+  const { data: topRatedMovies, isPending: topRatedMoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
     enabled: mediaType === 'movie',
   })
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
-      <header className="screen-px">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Explore</h1>
+      <header className="screen-px mb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Explore</h1>
 
         <div className="relative mt-6 w-full max-w-md">
           <input
@@ -109,6 +109,10 @@ function RouteComponent() {
                   onToggleFollow={() => {}}
                 />
               ))}
+
+            {!onTheAirShows &&
+              onTheAirShowsLoading &&
+              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
           <Section title="Top 10 Shows" canCollapse={false}>
@@ -126,6 +130,10 @@ function RouteComponent() {
                     onToggleFollow={() => {}}
                   />
                 ))}
+
+            {!top10Shows &&
+              top10ShowsLoading &&
+              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
           <Section title="Top Rated Shows" canCollapse={false}>
@@ -140,6 +148,10 @@ function RouteComponent() {
                   onToggleFollow={() => {}}
                 />
               ))}
+
+            {!topRatedShows &&
+              topRatedShowsLoading &&
+              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
         </>
       ) : (
@@ -156,6 +168,10 @@ function RouteComponent() {
                   onToggleFollow={() => {}}
                 />
               ))}
+
+            {!upcomingMovies &&
+              upcomingMoviesLoading &&
+              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
           <Section title="Top 10 Movies" canCollapse={false}>
@@ -173,6 +189,10 @@ function RouteComponent() {
                     onToggleFollow={() => {}}
                   />
                 ))}
+
+            {!top10Movies &&
+              top10MoviesLoading &&
+              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
           <Section title="Top Rated Movies" canCollapse={false}>
@@ -187,6 +207,10 @@ function RouteComponent() {
                   onToggleFollow={() => {}}
                 />
               ))}
+
+            {!topRatedMovies &&
+              topRatedMoviesLoading &&
+              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
         </>
       )}
