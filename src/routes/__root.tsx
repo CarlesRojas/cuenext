@@ -88,7 +88,7 @@ function RootDocument({ children }: Props) {
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html
           lang="en"
-          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden overscroll-none bg-yellow-500"
+          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden bg-yellow-500"
           data-theme="dark"
           suppressHydrationWarning
         >
