@@ -29,13 +29,13 @@ function App() {
   })
 
   return (
-    <div className="screen-py flex w-full flex-col gap-2 bg-orange-500">
+    <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Watchlist</h1>
       </header>
 
       {mediaType === 'tv' ? (
-        <div className="flex flex-col gap-6 bg-purple-500">
+        <div className="flex flex-col gap-6">
           {tvSectionsLoading &&
             ['Watch next', "Haven't started", 'Waiting for episodes', 'Stopped watching', 'Finished'].map(
               (title, i) => (
@@ -100,7 +100,7 @@ function App() {
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 bg-purple-500">
+        <div className="flex flex-col gap-6">
           {movieSectionsLoading &&
             ['Watch next', ''].map((title, i) => (
               <Section title={title} key={i} defaultCollapsed={title === 'Finished'}>

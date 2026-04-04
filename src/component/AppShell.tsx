@@ -96,11 +96,11 @@ export default function AppShell({ children }: AppShellProps) {
       )}
 
       <main
-        className="scroll-container relative flex size-full max-h-full min-h-full max-w-full min-w-full bg-red-500"
+        className="scroll-container relative flex size-full max-h-full min-h-full max-w-full min-w-full"
         onScroll={onScroll}
         ref={scrollContainer}
       >
-        <div className={cn('h-fit w-full bg-blue-500', isMobile && 'pb-21')}>{children}</div>
+        <div className={cn('h-fit w-full', isMobile && 'pb-21')}>{children}</div>
       </main>
 
       {isMobile && <MobileNavbar showHeader={showHeader} visualHeight={visualHeight} fullHeight={fullHeight} />}

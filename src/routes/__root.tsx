@@ -88,15 +88,15 @@ function RootDocument({ children }: Props) {
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html
           lang="en"
-          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden bg-yellow-500"
+          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden"
           data-theme="dark"
           suppressHydrationWarning
         >
           <head>
             <HeadContent />
           </head>
-          {/* bg-neutral-900 */}
-          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-green-500 font-sans wrap-anywhere antialiased selection:bg-sky-500/30">
+
+          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/30">
             <ToastProvider>
               <AppShell>{children}</AppShell>
             </ToastProvider>
