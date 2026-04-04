@@ -33,8 +33,10 @@ export default defineSchema({
     userId: v.string(),
     showTmdbId: v.number(),
     lastWatchedAt: v.union(v.number(), v.null()),
-    nextSeasonNumber: v.number(),
-    nextEpisodeNumber: v.number(),
+    seasonNumber: v.number(),
+    episodeNumber: v.number(),
+    seasonEpisodeCounts: v.array(v.number()),
+    seasonDataUpdatedAt: v.union(v.number(), v.null()),
     updatedAt: v.number(),
   }).index('by_user_show', ['userId', 'showTmdbId']),
 })

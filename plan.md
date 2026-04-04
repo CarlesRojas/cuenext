@@ -100,9 +100,9 @@
 
   - `lastWatchedAt: number | null`
 
-  - `nextSeasonNumber: number` (defaults to 1)
+  - `seasonNumber: number` (defaults to 1)
 
-  - `nextEpisodeNumber: number` (defaults to 1)
+  - `episodeNumber: number` (defaults to 1)
 
   - `updatedAt: number`
 
@@ -147,7 +147,7 @@
 
   - Update `nextEpisode.lastWatchedAt`
 
-  - Recompute `nextEpisode.nextSeasonNumber/nextEpisodeNumber` by scanning forward from current cursor using TMDB season data (see “TMDB access” below)
+  - Recompute `nextEpisode.seasonNumber/episodeNumber` by scanning forward from current cursor using TMDB season data (see “TMDB access” below)
 
 - `progress.markPreviousEpisodesWatched({ showTmdbId, upTo: {seasonNumber, episodeNumber} })`
   - Called when user confirms the popup.
@@ -160,7 +160,7 @@
 ### Watchlist sections (server-side classification)
 
 - `watchlist.getTvSections()`: returns 3 arrays (watchNext, haventStarted, stoppedWatching) with only Convex-owned data:
-  - `tmdbId`, `lastWatchedAt`, `manuallyStopped`, `nextSeasonNumber`, `nextEpisodeNumber`
+  - `tmdbId`, `lastWatchedAt`, `manuallyStopped`, `seasonNumber`, `episodeNumber`
 
   - The UI enriches each item with TMDB metadata (title/poster/next episode air date) using client-side cached TMDB fetches.
 

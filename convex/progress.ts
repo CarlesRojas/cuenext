@@ -84,8 +84,8 @@ export const markEpisodeWatched = mutation({
     showTmdbId: v.number(),
     seasonNumber: v.number(),
     episodeNumber: v.number(),
-    nextSeasonNumber: v.optional(v.number()),
-    nextEpisodeNumber: v.optional(v.number()),
+    seasonNumber: v.optional(v.number()),
+    episodeNumber: v.optional(v.number()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -119,9 +119,9 @@ export const markEpisodeWatched = mutation({
 
     if (nextEp) {
       const updates: any = { updatedAt: now, lastWatchedAt: now }
-      if (args.nextSeasonNumber !== undefined && args.nextEpisodeNumber !== undefined) {
-        updates.nextSeasonNumber = args.nextSeasonNumber
-        updates.nextEpisodeNumber = args.nextEpisodeNumber
+      if (args.seasonNumber !== undefined && args.episodeNumber !== undefined) {
+        updates.seasonNumber = args.seasonNumber
+        updates.episodeNumber = args.episodeNumber
       }
       await context.db.patch(nextEp._id, updates)
     }
@@ -133,8 +133,8 @@ export const unmarkEpisodeWatched = mutation({
     showTmdbId: v.number(),
     seasonNumber: v.number(),
     episodeNumber: v.number(),
-    nextSeasonNumber: v.optional(v.number()),
-    nextEpisodeNumber: v.optional(v.number()),
+    seasonNumber: v.optional(v.number()),
+    episodeNumber: v.optional(v.number()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -161,9 +161,9 @@ export const unmarkEpisodeWatched = mutation({
 
     if (nextEp) {
       const updates: any = { updatedAt: Date.now() }
-      if (args.nextSeasonNumber !== undefined && args.nextEpisodeNumber !== undefined) {
-        updates.nextSeasonNumber = args.nextSeasonNumber
-        updates.nextEpisodeNumber = args.nextEpisodeNumber
+      if (args.seasonNumber !== undefined && args.episodeNumber !== undefined) {
+        updates.seasonNumber = args.seasonNumber
+        updates.episodeNumber = args.episodeNumber
       }
       await context.db.patch(nextEp._id, updates)
     }

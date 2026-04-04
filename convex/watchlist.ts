@@ -5,8 +5,8 @@ export type TvSectionItem = {
   tmdbId: number
   lastWatchedAt: number | null
   manuallyStopped: boolean
-  nextSeasonNumber: number
-  nextEpisodeNumber: number
+  seasonNumber: number
+  episodeNumber: number
   followedAt?: number
 }
 
@@ -43,8 +43,8 @@ export const getTvSections = query({
         tmdbId: follow.tmdbId,
         lastWatchedAt: nextEp.lastWatchedAt,
         manuallyStopped: follow.manuallyStopped,
-        nextSeasonNumber: nextEp.nextSeasonNumber,
-        nextEpisodeNumber: nextEp.nextEpisodeNumber,
+        seasonNumber: nextEp.seasonNumber,
+        episodeNumber: nextEp.episodeNumber,
         followedAt: follow.followedAt,
       }
 

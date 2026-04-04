@@ -13,19 +13,19 @@ export const Route = createFileRoute('/')({
   component: App,
 })
 
-function WatchlistTvItem({ item }: { item: { tmdbId: number; nextSeasonNumber: number; nextEpisodeNumber: number } }) {
+function WatchlistTvItem({ item }: { item: { tmdbId: number; seasonNumber: number; episodeNumber: number } }) {
   const { showUndoToast } = useUndoToast()
   const { data: show, isPending } = useQuery(convexAction(api.tmdb.getShowDetails, { tmdbId: item.tmdbId }))
   const { data: season } = useQuery({
-    ...convexAction(api.tmdb.getShowSeasonDetails, { tmdbId: item.tmdbId, seasonNumber: item.nextSeasonNumber }),
+    ...convexAction(api.tmdb.getShowSeasonDetails, { tmdbId: item.tmdbId, seasonNumber: item.seasonNumber }),
     enabled: !!show,
   })
 
   const { data: isWatched } = useQuery({
     ...convexQuery(api.progress.checkEpisodeWatched, {
       showTmdbId: item.tmdbId,
-      seasonNumber: item.nextSeasonNumber,
-      episodeNumber: item.nextEpisodeNumber,
+      seasonNumber: item.seasonNumber,
+      episodeNumber: item.episodeNumber,
     }),
   })
 
@@ -36,11 +36,11 @@ function WatchlistTvItem({ item }: { item: { tmdbId: number; nextSeasonNumber: n
   if (!show) return null
 
   const handleToggleWatch = () => {
-    let nextS = item.nextSeasonNumber
-    let nextE = item.nextEpisodeNumber + 1
+    let nextS = item.seasonNumber
+    let nextE = item.episodeNumber + 1
 
     if (season && season.episodes) {
-      if (item.nextEpisodeNumber >= season.episodes.length) {
+      if (item.episodeNumber >= season.episodes.length) {
         nextS += 1
         nextE = 1
       }
@@ -49,33 +49,33 @@ function WatchlistTvItem({ item }: { item: { tmdbId: number; nextSeasonNumber: n
     if (isWatched) {
       unmarkEpisodeWatched({
         showTmdbId: show.id,
-        seasonNumber: item.nextSeasonNumber,
-        episodeNumber: item.nextEpisodeNumber,
+        seasonNumber: item.seasonNumber,
+        episodeNumber: item.episodeNumber,
       })
 
-      showUndoToast(`Episode ${item.nextEpisodeNumber}`, 'unwatch', `unwatch-tv-${show.id}`, () => {
+      showUndoToast(`Episode ${item.episodeNumber}`, 'unwatch', `unwatch-tv-${show.id}`, () => {
         markEpisodeWatched({
           showTmdbId: show.id,
-          seasonNumber: item.nextSeasonNumber,
-          episodeNumber: item.nextEpisodeNumber,
-          nextSeasonNumber: nextS,
-          nextEpisodeNumber: nextE,
+          seasonNumber: item.seasonNumber,
+          episodeNumber: item.episodeNumber,
+          seasonNumber: nextS,
+          episodeNumber: nextE,
         })
       })
     } else {
       markEpisodeWatched({
         showTmdbId: show.id,
-        seasonNumber: item.nextSeasonNumber,
-        episodeNumber: item.nextEpisodeNumber,
-        nextSeasonNumber: nextS,
-        nextEpisodeNumber: nextE,
+        seasonNumber: item.seasonNumber,
+        episodeNumber: item.episodeNumber,
+        seasonNumber: nextS,
+        episodeNumber: nextE,
       })
 
-      showUndoToast(`Episode ${item.nextEpisodeNumber}`, 'watch', `watch-tv-${show.id}`, () => {
+      showUndoToast(`Episode ${item.episodeNumber}`, 'watch', `watch-tv-${show.id}`, () => {
         unmarkEpisodeWatched({
           showTmdbId: show.id,
-          seasonNumber: item.nextSeasonNumber,
-          episodeNumber: item.nextEpisodeNumber,
+          seasonNumber: item.seasonNumber,
+          episodeNumber: item.episodeNumber,
         })
       })
     }
@@ -90,7 +90,7 @@ function WatchlistTvItem({ item }: { item: { tmdbId: number; nextSeasonNumber: n
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}
-      watchButtonText={`S${item.nextSeasonNumber}, E${item.nextEpisodeNumber}`}
+      watchButtonText={`S${item.seasonNumber}, E${item.episodeNumber}`}
     />
   )
 }
