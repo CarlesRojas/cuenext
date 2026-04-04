@@ -1,5 +1,6 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
 import { MediaTypeSelector } from '#/component/MediaTypeSelector'
+import { Search } from '#/component/Search'
 import { User } from '#/component/User'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
@@ -81,6 +82,10 @@ export default function AppShell({ children }: AppShellProps) {
               <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
 
               <MediaTypeSelector />
+
+              <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
+
+              <Search />
             </div>
 
             <User />
@@ -133,6 +138,8 @@ export default function AppShell({ children }: AppShellProps) {
                 </Link>
               ))}
             </LiquidGlass>
+
+            <Search isMobile />
           </div>
         </>
       )}
