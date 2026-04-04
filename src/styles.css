@@ -14,7 +14,33 @@
 
 @layer components {
   .full-page {
-    @apply h-dvh max-h-dvh min-h-dvh w-dvw max-w-dvw min-w-dvw overflow-hidden;
+    @apply w-dvw max-w-dvw min-w-dvw overflow-hidden;
+    height: 100vh;
+    height: 100dvh;
+    height: var(--app-height, 100vh);
+
+    max-height: 100vh;
+    max-height: 100dvh;
+    max-height: var(--app-height, 100vh);
+
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: var(--app-height, 100vh);
+  }
+
+  .full-page-visual {
+    @apply w-dvw max-w-dvw min-w-dvw overflow-hidden;
+    height: 100vh;
+    height: 100svh;
+    height: var(--visual-height, 100vh);
+
+    max-height: 100vh;
+    max-height: 100svh;
+    max-height: var(--visual-height, 100vh);
+
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: var(--visual-height, 100vh);
   }
 
   .screen-px {
@@ -31,6 +57,27 @@
     @apply m-0 box-border p-0 antialiased outline-none! select-none!;
   }
 
+  /* Improve mobile viewport handling */
+  html {
+    /* Prevent iOS zoom on input focus */
+    -webkit-text-size-adjust: 100%;
+    /* Ensure full height is maintained */
+    height: 100%;
+    height: 100vh;
+    height: var(--app-height, 100vh);
+  }
+
+  body {
+    /* Support for older browsers and better mobile handling */
+    height: 100%;
+    height: 100vh;
+    height: var(--app-height, 100vh);
+    /* Prevent overscroll behavior on iOS */
+    overscroll-behavior: none;
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
+  }
+
   img,
   video,
   svg {
@@ -39,5 +86,12 @@
 
   a {
     @apply no-underline;
+  }
+
+  /* Prevent mobile keyboard from shifting layout */
+  @supports (height: 100dvh) {
+    .supports-dvh .full-page {
+      height: 100dvh;
+    }
   }
 }
