@@ -96,7 +96,7 @@ function RootDocument({ children }: Props) {
             <HeadContent />
           </head>
 
-          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/30">
+          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-neutral-900 font-sans wrap-anywhere text-white antialiased selection:bg-sky-500/30">
             <ToastProvider>
               <AppShell>{children}</AppShell>
             </ToastProvider>

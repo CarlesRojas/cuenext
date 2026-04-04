@@ -1,24 +1,30 @@
 import { z } from 'zod'
 
-export const tmdbMovieSchema = z.object({
+export const tmdbMovieMinimalSchema = z.object({
   id: z.number(),
   title: z.string(),
   overview: z.string(),
   poster_path: z.string().nullable().optional(),
   backdrop_path: z.string().nullable().optional(),
   release_date: z.string().optional(),
-  runtime: z.number().nullable().optional(),
   vote_average: z.number().optional(),
+})
+
+export const tmdbMovieSchema = tmdbMovieMinimalSchema.extend({
+  runtime: z.number().nullable().optional(),
   media_type: z.literal('movie').optional(),
 })
 
-export const tmdbTvSchema = z.object({
+export const tmdbTvMinimalSchema = z.object({
   id: z.number(),
   name: z.string(),
   overview: z.string(),
   poster_path: z.string().nullable().optional(),
   backdrop_path: z.string().nullable().optional(),
   first_air_date: z.string().optional(),
+})
+
+export const tmdbTvSchema = tmdbTvMinimalSchema.extend({
   episode_run_time: z.array(z.number()).optional(),
   number_of_seasons: z.number().optional(),
   seasons: z
@@ -98,8 +104,10 @@ export function paginated<T extends z.ZodTypeAny>(itemSchema: T) {
   })
 }
 
+export type TmdbMovieMinimal = z.infer<typeof tmdbMovieMinimalSchema>
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
 export type TmdbTv = z.infer<typeof tmdbTvSchema>
+export type TmdbTvMinimal = z.infer<typeof tmdbTvMinimalSchema>
 export type TmdbPerson = z.infer<typeof tmdbPersonSchema>
 export type TmdbMultiSearchResult = z.infer<typeof tmdbMultiSearchResultSchema>
 export type TmdbEpisode = z.infer<typeof tmdbEpisodeSchema>

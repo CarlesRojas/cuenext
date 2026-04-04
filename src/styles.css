@@ -24,6 +24,10 @@
   .scroll-container {
     @apply touch-pan-y overflow-y-auto overscroll-none **:touch-pan-y;
   }
+
+  .page-width {
+    @apply mx-auto w-full max-w-3xl;
+  }
 }
 
 @layer base {

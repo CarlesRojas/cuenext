@@ -1,9 +1,10 @@
 import { v } from 'convex/values'
 import {
   paginated,
+  tmdbMovieMinimalSchema,
   tmdbMovieSchema,
-  tmdbMultiSearchResultSchema,
   tmdbSeasonSchema,
+  tmdbTvMinimalSchema,
   tmdbTvSchema,
 } from '../src/type/tmdb'
 import { action } from './_generated/server'
@@ -236,13 +237,51 @@ export const getDiscoverShows = action({
   },
 })
 
-export const searchMulti = action({
-  args: { query: v.string(), page: v.optional(v.number()) },
+export const searchMovies = action({
+  args: {
+    query: v.string(),
+    page: v.optional(v.number()),
+    includeAdult: v.optional(v.boolean()),
+    language: v.optional(v.string()),
+    primaryReleaseYear: v.optional(v.number()),
+    region: v.optional(v.string()),
+    year: v.optional(v.number()),
+  },
   handler: async (_, args) => {
-    return fetchTmdb(paginated(tmdbMultiSearchResultSchema), '/search/multi', {
+    const params: Record<string, string> = {
       query: args.query,
       page: String(args.page || 1),
-    })
+    }
+
+    if (args.includeAdult !== undefined) params.include_adult = String(args.includeAdult)
+    if (args.language) params.language = args.language
+    if (args.primaryReleaseYear !== undefined) params.primary_release_year = String(args.primaryReleaseYear)
+    if (args.region) params.region = args.region
+    if (args.year !== undefined) params.year = String(args.year)
+
+    return fetchTmdb(paginated(tmdbMovieMinimalSchema), '/search/movie', params)
+  },
+})
+
+export const searchTv = action({
+  args: {
+    query: v.string(),
+    page: v.optional(v.number()),
+    includeAdult: v.optional(v.boolean()),
+    language: v.optional(v.string()),
+    firstAirDateYear: v.optional(v.number()),
+  },
+  handler: async (_, args) => {
+    const params: Record<string, string> = {
+      query: args.query,
+      page: String(args.page || 1),
+    }
+
+    if (args.includeAdult !== undefined) params.include_adult = String(args.includeAdult)
+    if (args.language) params.language = args.language
+    if (args.firstAirDateYear !== undefined) params.first_air_date_year = String(args.firstAirDateYear)
+
+    return fetchTmdb(paginated(tmdbTvMinimalSchema), '/search/tv', params)
   },
 })
 
