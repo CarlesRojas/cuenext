@@ -1,6 +1,7 @@
 import AppShell from '#/component/AppShell'
 import { Toaster } from '#/component/ui/sonner'
 import { env } from '#/env'
+import { ToastProvider } from '#/hooks/useUndoToast'
 import { seo } from '#/lib/seo'
 import appCss from '#/styles.css?url'
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start'
@@ -96,7 +97,9 @@ function RootDocument({ children }: Props) {
           </head>
 
           <body className="full-page bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
-            <AppShell>{children}</AppShell>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+            </ToastProvider>
             <Toaster />
 
             <Scripts />
