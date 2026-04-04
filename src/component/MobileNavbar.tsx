@@ -42,7 +42,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
     <>
       <div
         className={cn(
-          'fixed top-3 right-3 left-3 z-50 flex h-fit items-center justify-between gap-3 opacity-100 transition-opacity',
+          'fixed top-3 right-3 left-3 z-50 flex h-fit items-center justify-between gap-3 overflow-hidden opacity-100 transition-opacity',
           !showHeader && 'pointer-events-none! opacity-0',
         )}
       >
