@@ -57,16 +57,17 @@ export default function WatchEpisode({ episode }: Props) {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
     const title = `S${episode.seasonNumber + 1} E${episode.episodeNumber + 1} of ${episode.name}`
+    const mediaKey = `tv-${episode.tmdbId}`
 
     if (isWatched) {
       await unwatch.mutateAsync({})
-      showUndoToast(title, 'unwatch', `unwatch-tv-${episode.tmdbId}`, async () => await watch.mutateAsync())
+      showUndoToast(title, 'unwatch', mediaKey, async () => await watch.mutateAsync())
     } else {
       const wasManuallyStopped = await watch.mutateAsync()
       showUndoToast(
         title,
         'watch',
-        `watch-tv-${episode.tmdbId}`,
+        mediaKey,
         async () => await unwatch.mutateAsync({ wasManuallyStopped: wasManuallyStopped ?? undefined }),
       )
     }

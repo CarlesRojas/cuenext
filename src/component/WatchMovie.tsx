@@ -37,12 +37,14 @@ export default function WatchMovie({ movie }: Props) {
   const handleToggleWatch = async () => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
+    const mediaKey = `movie-${movie.tmdbId}`
+
     if (isWatched) {
       await unwatch.mutateAsync()
-      showUndoToast(movie.name, 'unwatch', `unwatch-movie-${movie.tmdbId}`, async () => await watch.mutateAsync())
+      showUndoToast(movie.name, 'unwatch', mediaKey, async () => await watch.mutateAsync())
     } else {
       await watch.mutateAsync()
-      showUndoToast(movie.name, 'watch', `watch-movie-${movie.tmdbId}`, async () => await unwatch.mutateAsync())
+      showUndoToast(movie.name, 'watch', mediaKey, async () => await unwatch.mutateAsync())
     }
   }
 

@@ -1,12 +1,23 @@
 import { Button } from '#/component/ui/button'
 import { faCheckCircle, faEye, faEyeSlash, faMinus, faPlus, faUndo } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useRef } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext, useRef } from 'react'
 import { toast } from 'sonner'
 
 export type ToastActionType = 'follow' | 'unfollow' | 'watch' | 'unwatch'
 
-export function useUndoToast() {
+interface ToastContextType {
+  showUndoToast: (title: string, actionType: ToastActionType, idKey: string, onUndo: () => void) => void
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined)
+
+interface ToastProviderProps {
+  children: ReactNode
+}
+
+export function ToastProvider({ children }: ToastProviderProps) {
   const toastIds = useRef<Record<string, string | number>>({})
 
   const showUndoToast = (title: string, actionType: ToastActionType, idKey: string, onUndo: () => void) => {
@@ -65,5 +76,13 @@ export function useUndoToast() {
     )
   }
 
-  return { showUndoToast }
+  return <ToastContext.Provider value={{ showUndoToast }}>{children}</ToastContext.Provider>
+}
+
+export function useUndoToast() {
+  const context = useContext(ToastContext)
+
+  if (context === undefined) throw new Error('useUndoToast must be used within a ToastProvider')
+
+  return context
 }
