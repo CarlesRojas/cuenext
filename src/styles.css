@@ -27,27 +27,6 @@
     @apply m-0 box-border p-0 antialiased outline-none! select-none!;
   }
 
-  /* Improve mobile viewport handling */
-  html {
-    /* Prevent iOS zoom on input focus */
-    -webkit-text-size-adjust: 100%;
-    /* Ensure full height is maintained */
-    height: 100%;
-    height: 100vh;
-    height: var(--app-height, 100vh);
-  }
-
-  body {
-    /* Support for older browsers and better mobile handling */
-    height: 100%;
-    height: 100vh;
-    height: var(--app-height, 100vh);
-    /* Prevent overscroll behavior on iOS */
-    overscroll-behavior: none;
-    /* Prevent zoom on double tap */
-    touch-action: manipulation;
-  }
-
   img,
   video,
   svg {

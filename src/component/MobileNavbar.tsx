@@ -15,6 +15,8 @@ import { useDebounceCallback, useResizeObserver } from 'usehooks-ts'
 
 interface Props {
   showHeader: boolean
+  fullHeight: number
+  visualHeight: number
 }
 
 type Size = {
@@ -22,7 +24,7 @@ type Size = {
   height?: number
 }
 
-const MobileNavbar = ({ showHeader }: Props) => {
+const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
   const mobileTabsRef = useRef<HTMLDivElement>(null)
   const [{ width: mobileTabsWidth }, setSize] = useState<Size>({ width: undefined })
 
@@ -50,7 +52,8 @@ const MobileNavbar = ({ showHeader }: Props) => {
 
       <div
         ref={mobileTabsRef}
-        className="fixed right-0 bottom-0 left-0 z-50 flex gap-2 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden"
+        className="fixed right-0 bottom-0 left-0 z-50 flex gap-2 px-3 pb-3 md:hidden"
+        style={{ bottom: fullHeight - visualHeight }}
       >
         <LiquidGlass
           className={cn('relative w-fit rounded-full bg-neutral-800/40', mobileTabsWidth === undefined && 'w-full')}

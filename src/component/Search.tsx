@@ -26,6 +26,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
     defaultValues: { query: '' },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value: { query } }) => {
+      // TODO search
       console.log(query)
     },
   })

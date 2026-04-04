@@ -3,6 +3,7 @@ import { MediaTypeSelector } from '#/component/MediaTypeSelector'
 import MobileNavbar from '#/component/MobileNavbar'
 import { Search } from '#/component/Search'
 import { User } from '#/component/User'
+import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/free-solid-svg-icons'
@@ -32,6 +33,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  const { visualHeight, fullHeight } = useViewportHeight()
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
@@ -47,9 +49,12 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <ClientOnly>
       {!isMobile && (
-        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 p-3 transition-[bottom] md:block">
+        <aside
+          className="fixed top-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 p-3 md:block"
+          style={{ height: visualHeight }}
+        >
           <LiquidGlass className="relative h-full w-full rounded-3xl bg-neutral-800/40">
-            <div className="flex h-full w-full flex-col items-start justify-between overflow-y-auto p-4">
+            <div className="flex h-full w-full flex-col items-start justify-between gap-8 overflow-y-auto p-4">
               <div className="relative mt-10 flex w-full flex-col gap-8">
                 <nav className="flex w-full flex-col gap-2">
                   {NAV_ITEMS.map(item => (
@@ -95,12 +100,10 @@ export default function AppShell({ children }: AppShellProps) {
         onScroll={onScroll}
         ref={scrollContainer}
       >
-        <div className={cn('h-fit w-full', isMobile && 'pb-[calc(60px+2*max(env(safe-area-inset-bottom),0.75rem))]')}>
-          {children}
-        </div>
+        <div className={cn('h-fit w-full', isMobile && 'pb-21')}>{children}</div>
       </main>
 
-      {isMobile && <MobileNavbar showHeader={showHeader} />}
+      {isMobile && <MobileNavbar showHeader={showHeader} visualHeight={visualHeight} fullHeight={fullHeight} />}
     </ClientOnly>
   )
 }
