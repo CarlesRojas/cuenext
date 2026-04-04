@@ -50,11 +50,11 @@ export default function AppShell({ children }: AppShellProps) {
     <ClientOnly>
       {!isMobile && (
         <aside
-          className="fixed top-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 p-3 md:block"
+          className="fixed top-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 overflow-hidden p-3 md:block"
           style={{ height: visualHeight }}
         >
           <LiquidGlass className="relative h-full w-full rounded-3xl bg-neutral-800/40">
-            <div className="flex h-full w-full flex-col items-start justify-between gap-8 overflow-y-auto p-4">
+            <div className="flex h-full w-full flex-col items-start justify-between gap-8 overflow-hidden overflow-y-auto p-4">
               <div className="relative mt-10 flex w-full flex-col gap-8">
                 <Search />
 

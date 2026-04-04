@@ -24,7 +24,7 @@
 
 @layer base {
   * {
-    @apply m-0 box-border overscroll-none p-0 antialiased outline-none! select-none!;
+    @apply m-0 box-border p-0 antialiased outline-none! select-none!;
   }
 
   img,
