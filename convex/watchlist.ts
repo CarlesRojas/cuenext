@@ -48,28 +48,16 @@ export const getTvSections = query({
         followedAt: follow.followedAt,
       }
 
-      if (follow.manuallyStopped) {
-        stoppedWatching.push(item)
-      } else if (!nextEp.lastWatchedAt) {
-        haventStarted.push(item)
-      } else {
-        watchNext.push(item)
-      }
+      if (follow.manuallyStopped) stoppedWatching.push(item)
+      else if (!nextEp.lastWatchedAt) haventStarted.push(item)
+      else watchNext.push(item)
     }
 
     watchNext.sort((a, b) => (b.lastWatchedAt || 0) - (a.lastWatchedAt || 0))
-
     haventStarted.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     stoppedWatching.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
 
-    const stripFollowedAt = (arr: TvSectionItem[]) => arr.map(({ followedAt, ...rest }) => rest)
-
-    return {
-      watchNext: stripFollowedAt(watchNext),
-      haventStarted: stripFollowedAt(haventStarted),
-      stoppedWatching: stripFollowedAt(stoppedWatching),
-      finished: stripFollowedAt(finished),
-    }
+    return { watchNext, haventStarted, stoppedWatching, finished }
   },
 })
 

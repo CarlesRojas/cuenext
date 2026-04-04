@@ -37,8 +37,8 @@ export const follow = mutation({
             userId,
             showTmdbId: args.tmdbId,
             lastWatchedAt: null,
-            nextSeasonNumber: 1,
-            nextEpisodeNumber: 1,
+            nextSeasonNumber: 0,
+            nextEpisodeNumber: 0,
             updatedAt: now,
           })
       }
