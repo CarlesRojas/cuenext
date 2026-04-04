@@ -1,11 +1,8 @@
 import { v } from 'convex/values'
 import { tmdbTvSchema } from '../src/type/tmdb'
 import { api } from './_generated/api'
-import type { Doc } from './_generated/dataModel'
 import { action } from './_generated/server'
 import { fetchTmdb } from './lib/tmdbClient'
-
-type NextEpisodeInsert = Omit<Doc<'nextEpisode'>, '_id' | '_creationTime'>
 
 export const updateNextEpisode = action({
   args: { tmdbId: v.number() },

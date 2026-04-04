@@ -4,9 +4,7 @@ import FollowMovie from '#/component/FollowMovie'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { useMediaType } from '#/hooks/useMediaType'
-import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
-import { useClerk } from '@clerk/tanstack-react-start'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -16,9 +14,6 @@ export const Route = createFileRoute('/explore')({
 })
 
 function RouteComponent() {
-  const clerk = useClerk()
-  const { showUndoToast } = useUndoToast()
-
   const [mediaType] = useMediaType()
 
   const today = new Date()

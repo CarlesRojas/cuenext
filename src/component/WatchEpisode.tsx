@@ -29,10 +29,10 @@ export default function WatchEpisode({ episode }: Props) {
 
   const watch = useMutation({
     mutationFn: async () => {
-      await markEpisodeWatched({ 
-        showTmdbId: episode.tmdbId, 
-        seasonNumber: episode.seasonNumber, 
-        episodeNumber: episode.episodeNumber 
+      await markEpisodeWatched({
+        showTmdbId: episode.tmdbId,
+        seasonNumber: episode.seasonNumber,
+        episodeNumber: episode.episodeNumber,
       })
       await updateNextEpisode({ tmdbId: episode.tmdbId })
     },
@@ -40,10 +40,10 @@ export default function WatchEpisode({ episode }: Props) {
 
   const unwatch = useMutation({
     mutationFn: async () => {
-      await unmarkEpisodeWatched({ 
-        showTmdbId: episode.tmdbId, 
-        seasonNumber: episode.seasonNumber, 
-        episodeNumber: episode.episodeNumber 
+      await unmarkEpisodeWatched({
+        showTmdbId: episode.tmdbId,
+        seasonNumber: episode.seasonNumber,
+        episodeNumber: episode.episodeNumber,
       })
       await updateNextEpisode({ tmdbId: episode.tmdbId })
     },
