@@ -1,6 +1,7 @@
 import { cn } from '#/lib/cn'
 import { getDisplacementFilter } from '#/utils/liquidGlass'
 import React, { useEffect, useRef, useState } from 'react'
+import { isMobileSafari, isSafari } from 'react-device-detect'
 
 interface Props {
   className?: string
@@ -20,6 +21,8 @@ interface Props {
 }
 
 const supportsBackdropFilterUrl = (() => {
+  if (isSafari || isMobileSafari) return false
+
   if (typeof window === 'undefined') return true
   const testEl = document.createElement('div')
   testEl.style.cssText = 'backdrop-filter: url(#test)'
@@ -32,7 +35,7 @@ export function LiquidGlass({
   depth = 10,
   strength = 100,
   chromaticAberration = 0,
-  blur = 0,
+  blur = 5,
   color = 'transparent',
   background,
   freeze,
@@ -91,8 +94,8 @@ export function LiquidGlass({
         const fallbackStyle: React.CSSProperties = {
           width: `${width}px`,
           height: `${height}px`,
-          WebkitBackdropFilter: `blur(${width / 10}px) saturate(180%)`,
-          backdropFilter: `blur(${width / 10}px) saturate(180%)`,
+          WebkitBackdropFilter: `blur(${blur}px) saturate(${saturate})`,
+          backdropFilter: `blur(${blur}px) saturate(${saturate})`,
         }
         setGlassStyle(fallbackStyle)
       }

@@ -14,7 +14,7 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
   const [mediaType, setMediaType] = useMediaType()
 
   return (
-    <LiquidGlass blur={3} className={cn('relative w-fit rounded-full bg-neutral-800/40', !isMobile && 'w-full')}>
+    <LiquidGlass className={cn('relative w-fit rounded-full bg-neutral-800/40', !isMobile && 'w-full')}>
       <div
         className={cn(
           'flex h-11 max-h-11 min-h-11 w-fit flex-row items-center rounded-full border border-neutral-700/50 bg-neutral-800/80 backdrop-blur-md',

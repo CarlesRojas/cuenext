@@ -47,7 +47,6 @@ export default function AppShell({ children }: AppShellProps) {
       {!isMobile && (
         <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 p-3 md:block">
           <LiquidGlass
-            blur={3}
             className="relative h-full min-w-72 rounded-3xl bg-neutral-800/40"
             wrapperClassName="flex-col justify-between items-start p-4 "
           >
@@ -108,7 +107,7 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
 
           <div className="fixed right-0 bottom-0 left-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden">
-            <LiquidGlass blur={3} className="relative w-full rounded-full bg-neutral-800/40">
+            <LiquidGlass className="relative w-full rounded-full bg-neutral-800/40">
               {NAV_ITEMS.map(item => (
                 <Link
                   key={item.to}
