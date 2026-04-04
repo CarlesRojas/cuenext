@@ -6,6 +6,8 @@ export default defineSchema({
     userId: v.string(),
     type: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
+    name: v.string(),
+    poster: v.union(v.string(), v.null()),
     followedAt: v.number(),
     manuallyStopped: v.boolean(),
   })

@@ -18,7 +18,7 @@ export default function WatchMovie({ movie, number }: Props) {
 
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia } = useQuery({
+  const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
     ...convexQuery(api.library.listFollowed, { type: 'movie' }),
   })
 
@@ -27,7 +27,7 @@ export default function WatchMovie({ movie, number }: Props) {
 
   const follow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
-      await markAsFollowed({ type: 'movie', tmdbId: id })
+      await markAsFollowed({ type: 'movie', tmdbId: id, name: movie.title, poster: movie.poster_path ?? null })
     },
   })
 
@@ -63,6 +63,7 @@ export default function WatchMovie({ movie, number }: Props) {
       showFollow
       isFollowed={Array.isArray(followedMedia) && followedMedia.includes(movie.id)}
       onToggleFollow={() => toggleFollow(movie.id, movie.title)}
+      isFollowLoading={isFollowedLoading || follow.isPending || unfollow.isPending}
     />
   )
 }

@@ -6,6 +6,8 @@ export const follow = mutation({
   args: {
     type: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
+    name: v.string(),
+    poster: v.union(v.string(), v.null()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -22,6 +24,8 @@ export const follow = mutation({
       userId,
       type: args.type,
       tmdbId: args.tmdbId,
+      name: args.name,
+      poster: args.poster,
       followedAt: now,
       manuallyStopped: false,
     })

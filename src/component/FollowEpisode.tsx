@@ -18,7 +18,7 @@ export default function FollowEpisode({ episode, number }: Props) {
 
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia } = useQuery({
+  const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
     ...convexQuery(api.library.listFollowed, { type: 'tv' }),
   })
 
@@ -28,7 +28,7 @@ export default function FollowEpisode({ episode, number }: Props) {
 
   const follow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
-      await markAsFollowed({ type: 'tv', tmdbId: id })
+      await markAsFollowed({ type: 'tv', tmdbId: id, name: episode.name, poster: episode.poster_path ?? null })
       await updateNextEpisode({ tmdbId: id })
     },
   })
@@ -66,6 +66,7 @@ export default function FollowEpisode({ episode, number }: Props) {
       number={number}
       isFollowed={Array.isArray(followedMedia) && followedMedia.includes(episode.id)}
       onToggleFollow={() => toggleFollow(episode.id, episode.name)}
+      isFollowLoading={isFollowedLoading || follow.isPending || unfollow.isPending}
     />
   )
 }

@@ -35,6 +35,8 @@ export const getTvSections = query({
         followedAt: follow.followedAt,
         watchedPercentage: nextEp.watchedPercentage,
         status: nextEp.status,
+        name: follow.name,
+        poster: follow.poster,
       }
 
       const noMoreEpisodes = nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1
@@ -77,15 +79,17 @@ export const getMovieSections = query({
     const watchNext: MovieSectionItem[] = []
     const finished: MovieSectionItem[] = []
 
-    for (const f of movieFollows) {
+    for (const follow of movieFollows) {
       const item: MovieSectionItem = {
-        tmdbId: f.tmdbId,
-        watchedAt: watchedMap.get(f.tmdbId) || null,
-        followedAt: f.followedAt,
+        tmdbId: follow.tmdbId,
+        watchedAt: watchedMap.get(follow.tmdbId) || null,
+        followedAt: follow.followedAt,
+        name: follow.name,
+        poster: follow.poster,
       }
 
       if (item.watchedAt) finished.push(item)
-      else if (!f.manuallyStopped) watchNext.push(item)
+      else if (!follow.manuallyStopped) watchNext.push(item)
     }
 
     watchNext.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))

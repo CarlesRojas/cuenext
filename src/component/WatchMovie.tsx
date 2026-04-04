@@ -3,7 +3,7 @@ import { PosterCard } from '#/component/PosterCard'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { MovieSectionItem } from '#/type/section'
-import { convexAction, convexQuery } from '@convex-dev/react-query'
+import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMutation as useDbMutation } from 'convex/react'
 
@@ -14,7 +14,6 @@ interface Props {
 export default function WatchMovie({ movie }: Props) {
   const { showUndoToast } = useUndoToast()
 
-  const { data: movieDetails, isPending } = useQuery(convexAction(api.tmdb.getMovieDetails, { tmdbId: movie.tmdbId }))
   const { data: isWatched } = useQuery(convexQuery(api.progress.checkMovieWatched, { tmdbId: movie.tmdbId }))
 
   const markMovieWatched = useDbMutation(api.progress.markMovieWatched)
@@ -32,25 +31,22 @@ export default function WatchMovie({ movie }: Props) {
     },
   })
 
-  if (isPending) return <PosterCard isLoading />
-  if (!movieDetails) return null
-
   const handleToggleWatch = async () => {
     if (isWatched) {
       await unwatch.mutateAsync()
-      showUndoToast(movieDetails.title, 'unwatch', `unwatch-movie-${movie.tmdbId}`, () => watch.mutateAsync())
+      showUndoToast(movie.name, 'unwatch', `unwatch-movie-${movie.tmdbId}`, () => watch.mutateAsync())
     } else {
       await watch.mutateAsync()
-      showUndoToast(movieDetails.title, 'watch', `watch-movie-${movie.tmdbId}`, () => unwatch.mutateAsync())
+      showUndoToast(movie.name, 'watch', `watch-movie-${movie.tmdbId}`, () => unwatch.mutateAsync())
     }
   }
 
   return (
     <PosterCard
       id={movie.tmdbId}
-      title={movieDetails.title}
+      title={movie.name}
       mediaType="movie"
-      imageUrl={getTmdbImageUrl(movieDetails.poster_path, 'w342') || undefined}
+      imageUrl={getTmdbImageUrl(movie.poster, 'w342') || undefined}
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}

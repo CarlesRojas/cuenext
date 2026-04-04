@@ -7,10 +7,14 @@ export type TvSectionItem = {
   followedAt?: number
   watchedPercentage: number
   status: 'ended' | 'ongoing'
+  name: string
+  poster?: string | null
 }
 
 export type MovieSectionItem = {
   tmdbId: number
   watchedAt?: number | null
   followedAt?: number
+  name: string
+  poster?: string | null
 }
