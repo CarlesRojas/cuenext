@@ -41,7 +41,7 @@ export const Route = createRootRouteWithContext<{
         name: 'viewport',
         content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
       },
-      { name: 'theme-color', content: '#0a0a0a' },
+      { name: 'theme-color', content: '#171717' },
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       {
         name: 'apple-mobile-web-app-status-bar-style',
@@ -96,7 +96,7 @@ function RootDocument({ children }: Props) {
             <HeadContent />
           </head>
 
-          <body className="full-page bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
+          <body className="full-page bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/5">
             <ToastProvider>
               <AppShell>{children}</AppShell>
             </ToastProvider>
