@@ -1,12 +1,12 @@
+import { api } from '#/../convex/_generated/api'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
-import WatchlistEpisode from '#/component/WatchlistEpisode'
-import { default as WatchlistMovie } from '#/component/WatchlistMovie'
+import WatchEpisode from '#/component/WatchEpisode'
+import WatchMovie from '#/component/WatchMovie'
 import { useMediaType } from '#/hooks/useMediaType'
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { api } from 'convex/_generated/api'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -25,8 +25,6 @@ function App() {
     enabled: mediaType === 'movie',
   })
 
-  console.log(tvSections)
-
   return (
     <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px mb-8">
@@ -39,8 +37,8 @@ function App() {
             ['Watch next', "Haven't started", 'Waiting for episodes', 'Stopped watching', 'Finished'].map(
               (title, i) => (
                 <Section title={title} key={i} defaultCollapsed={!['Watch next', "Haven't started"].includes(title)}>
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <PosterCard key={i} isLoading />
+                  {Array.from({ length: 10 }).map((_, epispdeIndex) => (
+                    <PosterCard key={epispdeIndex} isLoading />
                   ))}
                 </Section>
               ),
@@ -49,7 +47,7 @@ function App() {
           {tvSections && tvSections.watchNext.length > 0 && (
             <Section title="Watch next">
               {tvSections.watchNext.map(item => (
-                <WatchlistEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.tmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -57,7 +55,7 @@ function App() {
           {tvSections && tvSections.haventStarted.length > 0 && (
             <Section title="Haven't started">
               {tvSections.haventStarted.map(item => (
-                <WatchlistEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.tmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -65,7 +63,7 @@ function App() {
           {tvSections && tvSections.waitingForEpisodes.length > 0 && (
             <Section title="Waiting for episodes" defaultCollapsed>
               {tvSections.waitingForEpisodes.map(item => (
-                <WatchlistEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.tmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -73,7 +71,7 @@ function App() {
           {tvSections && tvSections.stoppedWatching.length > 0 && (
             <Section title="Stopped watching" defaultCollapsed>
               {tvSections.stoppedWatching.map(item => (
-                <WatchlistEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.tmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -81,7 +79,7 @@ function App() {
           {tvSections && tvSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
               {tvSections.finished.map(item => (
-                <WatchlistEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.tmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -91,8 +89,8 @@ function App() {
           {movieSectionsLoading &&
             ['Watch next', ''].map((title, i) => (
               <Section title={title} key={i} defaultCollapsed={title === 'Finished'}>
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <PosterCard key={i} isLoading />
+                {Array.from({ length: 10 }).map((_, epispdeIndex) => (
+                  <PosterCard key={epispdeIndex} isLoading />
                 ))}
               </Section>
             ))}
@@ -100,7 +98,7 @@ function App() {
           {movieSections && movieSections.watchNext.length > 0 && (
             <Section title="Watch next">
               {movieSections.watchNext.map(item => (
-                <WatchlistMovie key={item.tmdbId} movie={item} />
+                <WatchMovie key={item.tmdbId} movie={item} />
               ))}
             </Section>
           )}
@@ -108,7 +106,7 @@ function App() {
           {movieSections && movieSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
               {movieSections.finished.map(item => (
-                <WatchlistMovie key={item.tmdbId} movie={item} />
+                <WatchMovie key={item.tmdbId} movie={item} />
               ))}
             </Section>
           )}

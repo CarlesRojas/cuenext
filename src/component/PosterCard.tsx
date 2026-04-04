@@ -1,7 +1,7 @@
 import { Button } from '#/component/ui/button'
 import type { MediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
-import { faEye, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
@@ -26,10 +26,12 @@ interface LoadedProps extends CommonProps {
   watchButtonText?: string
   isWatched?: boolean
   onToggleWatch?: () => void
+  isWatchLoading?: boolean
 
   showFollow?: boolean
   isFollowed?: boolean
   onToggleFollow?: () => void
+  isFollowLoading?: boolean
 
   progressPercentage?: number
 }
@@ -62,10 +64,12 @@ export function PosterCard(props: Props) {
     showWatch = false,
     isWatched = false,
     onToggleWatch,
+    isWatchLoading = false,
 
     showFollow = false,
     isFollowed = false,
     onToggleFollow,
+    isFollowLoading = false,
 
     progressPercentage,
   } = props
@@ -134,16 +138,17 @@ export function PosterCard(props: Props) {
         <Button
           variant="frost"
           size={watchButtonText ? 'small' : 'iconSmall'}
-          className="absolute top-1 right-1 z-10 gap-2 px-2"
+          className="absolute top-1 right-1 z-10 gap-2 px-2 disabled:opacity-100"
           onClick={e => {
             e.preventDefault()
             onToggleWatch()
           }}
           data-checked={isWatched}
           title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
+          disabled={isWatchLoading}
         >
           {watchButtonText && <span className="text-sm">{watchButtonText}</span>}
-          <FontAwesomeIcon icon={faEye} />
+          {<FontAwesomeIcon icon={isWatchLoading ? faSpinner : faEye} spin={isWatchLoading} />}
         </Button>
       )}
 
@@ -151,15 +156,16 @@ export function PosterCard(props: Props) {
         <Button
           variant="frost"
           size="iconSmall"
-          className="absolute top-1 right-1 z-10"
+          className="absolute top-1 right-1 z-10 disabled:opacity-100"
           onClick={e => {
             e.preventDefault()
             onToggleFollow()
           }}
           data-checked={isFollowed}
           title={isFollowed ? 'Unfollow' : 'Follow'}
+          disabled={isFollowLoading}
         >
-          <FontAwesomeIcon icon={faPlus} />
+          <FontAwesomeIcon icon={isFollowLoading ? faSpinner : faPlus} spin={isFollowLoading} />
         </Button>
       )}
     </div>

@@ -1,7 +1,5 @@
 import { v } from 'convex/values'
-import { tmdbTvSchema } from '../src/type/tmdb'
 import { mutation, query } from './_generated/server'
-import { fetchTmdb } from './lib/tmdbClient'
 import { requireUser } from './requireUser'
 
 export const checkMovieWatched = query({
@@ -71,81 +69,6 @@ export const checkEpisodeWatched = query({
   },
 })
 
-export async function updateNextEpisodeInternal(context: any, args: { showTmdbId: number }) {
-  const userId = await requireUser(context)
-  const now = Date.now()
-  const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000
-
-  const existingNextEpisode = await context.db
-    .query('nextEpisode')
-    .withIndex('by_user_show', (q: any) => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
-    .unique()
-
-  let seasonEpisodeCounts: number[] = existingNextEpisode?.seasonEpisodeCounts ?? []
-  let status: 'ended' | 'ongoing' = existingNextEpisode?.status ?? 'ongoing'
-
-  const needsSeasonDataUpdate =
-    !existingNextEpisode ||
-    !existingNextEpisode.seasonDataUpdatedAt ||
-    existingNextEpisode.seasonDataUpdatedAt < oneWeekAgo
-
-  if (needsSeasonDataUpdate) {
-    const showDetails = await fetchTmdb(tmdbTvSchema, `/tv/${args.showTmdbId}`)
-
-    seasonEpisodeCounts =
-      showDetails.seasons
-        ?.filter(season => season.season_number > 0)
-        .sort((a, b) => a.season_number - b.season_number)
-        .map(season => season.episode_count) || []
-
-    status = showDetails.status?.toLowerCase() === 'ended' ? 'ended' : 'ongoing'
-  }
-
-  const watchedEpisodes = await context.db
-    .query('episode')
-    .withIndex('by_user_show', (q: any) => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
-    .collect()
-
-  const totalEpisodes = seasonEpisodeCounts.reduce((sum, count) => sum + count, 0)
-  const watchedPercentage = totalEpisodes > 0 ? Math.round((watchedEpisodes.length / totalEpisodes) * 100) : 0
-
-  let nextSeasonNumber = 0
-  let nextEpisodeNumber = 0
-
-  const watchedSet = new Set(watchedEpisodes.map((ep: any) => `${ep.seasonNumber}-${ep.episodeNumber}`))
-  found: for (let seasonIndex = 0; seasonIndex < seasonEpisodeCounts.length; seasonIndex++) {
-    const episodeCount = seasonEpisodeCounts[seasonIndex]
-
-    for (let episodeNumber = 0; episodeNumber < episodeCount; episodeNumber++) {
-      if (!watchedSet.has(`${seasonIndex}-${episodeNumber}`)) {
-        nextSeasonNumber = seasonIndex
-        nextEpisodeNumber = episodeNumber
-        break found
-      }
-    }
-  }
-
-  if (totalEpisodes === 0 || watchedEpisodes.length === totalEpisodes) {
-    nextSeasonNumber = -1
-    nextEpisodeNumber = -1
-  }
-
-  const updateData = {
-    userId,
-    showTmdbId: args.showTmdbId,
-    lastWatchedAt: watchedEpisodes.length > 0 ? Math.max(...watchedEpisodes.map((ep: any) => ep.watchedAt)) : null,
-    seasonNumber: nextSeasonNumber,
-    episodeNumber: nextEpisodeNumber,
-    seasonEpisodeCounts,
-    seasonDataUpdatedAt: needsSeasonDataUpdate ? now : existingNextEpisode.seasonDataUpdatedAt,
-    watchedPercentage,
-    status,
-  }
-
-  if (!existingNextEpisode) await context.db.insert('nextEpisode', updateData)
-  else await context.db.patch(existingNextEpisode._id, updateData)
-}
-
 export const markEpisodeWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -168,8 +91,6 @@ export const markEpisodeWatched = mutation({
       .unique()
 
     if (!existing) await context.db.insert('episode', { userId, ...args, watchedAt: now })
-
-    await updateNextEpisodeInternal(context, { showTmdbId: args.showTmdbId })
   },
 })
 
@@ -196,6 +117,57 @@ export const unmarkEpisodeWatched = mutation({
     if (!existing) return
 
     await context.db.delete(existing._id)
-    await updateNextEpisodeInternal(context, { showTmdbId: args.showTmdbId })
+  },
+})
+
+export const getWatchedShowEpisodes = query({
+  args: { showTmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const episodes = await context.db
+      .query('episode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
+      .collect()
+
+    return episodes
+  },
+})
+
+export const getNextEpisode = query({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const nextEpisode = await context.db
+      .query('nextEpisode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.tmdbId))
+      .unique()
+
+    return nextEpisode
+  },
+})
+
+export const upsertNextEpisode = mutation({
+  args: {
+    showTmdbId: v.number(),
+    lastWatchedAt: v.union(v.number(), v.null()),
+    seasonNumber: v.number(),
+    episodeNumber: v.number(),
+    seasonEpisodeCounts: v.array(v.number()),
+    seasonDataUpdatedAt: v.union(v.number(), v.null()),
+    watchedPercentage: v.number(),
+    status: v.union(v.literal('ended'), v.literal('ongoing')),
+  },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const existing = await context.db
+      .query('nextEpisode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
+      .first()
+
+    if (existing) await context.db.patch(existing._id, { ...args })
+    else await context.db.insert('nextEpisode', { userId, ...args })
   },
 })

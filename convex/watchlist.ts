@@ -91,11 +91,6 @@ export const getMovieSections = query({
     watchNext.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     finished.sort((a, b) => (b.watchedAt || 0) - (a.watchedAt || 0))
 
-    const stripFollowedAt = (arr: MovieSectionItem[]) => arr.map(({ followedAt, ...rest }) => rest)
-
-    return {
-      watchNext: stripFollowedAt(watchNext),
-      finished: stripFollowedAt(finished),
-    }
+    return { watchNext, finished }
   },
 })

@@ -11,8 +11,7 @@ export const getProfileSummary = query({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId))
       .collect()
 
-    const watchedMovies = movies.filter(m => m.watchedAt !== null)
-    const moviesWatchedCount = watchedMovies.length
+    const moviesWatchedCount = movies.length
 
     const episodes = await context.db
       .query('episode')
@@ -31,7 +30,7 @@ export const getProfileSummary = query({
 
     let lastActivityTimestamp = 0
 
-    for (const m of watchedMovies) {
+    for (const m of movies) {
       if (m.watchedAt && m.watchedAt > lastActivityTimestamp) {
         lastActivityTimestamp = m.watchedAt
       }

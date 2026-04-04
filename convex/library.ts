@@ -1,6 +1,5 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { updateNextEpisodeInternal } from './progress'
 import { requireUser } from './requireUser'
 
 export const follow = mutation({
@@ -26,8 +25,6 @@ export const follow = mutation({
       followedAt: now,
       manuallyStopped: false,
     })
-
-    if (args.type === 'tv') await updateNextEpisodeInternal(context, { showTmdbId: args.tmdbId })
   },
 })
 
