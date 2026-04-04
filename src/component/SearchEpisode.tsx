@@ -52,23 +52,41 @@ export function SearchEpisode(props: Props) {
         // disabled={isWatchLoading || isFollowLoading}
       >
         {posterUrl ? (
-          <img
-            src={posterUrl}
-            alt={name}
-            className="aspect-2/3 h-full rounded-2xl object-cover lg:hidden"
-            loading="lazy"
-          />
+          <>
+            <img
+              src={posterUrl}
+              alt={name}
+              className="absolute inset-y-0 left-0 aspect-2/3 h-full scale-200 rounded-2xl object-cover opacity-30 blur-2xl lg:hidden"
+              loading="lazy"
+            />
+
+            <img
+              src={posterUrl}
+              alt={name}
+              className="relative aspect-2/3 h-full rounded-2xl object-cover lg:hidden"
+              loading="lazy"
+            />
+          </>
         ) : (
           <div className="flex aspect-2/3 h-full items-center justify-center rounded-2xl bg-neutral-900 text-center text-base text-neutral-500 lg:hidden" />
         )}
 
         {backdropUrl ? (
-          <img
-            src={backdropUrl}
-            alt={name}
-            className="hidden aspect-video h-full rounded-2xl object-cover lg:block"
-            loading="lazy"
-          />
+          <>
+            <img
+              src={backdropUrl}
+              alt={name}
+              className="absolute inset-0 hidden aspect-video h-full scale-150 rounded-2xl object-cover opacity-30 blur-2xl lg:block"
+              loading="lazy"
+            />
+
+            <img
+              src={backdropUrl}
+              alt={name}
+              className="relative hidden aspect-video h-full rounded-2xl object-cover lg:block"
+              loading="lazy"
+            />
+          </>
         ) : (
           <div className="hidden aspect-video h-full items-center justify-center rounded-2xl bg-neutral-900 text-center text-base text-neutral-500 lg:block" />
         )}
