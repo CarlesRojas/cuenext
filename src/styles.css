@@ -27,6 +27,16 @@
     @apply m-0 box-border p-0 antialiased outline-none! select-none!;
   }
 
+  html {
+    @apply overscroll-none;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply overscroll-none;
+  }
+
   img,
   video,
   svg {
