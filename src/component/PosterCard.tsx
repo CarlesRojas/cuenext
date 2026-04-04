@@ -89,12 +89,7 @@ export function PosterCard(props: Props) {
         disabled={isWatchLoading || isFollowLoading}
       >
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className="h-full w-full object-cover transition-opacity duration-300"
-            loading="lazy"
-          />
+          <img src={imageUrl} alt={title} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-center text-sm text-neutral-500">
             {title}
@@ -123,7 +118,7 @@ export function PosterCard(props: Props) {
             >
               <div className="mt-3 h-1.5 w-full rounded-full bg-white/30">
                 <div
-                  className="h-full rounded-full bg-white transition-all duration-300"
+                  className="h-full rounded-full bg-white transition-[width] duration-300"
                   style={{ width: `${progressPercentage}%` }}
                   role="progressbar"
                   aria-valuenow={progressPercentage}

@@ -27,11 +27,13 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
           onClick={() => setMediaType('tv')}
           className={cn(mediaType === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
         >
-          <motion.div
-            layoutId="media-indicator"
-            className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          />
+          {mediaType === 'tv' && (
+            <motion.div
+              layoutId="media-indicator"
+              className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            />
+          )}
 
           <FontAwesomeIcon icon={faTv} size="xl" className="z-60 -mx-1 h-4 max-h-4 min-h-4" />
           <span className="z-60">Shows</span>

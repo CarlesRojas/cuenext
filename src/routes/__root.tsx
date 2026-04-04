@@ -70,6 +70,7 @@ export const Route = createRootRouteWithContext<{
 
   notFoundComponent: () => <div>Not Found</div>,
   shellComponent: RootDocument,
+  ssr: false,
 })
 
 interface Props {
@@ -78,7 +79,7 @@ interface Props {
 
 function RootDocument({ children }: Props) {
   const context = useRouteContext({ from: Route.id })
-  const { visualHeight } = useViewportHeight()
+  useViewportHeight()
 
   return (
     <ClerkProvider
@@ -89,16 +90,15 @@ function RootDocument({ children }: Props) {
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html
           lang="en"
-          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden transition-all"
+          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden transition-[height]"
           data-theme="dark"
-          style={{ colorScheme: 'dark', height: `${visualHeight}px` }}
           suppressHydrationWarning
         >
           <head>
             <HeadContent />
           </head>
 
-          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/5">
+          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/30">
             <ToastProvider>
               <AppShell>{children}</AppShell>
             </ToastProvider>

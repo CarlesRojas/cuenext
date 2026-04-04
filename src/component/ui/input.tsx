@@ -16,7 +16,7 @@ function Input({ className, containerClassName, type, onClear, ...props }: Props
         type={type}
         data-slot="input"
         className={cn(
-          'relative h-full w-full min-w-0 bg-transparent px-3 text-base outline-none placeholder:text-white/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+          'relative h-full w-full min-w-0 bg-transparent px-3 text-base text-white outline-none placeholder:text-white/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
           onClear && 'pr-9',
           className,
         )}

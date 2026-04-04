@@ -57,7 +57,7 @@ const MobileNavbar = ({ showHeader }: Props) => {
         >
           <div
             className={cn(
-              'relative flex items-center justify-center transition-all duration-300 ease-in-out',
+              'relative flex items-center justify-center transition-[width] duration-300 ease-in-out',
               isExpanded ? 'w-15' : '',
               mobileTabsWidth === undefined && 'grow',
             )}
@@ -70,7 +70,7 @@ const MobileNavbar = ({ showHeader }: Props) => {
                 activeProps={{ className: 'text-sky-500' }}
                 inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                 className={cn(
-                  'relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-all duration-300 ease-in-out',
+                  'relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity duration-300 ease-in-out',
                   isExpanded && 'pointer-events-none opacity-0',
                 )}
               >
@@ -97,7 +97,7 @@ const MobileNavbar = ({ showHeader }: Props) => {
                 size="icon"
                 onClick={() => setIsExpanded(false)}
                 className={cn(
-                  'm-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12 opacity-0 transition-all duration-300 ease-in-out',
+                  'm-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12 opacity-0 transition-opacity duration-300 ease-in-out',
                   isExpanded && 'pointer-events-auto opacity-100',
                 )}
               >

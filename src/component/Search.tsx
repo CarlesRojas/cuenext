@@ -87,7 +87,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
             form.handleSubmit()
           }}
           className={cn(
-            'relative flex items-center transition-all duration-300 ease-in-out',
+            'relative flex items-center transition-[width,opacity] duration-300 ease-in-out',
             isExpanded ? 'opacity-100' : 'w-0 opacity-0',
           )}
           style={isExpanded ? { width: (mobileTabsWidth ?? 0) - 68 - 70 } : undefined}
