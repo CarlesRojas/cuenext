@@ -1,136 +1,16 @@
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
+import WatchlistEpisode from '#/component/WatchlistEpisode'
+import { default as WatchlistMovie } from '#/component/WatchlistMovie'
 import { useMediaType } from '#/hooks/useMediaType'
-import { useUndoToast } from '#/hooks/useUndoToast'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
-import { convexAction, convexQuery } from '@convex-dev/react-query'
+import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api'
-import { useMutation } from 'convex/react'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
-
-function WatchlistTvItem({ item }: { item: { tmdbId: number; seasonNumber: number; episodeNumber: number } }) {
-  const { showUndoToast } = useUndoToast()
-  const { data: show, isPending } = useQuery(convexAction(api.tmdb.getShowDetails, { tmdbId: item.tmdbId }))
-  const { data: season } = useQuery({
-    ...convexAction(api.tmdb.getShowSeasonDetails, { tmdbId: item.tmdbId, seasonNumber: item.seasonNumber }),
-    enabled: !!show,
-  })
-
-  const { data: isWatched } = useQuery({
-    ...convexQuery(api.progress.checkEpisodeWatched, {
-      showTmdbId: item.tmdbId,
-      seasonNumber: item.seasonNumber,
-      episodeNumber: item.episodeNumber,
-    }),
-  })
-
-  const markEpisodeWatched = useMutation(api.progress.markEpisodeWatched)
-  const unmarkEpisodeWatched = useMutation(api.progress.unmarkEpisodeWatched)
-
-  if (isPending) return <PosterCard isLoading />
-  if (!show) return null
-
-  const handleToggleWatch = () => {
-    let nextS = item.seasonNumber
-    let nextE = item.episodeNumber + 1
-
-    if (season && season.episodes) {
-      if (item.episodeNumber >= season.episodes.length) {
-        nextS += 1
-        nextE = 1
-      }
-    }
-
-    if (isWatched) {
-      unmarkEpisodeWatched({
-        showTmdbId: show.id,
-        seasonNumber: item.seasonNumber,
-        episodeNumber: item.episodeNumber,
-      })
-
-      showUndoToast(`Episode ${item.episodeNumber}`, 'unwatch', `unwatch-tv-${show.id}`, () => {
-        markEpisodeWatched({
-          showTmdbId: show.id,
-          seasonNumber: item.seasonNumber,
-          episodeNumber: item.episodeNumber,
-          seasonNumber: nextS,
-          episodeNumber: nextE,
-        })
-      })
-    } else {
-      markEpisodeWatched({
-        showTmdbId: show.id,
-        seasonNumber: item.seasonNumber,
-        episodeNumber: item.episodeNumber,
-        seasonNumber: nextS,
-        episodeNumber: nextE,
-      })
-
-      showUndoToast(`Episode ${item.episodeNumber}`, 'watch', `watch-tv-${show.id}`, () => {
-        unmarkEpisodeWatched({
-          showTmdbId: show.id,
-          seasonNumber: item.seasonNumber,
-          episodeNumber: item.episodeNumber,
-        })
-      })
-    }
-  }
-
-  return (
-    <PosterCard
-      id={show.id}
-      title={show.name}
-      mediaType="tv"
-      imageUrl={getTmdbImageUrl(show.poster_path, 'w342') || undefined}
-      showWatch
-      isWatched={isWatched}
-      onToggleWatch={handleToggleWatch}
-      watchButtonText={`S${item.seasonNumber}, E${item.episodeNumber}`}
-    />
-  )
-}
-
-function WatchlistMovieItem({ tmdbId }: { tmdbId: number }) {
-  const { showUndoToast } = useUndoToast()
-  const { data: movie, isPending } = useQuery(convexAction(api.tmdb.getMovieDetails, { tmdbId }))
-  const { data: isWatched } = useQuery(convexQuery(api.progress.checkMovieWatched, { tmdbId }))
-  const markMovieWatched = useMutation(api.progress.markMovieWatched)
-  const unmarkMovieWatched = useMutation(api.progress.unmarkMovieWatched)
-
-  if (isPending) return <PosterCard isLoading />
-  if (!movie) return null
-
-  const handleToggleWatch = () => {
-    if (isWatched) {
-      unmarkMovieWatched({ tmdbId: movie.id })
-      showUndoToast(movie.title, 'unwatch', `unwatch-movie-${movie.id}`, () => {
-        markMovieWatched({ tmdbId: movie.id })
-      })
-    } else {
-      markMovieWatched({ tmdbId: movie.id })
-      showUndoToast(movie.title, 'watch', `watch-movie-${movie.id}`, () => {
-        unmarkMovieWatched({ tmdbId: movie.id })
-      })
-    }
-  }
-
-  return (
-    <PosterCard
-      id={movie.id}
-      title={movie.title}
-      mediaType="movie"
-      imageUrl={getTmdbImageUrl(movie.poster_path, 'w342') || undefined}
-      showWatch
-      isWatched={isWatched}
-      onToggleWatch={handleToggleWatch}
-    />
-  )
-}
 
 function App() {
   const [mediaType] = useMediaType()
@@ -145,6 +25,8 @@ function App() {
     enabled: mediaType === 'movie',
   })
 
+  console.log(tvSections)
+
   return (
     <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px mb-8">
@@ -153,55 +35,81 @@ function App() {
 
       {mediaType === 'tv' ? (
         <div className="flex flex-col gap-6">
-          {(tvSectionsLoading || (tvSections && tvSections.watchNext.length > 0)) && (
+          {tvSectionsLoading &&
+            ['Watch next', "Haven't started", 'Waiting for episodes', 'Stopped watching', 'Finished'].map(
+              (title, i) => (
+                <Section title={title} key={i} defaultCollapsed={!['Watch next', "Haven't started"].includes(title)}>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <PosterCard key={i} isLoading />
+                  ))}
+                </Section>
+              ),
+            )}
+
+          {tvSections && tvSections.watchNext.length > 0 && (
             <Section title="Watch next">
-              {tvSections && tvSections.watchNext.map(item => <WatchlistTvItem key={item.tmdbId} item={item} />)}
-
-              {tvSectionsLoading && Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+              {tvSections.watchNext.map(item => (
+                <WatchlistEpisode key={item.tmdbId} episode={item} />
+              ))}
             </Section>
           )}
 
-          {(tvSectionsLoading || (tvSections && tvSections.haventStarted.length > 0)) && (
+          {tvSections && tvSections.haventStarted.length > 0 && (
             <Section title="Haven't started">
-              {tvSections && tvSections.haventStarted.map(item => <WatchlistTvItem key={item.tmdbId} item={item} />)}
-
-              {tvSectionsLoading && Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+              {tvSections.haventStarted.map(item => (
+                <WatchlistEpisode key={item.tmdbId} episode={item} />
+              ))}
             </Section>
           )}
 
-          {(tvSectionsLoading || (tvSections && tvSections.stoppedWatching.length > 0)) && (
+          {tvSections && tvSections.waitingForEpisodes.length > 0 && (
+            <Section title="Waiting for episodes" defaultCollapsed>
+              {tvSections.waitingForEpisodes.map(item => (
+                <WatchlistEpisode key={item.tmdbId} episode={item} />
+              ))}
+            </Section>
+          )}
+
+          {tvSections && tvSections.stoppedWatching.length > 0 && (
             <Section title="Stopped watching" defaultCollapsed>
-              {tvSections && tvSections.stoppedWatching.map(item => <WatchlistTvItem key={item.tmdbId} item={item} />)}
-
-              {tvSectionsLoading && Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+              {tvSections.stoppedWatching.map(item => (
+                <WatchlistEpisode key={item.tmdbId} episode={item} />
+              ))}
             </Section>
           )}
 
-          {(tvSectionsLoading || (tvSections && tvSections.finished.length > 0)) && (
+          {tvSections && tvSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
-              {tvSections && tvSections.finished.map(item => <WatchlistTvItem key={item.tmdbId} item={item} />)}
-
-              {tvSectionsLoading && Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+              {tvSections.finished.map(item => (
+                <WatchlistEpisode key={item.tmdbId} episode={item} />
+              ))}
             </Section>
           )}
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          {(movieSectionsLoading || (movieSections && movieSections.watchNext.length > 0)) && (
-            <Section title="Watch next">
-              {movieSections &&
-                movieSections.watchNext.map(item => <WatchlistMovieItem key={item.tmdbId} tmdbId={item.tmdbId} />)}
+          {movieSectionsLoading &&
+            ['Watch next', ''].map((title, i) => (
+              <Section title={title} key={i} defaultCollapsed={title === 'Finished'}>
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <PosterCard key={i} isLoading />
+                ))}
+              </Section>
+            ))}
 
-              {movieSectionsLoading && Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+          {movieSections && movieSections.watchNext.length > 0 && (
+            <Section title="Watch next">
+              {movieSections.watchNext.map(item => (
+                <WatchlistMovie key={item.tmdbId} movie={item} />
+              ))}
             </Section>
           )}
 
-          {(movieSectionsLoading || (movieSections && movieSections.finished.length > 0)) && (
+          {movieSections && movieSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
-              {movieSections &&
-                movieSections.finished.map(item => <WatchlistMovieItem key={item.tmdbId} tmdbId={item.tmdbId} />)}
-
-              {movieSectionsLoading && Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+              {movieSections.finished.map(item => (
+                <WatchlistMovie key={item.tmdbId} movie={item} />
+              ))}
             </Section>
           )}
         </div>
