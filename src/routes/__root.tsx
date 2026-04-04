@@ -89,7 +89,7 @@ function RootDocument({ children }: Props) {
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html
           lang="en"
-          className="dark w-dvw max-w-dvw min-w-dvw overflow-hidden transition-all"
+          className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden transition-all"
           data-theme="dark"
           style={{ colorScheme: 'dark', height: `${visualHeight}px` }}
           suppressHydrationWarning
