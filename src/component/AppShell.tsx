@@ -56,6 +56,8 @@ export default function AppShell({ children }: AppShellProps) {
           <LiquidGlass className="relative h-full w-full rounded-3xl bg-neutral-800/40">
             <div className="flex h-full w-full flex-col items-start justify-between gap-8 overflow-y-auto p-4">
               <div className="relative mt-10 flex w-full flex-col gap-8">
+                <Search />
+
                 <nav className="flex w-full flex-col gap-2">
                   {NAV_ITEMS.map(item => (
                     <Link
@@ -82,8 +84,6 @@ export default function AppShell({ children }: AppShellProps) {
                     </Link>
                   ))}
                 </nav>
-
-                <Search />
 
                 <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
                 <MediaTypeSelector />
