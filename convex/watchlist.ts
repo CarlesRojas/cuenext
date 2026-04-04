@@ -8,6 +8,8 @@ export type TvSectionItem = {
   seasonNumber: number
   episodeNumber: number
   followedAt?: number
+  watchedPercentage: number
+  status: 'ended' | 'ongoing'
 }
 
 export type MovieSectionItem = {
@@ -30,6 +32,7 @@ export const getTvSections = query({
     const haventStarted: TvSectionItem[] = []
     const stoppedWatching: TvSectionItem[] = []
     const finished: TvSectionItem[] = []
+    const waitingForEpisodes: TvSectionItem[] = []
 
     for (const follow of tvFollows) {
       const nextEp = await context.db
@@ -46,18 +49,27 @@ export const getTvSections = query({
         seasonNumber: nextEp.seasonNumber,
         episodeNumber: nextEp.episodeNumber,
         followedAt: follow.followedAt,
+        watchedPercentage: nextEp.watchedPercentage,
+        status: nextEp.status,
       }
 
-      if (follow.manuallyStopped) stoppedWatching.push(item)
-      else if (!nextEp.lastWatchedAt) haventStarted.push(item)
+      const noMoreEpisodes = nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1
+
+      if (noMoreEpisodes) {
+        if (nextEp.status === 'ended') finished.push(item)
+        else waitingForEpisodes.push(item)
+      } else if (follow.manuallyStopped) stoppedWatching.push(item)
+      else if (nextEp.seasonNumber === 0 && nextEp.episodeNumber === 0) haventStarted.push(item)
       else watchNext.push(item)
     }
 
     watchNext.sort((a, b) => (b.lastWatchedAt || 0) - (a.lastWatchedAt || 0))
     haventStarted.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     stoppedWatching.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
+    finished.sort((a, b) => (b.lastWatchedAt || 0) - (a.lastWatchedAt || 0))
+    waitingForEpisodes.sort((a, b) => (b.lastWatchedAt || 0) - (a.lastWatchedAt || 0))
 
-    return { watchNext, haventStarted, stoppedWatching, finished }
+    return { watchNext, haventStarted, stoppedWatching, finished, waitingForEpisodes }
   },
 })
 
@@ -76,7 +88,7 @@ export const getMovieSections = query({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId))
       .collect()
 
-    const watchedMap = new Map(movies.filter(m => m.watchedAt !== null).map(m => [m.tmdbId, m.watchedAt!]))
+    const watchedMap = new Map(movies.map(m => [m.tmdbId, m.watchedAt]))
 
     const watchNext: MovieSectionItem[] = []
     const finished: MovieSectionItem[] = []
@@ -88,11 +100,8 @@ export const getMovieSections = query({
         followedAt: f.followedAt,
       }
 
-      if (watchedMap.has(f.tmdbId)) {
-        finished.push(item)
-      } else if (!f.manuallyStopped) {
-        watchNext.push(item)
-      }
+      if (item.watchedAt) finished.push(item)
+      else if (!f.manuallyStopped) watchNext.push(item)
     }
 
     watchNext.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))

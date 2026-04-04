@@ -15,7 +15,7 @@ export default defineSchema({
   movie: defineTable({
     userId: v.string(),
     tmdbId: v.number(),
-    watchedAt: v.union(v.number(), v.null()),
+    watchedAt: v.number(),
   }).index('by_user_tmdbId', ['userId', 'tmdbId']),
 
   episode: defineTable({

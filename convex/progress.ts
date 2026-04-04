@@ -14,7 +14,7 @@ export const checkMovieWatched = query({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
       .unique()
 
-    return !!existing?.watchedAt
+    return !!existing
   },
 })
 
@@ -43,7 +43,7 @@ export const unmarkMovieWatched = mutation({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (existing) await context.db.patch(existing._id, { watchedAt: null })
+    if (existing) await context.db.delete(existing._id)
   },
 })
 
@@ -125,9 +125,9 @@ export async function updateNextEpisodeInternal(context: any, args: { showTmdbId
     }
   }
 
-  if (watchedEpisodes.length === totalEpisodes && totalEpisodes > 0) {
-    nextSeasonNumber = seasonEpisodeCounts.length - 1
-    nextEpisodeNumber = seasonEpisodeCounts[seasonEpisodeCounts.length - 1] - 1
+  if (totalEpisodes === 0 || watchedEpisodes.length === totalEpisodes) {
+    nextSeasonNumber = -1
+    nextEpisodeNumber = -1
   }
 
   const updateData = {
