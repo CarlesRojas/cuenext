@@ -8,7 +8,6 @@ export default defineSchema({
     tmdbId: v.number(),
     followedAt: v.number(),
     manuallyStopped: v.boolean(),
-    updatedAt: v.number(),
   })
     .index('by_user_type', ['userId', 'type'])
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
@@ -37,6 +36,7 @@ export default defineSchema({
     episodeNumber: v.number(),
     seasonEpisodeCounts: v.array(v.number()),
     seasonDataUpdatedAt: v.union(v.number(), v.null()),
-    updatedAt: v.number(),
+    watchedPercentage: v.number(),
+    status: v.union(v.literal('ended'), v.literal('ongoing')),
   }).index('by_user_show', ['userId', 'showTmdbId']),
 })

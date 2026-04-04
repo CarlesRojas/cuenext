@@ -21,6 +21,19 @@ export const tmdbTvSchema = z.object({
   first_air_date: z.string().optional(),
   episode_run_time: z.array(z.number()).optional(),
   number_of_seasons: z.number().optional(),
+  seasons: z
+    .array(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+        overview: z.string(),
+        air_date: z.string().nullable().optional(),
+        episode_count: z.number(),
+        poster_path: z.string().nullable().optional(),
+        season_number: z.number(),
+      }),
+    )
+    .optional(),
   next_episode_to_air: z
     .object({
       id: z.number(),
@@ -33,6 +46,7 @@ export const tmdbTvSchema = z.object({
     })
     .nullable()
     .optional(),
+  status: z.string().optional(),
   media_type: z.literal('tv').optional(),
 })
 

@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+import { updateNextEpisodeInternal } from './progress'
 import { requireUser } from './requireUser'
 
 export const follow = mutation({
@@ -16,33 +17,17 @@ export const follow = mutation({
       .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (!existing) {
-      await context.db.insert('follow', {
-        userId,
-        type: args.type,
-        tmdbId: args.tmdbId,
-        followedAt: now,
-        manuallyStopped: false,
-        updatedAt: now,
-      })
+    if (existing) return
 
-      if (args.type === 'tv') {
-        const existingNextEpisode = await context.db
-          .query('nextEpisode')
-          .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.tmdbId))
-          .unique()
+    await context.db.insert('follow', {
+      userId,
+      type: args.type,
+      tmdbId: args.tmdbId,
+      followedAt: now,
+      manuallyStopped: false,
+    })
 
-        if (!existingNextEpisode)
-          await context.db.insert('nextEpisode', {
-            userId,
-            showTmdbId: args.tmdbId,
-            lastWatchedAt: null,
-            seasonNumber: 0,
-            episodeNumber: 0,
-            updatedAt: now,
-          })
-      }
-    }
+    if (args.type === 'tv') await updateNextEpisodeInternal(context, { showTmdbId: args.tmdbId })
   },
 })
 
@@ -77,12 +62,9 @@ export const setStopped = mutation({
       .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (existing) {
-      await context.db.patch(existing._id, {
-        manuallyStopped: args.stopped,
-        updatedAt: Date.now(),
-      })
-    }
+    if (!existing) return
+
+    await context.db.patch(existing._id, { manuallyStopped: args.stopped })
   },
 })
 

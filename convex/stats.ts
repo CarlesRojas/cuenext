@@ -47,9 +47,6 @@ export const getProfileSummary = query({
       if (f.followedAt > lastActivityTimestamp) {
         lastActivityTimestamp = f.followedAt
       }
-      if (f.updatedAt > lastActivityTimestamp) {
-        lastActivityTimestamp = f.updatedAt
-      }
     }
 
     return {

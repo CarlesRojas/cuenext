@@ -61,8 +61,6 @@
 
   - `manuallyStopped: boolean`
 
-  - `updatedAt: number`
-
   - **Indexes**
     - `by_user_mediaType` (for lists)
 
@@ -103,8 +101,6 @@
   - `seasonNumber: number` (defaults to 1)
 
   - `episodeNumber: number` (defaults to 1)
-
-  - `updatedAt: number`
 
   - Index: `by_user_show`
 
