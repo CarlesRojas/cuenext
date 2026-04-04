@@ -11,33 +11,17 @@ function setViewportHeight() {
   document.documentElement.style.setProperty('--full-height', `${fullVh}px`)
 }
 
-function addFeatureDetection() {
-  const html = document.documentElement
-
-  if (CSS.supports('height', '100dvh')) {
-    html.classList.add('supports-dvh')
-  }
-
-  if (window.visualViewport) {
-    html.classList.add('supports-visual-viewport')
-  }
-}
-
-addFeatureDetection()
 setViewportHeight()
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', setViewportHeight)
-} else {
-  window.addEventListener('resize', setViewportHeight)
-}
 
-window.addEventListener('orientationchange', () => {
-  setTimeout(setViewportHeight, 100)
-})
+if (window.visualViewport) window.visualViewport.addEventListener('resize', setViewportHeight)
+else window.addEventListener('resize', setViewportHeight)
+
+window.addEventListener('orientationchange', () => setTimeout(setViewportHeight, 100))
 
 if ('serviceWorker' in navigator) {
   const registerServiceWorker = () => {
     navigator.serviceWorker.register('/service-worker.js')
+    setViewportHeight()
   }
 
   if (document.readyState === 'complete') registerServiceWorker()

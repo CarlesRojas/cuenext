@@ -87,11 +87,4 @@
   a {
     @apply no-underline;
   }
-
-  /* Prevent mobile keyboard from shifting layout */
-  @supports (height: 100dvh) {
-    .supports-dvh .full-page {
-      height: 100dvh;
-    }
-  }
 }

@@ -2,6 +2,7 @@ import AppShell from '#/component/AppShell'
 import { Toaster } from '#/component/ui/sonner'
 import { env } from '#/env'
 import { ToastProvider } from '#/hooks/useUndoToast'
+import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { seo } from '#/lib/seo'
 import appCss from '#/styles.css?url'
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start'
@@ -77,6 +78,7 @@ interface Props {
 
 function RootDocument({ children }: Props) {
   const context = useRouteContext({ from: Route.id })
+  const { visualHeight } = useViewportHeight()
 
   return (
     <ClerkProvider
@@ -87,16 +89,16 @@ function RootDocument({ children }: Props) {
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <html
           lang="en"
-          className="full-page dark"
+          className="dark w-dvw max-w-dvw min-w-dvw overflow-hidden transition-all"
           data-theme="dark"
-          style={{ colorScheme: 'dark' }}
+          style={{ colorScheme: 'dark', height: `${visualHeight}px` }}
           suppressHydrationWarning
         >
           <head>
             <HeadContent />
           </head>
 
-          <body className="full-page bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/5">
+          <body className="size-full max-h-full min-h-full max-w-full min-w-full bg-neutral-900 font-sans wrap-anywhere antialiased selection:bg-sky-500/5">
             <ToastProvider>
               <AppShell>{children}</AppShell>
             </ToastProvider>
