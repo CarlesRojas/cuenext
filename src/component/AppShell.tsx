@@ -46,12 +46,12 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <ClientOnly>
       {!isMobile && (
-        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 p-3 md:block">
+        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 p-3 md:block">
           <LiquidGlass
-            className="relative h-full min-w-72 rounded-3xl bg-neutral-800/40"
+            className="relative h-full w-72 max-w-72 min-w-72 rounded-3xl bg-neutral-800/40"
             wrapperClassName="flex-col justify-between items-start p-4 "
           >
-            <div className="mt-10 flex w-full flex-col gap-8">
+            <div className="relative mt-10 flex w-full flex-col gap-8">
               <nav className="flex w-full flex-col gap-2">
                 {NAV_ITEMS.map(item => (
                   <Link

@@ -124,13 +124,9 @@ export function LiquidGlass({
   const Component = inline ? 'span' : 'div'
 
   let glassBoxClass = 'm-0! '
-  if (color === 'black') {
-    glassBoxClass += 'bg-[#09090b80] shadow-[inset_0_0_4px_0px_#fafafa80] brightness-50'
-  } else if (color === 'white') {
-    glassBoxClass += 'bg-[#fafafa80] shadow-[inset_0_0_4px_0px_#fafafa80]'
-  } else {
-    glassBoxClass += 'bg-[#09090b00] shadow-[inset_0_0_4px_0px_#fafafa80]'
-  }
+  if (color === 'black') glassBoxClass += 'bg-[#09090b80] shadow-[inset_0_0_4px_0px_#fafafa50] brightness-50'
+  else if (color === 'white') glassBoxClass += 'bg-[#fafafa80] shadow-[inset_0_0_4px_0px_#fafafa50]'
+  else glassBoxClass += 'bg-[#09090b00] shadow-[inset_0_0_4px_0px_#fafafa50]'
 
   return (
     <Component ref={containerRef as any} className={wrapperClasses} style={style}>

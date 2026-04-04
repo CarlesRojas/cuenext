@@ -11,14 +11,13 @@ const buttonVariants = cva(
         default: [
           'bg-white text-black hover:bg-sky-500 hover:text-white focus-visible:bg-sky-500 focus-visible:text-white',
         ],
-        ghost: [
-          'text-white hover:bg-neutral-400/10 hover:text-white focus-visible:bg-neutral-400/10 focus-visible:text-white',
-        ],
+        ghost: ['text-white hover:bg-neutral-400/10 focus-visible:bg-neutral-400/10'],
         link: ['text-white hover:text-sky-500 focus-visible:text-sky-500'],
         frost: [
           'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden hover:bg-black/80 focus-visible:bg-black/80',
-          'data-[checked=true]:bg-sky-500/80 data-[checked=true]:text-white data-[checked=true]:hover:bg-sky-600/80 data-[checked=true]:focus-visible:bg-sky-600/80',
+          'data-[checked=true]:bg-sky-500/80 data-[checked=true]:hover:bg-sky-600/80 data-[checked=true]:focus-visible:bg-sky-600/80',
         ],
+        input: ['text-white/70 hover:text-white focus-visible:text-white'],
       },
       size: {
         default: 'h-11 w-fit gap-2 px-4 py-2.5',
@@ -27,6 +26,7 @@ const buttonVariants = cva(
         iconSmall: 'size-9',
         small: 'm-1 h-9 w-fit gap-1 px-4',
         link: 'w-fit gap-2',
+        input: 'size-8',
       },
     },
     defaultVariants: {
