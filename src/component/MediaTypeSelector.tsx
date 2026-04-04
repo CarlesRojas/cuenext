@@ -23,7 +23,7 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
       >
         <Button
           variant="ghost"
-          size="selector"
+          size="small"
           onClick={() => setMediaType('tv')}
           className={cn(mediaType === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
         >
@@ -39,7 +39,7 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
 
         <Button
           variant="ghost"
-          size="selector"
+          size="small"
           onClick={() => setMediaType('movie')}
           className={cn(mediaType === 'movie' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
         >

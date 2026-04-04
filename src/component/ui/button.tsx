@@ -26,7 +26,7 @@ const buttonVariants = cva(
         full: 'h-11 w-full gap-2 px-4 py-2.5',
         icon: 'size-11',
         iconSmall: 'size-9',
-        selector: 'm-1 h-9 w-fit gap-1 px-4',
+        small: 'm-1 h-9 w-fit gap-1 px-4',
         link: 'w-fit gap-2',
       },
     },

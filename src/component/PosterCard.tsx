@@ -1,77 +1,80 @@
 import { Button } from '#/component/ui/button'
 import type { MediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
-import { faCheck, faEye } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 
-type PosterCardProps = {
+interface CommonProps {
   className?: string
+}
+
+interface LoadingProps extends CommonProps {
+  isLoading: true
+}
+
+interface LoadedProps extends CommonProps {
+  isLoading?: false
+  id: number
+  title: string
+  mediaType: MediaType
   number?: number
-} & (
-  | {
-      isLoading: true
-      id?: never
-      title?: never
-      mediaType?: never
-      imageUrl?: never
-      showWatch?: never
-      isWatched?: never
-      onToggleWatch?: never
-      showFollow?: never
-      isFollowed?: never
-      onToggleFollow?: never
-    }
-  | {
-      isLoading?: false
-      id: number
-      title: string
-      mediaType: MediaType
-      imageUrl?: string
-      showWatch?: boolean
-      isWatched?: boolean
-      onToggleWatch?: () => void
-      showFollow?: boolean
-      isFollowed?: boolean
-      onToggleFollow?: () => void
-    }
-)
+  imageUrl?: string
 
-export function PosterCard({
-  id,
-  title,
-  mediaType,
-  imageUrl,
-  className,
-  number,
-  isLoading,
+  showWatch?: boolean
+  watchButtonText?: string
+  isWatched?: boolean
+  onToggleWatch?: () => void
 
-  showWatch = false,
-  isWatched = false,
-  onToggleWatch,
+  showFollow?: boolean
+  isFollowed?: boolean
+  onToggleFollow?: () => void
 
-  showFollow = false,
-  isFollowed = false,
-  onToggleFollow,
-}: PosterCardProps) {
-  if (isLoading) {
+  progressPercentage?: number
+}
+
+type Props = LoadingProps | LoadedProps
+
+export function PosterCard(props: Props) {
+  if (props.isLoading) {
     return (
       <div
         className={cn(
           'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl',
-          'xl:w-44opacity-0 w-32 max-w-32 min-w-32 transition-opacity duration-300 md:w-36 md:max-w-36 md:min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:max-w-44 xl:min-w-44',
-          className,
+          'w-36 max-w-36 min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
+          'opacity-0 transition-opacity duration-300',
+          props.className,
         )}
       />
     )
   }
 
+  const {
+    id,
+    title,
+    mediaType,
+    imageUrl,
+    number,
+    className,
+
+    watchButtonText,
+    showWatch = false,
+    isWatched = false,
+    onToggleWatch,
+
+    showFollow = false,
+    isFollowed = false,
+    onToggleFollow,
+
+    progressPercentage,
+  } = props
+
   return (
     <div
       className={cn(
         'group/poster relative flex aspect-2/3 flex-col gap-2',
-        'w-32 max-w-32 min-w-32 md:w-36 md:max-w-36 md:min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
+        'w-36 max-w-36 min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
         className,
       )}
     >
@@ -103,20 +106,43 @@ export function PosterCard({
             </div>
           </>
         )}
+
+        {progressPercentage && (
+          <>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/50 via-transparent to-transparent" />
+
+            <div
+              className="absolute inset-x-0 bottom-0 -mb-px flex h-11 min-h-11 w-full items-center justify-center px-3.5 backdrop-blur"
+              style={{ maskImage: 'linear-gradient(to top, black 50%, transparent)' }}
+            >
+              <div className="mt-3 h-1.5 w-full rounded-full bg-white/30">
+                <div
+                  className="h-full rounded-full bg-white transition-all duration-300"
+                  style={{ width: '70%' }}
+                  role="progressbar"
+                  aria-valuenow={70}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </Link>
 
       {showWatch && onToggleWatch && (
         <Button
           variant="frost"
-          size="iconSmall"
-          className="absolute top-2 right-2 z-10"
+          size={watchButtonText ? 'small' : 'iconSmall'}
+          className="absolute top-1 right-1 z-10 gap-2 px-2"
           onClick={e => {
             e.preventDefault()
             onToggleWatch()
           }}
           data-checked={isWatched}
-          title={isWatched ? 'Watched' : 'Mark Watched'}
+          title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
         >
+          {watchButtonText && <span className="text-sm">{watchButtonText}</span>}
           <FontAwesomeIcon icon={faEye} />
         </Button>
       )}
@@ -125,7 +151,7 @@ export function PosterCard({
         <Button
           variant="frost"
           size="iconSmall"
-          className="absolute top-2 right-2 z-10"
+          className="absolute top-1 right-1 z-10"
           onClick={e => {
             e.preventDefault()
             onToggleFollow()
@@ -133,7 +159,7 @@ export function PosterCard({
           data-checked={isFollowed}
           title={isFollowed ? 'Unfollow' : 'Follow'}
         >
-          <FontAwesomeIcon icon={faCheck} />
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
       )}
     </div>

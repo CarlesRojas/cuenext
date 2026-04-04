@@ -1,5 +1,5 @@
 import { Button } from '#/component/ui/button'
-import { faCheck, faCheckCircle, faEye, faEyeSlash, faTimes, faUndo } from '@fortawesome/free-solid-svg-icons'
+import { faCheckCircle, faEye, faEyeSlash, faMinus, faPlus, faUndo } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRef } from 'react'
 import { toast } from 'sonner'
@@ -21,12 +21,12 @@ export function useUndoToast() {
 
     switch (actionType) {
       case 'follow':
-        icon = faCheck
+        icon = faPlus
         iconClass = 'text-sky-500'
         message = `Followed ${title}`
         break
       case 'unfollow':
-        icon = faTimes
+        icon = faMinus
         iconClass = 'text-neutral-400'
         message = `Unfollowed ${title}`
         break

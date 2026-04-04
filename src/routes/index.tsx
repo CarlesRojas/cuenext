@@ -90,6 +90,7 @@ function WatchlistTvItem({ item }: { item: { tmdbId: number; nextSeasonNumber: n
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}
+      watchButtonText={`S${item.nextSeasonNumber}, E${item.nextEpisodeNumber}`}
     />
   )
 }
