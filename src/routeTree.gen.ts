@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,6 +20,11 @@ import { Route as MovieTmdbIdRouteImport } from './routes/movie/$tmdbId'
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
   path: '/upcoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/movie/$tmdbId': typeof MovieTmdbIdRoute
   '/tv/$tmdbId': typeof TvTmdbIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/movie/$tmdbId': typeof MovieTmdbIdRoute
   '/tv/$tmdbId': typeof TvTmdbIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/movie/$tmdbId': typeof MovieTmdbIdRoute
   '/tv/$tmdbId': typeof TvTmdbIdRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/explore'
     | '/profile'
+    | '/search'
     | '/upcoming'
     | '/movie/$tmdbId'
     | '/tv/$tmdbId'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/explore'
     | '/profile'
+    | '/search'
     | '/upcoming'
     | '/movie/$tmdbId'
     | '/tv/$tmdbId'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/explore'
     | '/profile'
+    | '/search'
     | '/upcoming'
     | '/movie/$tmdbId'
     | '/tv/$tmdbId'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ExploreRoute: typeof ExploreRoute
   ProfileRoute: typeof ProfileRoute
+  SearchRoute: typeof SearchRoute
   UpcomingRoute: typeof UpcomingRoute
   MovieTmdbIdRoute: typeof MovieTmdbIdRoute
   TvTmdbIdRoute: typeof TvTmdbIdRoute
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/upcoming'
       fullPath: '/upcoming'
       preLoaderRoute: typeof UpcomingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ExploreRoute: ExploreRoute,
   ProfileRoute: ProfileRoute,
+  SearchRoute: SearchRoute,
   UpcomingRoute: UpcomingRoute,
   MovieTmdbIdRoute: MovieTmdbIdRoute,
   TvTmdbIdRoute: TvTmdbIdRoute,

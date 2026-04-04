@@ -6,6 +6,7 @@ import { cn } from '#/lib/cn'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
+import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
 import z from 'zod'
 
 interface Props {
@@ -17,19 +18,40 @@ interface Props {
 
 export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, setIsExpanded }: Props) {
   const [mediaType] = useMediaType()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const router = useRouter()
 
   const formSchema = z.object({
     query: z.string(),
   })
 
   const form = useForm({
-    defaultValues: { query: '' },
+    defaultValues: { query: location.search.query ? decodeURIComponent(location.search.query) : '' },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value: { query } }) => {
-      // TODO search
-      console.log(query)
+      const sanitizedQuery = encodeURIComponent(query.trim())
+      if (sanitizedQuery)
+        navigate({
+          to: '/search',
+          replace: location.pathname === '/search',
+          search: { query: sanitizedQuery, media: mediaType },
+        })
     },
   })
+
+  const handleClear = (field: any) => {
+    field.handleChange('')
+
+    if (location.pathname === '/search') router.history.back()
+    else navigate({ to: location.pathname, replace: true, search: { media: mediaType } })
+  }
+
+  const handleInputChange = (field: any, value: string) => {
+    field.handleChange(value)
+
+    if (value.trim() === '' && location.pathname === '/search') router.history.back()
+  }
 
   if (!isMobile) {
     return (
@@ -48,9 +70,9 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                 <Input
                   placeholder={mediaType === 'movie' ? 'Search movies...' : 'Search TV shows...'}
                   value={field.state.value}
-                  onChange={e => field.handleChange(e.target.value)}
+                  onChange={e => handleInputChange(field, e.target.value)}
                   onBlur={field.handleBlur}
-                  onClear={field.state.value ? () => field.handleChange('') : undefined}
+                  onClear={field.state.value ? () => handleClear(field) : undefined}
                 />
               )
             }}
@@ -100,9 +122,9 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                 <Input
                   placeholder={mediaType === 'movie' ? 'Search movies...' : 'Search TV shows...'}
                   value={field.state.value}
-                  onChange={e => field.handleChange(e.target.value)}
+                  onChange={e => handleInputChange(field, e.target.value)}
                   onBlur={field.handleBlur}
-                  onClear={field.state.value ? () => field.handleChange('') : undefined}
+                  onClear={field.state.value ? () => handleClear(field) : undefined}
                   autoFocus
                   containerClassName="w-full"
                 />

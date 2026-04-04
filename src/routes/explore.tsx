@@ -5,12 +5,14 @@ import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { useMediaType } from '#/hooks/useMediaType'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
+import { UrlParams } from '#/type/url'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/explore')({
   component: RouteComponent,
+  validateSearch: UrlParams,
 })
 
 function RouteComponent() {

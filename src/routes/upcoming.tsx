@@ -1,8 +1,10 @@
 import { useViewportHeight } from '#/hooks/useViewportHeight'
+import { UrlParams } from '#/type/url'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/upcoming')({
   component: UpcomingPage,
+  validateSearch: UrlParams,
 })
 
 function UpcomingPage() {

@@ -1,11 +1,13 @@
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { useMediaType } from '#/hooks/useMediaType'
+import { UrlParams } from '#/type/url'
 import { SignOutButton, useUser } from '@clerk/tanstack-react-start'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/profile')({
   component: ProfilePage,
+  validateSearch: UrlParams,
 })
 
 function ProfilePage() {

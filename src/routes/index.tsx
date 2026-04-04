@@ -5,6 +5,7 @@ import WatchEpisode from '#/component/WatchEpisode'
 import WatchMovie from '#/component/WatchMovie'
 import { useMediaType } from '#/hooks/useMediaType'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
+import { UrlParams } from '#/type/url'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
@@ -12,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
   component: App,
+  validateSearch: UrlParams,
 })
 
 function App() {
