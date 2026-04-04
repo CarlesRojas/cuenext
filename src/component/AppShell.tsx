@@ -96,7 +96,7 @@ export default function AppShell({ children }: AppShellProps) {
       )}
 
       <main
-        className="relative flex size-full max-h-full min-h-full max-w-full min-w-full touch-pan-y overflow-y-auto bg-red-500 **:touch-pan-y"
+        className="relative flex size-full max-h-full min-h-full max-w-full min-w-full touch-pan-y overflow-y-auto overscroll-none bg-red-500 **:touch-pan-y"
         onScroll={onScroll}
         ref={scrollContainer}
       >
