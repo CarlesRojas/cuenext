@@ -3,6 +3,7 @@ import { PosterCard } from '#/component/PosterCard'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TvSectionItem } from '#/type/section'
+import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export default function WatchEpisode({ episode }: Props) {
+  const clerk = useClerk()
+
   const { showUndoToast } = useUndoToast()
 
   const { data: isWatched } = useQuery({
@@ -28,35 +31,44 @@ export default function WatchEpisode({ episode }: Props) {
 
   const watch = useMutation({
     mutationFn: async () => {
-      await markEpisodeWatched({
+      const wasManuallyStopped = await markEpisodeWatched({
         showTmdbId: episode.tmdbId,
         seasonNumber: episode.seasonNumber,
         episodeNumber: episode.episodeNumber,
       })
       await updateNextEpisode({ tmdbId: episode.tmdbId })
+      return wasManuallyStopped
     },
   })
 
   const unwatch = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ wasManuallyStopped }: { wasManuallyStopped?: boolean }) => {
       await unmarkEpisodeWatched({
         showTmdbId: episode.tmdbId,
         seasonNumber: episode.seasonNumber,
         episodeNumber: episode.episodeNumber,
+        wasManuallyStopped,
       })
       await updateNextEpisode({ tmdbId: episode.tmdbId })
     },
   })
 
   const handleToggleWatch = async () => {
-    const title = `S${episode.seasonNumber} E${episode.episodeNumber} of ${episode.name}`
+    if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
+
+    const title = `S${episode.seasonNumber + 1} E${episode.episodeNumber + 1} of ${episode.name}`
 
     if (isWatched) {
-      await unwatch.mutateAsync()
-      showUndoToast(title, 'unwatch', `unwatch-tv-${episode.tmdbId}`, () => watch.mutateAsync())
+      await unwatch.mutateAsync({})
+      showUndoToast(title, 'unwatch', `unwatch-tv-${episode.tmdbId}`, async () => await watch.mutateAsync())
     } else {
-      await watch.mutateAsync()
-      showUndoToast(title, 'watch', `watch-tv-${episode.tmdbId}`, () => unwatch.mutateAsync())
+      const wasManuallyStopped = await watch.mutateAsync()
+      showUndoToast(
+        title,
+        'watch',
+        `watch-tv-${episode.tmdbId}`,
+        async () => await unwatch.mutateAsync({ wasManuallyStopped: wasManuallyStopped ?? undefined }),
+      )
     }
   }
 
@@ -70,7 +82,7 @@ export default function WatchEpisode({ episode }: Props) {
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}
       isWatchLoading={watch.isPending || unwatch.isPending}
-      watchButtonText={`S${episode.seasonNumber}, E${episode.episodeNumber}`}
+      watchButtonText={`S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`}
       progressPercentage={episode.watchedPercentage}
     />
   )

@@ -1,4 +1,5 @@
 export type TvSectionItem = {
+  id: string
   tmdbId: number
   lastWatchedAt: number | null
   manuallyStopped: boolean

@@ -3,6 +3,7 @@ import { PosterCard } from '#/component/PosterCard'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { MovieSectionItem } from '#/type/section'
+import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMutation as useDbMutation } from 'convex/react'
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export default function WatchMovie({ movie }: Props) {
+  const clerk = useClerk()
+
   const { showUndoToast } = useUndoToast()
 
   const { data: isWatched } = useQuery(convexQuery(api.progress.checkMovieWatched, { tmdbId: movie.tmdbId }))
@@ -32,12 +35,14 @@ export default function WatchMovie({ movie }: Props) {
   })
 
   const handleToggleWatch = async () => {
+    if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
+
     if (isWatched) {
       await unwatch.mutateAsync()
-      showUndoToast(movie.name, 'unwatch', `unwatch-movie-${movie.tmdbId}`, () => watch.mutateAsync())
+      showUndoToast(movie.name, 'unwatch', `unwatch-movie-${movie.tmdbId}`, async () => await watch.mutateAsync())
     } else {
       await watch.mutateAsync()
-      showUndoToast(movie.name, 'watch', `watch-movie-${movie.tmdbId}`, () => unwatch.mutateAsync())
+      showUndoToast(movie.name, 'watch', `watch-movie-${movie.tmdbId}`, async () => await unwatch.mutateAsync())
     }
   }
 

@@ -45,10 +45,10 @@ export default function WatchMovie({ movie, number }: Props) {
 
     if (isFollowing) {
       await unfollow.mutateAsync({ id })
-      showUndoToast(title, 'unfollow', mediaKey, () => follow.mutateAsync({ id }))
+      showUndoToast(title, 'unfollow', mediaKey, async () => await follow.mutateAsync({ id }))
     } else {
       await follow.mutateAsync({ id })
-      showUndoToast(title, 'follow', mediaKey, () => unfollow.mutateAsync({ id }))
+      showUndoToast(title, 'follow', mediaKey, async () => await unfollow.mutateAsync({ id }))
     }
   }
 

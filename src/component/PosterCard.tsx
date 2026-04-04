@@ -122,9 +122,9 @@ export function PosterCard(props: Props) {
               <div className="mt-3 h-1.5 w-full rounded-full bg-white/30">
                 <div
                   className="h-full rounded-full bg-white transition-all duration-300"
-                  style={{ width: '70%' }}
+                  style={{ width: `${progressPercentage}%` }}
                   role="progressbar"
-                  aria-valuenow={70}
+                  aria-valuenow={progressPercentage}
                   aria-valuemin={0}
                   aria-valuemax={100}
                 />

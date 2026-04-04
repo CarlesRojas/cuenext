@@ -4,6 +4,7 @@ import { Section } from '#/component/Section'
 import WatchEpisode from '#/component/WatchEpisode'
 import WatchMovie from '#/component/WatchMovie'
 import { useMediaType } from '#/hooks/useMediaType'
+import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -47,7 +48,7 @@ function App() {
           {tvSections && tvSections.watchNext.length > 0 && (
             <Section title="Watch next">
               {tvSections.watchNext.map(item => (
-                <WatchEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.id} episode={item} />
               ))}
             </Section>
           )}
@@ -55,7 +56,7 @@ function App() {
           {tvSections && tvSections.haventStarted.length > 0 && (
             <Section title="Haven't started">
               {tvSections.haventStarted.map(item => (
-                <WatchEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.id} episode={item} />
               ))}
             </Section>
           )}
@@ -63,7 +64,13 @@ function App() {
           {tvSections && tvSections.waitingForEpisodes.length > 0 && (
             <Section title="Waiting for episodes" defaultCollapsed>
               {tvSections.waitingForEpisodes.map(item => (
-                <WatchEpisode key={item.tmdbId} episode={item} />
+                <PosterCard
+                  key={item.id}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="tv"
+                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || undefined}
+                />
               ))}
             </Section>
           )}
@@ -71,7 +78,7 @@ function App() {
           {tvSections && tvSections.stoppedWatching.length > 0 && (
             <Section title="Stopped watching" defaultCollapsed>
               {tvSections.stoppedWatching.map(item => (
-                <WatchEpisode key={item.tmdbId} episode={item} />
+                <WatchEpisode key={item.id} episode={item} />
               ))}
             </Section>
           )}
@@ -79,7 +86,13 @@ function App() {
           {tvSections && tvSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
               {tvSections.finished.map(item => (
-                <WatchEpisode key={item.tmdbId} episode={item} />
+                <PosterCard
+                  key={item.id}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="tv"
+                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || undefined}
+                />
               ))}
             </Section>
           )}
