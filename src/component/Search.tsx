@@ -7,6 +7,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
 import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import z from 'zod'
 
 interface Props {
@@ -39,6 +40,11 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
         })
     },
   })
+
+  useEffect(() => {
+    const currentQuery = location.search.query ? decodeURIComponent(location.search.query) : ''
+    form.setFieldValue('query', currentQuery)
+  }, [location.pathname, form])
 
   const handleClear = (field: any) => {
     field.handleChange('')
