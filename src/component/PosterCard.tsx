@@ -79,12 +79,14 @@ export function PosterCard(props: Props) {
       className={cn(
         'group/poster relative flex aspect-2/3 flex-col gap-2',
         'w-36 max-w-36 min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
+        isWatchLoading || isFollowLoading ? 'pointer-events-none' : '',
         className,
       )}
     >
       <Link
         to={`/${mediaType}/${id}` as LinkProps['to']}
-        className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07]"
+        className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
+        disabled={isWatchLoading || isFollowLoading}
       >
         {imageUrl ? (
           <img
@@ -143,7 +145,7 @@ export function PosterCard(props: Props) {
             e.preventDefault()
             onToggleWatch()
           }}
-          data-checked={isWatched}
+          data-checked={!isWatchLoading && isWatched}
           title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
           disabled={isWatchLoading}
         >
@@ -161,7 +163,7 @@ export function PosterCard(props: Props) {
             e.preventDefault()
             onToggleFollow()
           }}
-          data-checked={isFollowed}
+          data-checked={!isFollowLoading && isFollowed}
           title={isFollowed ? 'Unfollow' : 'Follow'}
           disabled={isFollowLoading}
         >

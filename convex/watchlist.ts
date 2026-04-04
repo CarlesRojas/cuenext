@@ -50,7 +50,7 @@ export const getTvSections = query({
       else watchNext.push(item)
     }
 
-    watchNext.sort((a, b) => (b.lastWatchedAt || 0) - (a.lastWatchedAt || 0))
+    watchNext.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     haventStarted.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     stoppedWatching.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     finished.sort((a, b) => (b.lastWatchedAt || 0) - (a.lastWatchedAt || 0))
