@@ -26,14 +26,16 @@ export function useViewportHeight(): ViewportInfo {
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', updateViewport)
+
       return () => {
         window.visualViewport?.removeEventListener('resize', updateViewport)
       }
-    } else {
-      window.addEventListener('resize', updateViewport)
-      return () => {
-        window.removeEventListener('resize', updateViewport)
-      }
+    }
+
+    window.addEventListener('resize', updateViewport)
+
+    return () => {
+      window.removeEventListener('resize', updateViewport)
     }
   }, [])
 

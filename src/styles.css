@@ -13,36 +13,6 @@
 @custom-variant mouse (@media (hover: hover) and (pointer: fine));
 
 @layer components {
-  .full-page {
-    @apply w-dvw max-w-dvw min-w-dvw overflow-hidden;
-    height: 100vh;
-    height: 100dvh;
-    height: var(--app-height, 100vh);
-
-    max-height: 100vh;
-    max-height: 100dvh;
-    max-height: var(--app-height, 100vh);
-
-    min-height: 100vh;
-    min-height: 100dvh;
-    min-height: var(--app-height, 100vh);
-  }
-
-  .full-page-visual {
-    @apply w-dvw max-w-dvw min-w-dvw overflow-hidden;
-    height: 100vh;
-    height: 100svh;
-    height: var(--visual-height, 100vh);
-
-    max-height: 100vh;
-    max-height: 100svh;
-    max-height: var(--visual-height, 100vh);
-
-    min-height: 100vh;
-    min-height: 100svh;
-    min-height: var(--visual-height, 100vh);
-  }
-
   .screen-px {
     @apply md:pl-aside px-4 md:px-8;
   }

@@ -1,4 +1,3 @@
-import { useMediaType } from '#/hooks/useMediaType'
 import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -7,7 +6,7 @@ export const Route = createFileRoute('/upcoming')({
 })
 
 function UpcomingPage() {
-  const [mediaType] = useMediaType()
+  // const [mediaType] = useMediaType()
   const { visualHeight, fullHeight, isKeyboardOpen } = useViewportHeight()
 
   return (
