@@ -1,5 +1,6 @@
 import { api } from '#/../convex/_generated/api'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
+import { SearchEpisode } from '#/component/SearchEpisode'
 import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { UrlParams } from '#/type/url'
@@ -39,12 +40,13 @@ function RouteComponent() {
       </header>
 
       <div className="page-width relative w-full">
-        {search.query && (
+        {search.query && mediaType === 'tv' && (
           <InfiniteMediaList
-            action={mediaType === 'tv' ? api.tmdb.searchTv : api.tmdb.searchMovies}
-            actionKey={mediaType === 'tv' ? 'searchTv' : 'searchMovies'}
+            action={api.tmdb.searchTv}
+            actionKey={'searchTv'}
             params={{ query: search.query }}
-            mediaType={mediaType}
+            Component={SearchEpisode}
+            LoadingComponent={<SearchEpisode isLoading />}
           />
         )}
 

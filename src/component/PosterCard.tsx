@@ -45,7 +45,7 @@ export function PosterCard(props: Props) {
         className={cn(
           'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl',
           'w-36 max-w-36 min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
-          'opacity-0 transition-opacity duration-300',
+          'transition-opacity duration-300',
           props.className,
         )}
       />
