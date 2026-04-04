@@ -6,11 +6,12 @@ import type { ComponentProps } from 'react'
 
 type Props = ComponentProps<'input'> & {
   onClear?: () => void
+  containerClassName?: string
 }
 
-function Input({ className, type, onClear, ...props }: Props) {
+function Input({ className, containerClassName, type, onClear, ...props }: Props) {
   return (
-    <div className={cn('group relative z-10 h-11 max-h-11 min-h-11 w-fit')}>
+    <div className={cn('group relative z-10 h-11 max-h-11 min-h-11 w-fit', containerClassName)}>
       <input
         type={type}
         data-slot="input"

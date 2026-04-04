@@ -1,5 +1,6 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
 import { MediaTypeSelector } from '#/component/MediaTypeSelector'
+import MobileNavbar from '#/component/MobileNavbar'
 import { Search } from '#/component/Search'
 import { User } from '#/component/User'
 import { cn } from '#/lib/cn'
@@ -19,7 +20,7 @@ type NavItem = {
   icon: IconDefinition
 }
 
-const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Watchlist', icon: faCirclePlay },
   { to: '/upcoming', label: 'Upcoming', icon: faCalendarDays },
   { to: '/explore', label: 'Explore', icon: faCompass },
@@ -99,50 +100,7 @@ export default function AppShell({ children }: AppShellProps) {
         </div>
       </main>
 
-      {isMobile && (
-        <>
-          <div
-            className={cn(
-              'fixed top-3 right-3 left-3 z-50 flex h-fit items-center justify-between gap-3 opacity-100 transition-opacity',
-              !showHeader && 'pointer-events-none! opacity-0',
-            )}
-          >
-            <MediaTypeSelector isMobile />
-            <User isMobile />
-          </div>
-
-          <div className="fixed right-0 bottom-0 left-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden">
-            <LiquidGlass className="relative w-full rounded-full bg-neutral-800/40">
-              {NAV_ITEMS.map(item => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  activeProps={{ className: 'text-sky-500' }}
-                  inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
-                  className="relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-colors"
-                >
-                  {({ isActive }) => (
-                    <>
-                      {isActive && (
-                        <motion.div
-                          layoutId="nav-indicator"
-                          className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
-                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        />
-                      )}
-
-                      <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
-                      <span className="z-60 text-[9px] leading-2 font-bold">{item.label}</span>
-                    </>
-                  )}
-                </Link>
-              ))}
-            </LiquidGlass>
-
-            <Search isMobile />
-          </div>
-        </>
-      )}
+      {isMobile && <MobileNavbar showHeader={showHeader} />}
     </ClientOnly>
   )
 }
