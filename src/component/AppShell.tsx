@@ -54,7 +54,7 @@ export default function AppShell({ children }: AppShellProps) {
           style={{ height: visualHeight }}
         >
           <LiquidGlass className="relative h-full w-full rounded-3xl bg-neutral-800/40">
-            <div className="flex h-full w-full touch-pan-y flex-col items-start justify-between gap-8 overflow-y-auto p-4">
+            <div className="scroll-container flex h-full w-full flex-col items-start justify-between gap-8 p-4">
               <div className="relative mt-10 flex w-full flex-col gap-8">
                 <Search />
 
@@ -96,7 +96,7 @@ export default function AppShell({ children }: AppShellProps) {
       )}
 
       <main
-        className="relative flex size-full max-h-full min-h-full max-w-full min-w-full touch-pan-y overflow-y-auto overscroll-none bg-red-500 **:touch-pan-y"
+        className="scroll-container relative flex size-full max-h-full min-h-full max-w-full min-w-full bg-red-500"
         onScroll={onScroll}
         ref={scrollContainer}
       >
