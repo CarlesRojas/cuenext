@@ -20,6 +20,7 @@ export default function WatchMovie({ movie, number }: Props) {
 
   const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
     ...convexQuery(api.library.listFollowed, { type: 'movie' }),
+    enabled: clerk.isSignedIn,
   })
 
   const markAsFollowed = useDbMutation(api.library.follow)

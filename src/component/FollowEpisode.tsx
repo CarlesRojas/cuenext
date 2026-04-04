@@ -20,6 +20,7 @@ export default function FollowEpisode({ episode, number }: Props) {
 
   const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
     ...convexQuery(api.library.listFollowed, { type: 'tv' }),
+    enabled: clerk.isSignedIn,
   })
 
   const markAsFollowed = useDbMutation(api.library.follow)

@@ -5,6 +5,7 @@ import WatchEpisode from '#/component/WatchEpisode'
 import WatchMovie from '#/component/WatchMovie'
 import { useMediaType } from '#/hooks/useMediaType'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
+import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -14,16 +15,17 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
+  const clerk = useClerk()
   const [mediaType] = useMediaType()
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections, {}),
-    enabled: mediaType === 'tv',
+    enabled: mediaType === 'tv' && clerk.isSignedIn,
   })
 
   const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getMovieSections, {}),
-    enabled: mediaType === 'movie',
+    enabled: mediaType === 'movie' && clerk.isSignedIn,
   })
 
   return (
