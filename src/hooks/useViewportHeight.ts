@@ -15,6 +15,8 @@ export function useViewportHeight(): ViewportInfo {
 
     const html = document.documentElement
     html.style.setProperty('height', `${visualHeight}px`)
+    html.style.setProperty('max-height', `${visualHeight}px`)
+    html.style.setProperty('min-height', `${visualHeight}px`)
 
     return { visualHeight, fullHeight, isKeyboardOpen: fullHeight - visualHeight > 100 }
   })
@@ -25,6 +27,8 @@ export function useViewportHeight(): ViewportInfo {
 
     const html = document.documentElement
     html.style.setProperty('height', `${visualHeight}px`)
+    html.style.setProperty('max-height', `${visualHeight}px`)
+    html.style.setProperty('min-height', `${visualHeight}px`)
 
     setViewport({ visualHeight, fullHeight, isKeyboardOpen: fullHeight - visualHeight > 100 })
   }, [])
