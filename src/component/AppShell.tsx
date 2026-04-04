@@ -47,49 +47,45 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <ClientOnly>
       {!isMobile && (
-        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 p-3 md:block">
-          <LiquidGlass
-            className="relative h-full w-72 max-w-72 min-w-72 rounded-3xl bg-neutral-800/40"
-            wrapperClassName="flex-col justify-between items-start p-4 "
-          >
-            <div className="relative mt-10 flex w-full flex-col gap-8">
-              <nav className="flex w-full flex-col gap-2">
-                {NAV_ITEMS.map(item => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    activeProps={{ className: 'text-sky-500' }}
-                    inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
-                    className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {isActive && (
-                          <motion.div
-                            layoutId="nav-indicator"
-                            className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                          />
-                        )}
+        <aside className="fixed top-0 bottom-0 left-0 z-50 hidden w-72 max-w-72 min-w-72 p-3 transition-[bottom] md:block">
+          <LiquidGlass className="relative h-full w-full rounded-3xl bg-neutral-800/40">
+            <div className="flex h-full w-full flex-col items-start justify-between overflow-y-auto p-4">
+              <div className="relative mt-10 flex w-full flex-col gap-8">
+                <nav className="flex w-full flex-col gap-2">
+                  {NAV_ITEMS.map(item => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      activeProps={{ className: 'text-sky-500' }}
+                      inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
+                      className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive && (
+                            <motion.div
+                              layoutId="nav-indicator"
+                              className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                            />
+                          )}
 
-                        <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
-                        <span className="z-60 font-semibold">{item.label}</span>
-                      </>
-                    )}
-                  </Link>
-                ))}
-              </nav>
+                          <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
+                          <span className="z-60 font-semibold">{item.label}</span>
+                        </>
+                      )}
+                    </Link>
+                  ))}
+                </nav>
 
-              <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
+                <Search />
 
-              <MediaTypeSelector />
+                <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
+                <MediaTypeSelector />
+              </div>
 
-              <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
-
-              <Search />
+              <User />
             </div>
-
-            <User />
           </LiquidGlass>
         </aside>
       )}
