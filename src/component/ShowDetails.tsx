@@ -1,10 +1,11 @@
 import { Button } from '#/component/ui/button'
 import { useFavoriteEpisode } from '#/hooks/useFavoriteEpisode'
 import { useFollowEpisode } from '#/hooks/useFollowEpisode'
+import { useStopEpisode } from '#/hooks/useStopEpisode'
 import { cn } from '#/lib/cn'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbTv } from '#/type/tmdb'
-import { faHeart, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faHeart, faMinus, faPlay, faPlus, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface ShowDetailsProps {
@@ -23,15 +24,13 @@ export function ShowDetails({ show }: ShowDetailsProps) {
     status,
     seasons: seasonsWithSpecials,
     genres,
-    vote_average,
-    vote_count,
     tagline,
   } = show
 
   const { isFollowed, isLoading: isFollowLoading, toggleFollow } = useFollowEpisode(show)
   const { isFavorited, isLoading: isFavoriteLoading, toggleFavorite } = useFavoriteEpisode(show)
+  const { isStopped, isStoppedLoading, toggleStopped } = useStopEpisode(show)
 
-  const specials = seasonsWithSpecials?.filter(season => season.season_number === 0)
   const seasons = seasonsWithSpecials?.filter(season => season.season_number !== 0)
   const numberOfSeasons = seasons?.length || number_of_seasons || null
   const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
@@ -92,11 +91,23 @@ export function ShowDetails({ show }: ShowDetailsProps) {
 
         {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
 
-        <div className="flex max-w-3xl flex-wrap gap-4">
+        <div className="flex max-w-3xl flex-wrap gap-2">
           <Button variant="secondary" onClick={() => toggleFollow(id, name)} disabled={isFollowLoading}>
             <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
             <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
           </Button>
+
+          {!isFollowLoading && isFollowed && (
+            <Button
+              variant="secondary"
+              onClick={() => toggleStopped(id, name)}
+              disabled={isStoppedLoading}
+              data-state={!isStoppedLoading && isStopped ? 'on' : 'off'}
+            >
+              <FontAwesomeIcon icon={isStopped ? faPlay : faStop} className="size-5" />
+              <span>{isStopped ? 'Resume Watching' : 'Stop Watching'}</span>
+            </Button>
+          )}
 
           {!isFollowLoading && isFollowed && (
             <Button

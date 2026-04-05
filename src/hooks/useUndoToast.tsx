@@ -7,6 +7,7 @@ import {
   faHeartBroken,
   faMinus,
   faPlus,
+  faStop,
   faUndo,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -14,7 +15,15 @@ import type { ReactNode } from 'react'
 import { createContext, useContext, useRef } from 'react'
 import { toast } from 'sonner'
 
-export type ToastActionType = 'follow' | 'unfollow' | 'watch' | 'unwatch' | 'favorite' | 'unfavorite'
+export type ToastActionType =
+  | 'follow'
+  | 'unfollow'
+  | 'watch'
+  | 'unwatch'
+  | 'favorite'
+  | 'unfavorite'
+  | 'stop'
+  | 'unstop'
 
 interface ToastContextType {
   showUndoToast: (title: string, actionType: ToastActionType, idKey: string, onUndo: () => void) => void
@@ -69,6 +78,16 @@ export function ToastProvider({ children }: ToastProviderProps) {
         icon = faHeartBroken
         iconClass = 'text-neutral-400'
         message = `Unfavorited ${title}`
+        break
+      case 'stop':
+        icon = faStop
+        iconClass = 'text-red-500'
+        message = `Stopped ${title}`
+        break
+      case 'unstop':
+        icon = faStop
+        iconClass = 'text-neutral-400'
+        message = `Unstopped ${title}`
         break
     }
 
