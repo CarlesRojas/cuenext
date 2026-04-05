@@ -89,7 +89,8 @@ function RouteComponent() {
       {mediaType === 'tv' ? (
         <>
           <Section title="Dropping This Week" canCollapse={false}>
-            {onTheAirShows && onTheAirShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} />)}
+            {onTheAirShows &&
+              onTheAirShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
 
             {!onTheAirShows &&
               onTheAirShowsLoading &&
@@ -100,7 +101,9 @@ function RouteComponent() {
             {top10Shows &&
               top10Shows.results
                 .slice(0, 10)
-                .map((tv: TmdbTv, index: number) => <FollowEpisode key={tv.id} episode={tv} number={index + 1} />)}
+                .map((tv: TmdbTv, index: number) => (
+                  <FollowEpisode key={tv.id} episode={tv} number={index + 1} variant="poster" />
+                ))}
 
             {!top10Shows &&
               top10ShowsLoading &&
@@ -108,7 +111,8 @@ function RouteComponent() {
           </Section>
 
           <Section title="Top Rated Shows" canCollapse={false}>
-            {topRatedShows && topRatedShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} />)}
+            {topRatedShows &&
+              topRatedShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
 
             {!topRatedShows &&
               topRatedShowsLoading &&
@@ -119,7 +123,9 @@ function RouteComponent() {
         <>
           <Section title="Upcoming Movies" canCollapse={false}>
             {upcomingMovies &&
-              upcomingMovies.results.map((movie: TmdbMovie) => <FollowMovie key={movie.id} movie={movie} />)}
+              upcomingMovies.results.map((movie: TmdbMovie) => (
+                <FollowMovie key={movie.id} movie={movie} variant="poster" />
+              ))}
 
             {!upcomingMovies &&
               upcomingMoviesLoading &&
@@ -131,7 +137,7 @@ function RouteComponent() {
               top10Movies.results
                 .slice(0, 10)
                 .map((movie: TmdbMovie, index: number) => (
-                  <FollowMovie key={movie.id} movie={movie} number={index + 1} />
+                  <FollowMovie key={movie.id} movie={movie} number={index + 1} variant="poster" />
                 ))}
 
             {!top10Movies &&
@@ -141,7 +147,9 @@ function RouteComponent() {
 
           <Section title="Top Rated Movies" canCollapse={false}>
             {topRatedMovies &&
-              topRatedMovies.results.map((movie: TmdbMovie) => <FollowMovie key={movie.id} movie={movie} />)}
+              topRatedMovies.results.map((movie: TmdbMovie) => (
+                <FollowMovie key={movie.id} movie={movie} variant="poster" />
+              ))}
 
             {!topRatedMovies &&
               topRatedMoviesLoading &&
