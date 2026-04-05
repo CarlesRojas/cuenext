@@ -1,7 +1,7 @@
 import { Button } from '#/component/ui/button'
 import type { MediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
-import { faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faClapperboard, faPlus, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
@@ -96,7 +96,13 @@ export default function RowCard(props: Props) {
             />
           </>
         ) : (
-          <div className="flex aspect-2/3 h-full items-center justify-center rounded-[22px] bg-neutral-900 text-center text-base text-neutral-500 lg:hidden" />
+          <div className="flex aspect-2/3 h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:hidden">
+            <FontAwesomeIcon
+              icon={mediaType === 'movie' ? faClapperboard : faTv}
+              size="6x"
+              className="max-w-10 opacity-40"
+            />
+          </div>
         )}
 
         {backdropUrl ? (
@@ -116,7 +122,13 @@ export default function RowCard(props: Props) {
             />
           </>
         ) : (
-          <div className="hidden aspect-video h-full items-center justify-center rounded-[22px] bg-neutral-900 text-center text-base text-neutral-500 lg:block" />
+          <div className="hidden aspect-video h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:flex">
+            <FontAwesomeIcon
+              icon={mediaType === 'movie' ? faClapperboard : faTv}
+              size="6x"
+              className="max-w-10 opacity-40"
+            />
+          </div>
         )}
 
         <div className="flex flex-col justify-between p-3 lg:p-4">
