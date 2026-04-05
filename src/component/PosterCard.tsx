@@ -29,6 +29,7 @@ interface LoadedProps extends CommonProps {
   isWatchLoading?: boolean
 
   showFollow?: boolean
+  followButtonText?: string
   isFollowed?: boolean
   onToggleFollow?: () => void
   isFollowLoading?: boolean
@@ -43,7 +44,7 @@ export function PosterCard(props: Props) {
     return (
       <div
         className={cn(
-          'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl',
+          'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl',
           'w-36 max-w-36 min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
           'transition-opacity duration-300',
           props.className,
@@ -53,12 +54,14 @@ export function PosterCard(props: Props) {
   }
 
   const {
+    className,
+
     id,
     title,
     mediaType,
     imageUrl,
     number,
-    className,
+    progressPercentage,
 
     watchButtonText,
     showWatch = false,
@@ -66,12 +69,11 @@ export function PosterCard(props: Props) {
     onToggleWatch,
     isWatchLoading = false,
 
+    followButtonText,
     showFollow = false,
     isFollowed = false,
     onToggleFollow,
     isFollowLoading = false,
-
-    progressPercentage,
   } = props
 
   return (
@@ -85,7 +87,7 @@ export function PosterCard(props: Props) {
     >
       <Link
         to={`/${mediaType}/${id}` as LinkProps['to']}
-        className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-2xl border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
+        className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
         disabled={isWatchLoading || isFollowLoading}
       >
         {imageUrl ? (
@@ -152,8 +154,8 @@ export function PosterCard(props: Props) {
       {showFollow && onToggleFollow && (
         <Button
           variant="frost"
-          size="iconSmall"
-          className="absolute top-1 right-1 z-10 disabled:opacity-100"
+          size={followButtonText ? 'small' : 'iconSmall'}
+          className="absolute top-1 right-1 z-10 gap-2 px-2 disabled:opacity-100"
           onClick={e => {
             e.preventDefault()
             onToggleFollow()
@@ -162,6 +164,7 @@ export function PosterCard(props: Props) {
           title={isFollowed ? 'Unfollow' : 'Follow'}
           disabled={isFollowLoading}
         >
+          {followButtonText && <span className="text-sm">{followButtonText}</span>}
           <FontAwesomeIcon icon={isFollowLoading ? faSpinner : faPlus} spin={isFollowLoading} />
         </Button>
       )}

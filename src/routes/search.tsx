@@ -1,8 +1,10 @@
 import { api } from '#/../convex/_generated/api'
+import FollowEpisode from '#/component/FollowEpisode'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
-import { SearchEpisode } from '#/component/SearchEpisode'
+import RowCard from '#/component/RowCard'
 import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
+import type { TmdbTvMinimal } from '#/type/tmdb'
 import { UrlParams } from '#/type/url'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,6 +14,10 @@ export const Route = createFileRoute('/search')({
   component: RouteComponent,
   validateSearch: UrlParams,
 })
+
+function EpisodeWrapper(props: TmdbTvMinimal) {
+  return <FollowEpisode episode={props} variant="row" followButtonText="Follow" />
+}
 
 function RouteComponent() {
   const router = useRouter()
@@ -45,8 +51,8 @@ function RouteComponent() {
             action={api.tmdb.searchTv}
             actionKey={'searchTv'}
             params={{ query: search.query }}
-            Component={SearchEpisode}
-            LoadingComponent={<SearchEpisode isLoading />}
+            Component={EpisodeWrapper}
+            LoadingComponent={<RowCard isLoading />}
           />
         )}
 

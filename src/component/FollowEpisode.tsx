@@ -1,28 +1,64 @@
 import { PosterCard } from '#/component/PosterCard'
+import RowCard from '#/component/RowCard'
 import { useFollowEpisode } from '#/hooks/useFollowEpisode'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
-import type { TmdbTv } from '#/type/tmdb'
+import type { TmdbTvMinimal } from '#/type/tmdb'
 
 interface Props {
-  episode: TmdbTv
+  episode: TmdbTvMinimal
+  variant: 'poster' | 'row'
   number?: number
+  followButtonText?: string
 }
 
-export default function FollowEpisode({ episode, number }: Props) {
+export default function FollowEpisode({ episode, variant, number, followButtonText }: Props) {
   const { isFollowed, isLoading, toggleFollow } = useFollowEpisode(episode)
+
+  const { id, name, overview, poster_path, backdrop_path, first_air_date } = episode
+
+  const posterUrl = getTmdbImageUrl(poster_path, 'w342') || getTmdbImageUrl(poster_path, 'original') || undefined
+
+  if (variant === 'row') {
+    const backdropUrl =
+      getTmdbImageUrl(backdrop_path, 'w780') || getTmdbImageUrl(backdrop_path, 'original') || undefined
+
+    const releaseDate = first_air_date ? new Date(first_air_date) : null
+    const formattedReleaseDate = releaseDate
+      ? releaseDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+      : undefined
+
+    return (
+      <RowCard
+        mediaType="tv"
+        key={id}
+        id={id}
+        title={name}
+        posterUrl={posterUrl}
+        backdropUrl={backdropUrl}
+        releaseDate={formattedReleaseDate}
+        overview={overview}
+        showFollow
+        isFollowed={isFollowed}
+        onToggleFollow={() => toggleFollow(id, name)}
+        isFollowLoading={isLoading}
+        followButtonText={followButtonText}
+      />
+    )
+  }
 
   return (
     <PosterCard
       mediaType="tv"
-      key={episode.id}
-      id={episode.id}
-      title={episode.name}
-      imageUrl={getTmdbImageUrl(episode.poster_path, 'w342') || undefined}
-      showFollow
+      key={id}
+      id={id}
+      title={name}
+      imageUrl={posterUrl}
       number={number}
+      showFollow
       isFollowed={isFollowed}
-      onToggleFollow={() => toggleFollow(episode.id, episode.name)}
+      onToggleFollow={() => toggleFollow(id, name)}
       isFollowLoading={isLoading}
+      followButtonText={followButtonText}
     />
   )
 }
