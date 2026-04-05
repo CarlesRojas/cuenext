@@ -15,7 +15,7 @@ export default function WatchEpisode({ episode }: Props) {
       id={episode.tmdbId}
       title={episode.name}
       mediaType="tv"
-      imageUrl={getTmdbImageUrl(episode.poster, 'w342') || undefined}
+      imageUrl={getTmdbImageUrl(episode.poster, 'w342') || getTmdbImageUrl(episode.poster, 'original')}
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}

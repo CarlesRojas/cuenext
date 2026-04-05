@@ -15,8 +15,7 @@ interface UpcomingEpisodeItem {
 export default function UpcomingEpisode(props: UpcomingEpisodeItem) {
   const { tmdbId, name, episode, airDate } = props
 
-  const posterUrl =
-    getTmdbImageUrl(episode.poster_path, 'w342') || getTmdbImageUrl(episode.poster_path, 'original') || undefined
+  const posterUrl = getTmdbImageUrl(episode.poster_path, 'w342') || getTmdbImageUrl(episode.poster_path, 'original')
 
   const backdropUrl =
     getTmdbImageUrl(episode.backdrop_path, 'w780') || getTmdbImageUrl(episode.backdrop_path, 'original') || posterUrl

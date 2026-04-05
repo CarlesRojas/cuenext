@@ -15,7 +15,7 @@ export default function WatchMovie({ movie }: Props) {
       id={movie.tmdbId}
       title={movie.name}
       mediaType="movie"
-      imageUrl={getTmdbImageUrl(movie.poster, 'w342') || undefined}
+      imageUrl={getTmdbImageUrl(movie.poster, 'w342') || getTmdbImageUrl(movie.poster, 'original')}
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}

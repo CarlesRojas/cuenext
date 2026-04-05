@@ -15,8 +15,7 @@ interface UpcomingMovieItem {
 export default function UpcomingMovie(props: UpcomingMovieItem) {
   const { tmdbId, name, movie, airDate } = props
 
-  const posterUrl =
-    getTmdbImageUrl(movie.poster_path, 'w342') || getTmdbImageUrl(movie.poster_path, 'original') || undefined
+  const posterUrl = getTmdbImageUrl(movie.poster_path, 'w342') || getTmdbImageUrl(movie.poster_path, 'original')
 
   const backdropUrl =
     getTmdbImageUrl(movie.backdrop_path, 'w780') || getTmdbImageUrl(movie.backdrop_path, 'original') || posterUrl

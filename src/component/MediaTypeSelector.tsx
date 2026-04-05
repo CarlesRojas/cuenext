@@ -4,6 +4,7 @@ import { useMediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
 import { faClapperboard, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useLocation } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 
 interface MediaTypeSelectorProps {
@@ -11,10 +12,19 @@ interface MediaTypeSelectorProps {
 }
 
 export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) {
+  const location = useLocation()
   const [mediaType, setMediaType] = useMediaType()
 
+  const hide = location.pathname.startsWith('/tv') || location.pathname.startsWith('/movie')
+
   return (
-    <LiquidGlass className={cn('relative w-fit rounded-full bg-neutral-800/40', !isMobile && 'w-full')}>
+    <LiquidGlass
+      className={cn(
+        'relative w-fit rounded-full bg-neutral-800/40 transition-opacity duration-300',
+        !isMobile && 'w-full',
+        hide && 'pointer-events-none opacity-0',
+      )}
+    >
       <div
         className={cn(
           'flex h-11 max-h-11 min-h-11 w-fit flex-row items-center rounded-full border border-neutral-700/50 bg-neutral-800/80 backdrop-blur-md',

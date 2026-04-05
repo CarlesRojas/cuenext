@@ -91,7 +91,7 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   mediaType="tv"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || undefined}
+                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
             </Section>
@@ -113,9 +113,7 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   mediaType="tv"
-                  imageUrl={
-                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
-                  }
+                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
             </Section>
@@ -148,9 +146,7 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   mediaType="movie"
-                  imageUrl={
-                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
-                  }
+                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
             </Section>

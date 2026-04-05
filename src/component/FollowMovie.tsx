@@ -16,7 +16,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
 
   const { id, title, overview, poster_path, backdrop_path, release_date } = movie
 
-  const posterUrl = getTmdbImageUrl(poster_path, 'w342') || getTmdbImageUrl(poster_path, 'original') || undefined
+  const posterUrl = getTmdbImageUrl(poster_path, 'w342') || getTmdbImageUrl(poster_path, 'original')
 
   if (variant === 'row') {
     const backdropUrl =
