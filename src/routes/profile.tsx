@@ -6,7 +6,7 @@ import { cn } from '#/lib/cn'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { UrlParams } from '#/type/url'
 import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
-import { convexQuery, useConvexAction } from '@convex-dev/react-query'
+import { convexAction, convexQuery } from '@convex-dev/react-query'
 import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
@@ -74,30 +74,39 @@ function ProfilePage() {
   const [mediaType] = useMediaType()
   const clerk = useClerk()
   const { user } = useUser()
-  const getMovieStats = useConvexAction(api.stats.getMovieStats)
-  const getShowStats = useConvexAction(api.stats.getShowStats)
 
   const { data: showStats } = useQuery({
-    queryKey: ['stats-tv', user?.id],
-    queryFn: () => getShowStats(),
+    ...convexAction(api.stats.getShowStats),
     enabled: !!user && mediaType === 'tv',
   })
 
   const { data: movieStats } = useQuery({
-    queryKey: ['stats-movie', user?.id],
-    queryFn: () => getMovieStats(),
+    ...convexAction(api.stats.getMovieStats),
     enabled: !!user && mediaType === 'movie',
   })
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
-    ...convexQuery(api.watchlist.getTvSections, {}),
+    ...convexQuery(api.watchlist.getTvSections),
     enabled: mediaType === 'tv' && clerk.isSignedIn,
   })
 
   const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
-    ...convexQuery(api.watchlist.getMovieSections, {}),
+    ...convexQuery(api.watchlist.getMovieSections),
     enabled: mediaType === 'movie' && clerk.isSignedIn,
   })
+
+  const { data: favoriteShows, isPending: favoriteShowsLoading } = useQuery({
+    ...convexQuery(api.favorites.getFavoriteShows),
+    enabled: mediaType === 'tv' && clerk.isSignedIn,
+  })
+
+  const { data: favoriteMovies, isPending: favoriteMoviesLoading } = useQuery({
+    ...convexQuery(api.favorites.getFavoriteMovies),
+    enabled: mediaType === 'movie' && clerk.isSignedIn,
+  })
+
+  const isLoadingShows = tvSectionsLoading || favoriteShowsLoading
+  const isLoadingMovies = movieSectionsLoading || favoriteMoviesLoading
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
@@ -204,59 +213,107 @@ function ProfilePage() {
       <div className="flex flex-col gap-6">
         {mediaType === 'tv' && (
           <>
-            {tvSectionsLoading &&
+            {isLoadingShows &&
               ['Finished Shows', 'Favorite Shows'].map((title, i) => (
                 <Section title={title} key={i}>
-                  {Array.from({ length: 10 }).map((_, epispdeIndex) => (
-                    <PosterCard key={epispdeIndex} isLoading />
+                  {Array.from({ length: 10 }).map((_, episodeIndex) => (
+                    <PosterCard key={episodeIndex} isLoading />
                   ))}
                 </Section>
               ))}
 
-            {tvSections && tvSections.finished.length > 0 && (
-              <Section title="Finished Shows">
-                {tvSections.finished.map(item => (
-                  <PosterCard
-                    key={item.id}
-                    id={item.tmdbId}
-                    title={item.name}
-                    mediaType="tv"
-                    imageUrl={
-                      getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
-                    }
-                  />
-                ))}
-              </Section>
-            )}
+            <Section title="Finished Shows">
+              {tvSections?.finished.map(item => (
+                <PosterCard
+                  key={item.id}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="tv"
+                  imageUrl={
+                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                  }
+                />
+              ))}
+
+              {tvSections && tvSections.finished.length === 0 && (
+                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
+                  Your finished shows will appear here.
+                </p>
+              )}
+            </Section>
+
+            <Section title="Favorite Shows">
+              {favoriteShows?.map(item => (
+                <PosterCard
+                  key={item.id}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="tv"
+                  imageUrl={
+                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                  }
+                />
+              ))}
+
+              {favoriteShows && favoriteShows.length === 0 && (
+                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
+                  Your favorite shows will appear here.
+                </p>
+              )}
+            </Section>
           </>
         )}
 
         {mediaType === 'movie' && (
           <>
-            {movieSectionsLoading &&
+            {isLoadingMovies &&
               ['Finished Movies', 'Favorite Movies'].map((title, i) => (
                 <Section title={title} key={i}>
-                  {Array.from({ length: 10 }).map((_, epispdeIndex) => (
-                    <PosterCard key={epispdeIndex} isLoading />
+                  {Array.from({ length: 10 }).map((_, episodeIndex) => (
+                    <PosterCard key={episodeIndex} isLoading />
                   ))}
                 </Section>
               ))}
 
-            {movieSections && movieSections.finished.length > 0 && (
-              <Section title="Finished Movies">
-                {movieSections.finished.map(item => (
-                  <PosterCard
-                    key={item.tmdbId}
-                    id={item.tmdbId}
-                    title={item.name}
-                    mediaType="movie"
-                    imageUrl={
-                      getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
-                    }
-                  />
-                ))}
-              </Section>
-            )}
+            <Section title="Finished Movies">
+              {movieSections?.finished.map(item => (
+                <PosterCard
+                  key={item.tmdbId}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="movie"
+                  imageUrl={
+                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                  }
+                />
+              ))}
+
+              {movieSections && movieSections.finished.length === 0 && (
+                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
+                  Your finished movies will appear here.
+                </p>
+              )}
+            </Section>
+
+            <Section title="Favorite Movies">
+              {favoriteMovies?.map(item => (
+                <PosterCard
+                  key={item.tmdbId}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="movie"
+                  imageUrl={
+                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                  }
+                />
+              ))}
+
+              {favoriteMovies && favoriteMovies.length === 0 && (
+                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
+                  Your favorite movies will appear here.
+                </p>
+              )}
+            </Section>
           </>
         )}
       </div>

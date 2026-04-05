@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as favorites from "../favorites.js";
 import type * as lib_tmdbClient from "../lib/tmdbClient.js";
 import type * as library from "../library.js";
 import type * as nextEpisode from "../nextEpisode.js";
@@ -26,6 +27,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  favorites: typeof favorites;
   "lib/tmdbClient": typeof lib_tmdbClient;
   library: typeof library;
   nextEpisode: typeof nextEpisode;

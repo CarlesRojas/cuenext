@@ -11,9 +11,11 @@ export default defineSchema({
     backdrop: v.union(v.string(), v.null()),
     followedAt: v.number(),
     manuallyStopped: v.boolean(),
+    favorite: v.optional(v.boolean()),
   })
     .index('by_user_type', ['userId', 'type'])
     .index('by_user_type_manually_stopped', ['userId', 'type', 'manuallyStopped'])
+    .index('by_user_type_favorite', ['userId', 'type', 'favorite'])
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
 
   movie: defineTable({
