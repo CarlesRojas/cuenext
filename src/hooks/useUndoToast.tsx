@@ -1,11 +1,20 @@
 import { Button } from '#/component/ui/button'
-import { faCheckCircle, faEye, faEyeSlash, faMinus, faPlus, faUndo } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCheckCircle,
+  faEye,
+  faEyeSlash,
+  faHeart,
+  faHeartBroken,
+  faMinus,
+  faPlus,
+  faUndo,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useRef } from 'react'
 import { toast } from 'sonner'
 
-export type ToastActionType = 'follow' | 'unfollow' | 'watch' | 'unwatch'
+export type ToastActionType = 'follow' | 'unfollow' | 'watch' | 'unwatch' | 'favorite' | 'unfavorite'
 
 interface ToastContextType {
   showUndoToast: (title: string, actionType: ToastActionType, idKey: string, onUndo: () => void) => void
@@ -50,6 +59,16 @@ export function ToastProvider({ children }: ToastProviderProps) {
         icon = faEyeSlash
         iconClass = 'text-neutral-400'
         message = `Unwatched ${title}`
+        break
+      case 'favorite':
+        icon = faHeart
+        iconClass = 'text-rose-500'
+        message = `Favorited ${title}`
+        break
+      case 'unfavorite':
+        icon = faHeartBroken
+        iconClass = 'text-neutral-400'
+        message = `Unfavorited ${title}`
         break
     }
 

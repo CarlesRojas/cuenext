@@ -4,12 +4,16 @@ import type { VariantProps } from 'class-variance-authority'
 import { cva } from 'class-variance-authority'
 
 const buttonVariants = cva(
-  "group relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full text-base font-semibold whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+  "group/button relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full text-base font-semibold whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {
         default: [
           'bg-white text-black hover:bg-sky-500 hover:text-white focus-visible:bg-sky-500 focus-visible:text-white',
+        ],
+        secondary: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
+          'hover:bg-neutral-500/25 focus-visible:bg-neutral-500/25',
         ],
         ghost: ['text-white hover:bg-neutral-400/10 focus-visible:bg-neutral-400/10'],
         link: ['text-white hover:text-sky-500 focus-visible:text-sky-500'],
@@ -18,6 +22,13 @@ const buttonVariants = cva(
           'data-[checked=true]:bg-sky-500/80 data-[checked=true]:hover:bg-sky-600/80 data-[checked=true]:focus-visible:bg-sky-600/80',
         ],
         input: ['text-white/70 hover:text-white focus-visible:text-white'],
+        favorite: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
+          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
+
+          'data-[state=on]:border-rose-500/40 data-[state=on]:bg-rose-500/15 data-[state=on]:text-rose-500',
+          'data-[state=on]:hover:bg-rose-500/25 data-[state=on]:focus-visible:bg-rose-500/25',
+        ],
       },
       size: {
         default: 'h-11 w-fit gap-2 px-4 py-2.5',

@@ -99,3 +99,17 @@ export const unfavoriteItem = mutation({
     return existingFollow._id
   },
 })
+
+export const listFavorites = query({
+  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const favorites = await context.db
+      .query('follow')
+      .withIndex('by_user_type_favorite', q => q.eq('userId', userId).eq('type', args.type).eq('favorite', true))
+      .collect()
+
+    return favorites.map(f => f.tmdbId)
+  },
+})

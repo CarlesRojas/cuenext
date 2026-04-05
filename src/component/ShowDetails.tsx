@@ -1,64 +1,116 @@
+import { Button } from '#/component/ui/button'
+import { useFavoriteEpisode } from '#/hooks/useFavoriteEpisode'
+import { useFollowEpisode } from '#/hooks/useFollowEpisode'
+import { cn } from '#/lib/cn'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbTv } from '#/type/tmdb'
+import { faHeart, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface ShowDetailsProps {
   show: TmdbTv
 }
 
 export function ShowDetails({ show }: ShowDetailsProps) {
-  const { name, poster_path, backdrop_path, first_air_date, number_of_seasons, overview, status } = show
+  const {
+    id,
+    name,
+    poster_path,
+    backdrop_path,
+    first_air_date,
+    number_of_seasons,
+    overview,
+    status,
+    seasons: seasonsWithSpecials,
+    genres,
+    vote_average,
+    vote_count,
+    tagline,
+  } = show
+
+  const { isFollowed, isLoading: isFollowLoading, toggleFollow } = useFollowEpisode(show)
+  const { isFavorited, isLoading: isFavoriteLoading, toggleFavorite } = useFavoriteEpisode(show)
+
+  const specials = seasonsWithSpecials?.filter(season => season.season_number === 0)
+  const seasons = seasonsWithSpecials?.filter(season => season.season_number !== 0)
+  const numberOfSeasons = seasons?.length || number_of_seasons || null
+  const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
 
   const posterUrl = getTmdbImageUrl(poster_path, 'original')
   const backdropUrl = getTmdbImageUrl(backdrop_path, 'w780') || getTmdbImageUrl(backdrop_path, 'original') || posterUrl
 
+  const formattedReleaseDate = first_air_date
+    ? new Date(first_air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : undefined
+
   return (
     <div className="flex h-fit w-full flex-col gap-8">
       <section
-        className="relative aspect-video max-h-[50%] min-h-[30%] max-w-full min-w-full overflow-hidden"
-        style={{ maskImage: 'linear-gradient(to bottom, black 40%, transparent)' }}
+        className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
+        style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
       >
-        <img
-          src={backdropUrl}
-          alt={name}
-          className="aspect-video h-full max-h-full w-full max-w-full object-cover object-center"
-        />
+        <img src={backdropUrl} alt={name} className="h-full max-h-full w-full max-w-full object-cover object-center" />
 
         <div
           className="absolute inset-0 size-full backdrop-blur"
-          style={{ maskImage: 'linear-gradient(to bottom, transparent 40%, black)' }}
+          style={{ maskImage: 'linear-gradient(to bottom, transparent 30%, black)' }}
         />
 
         <div className="absolute inset-0 size-full bg-radial from-transparent from-40% to-neutral-950 to-90%" />
       </section>
 
-      {/* <div className="screen-px flex">
-        <section className="flex-1">
-          <h1 className="mb-4 text-4xl font-bold">{name}</h1>
+      <section className="screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]">
+        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{name}</h1>
 
-          {first_air_date && (
-            <p className="mb-2 text-lg text-gray-600">First aired: {new Date(first_air_date).toLocaleDateString()}</p>
-          )}
+        <p className="leading-snug font-medium tracking-wide">
+          {[formattedReleaseDate, seasonsText, tagline].filter(Boolean).join(' • ')}
+        </p>
 
-          {number_of_seasons && (
-            <p className="mb-4 text-lg text-gray-600">
-              {number_of_seasons} season{number_of_seasons !== 1 ? 's' : ''}
-            </p>
-          )}
+        {(genres || status) && (
+          <div className="flex flex-wrap gap-2">
+            {genres?.map(genre => (
+              <p
+                key={genre.id}
+                className="w-fit rounded-full border border-neutral-500/40 bg-white/10 px-2 py-px text-sm leading-6 font-medium tracking-wide backdrop-blur-md"
+              >
+                {genre.name}
+              </p>
+            ))}
 
-          {overview && (
-            <div className="mb-6">
-              <h2 className="mb-2 text-xl font-semibold">Overview</h2>
-              <p className="leading-relaxed text-gray-700">{overview}</p>
-            </div>
-          )}
+            {status && (
+              <p
+                className={cn(
+                  'w-fit rounded-full border border-green-500/30 bg-green-500/10 px-2 py-px text-sm leading-6 font-medium tracking-wide text-green-400/70 capitalize backdrop-blur-md',
+                  status.toLowerCase() === 'ended' && 'border-red-500/30 bg-red-500/10 text-red-400/70',
+                )}
+              >
+                {status}
+              </p>
+            )}
+          </div>
+        )}
 
-          {status && (
-            <p className="text-lg">
-              <span className="font-semibold">Status:</span> {status}
-            </p>
+        {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
+
+        <div className="flex max-w-3xl flex-wrap gap-4">
+          <Button variant="secondary" onClick={() => toggleFollow(id, name)} disabled={isFollowLoading}>
+            <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
+            <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
+          </Button>
+
+          {!isFollowLoading && isFollowed && (
+            <Button
+              size="icon"
+              variant="favorite"
+              onClick={() => toggleFavorite(id, name)}
+              disabled={isFavoriteLoading}
+              data-state={!isFavoriteLoading && isFavorited ? 'on' : 'off'}
+            >
+              <FontAwesomeIcon icon={faHeart} className="size-5" />
+            </Button>
           )}
-        </section>
-      </div> */}
+        </div>
+      </section>
     </div>
   )
 }

@@ -87,6 +87,17 @@ export const tmdbTvSchema = tmdbTvMinimalSchema.extend({
     .optional(),
   status: z.string().optional(),
   media_type: z.literal('tv').optional(),
+  genres: z
+    .array(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+      }),
+    )
+    .optional(),
+  tagline: z.string().nullable().optional(),
+  vote_average: z.number().optional(),
+  vote_count: z.number().optional(),
 })
 
 export const tmdbPersonSchema = z.object({
