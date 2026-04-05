@@ -28,7 +28,15 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
     tmdbId: id,
   })
 
-  const runtimeText = runtime ? `${runtime} min` : null
+  const runtimeText = runtime
+    ? (() => {
+        const hours = Math.floor(runtime / 60)
+        const minutes = runtime % 60
+        if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`
+
+        return `${minutes}min`
+      })()
+    : null
 
   const posterUrl = getTmdbImageUrl(poster_path, 'original')
   const backdropUrl = getTmdbImageUrl(backdrop_path, 'original') || posterUrl
