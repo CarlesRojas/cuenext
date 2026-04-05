@@ -1,12 +1,66 @@
-import { PosterCard } from '#/component/PosterCard'
-import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
+import { cn } from '#/lib/cn'
 import { UrlParams } from '#/type/url'
 import { SignInButton, useUser } from '@clerk/tanstack-react-start'
-import { faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { useConvexAction } from '@convex-dev/react-query'
+import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
+import { api } from '../../convex/_generated/api'
+
+function formatWatchTime(minutes: number): string {
+  if (minutes === 0) return '0h'
+
+  const totalHours = Math.floor(minutes / 60)
+
+  const years = Math.floor(totalHours / (24 * 365))
+  const remainingHoursAfterYears = totalHours % (24 * 365)
+
+  const months = Math.floor(remainingHoursAfterYears / (24 * 30))
+  const remainingHoursAfterMonths = remainingHoursAfterYears % (24 * 30)
+
+  const days = Math.floor(remainingHoursAfterMonths / 24)
+  const hours = remainingHoursAfterMonths % 24
+
+  return `${years > 0 ? `${years}y • ` : ''}${months > 0 ? `${months}m • ` : ''}${days > 0 ? `${days}d • ` : ''}${hours > 0 ? `${hours}h` : ''}`.trim()
+}
+
+function formatNumber(num?: number): string {
+  return (
+    num?.toLocaleString('en-US', {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }) ?? '-'
+  )
+}
+
+function StatCard({
+  value,
+  name,
+  className,
+  colorClassName,
+}: {
+  value: ReactNode
+  name: ReactNode
+  className?: string
+  colorClassName?: string
+}) {
+  return (
+    <div
+      className={cn('flex flex-col gap-2 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-6', className)}
+    >
+      <div className="relative isolate h-fit w-fit">
+        <span className={cn('absolute inset-0 text-4xl font-bold opacity-90 blur-lg', colorClassName)}>{value}</span>
+        <span className={cn('relative z-10 text-4xl font-bold', colorClassName)}>{value}</span>
+      </div>
+
+      <span className="text-sm font-medium text-neutral-400">{name}</span>
+    </div>
+  )
+}
 
 export const Route = createFileRoute('/profile')({
   component: ProfilePage,
@@ -16,6 +70,20 @@ export const Route = createFileRoute('/profile')({
 function ProfilePage() {
   const [mediaType] = useMediaType()
   const { user } = useUser()
+  const getMovieStats = useConvexAction(api.stats.getMovieStats)
+  const getShowStats = useConvexAction(api.stats.getShowStats)
+
+  const { data: showStats } = useQuery({
+    queryKey: ['stats-tv', user?.id],
+    queryFn: () => getShowStats(),
+    enabled: !!user && mediaType === 'tv',
+  })
+
+  const { data: movieStats } = useQuery({
+    queryKey: ['stats-movie', user?.id],
+    queryFn: () => getMovieStats(),
+    enabled: !!user && mediaType === 'movie',
+  })
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
@@ -40,36 +108,84 @@ function ProfilePage() {
         )}
       </header>
 
-      <section className="screen-px grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6">
-          <span className="text-3xl font-bold text-white">42</span>
-          <span className="text-sm font-medium text-neutral-500">Shows Finished</span>
-        </div>
-        <div className="flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6">
-          <span className="text-3xl font-bold text-white">128</span>
-          <span className="text-sm font-medium text-neutral-500">Movies Watched</span>
-        </div>
-        <div className="flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6">
-          <span className="text-3xl font-bold text-white">1,337</span>
-          <span className="text-sm font-medium text-neutral-500">Episodes Watched</span>
-        </div>
-        <div className="flex flex-col rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6">
-          <span className="text-3xl font-bold text-white">2.5k</span>
-          <span className="text-sm font-medium text-neutral-500">Hours Watched</span>
+      <section className="screen-px">
+        <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {user && mediaType === 'tv' && (
+            <>
+              <StatCard
+                className="col-span-2"
+                colorClassName="text-sky-500"
+                value={
+                  showStats ? formatWatchTime(showStats.showTimeMinutes) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Show Time"
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value={
+                  showStats ? formatNumber(showStats.episodesWatchedCount) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Episodes Watched"
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value={
+                  showStats ? formatNumber(showStats.followedShowsCount) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Followed Shows"
+              />
+            </>
+          )}
+
+          {user && mediaType === 'movie' && (
+            <>
+              <StatCard
+                className="col-span-2"
+                colorClassName="text-sky-500"
+                value={
+                  movieStats ? formatWatchTime(movieStats.movieTimeMinutes) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Movie Time"
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value={
+                  movieStats ? formatNumber(movieStats.moviesWatchedCount) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Movies Watched"
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value={
+                  movieStats ? formatNumber(movieStats.followedMoviesCount) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Followed Movies"
+              />
+            </>
+          )}
+
+          {!user && (
+            <>
+              <StatCard
+                colorClassName="text-sky-500"
+                className="col-span-2"
+                value="-"
+                name={mediaType === 'tv' ? 'Show Time' : 'Movie Time'}
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value="-"
+                name={mediaType === 'tv' ? 'Episodes Watched' : 'Movies Watched'}
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value="-"
+                name={mediaType === 'tv' ? 'Followed Shows' : 'Followed Movies'}
+              />
+            </>
+          )}
         </div>
       </section>
-
-      {mediaType === 'tv' ? (
-        <Section title="Finished Shows">
-          <PosterCard mediaType={mediaType} id={21} title="Breaking Bad" isFollowed onToggleFollow={() => {}} />
-          <PosterCard mediaType={mediaType} id={22} title="Better Call Saul" isFollowed onToggleFollow={() => {}} />
-        </Section>
-      ) : (
-        <Section title="Watched Movies">
-          <PosterCard mediaType={mediaType} id={23} title="The Matrix" isFollowed onToggleFollow={() => {}} />
-          <PosterCard mediaType={mediaType} id={24} title="Inception" isFollowed onToggleFollow={() => {}} />
-        </Section>
-      )}
     </div>
   )
 }

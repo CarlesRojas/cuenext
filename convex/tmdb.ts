@@ -314,7 +314,6 @@ export const getUpcomingTv = action({
     const page = args.page || 1
     const pageSize = 20
 
-    console.log('CALL UPCOMING TV')
     const tvWatchlist: Array<{
       tmdbId: number
       name: string

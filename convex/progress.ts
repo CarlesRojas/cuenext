@@ -2,6 +2,20 @@ import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { requireUser } from './requireUser'
 
+export const getWatchedMovies = query({
+  args: {},
+  handler: async context => {
+    const userId = await requireUser(context)
+
+    const movies = await context.db
+      .query('movie')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    return movies
+  },
+})
+
 export const checkMovieWatched = query({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
@@ -42,6 +56,20 @@ export const unmarkMovieWatched = mutation({
       .unique()
 
     if (existing) await context.db.delete(existing._id)
+  },
+})
+
+export const getWatchedEpisodes = query({
+  args: {},
+  handler: async context => {
+    const userId = await requireUser(context)
+
+    const episodes = await context.db
+      .query('episode')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    return episodes
   },
 })
 

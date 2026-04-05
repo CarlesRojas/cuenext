@@ -20,7 +20,9 @@ export default defineSchema({
     userId: v.string(),
     tmdbId: v.number(),
     watchedAt: v.number(),
-  }).index('by_user_tmdbId', ['userId', 'tmdbId']),
+  })
+    .index('by_user', ['userId'])
+    .index('by_user_tmdbId', ['userId', 'tmdbId']),
 
   episode: defineTable({
     userId: v.string(),
@@ -29,6 +31,7 @@ export default defineSchema({
     episodeNumber: v.number(),
     watchedAt: v.number(),
   })
+    .index('by_user', ['userId'])
     .index('by_user_show', ['userId', 'showTmdbId'])
     .index('by_user_show_season_episode', ['userId', 'showTmdbId', 'seasonNumber', 'episodeNumber']),
 
