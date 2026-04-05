@@ -32,6 +32,8 @@ function UpcomingPage() {
               LoadingComponent={<RowCard isLoading />}
               emptyMessage="No upcoming movies found in your watchlist"
               errorMessage="Failed to load upcoming movies."
+              groupBy={movie => new Date(movie.airDate)}
+              showTotalResults={false}
             />
           )}
 
@@ -44,6 +46,8 @@ function UpcomingPage() {
               LoadingComponent={<RowCard isLoading />}
               emptyMessage="No upcoming TV episodes found in your watchlist"
               errorMessage="Failed to load upcoming TV episodes."
+              groupBy={episode => new Date(episode.airDate)}
+              showTotalResults={false}
             />
           )}
         </div>

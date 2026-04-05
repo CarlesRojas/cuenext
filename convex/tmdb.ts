@@ -347,8 +347,10 @@ export const getUpcomingTv = action({
 
         const airDate = new Date(airDateString)
         const now = new Date()
+        const yesterday = new Date(now)
+        yesterday.setDate(now.getDate() - 1)
 
-        if (airDate < now) continue
+        if (airDate < yesterday) continue
 
         tvUpcoming.push({
           tmdbId: show.tmdbId,
@@ -411,8 +413,10 @@ export const getUpcomingMovies = action({
 
         const airDate = new Date(airDateString)
         const now = new Date()
+        const yesterday = new Date(now)
+        yesterday.setDate(now.getDate() - 1)
 
-        if (airDate < now) continue
+        if (airDate < yesterday) continue
 
         movieUpcoming.push({
           tmdbId: movie.tmdbId,
