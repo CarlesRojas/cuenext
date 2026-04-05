@@ -173,11 +173,7 @@ export function InfiniteMediaList<TItem>({
   if (isLoading) return <div className={cn('flex flex-col gap-4', className)}>{LoadingComponent}</div>
 
   if (error) {
-    return (
-      <div className="flex w-full flex-col items-center justify-center py-12 text-center">
-        <p className="font-semibold tracking-wide text-red-800">{errorMessage}</p>
-      </div>
-    )
+    return <p className="pointer-events-none mb-4 font-medium tracking-wider text-red-400">{errorMessage}</p>
   }
 
   if (allItems.length === 0) {
