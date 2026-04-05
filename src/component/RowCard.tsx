@@ -19,7 +19,7 @@ interface LoadedProps extends CommonProps {
   id: number
   title: string
   mediaType: MediaType
-  releaseDate?: string
+  subtitle?: string
   posterUrl?: string
   backdropUrl?: string
   overview: string
@@ -55,7 +55,7 @@ export default function RowCard(props: Props) {
     mediaType,
     posterUrl,
     backdropUrl,
-    releaseDate,
+    subtitle,
     overview,
 
     followButtonText,
@@ -134,7 +134,7 @@ export default function RowCard(props: Props) {
         <div className="flex flex-col justify-between p-3 lg:p-4">
           <div className={cn('flex flex-col', showFollow && onToggleFollow && 'pr-24')}>
             <h2 className="line-clamp-1 text-lg leading-6 font-semibold">{title}</h2>
-            {releaseDate && <p className="line-clamp-1 text-sm text-neutral-400">{releaseDate}</p>}
+            {subtitle && <p className="line-clamp-1 text-sm text-neutral-400">{subtitle}</p>}
           </div>
 
           <p className="line-clamp-4 text-sm leading-snug text-neutral-400">{overview}</p>

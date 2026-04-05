@@ -10,6 +10,7 @@ export type TvSectionItem = {
   status: 'ended' | 'ongoing'
   name: string
   poster?: string | null
+  backdrop?: string | null
 }
 
 export type MovieSectionItem = {
@@ -18,4 +19,5 @@ export type MovieSectionItem = {
   followedAt?: number
   name: string
   poster?: string | null
+  backdrop?: string | null
 }

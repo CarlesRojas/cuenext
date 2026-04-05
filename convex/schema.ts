@@ -8,10 +8,12 @@ export default defineSchema({
     tmdbId: v.number(),
     name: v.string(),
     poster: v.union(v.string(), v.null()),
+    backdrop: v.union(v.string(), v.null()),
     followedAt: v.number(),
     manuallyStopped: v.boolean(),
   })
     .index('by_user_type', ['userId', 'type'])
+    .index('by_user_type_manually_stopped', ['userId', 'type', 'manuallyStopped'])
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
 
   movie: defineTable({

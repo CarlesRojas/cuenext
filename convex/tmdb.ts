@@ -1,4 +1,5 @@
 import { v } from 'convex/values'
+import type { TmdbMovie, TmdbTv } from '../src/type/tmdb'
 import {
   paginated,
   tmdbMovieMinimalSchema,
@@ -7,6 +8,7 @@ import {
   tmdbTvMinimalSchema,
   tmdbTvSchema,
 } from '../src/type/tmdb'
+import { api } from './_generated/api'
 import { action } from './_generated/server'
 import { fetchTmdb } from './lib/tmdbClient'
 
@@ -303,5 +305,136 @@ export const getShowSeasonDetails = action({
   args: { tmdbId: v.number(), seasonNumber: v.number() },
   handler: async (_, args) => {
     return fetchTmdb(tmdbSeasonSchema, `/tv/${args.tmdbId}/season/${args.seasonNumber}`)
+  },
+})
+
+export const getUpcomingTv = action({
+  args: { page: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const page = args.page || 1
+    const pageSize = 20
+    const offset = (page - 1) * pageSize
+
+    const tvWatchlist: Array<{
+      tmdbId: number
+      name: string
+      poster: string | null
+      backdrop: string | null
+      type: 'tv'
+    }> = await ctx.runQuery(api.upcoming.getUpcomingTvWatchlist, {})
+
+    const paginatedWatchlist = tvWatchlist.slice(offset, offset + pageSize)
+
+    const tvUpcoming: Array<{
+      tmdbId: number
+      name: string
+      poster: string | null
+      backdrop: string | null
+      type: 'tv'
+      episode: TmdbTv
+      airDate: string
+    }> = []
+
+    for (const show of paginatedWatchlist) {
+      try {
+        const showDetails = await fetchTmdb(tmdbTvSchema, `/tv/${show.tmdbId}`)
+
+        const nextEpisode = showDetails.next_episode_to_air
+        if (!nextEpisode) continue
+
+        const airDateString = nextEpisode.air_date
+        if (!airDateString) continue
+
+        const airDate = new Date(airDateString)
+        const now = new Date()
+
+        if (airDate < now) continue
+
+        tvUpcoming.push({
+          tmdbId: show.tmdbId,
+          name: show.name,
+          poster: show.poster,
+          backdrop: show.backdrop,
+          type: 'tv',
+          episode: showDetails,
+          airDate: airDateString,
+        })
+      } catch (error) {
+        console.error(`Failed to fetch TV details for ${show.tmdbId}:`, error)
+      }
+    }
+
+    const sortedTv = tvUpcoming.sort((a, b) => new Date(a.airDate).getTime() - new Date(b.airDate).getTime())
+
+    return {
+      page,
+      results: sortedTv,
+      total_pages: Math.ceil(tvWatchlist.length / pageSize),
+      total_results: tvWatchlist.length,
+    }
+  },
+})
+
+export const getUpcomingMovies = action({
+  args: { page: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const page = args.page || 1
+    const pageSize = 20
+    const offset = (page - 1) * pageSize
+
+    const movieWatchlist: Array<{
+      tmdbId: number
+      name: string
+      poster: string | null
+      backdrop: string | null
+      type: 'movie'
+    }> = await ctx.runQuery(api.upcoming.getUpcomingMoviesWatchlist, {})
+
+    const paginatedWatchlist = movieWatchlist.slice(offset, offset + pageSize)
+
+    const movieUpcoming: Array<{
+      tmdbId: number
+      name: string
+      poster: string | null
+      backdrop: string | null
+      type: 'movie'
+      movie: TmdbMovie
+      airDate: string
+    }> = []
+
+    for (const movie of paginatedWatchlist) {
+      try {
+        const movieDetails = await fetchTmdb(tmdbMovieSchema, `/movie/${movie.tmdbId}`)
+
+        const airDateString = movieDetails.release_date
+        if (!airDateString) continue
+
+        const airDate = new Date(airDateString)
+        const now = new Date()
+
+        if (airDate < now) continue
+
+        movieUpcoming.push({
+          tmdbId: movie.tmdbId,
+          name: movie.name,
+          poster: movie.poster,
+          backdrop: movie.backdrop,
+          type: 'movie',
+          movie: movieDetails,
+          airDate: airDateString,
+        })
+      } catch (error) {
+        console.error(`Failed to fetch movie details for ${movie.tmdbId}:`, error)
+      }
+    }
+
+    const sortedMovies = movieUpcoming.sort((a, b) => new Date(a.airDate).getTime() - new Date(b.airDate).getTime())
+
+    return {
+      page,
+      results: sortedMovies,
+      total_pages: Math.ceil(movieWatchlist.length / pageSize),
+      total_results: movieWatchlist.length,
+    }
   },
 })

@@ -11,7 +11,37 @@ export const tmdbMovieMinimalSchema = z.object({
 })
 
 export const tmdbMovieSchema = tmdbMovieMinimalSchema.extend({
+  adult: z.boolean().optional(),
+  budget: z.number().optional(),
+  genres: z
+    .array(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+      }),
+    )
+    .optional(),
+  homepage: z.string().nullable().optional(),
+  imdb_id: z.string().nullable().optional(),
+  origin_country: z.array(z.string()).optional(),
+  original_language: z.string().optional(),
+  original_title: z.string().optional(),
+  popularity: z.number().optional(),
+  revenue: z.number().optional(),
   runtime: z.number().nullable().optional(),
+  spoken_languages: z
+    .array(
+      z.object({
+        english_name: z.string(),
+        iso_639_1: z.string(),
+        name: z.string(),
+      }),
+    )
+    .optional(),
+  status: z.string().optional(),
+  tagline: z.string().nullable().optional(),
+  video: z.boolean().optional(),
+  vote_count: z.number().optional(),
   media_type: z.literal('movie').optional(),
 })
 
@@ -49,6 +79,9 @@ export const tmdbTvSchema = tmdbTvMinimalSchema.extend({
       episode_number: z.number(),
       season_number: z.number(),
       runtime: z.number().nullable().optional(),
+      episode_type: z.string().optional(),
+      show_id: z.number().optional(),
+      still_path: z.string().nullable().optional(),
     })
     .nullable()
     .optional(),
@@ -62,12 +95,6 @@ export const tmdbPersonSchema = z.object({
   profile_path: z.string().nullable().optional(),
   media_type: z.literal('person').optional(),
 })
-
-export const tmdbMultiSearchResultSchema = z.discriminatedUnion('media_type', [
-  tmdbMovieSchema.extend({ media_type: z.literal('movie') }),
-  tmdbTvSchema.extend({ media_type: z.literal('tv') }),
-  tmdbPersonSchema.extend({ media_type: z.literal('person') }),
-])
 
 export const tmdbEpisodeSchema = z.object({
   id: z.number(),
@@ -109,6 +136,5 @@ export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
 export type TmdbTv = z.infer<typeof tmdbTvSchema>
 export type TmdbTvMinimal = z.infer<typeof tmdbTvMinimalSchema>
 export type TmdbPerson = z.infer<typeof tmdbPersonSchema>
-export type TmdbMultiSearchResult = z.infer<typeof tmdbMultiSearchResultSchema>
 export type TmdbEpisode = z.infer<typeof tmdbEpisodeSchema>
 export type TmdbSeason = z.infer<typeof tmdbSeasonSchema>

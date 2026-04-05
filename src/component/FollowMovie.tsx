@@ -35,7 +35,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
         title={title}
         posterUrl={posterUrl}
         backdropUrl={backdropUrl}
-        releaseDate={formattedReleaseDate}
+        subtitle={formattedReleaseDate}
         overview={overview}
         showFollow
         isFollowed={isFollowed}

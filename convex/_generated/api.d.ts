@@ -15,6 +15,7 @@ import type * as progress from "../progress.js";
 import type * as requireUser from "../requireUser.js";
 import type * as stats from "../stats.js";
 import type * as tmdb from "../tmdb.js";
+import type * as upcoming from "../upcoming.js";
 import type * as watchlist from "../watchlist.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   requireUser: typeof requireUser;
   stats: typeof stats;
   tmdb: typeof tmdb;
+  upcoming: typeof upcoming;
   watchlist: typeof watchlist;
 }>;
 

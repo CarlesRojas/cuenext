@@ -21,7 +21,13 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
 
   const follow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
-      await markAsFollowed({ type: 'tv', tmdbId: id, name: episode.name, poster: episode.poster_path ?? null })
+      await markAsFollowed({
+        type: 'tv',
+        tmdbId: id,
+        name: episode.name,
+        poster: episode.poster_path ?? null,
+        backdrop: episode.backdrop_path ?? null,
+      })
       await updateNextEpisode({ tmdbId: id })
     },
   })

@@ -35,7 +35,7 @@ export default function FollowEpisode({ episode, variant, number, followButtonTe
         title={name}
         posterUrl={posterUrl}
         backdropUrl={backdropUrl}
-        releaseDate={formattedReleaseDate}
+        subtitle={formattedReleaseDate}
         overview={overview}
         showFollow
         isFollowed={isFollowed}

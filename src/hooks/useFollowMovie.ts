@@ -20,7 +20,13 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
 
   const follow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
-      await markAsFollowed({ type: 'movie', tmdbId: id, name: movie.title, poster: movie.poster_path ?? null })
+      await markAsFollowed({
+        type: 'movie',
+        tmdbId: id,
+        name: movie.title,
+        poster: movie.poster_path ?? null,
+        backdrop: movie.backdrop_path ?? null,
+      })
     },
   })
 
