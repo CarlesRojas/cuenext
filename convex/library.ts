@@ -84,3 +84,19 @@ export const listFollowed = query({
     return follows.map(f => f.tmdbId)
   },
 })
+
+export const listStopped = query({
+  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const stoppedItems = await context.db
+      .query('follow')
+      .withIndex('by_user_type_manually_stopped', q =>
+        q.eq('userId', userId).eq('type', args.type).eq('manuallyStopped', true),
+      )
+      .collect()
+
+    return stoppedItems.map(f => f.tmdbId)
+  },
+})
