@@ -20,7 +20,7 @@ export default function FollowEpisode({ episode, variant, number, followButtonTe
 
   if (variant === 'row') {
     const backdropUrl =
-      getTmdbImageUrl(backdrop_path, 'w780') || getTmdbImageUrl(backdrop_path, 'original') || undefined
+      getTmdbImageUrl(backdrop_path, 'w780') || getTmdbImageUrl(backdrop_path, 'original') || posterUrl
 
     const releaseDate = first_air_date ? new Date(first_air_date) : null
     const formattedReleaseDate = releaseDate
