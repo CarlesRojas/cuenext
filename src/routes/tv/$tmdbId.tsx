@@ -1,5 +1,7 @@
 import { api } from '#/../convex/_generated/api'
 import { ShowDetails } from '#/component/ShowDetails'
+import { ShowSeasons } from '#/component/ShowSeasons'
+import type { TmdbSeason } from '#/type/tmdb'
 import { convexAction } from '@convex-dev/react-query'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -33,9 +35,9 @@ function RouteComponent() {
     <div className="flex w-full flex-col gap-8">
       {show.data && <ShowDetails show={show.data} />}
 
-      {/* {show.data && allSeasonsLoaded && seasons.length > 0 && (
+      {show.data && allSeasonsLoaded && seasons.length > 0 && (
         <ShowSeasons show={show.data} seasons={seasons as TmdbSeason[]} />
-      )} */}
+      )}
     </div>
   )
 }

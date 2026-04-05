@@ -36,7 +36,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
   const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
 
   const posterUrl = getTmdbImageUrl(poster_path, 'original')
-  const backdropUrl = getTmdbImageUrl(backdrop_path, 'w780') || getTmdbImageUrl(backdrop_path, 'original') || posterUrl
+  const backdropUrl = getTmdbImageUrl(backdrop_path, 'original') || posterUrl
 
   const formattedReleaseDate = first_air_date
     ? new Date(first_air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
