@@ -1,9 +1,12 @@
+import { PosterCard } from '#/component/PosterCard'
+import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
+import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { UrlParams } from '#/type/url'
-import { SignInButton, useUser } from '@clerk/tanstack-react-start'
-import { useConvexAction } from '@convex-dev/react-query'
+import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
+import { convexQuery, useConvexAction } from '@convex-dev/react-query'
 import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
@@ -69,6 +72,7 @@ export const Route = createFileRoute('/profile')({
 
 function ProfilePage() {
   const [mediaType] = useMediaType()
+  const clerk = useClerk()
   const { user } = useUser()
   const getMovieStats = useConvexAction(api.stats.getMovieStats)
   const getShowStats = useConvexAction(api.stats.getShowStats)
@@ -83,6 +87,16 @@ function ProfilePage() {
     queryKey: ['stats-movie', user?.id],
     queryFn: () => getMovieStats(),
     enabled: !!user && mediaType === 'movie',
+  })
+
+  const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
+    ...convexQuery(api.watchlist.getTvSections, {}),
+    enabled: mediaType === 'tv' && clerk.isSignedIn,
+  })
+
+  const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
+    ...convexQuery(api.watchlist.getMovieSections, {}),
+    enabled: mediaType === 'movie' && clerk.isSignedIn,
   })
 
   return (
@@ -108,7 +122,7 @@ function ProfilePage() {
         )}
       </header>
 
-      <section className="screen-px">
+      <section className="screen-px mb-8">
         <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
           {user && mediaType === 'tv' && (
             <>
@@ -186,6 +200,66 @@ function ProfilePage() {
           )}
         </div>
       </section>
+
+      <div className="flex flex-col gap-6">
+        {mediaType === 'tv' && (
+          <>
+            {tvSectionsLoading &&
+              ['Finished Shows', 'Favorite Shows'].map((title, i) => (
+                <Section title={title} key={i}>
+                  {Array.from({ length: 10 }).map((_, epispdeIndex) => (
+                    <PosterCard key={epispdeIndex} isLoading />
+                  ))}
+                </Section>
+              ))}
+
+            {tvSections && tvSections.finished.length > 0 && (
+              <Section title="Finished Shows">
+                {tvSections.finished.map(item => (
+                  <PosterCard
+                    key={item.id}
+                    id={item.tmdbId}
+                    title={item.name}
+                    mediaType="tv"
+                    imageUrl={
+                      getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                    }
+                  />
+                ))}
+              </Section>
+            )}
+          </>
+        )}
+
+        {mediaType === 'movie' && (
+          <>
+            {movieSectionsLoading &&
+              ['Finished Movies', 'Favorite Movies'].map((title, i) => (
+                <Section title={title} key={i}>
+                  {Array.from({ length: 10 }).map((_, epispdeIndex) => (
+                    <PosterCard key={epispdeIndex} isLoading />
+                  ))}
+                </Section>
+              ))}
+
+            {movieSections && movieSections.finished.length > 0 && (
+              <Section title="Finished Movies">
+                {movieSections.finished.map(item => (
+                  <PosterCard
+                    key={item.tmdbId}
+                    id={item.tmdbId}
+                    title={item.name}
+                    mediaType="movie"
+                    imageUrl={
+                      getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                    }
+                  />
+                ))}
+              </Section>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }

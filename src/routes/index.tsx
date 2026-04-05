@@ -113,7 +113,9 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   mediaType="tv"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || undefined}
+                  imageUrl={
+                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                  }
                 />
               ))}
             </Section>
@@ -141,7 +143,15 @@ function App() {
           {movieSections && movieSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
               {movieSections.finished.map(item => (
-                <WatchMovie key={item.tmdbId} movie={item} />
+                <PosterCard
+                  key={item.tmdbId}
+                  id={item.tmdbId}
+                  title={item.name}
+                  mediaType="movie"
+                  imageUrl={
+                    getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original') || undefined
+                  }
+                />
               ))}
             </Section>
           )}
