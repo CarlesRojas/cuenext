@@ -72,11 +72,7 @@ export function InfiniteMediaList<TItem>({
   }
 
   if (allItems.length === 0) {
-    return (
-      <div className="flex w-full flex-col items-center justify-center py-12 text-center">
-        <p className="font-semibold tracking-wide text-neutral-500">{emptyMessage}</p>
-      </div>
-    )
+    return <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">{emptyMessage}</p>
   }
 
   return (
@@ -88,8 +84,8 @@ export function InfiniteMediaList<TItem>({
           <Component key={index} {...item} />
         ))}
 
-        <div ref={ref} className="col-span-full flex justify-center py-4">
-          {LoadingComponent}
+        <div ref={ref} className="col-span-full flex justify-center">
+          {hasNextPage && LoadingComponent}
         </div>
       </div>
     </>

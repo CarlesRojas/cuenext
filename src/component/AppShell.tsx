@@ -13,7 +13,7 @@ import { ClientOnly, Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { useRef, useState } from 'react'
-import { useEventListener, useWindowSize } from 'usehooks-ts'
+import { useWindowSize } from 'usehooks-ts'
 
 type NavItem = {
   to: NonNullable<LinkProps['to']>
@@ -43,8 +43,6 @@ export default function AppShell({ children }: AppShellProps) {
   const onScroll = () => {
     setShowHeader(!scrollContainer.current || scrollContainer.current.scrollTop < 20)
   }
-
-  useEventListener('scroll', onScroll)
 
   return (
     <ClientOnly>
