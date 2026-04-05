@@ -125,7 +125,7 @@ function App() {
         <div className="flex flex-col gap-6">
           {movieSectionsLoading &&
             ['Watch next', ''].map((title, i) => (
-              <Section title={title} key={i} defaultCollapsed={title === 'Finished'}>
+              <Section title={title} key={i}>
                 {Array.from({ length: 10 }).map((_, epispdeIndex) => (
                   <PosterCard key={epispdeIndex} isLoading />
                 ))}
@@ -141,7 +141,7 @@ function App() {
           )}
 
           {movieSections && movieSections.finished.length > 0 && (
-            <Section title="Finished" defaultCollapsed>
+            <Section title="Finished">
               {movieSections.finished.map(item => (
                 <PosterCard
                   key={item.tmdbId}
