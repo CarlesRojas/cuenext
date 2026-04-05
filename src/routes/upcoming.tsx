@@ -26,6 +26,21 @@ function UpcomingPage() {
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Upcoming</h1>
       </header>
 
+      {!clerk.isSignedIn && (
+        <div className="screen-px mb-8 flex flex-col gap-4">
+          <span className="font-semibold tracking-wide text-neutral-500">
+            Sign in to view upcoming movies and TV episodes
+          </span>
+
+          <SignInButton mode="modal">
+            <Button>
+              <FontAwesomeIcon icon={faSignIn} className="mr-2" />
+              <span>Sign in</span>
+            </Button>
+          </SignInButton>
+        </div>
+      )}
+
       <div className="screen-px">
         {clerk.isSignedIn && (
           <div className="page-width mx-[unset]">
@@ -56,21 +71,6 @@ function UpcomingPage() {
                 showTotalResults={false}
               />
             )}
-          </div>
-        )}
-
-        {!clerk.isSignedIn && (
-          <div className="page-width mx-[unset] mb-4 flex flex-col gap-4">
-            <span className="font-semibold tracking-wide text-neutral-500">
-              Sign in to view upcoming movies and TV episodes
-            </span>
-
-            <SignInButton mode="modal">
-              <Button>
-                <FontAwesomeIcon icon={faSignIn} className="mr-2" />
-                <span>Sign in</span>
-              </Button>
-            </SignInButton>
           </div>
         )}
       </div>

@@ -8,8 +8,9 @@ import { useMediaType } from '#/hooks/useMediaType'
 import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { UrlParams } from '#/type/url'
+import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexAction } from '@convex-dev/react-query'
-import { faForward } from '@fortawesome/free-solid-svg-icons'
+import { faForward, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -20,6 +21,7 @@ export const Route = createFileRoute('/explore')({
 })
 
 function RouteComponent() {
+  const clerk = useClerk()
   const [mediaType] = useMediaType()
 
   const today = new Date()
@@ -89,6 +91,21 @@ function RouteComponent() {
       <header className="screen-px mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Explore</h1>
       </header>
+
+      {!clerk.isSignedIn && (
+        <div className="screen-px mb-8 flex flex-col gap-4">
+          <span className="font-semibold tracking-wide text-neutral-500">
+            Sign in to view upcoming movies and TV episodes
+          </span>
+
+          <SignInButton mode="modal">
+            <Button>
+              <FontAwesomeIcon icon={faSignIn} className="mr-2" />
+              <span>Sign in</span>
+            </Button>
+          </SignInButton>
+        </div>
+      )}
 
       {mediaType === 'tv' ? (
         <>
