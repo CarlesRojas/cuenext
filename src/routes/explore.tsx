@@ -3,12 +3,16 @@ import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
+import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
+import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { UrlParams } from '#/type/url'
 import { convexAction } from '@convex-dev/react-query'
+import { faForward } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/explore')({
   component: RouteComponent,
@@ -88,16 +92,27 @@ function RouteComponent() {
 
       {mediaType === 'tv' ? (
         <>
-          <Section title="Dropping This Week" canCollapse={false}>
+          <Section title="Dropping This Week" canCollapse={false} key="dropping-this-week">
             {onTheAirShows &&
               onTheAirShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
+
+            {onTheAirShows && (
+              <div className="flex h-full w-fit items-center justify-center">
+                <Button asChild>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={{ media: 'tv' }}>
+                    <FontAwesomeIcon icon={faForward} className="size-4" />
+                    <span>See all</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {!onTheAirShows &&
               onTheAirShowsLoading &&
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top 10 Shows" canCollapse={false}>
+          <Section title="Top 10 Shows" canCollapse={false} key="top10-shows">
             {top10Shows &&
               top10Shows.results
                 .slice(0, 10)
@@ -110,9 +125,20 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top Rated Shows" canCollapse={false}>
+          <Section title="Top Rated Shows" canCollapse={false} key="top-rated-shows">
             {topRatedShows &&
               topRatedShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
+
+            {topRatedShows && (
+              <div className="flex h-full w-fit items-center justify-center">
+                <Button asChild>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={{ media: 'tv' }}>
+                    <FontAwesomeIcon icon={faForward} className="size-4" />
+                    <span>See all</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {!topRatedShows &&
               topRatedShowsLoading &&
@@ -121,18 +147,29 @@ function RouteComponent() {
         </>
       ) : (
         <>
-          <Section title="Upcoming Movies" canCollapse={false}>
+          <Section title="Upcoming Movies" canCollapse={false} key="upcoming-movies">
             {upcomingMovies &&
               upcomingMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
               ))}
+
+            {upcomingMovies && (
+              <div className="flex h-full w-fit items-center justify-center">
+                <Button asChild>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={{ media: 'movie' }}>
+                    <FontAwesomeIcon icon={faForward} className="size-4" />
+                    <span>See all</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {!upcomingMovies &&
               upcomingMoviesLoading &&
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top 10 Movies" canCollapse={false}>
+          <Section title="Top 10 Movies" canCollapse={false} key="top10-movies">
             {top10Movies &&
               top10Movies.results
                 .slice(0, 10)
@@ -145,11 +182,22 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top Rated Movies" canCollapse={false}>
+          <Section title="Top Rated Movies" canCollapse={false} key="top-rated-movies">
             {topRatedMovies &&
               topRatedMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
               ))}
+
+            {topRatedMovies && (
+              <div className="flex h-full w-fit items-center justify-center">
+                <Button asChild>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={{ media: 'movie' }}>
+                    <FontAwesomeIcon icon={faForward} className="size-4" />
+                    <span>See all</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {!topRatedMovies &&
               topRatedMoviesLoading &&

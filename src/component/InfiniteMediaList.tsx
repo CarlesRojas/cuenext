@@ -77,7 +77,7 @@ export function InfiniteMediaList<TItem>({
 
   return (
     <>
-      <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">{`Showing ${totalResults} results`}</p>
+      <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">{`Showing ${totalResults.toLocaleString()} results`}</p>
 
       <div className={cn('flex flex-col gap-4', className)}>
         {allItems.map((item, index) => (

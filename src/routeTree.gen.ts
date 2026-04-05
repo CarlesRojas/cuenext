@@ -15,6 +15,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TvTmdbIdRouteImport } from './routes/tv/$tmdbId'
+import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
 import { Route as MovieTmdbIdRouteImport } from './routes/movie/$tmdbId'
 
 const UpcomingRoute = UpcomingRouteImport.update({
@@ -47,6 +48,11 @@ const TvTmdbIdRoute = TvTmdbIdRouteImport.update({
   path: '/tv/$tmdbId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SeeAllListRoute = SeeAllListRouteImport.update({
+  id: '/see-all/$list',
+  path: '/see-all/$list',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MovieTmdbIdRoute = MovieTmdbIdRouteImport.update({
   id: '/movie/$tmdbId',
   path: '/movie/$tmdbId',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/movie/$tmdbId': typeof MovieTmdbIdRoute
+  '/see-all/$list': typeof SeeAllListRoute
   '/tv/$tmdbId': typeof TvTmdbIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/movie/$tmdbId': typeof MovieTmdbIdRoute
+  '/see-all/$list': typeof SeeAllListRoute
   '/tv/$tmdbId': typeof TvTmdbIdRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/movie/$tmdbId': typeof MovieTmdbIdRoute
+  '/see-all/$list': typeof SeeAllListRoute
   '/tv/$tmdbId': typeof TvTmdbIdRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/upcoming'
     | '/movie/$tmdbId'
+    | '/see-all/$list'
     | '/tv/$tmdbId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/upcoming'
     | '/movie/$tmdbId'
+    | '/see-all/$list'
     | '/tv/$tmdbId'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/upcoming'
     | '/movie/$tmdbId'
+    | '/see-all/$list'
     | '/tv/$tmdbId'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   UpcomingRoute: typeof UpcomingRoute
   MovieTmdbIdRoute: typeof MovieTmdbIdRoute
+  SeeAllListRoute: typeof SeeAllListRoute
   TvTmdbIdRoute: typeof TvTmdbIdRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TvTmdbIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/see-all/$list': {
+      id: '/see-all/$list'
+      path: '/see-all/$list'
+      fullPath: '/see-all/$list'
+      preLoaderRoute: typeof SeeAllListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movie/$tmdbId': {
       id: '/movie/$tmdbId'
       path: '/movie/$tmdbId'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   UpcomingRoute: UpcomingRoute,
   MovieTmdbIdRoute: MovieTmdbIdRoute,
+  SeeAllListRoute: SeeAllListRoute,
   TvTmdbIdRoute: TvTmdbIdRoute,
 }
 export const routeTree = rootRouteImport
