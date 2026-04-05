@@ -313,8 +313,8 @@ export const getUpcomingTv = action({
   handler: async (ctx, args) => {
     const page = args.page || 1
     const pageSize = 20
-    const offset = (page - 1) * pageSize
 
+    console.log('CALL UPCOMING TV')
     const tvWatchlist: Array<{
       tmdbId: number
       name: string
@@ -322,8 +322,6 @@ export const getUpcomingTv = action({
       backdrop: string | null
       type: 'tv'
     }> = await ctx.runQuery(api.upcoming.getUpcomingTvWatchlist, {})
-
-    const paginatedWatchlist = tvWatchlist.slice(offset, offset + pageSize)
 
     const tvUpcoming: Array<{
       tmdbId: number
@@ -335,7 +333,7 @@ export const getUpcomingTv = action({
       airDate: string
     }> = []
 
-    for (const show of paginatedWatchlist) {
+    for (const show of tvWatchlist) {
       try {
         const showDetails = await fetchTmdb(tmdbTvSchema, `/tv/${show.tmdbId}`)
 
@@ -368,11 +366,14 @@ export const getUpcomingTv = action({
 
     const sortedTv = tvUpcoming.sort((a, b) => new Date(a.airDate).getTime() - new Date(b.airDate).getTime())
 
+    const offset = (page - 1) * pageSize
+    const paginatedResults = sortedTv.slice(offset, offset + pageSize)
+
     return {
       page,
-      results: sortedTv,
-      total_pages: Math.ceil(tvWatchlist.length / pageSize),
-      total_results: tvWatchlist.length,
+      results: paginatedResults,
+      total_pages: Math.ceil(sortedTv.length / pageSize),
+      total_results: sortedTv.length,
     }
   },
 })
@@ -382,7 +383,6 @@ export const getUpcomingMovies = action({
   handler: async (ctx, args) => {
     const page = args.page || 1
     const pageSize = 20
-    const offset = (page - 1) * pageSize
 
     const movieWatchlist: Array<{
       tmdbId: number
@@ -391,8 +391,6 @@ export const getUpcomingMovies = action({
       backdrop: string | null
       type: 'movie'
     }> = await ctx.runQuery(api.upcoming.getUpcomingMoviesWatchlist, {})
-
-    const paginatedWatchlist = movieWatchlist.slice(offset, offset + pageSize)
 
     const movieUpcoming: Array<{
       tmdbId: number
@@ -404,7 +402,7 @@ export const getUpcomingMovies = action({
       airDate: string
     }> = []
 
-    for (const movie of paginatedWatchlist) {
+    for (const movie of movieWatchlist) {
       try {
         const movieDetails = await fetchTmdb(tmdbMovieSchema, `/movie/${movie.tmdbId}`)
 
@@ -434,11 +432,14 @@ export const getUpcomingMovies = action({
 
     const sortedMovies = movieUpcoming.sort((a, b) => new Date(a.airDate).getTime() - new Date(b.airDate).getTime())
 
+    const offset = (page - 1) * pageSize
+    const paginatedResults = sortedMovies.slice(offset, offset + pageSize)
+
     return {
       page,
-      results: sortedMovies,
-      total_pages: Math.ceil(movieWatchlist.length / pageSize),
-      total_results: movieWatchlist.length,
+      results: paginatedResults,
+      total_pages: Math.ceil(sortedMovies.length / pageSize),
+      total_results: sortedMovies.length,
     }
   },
 })
