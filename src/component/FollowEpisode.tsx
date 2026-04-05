@@ -1,12 +1,7 @@
-import { api } from '#/../convex/_generated/api'
 import { PosterCard } from '#/component/PosterCard'
-import { useUndoToast } from '#/hooks/useUndoToast'
+import { useFollowEpisode } from '#/hooks/useFollowEpisode'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbTv } from '#/type/tmdb'
-import { useClerk } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 interface Props {
   episode: TmdbTv
@@ -14,47 +9,7 @@ interface Props {
 }
 
 export default function FollowEpisode({ episode, number }: Props) {
-  const clerk = useClerk()
-
-  const { showUndoToast } = useUndoToast()
-
-  const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
-    ...convexQuery(api.library.listFollowed, { type: 'tv' }),
-    enabled: clerk.isSignedIn,
-  })
-
-  const markAsFollowed = useDbMutation(api.library.follow)
-  const unmarkAsFollowed = useDbMutation(api.library.unfollow)
-  const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
-
-  const follow = useMutation({
-    mutationFn: async ({ id }: { id: number }) => {
-      await markAsFollowed({ type: 'tv', tmdbId: id, name: episode.name, poster: episode.poster_path ?? null })
-      await updateNextEpisode({ tmdbId: id })
-    },
-  })
-
-  const unfollow = useMutation({
-    mutationFn: async ({ id }: { id: number }) => {
-      await unmarkAsFollowed({ type: 'tv', tmdbId: id })
-      await updateNextEpisode({ tmdbId: id })
-    },
-  })
-
-  const toggleFollow = async (id: number, title: string) => {
-    if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
-
-    const isFollowing = Array.isArray(followedMedia) && followedMedia.includes(id)
-    const mediaKey = `tv-${id}`
-
-    if (isFollowing) {
-      await unfollow.mutateAsync({ id })
-      showUndoToast(title, 'unfollow', mediaKey, async () => await follow.mutateAsync({ id }))
-    } else {
-      await follow.mutateAsync({ id })
-      showUndoToast(title, 'follow', mediaKey, async () => await unfollow.mutateAsync({ id }))
-    }
-  }
+  const { isFollowed, isLoading, toggleFollow } = useFollowEpisode(episode)
 
   return (
     <PosterCard
@@ -65,9 +20,9 @@ export default function FollowEpisode({ episode, number }: Props) {
       imageUrl={getTmdbImageUrl(episode.poster_path, 'w342') || undefined}
       showFollow
       number={number}
-      isFollowed={Array.isArray(followedMedia) && followedMedia.includes(episode.id)}
+      isFollowed={isFollowed}
       onToggleFollow={() => toggleFollow(episode.id, episode.name)}
-      isFollowLoading={isFollowedLoading || follow.isPending || unfollow.isPending}
+      isFollowLoading={isLoading}
     />
   )
 }
