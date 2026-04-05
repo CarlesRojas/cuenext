@@ -10,7 +10,7 @@ import {
 } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
-import { fetchTmdb } from './lib/tmdbClient'
+import { fetchTmdbCached } from './tmdbCache'
 
 export const getDiscoverMovies = action({
   args: {
@@ -82,7 +82,7 @@ export const getDiscoverMovies = action({
     without_watch_providers: v.optional(v.string()),
     year: v.optional(v.number()),
   },
-  handler: async (_, args) => {
+  handler: async (context, args) => {
     const params: Record<string, string> = {}
 
     if (args.certification) params.certification = args.certification
@@ -123,7 +123,7 @@ export const getDiscoverMovies = action({
     if (args.without_watch_providers) params.without_watch_providers = args.without_watch_providers
     if (args.year) params.year = String(args.year)
 
-    return fetchTmdb(paginated(tmdbMovieSchema), '/discover/movie', {
+    return fetchTmdbCached(context, paginated(tmdbMovieSchema), '/discover/movie', {
       page: String(args.page || 1),
       ...params,
     })
@@ -195,7 +195,7 @@ export const getDiscoverShows = action({
     without_keywords: v.optional(v.string()),
     without_watch_providers: v.optional(v.string()),
   },
-  handler: async (_, args) => {
+  handler: async (context, args) => {
     const params: Record<string, string> = {}
 
     if (args.air_date_gte) params['air_date.gte'] = args.air_date_gte
@@ -232,7 +232,7 @@ export const getDiscoverShows = action({
     if (args.without_keywords) params.without_keywords = args.without_keywords
     if (args.without_watch_providers) params.without_watch_providers = args.without_watch_providers
 
-    return fetchTmdb(paginated(tmdbTvSchema), '/discover/tv', {
+    return fetchTmdbCached(context, paginated(tmdbTvSchema), '/discover/tv', {
       page: String(args.page || 1),
       ...params,
     })
@@ -249,7 +249,7 @@ export const searchMovies = action({
     region: v.optional(v.string()),
     year: v.optional(v.number()),
   },
-  handler: async (_, args) => {
+  handler: async (context, args) => {
     const params: Record<string, string> = {
       query: args.query,
       page: String(args.page || 1),
@@ -261,7 +261,7 @@ export const searchMovies = action({
     if (args.region) params.region = args.region
     if (args.year !== undefined) params.year = String(args.year)
 
-    return fetchTmdb(paginated(tmdbMovieMinimalSchema), '/search/movie', params)
+    return fetchTmdbCached(context, paginated(tmdbMovieMinimalSchema), '/search/movie', params)
   },
 })
 
@@ -273,7 +273,7 @@ export const searchTv = action({
     language: v.optional(v.string()),
     firstAirDateYear: v.optional(v.number()),
   },
-  handler: async (_, args) => {
+  handler: async (context, args) => {
     const params: Record<string, string> = {
       query: args.query,
       page: String(args.page || 1),
@@ -283,34 +283,34 @@ export const searchTv = action({
     if (args.language) params.language = args.language
     if (args.firstAirDateYear !== undefined) params.first_air_date_year = String(args.firstAirDateYear)
 
-    return fetchTmdb(paginated(tmdbTvMinimalSchema), '/search/tv', params)
+    return fetchTmdbCached(context, paginated(tmdbTvMinimalSchema), '/search/tv', params)
   },
 })
 
 export const getMovieDetails = action({
   args: { tmdbId: v.number() },
-  handler: async (_, args) => {
-    return fetchTmdb(tmdbMovieSchema, `/movie/${args.tmdbId}`)
+  handler: async (context, args) => {
+    return fetchTmdbCached(context, tmdbMovieSchema, `/movie/${args.tmdbId}`)
   },
 })
 
 export const getShowDetails = action({
   args: { tmdbId: v.number() },
-  handler: async (_, args) => {
-    return fetchTmdb(tmdbTvSchema, `/tv/${args.tmdbId}`)
+  handler: async (context, args) => {
+    return fetchTmdbCached(context, tmdbTvSchema, `/tv/${args.tmdbId}`)
   },
 })
 
 export const getShowSeasonDetails = action({
   args: { tmdbId: v.number(), seasonNumber: v.number() },
-  handler: async (_, args) => {
-    return fetchTmdb(tmdbSeasonSchema, `/tv/${args.tmdbId}/season/${args.seasonNumber}`)
+  handler: async (context, args) => {
+    return fetchTmdbCached(context, tmdbSeasonSchema, `/tv/${args.tmdbId}/season/${args.seasonNumber}`)
   },
 })
 
 export const getUpcomingTv = action({
   args: { page: v.optional(v.number()) },
-  handler: async (ctx, args) => {
+  handler: async (context, args) => {
     const page = args.page || 1
     const pageSize = 20
 
@@ -321,7 +321,7 @@ export const getUpcomingTv = action({
       poster: string | null
       backdrop: string | null
       type: 'tv'
-    }> = await ctx.runQuery(api.upcoming.getUpcomingTvWatchlist, {})
+    }> = await context.runQuery(api.upcoming.getUpcomingTvWatchlist, {})
 
     const tvUpcoming: Array<{
       tmdbId: number
@@ -335,7 +335,7 @@ export const getUpcomingTv = action({
 
     for (const show of tvWatchlist) {
       try {
-        const showDetails = await fetchTmdb(tmdbTvSchema, `/tv/${show.tmdbId}`)
+        const showDetails = await fetchTmdbCached(context, tmdbTvSchema, `/tv/${show.tmdbId}`)
 
         const nextEpisode = showDetails.next_episode_to_air
         if (!nextEpisode) continue
@@ -380,7 +380,7 @@ export const getUpcomingTv = action({
 
 export const getUpcomingMovies = action({
   args: { page: v.optional(v.number()) },
-  handler: async (ctx, args) => {
+  handler: async (context, args) => {
     const page = args.page || 1
     const pageSize = 20
 
@@ -390,7 +390,7 @@ export const getUpcomingMovies = action({
       poster: string | null
       backdrop: string | null
       type: 'movie'
-    }> = await ctx.runQuery(api.upcoming.getUpcomingMoviesWatchlist, {})
+    }> = await context.runQuery(api.upcoming.getUpcomingMoviesWatchlist, {})
 
     const movieUpcoming: Array<{
       tmdbId: number
@@ -404,7 +404,7 @@ export const getUpcomingMovies = action({
 
     for (const movie of movieWatchlist) {
       try {
-        const movieDetails = await fetchTmdb(tmdbMovieSchema, `/movie/${movie.tmdbId}`)
+        const movieDetails = await fetchTmdbCached(context, tmdbMovieSchema, `/movie/${movie.tmdbId}`)
 
         const airDateString = movieDetails.release_date
         if (!airDateString) continue

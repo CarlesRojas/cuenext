@@ -2,7 +2,7 @@ import { v } from 'convex/values'
 import { tmdbTvSchema } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
-import { fetchTmdb } from './lib/tmdbClient'
+import { fetchTmdbCached } from './tmdbCache'
 
 export const updateNextEpisode = action({
   args: { tmdbId: v.number() },
@@ -21,7 +21,7 @@ export const updateNextEpisode = action({
       existingNextEpisode.seasonDataUpdatedAt < oneWeekAgo
 
     if (needsSeasonDataUpdate) {
-      const showDetails = await fetchTmdb(tmdbTvSchema, `/tv/${args.tmdbId}`)
+      const showDetails = await fetchTmdbCached(context, tmdbTvSchema, `/tv/${args.tmdbId}`)
 
       seasonEpisodeCounts =
         showDetails.seasons

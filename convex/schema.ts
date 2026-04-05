@@ -43,4 +43,11 @@ export default defineSchema({
     watchedPercentage: v.number(),
     status: v.union(v.literal('ended'), v.literal('ongoing')),
   }).index('by_user_show', ['userId', 'showTmdbId']),
+
+  tmdbCache: defineTable({
+    endpoint: v.string(),
+    data: v.any(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  }).index('by_endpoint', ['endpoint']),
 })
