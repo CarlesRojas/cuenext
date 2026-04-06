@@ -18,7 +18,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
 
   const { isFollowed, isFollowedLoading, toggleFollow } = useFollowMovie(movie)
   const { isFavorited, isFavoritedLoading, toggleFavorite } = useFavoriteMovie(movie)
-  const { isWatched, isWatchedLoading, handleToggleWatch } = useWatchMovie({
+  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie({
     ...movie,
     name: title,
     poster: poster_path,
@@ -117,7 +117,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
           {!isFollowedLoading && isFollowed && (
             <Button
               variant={isWatched ? 'negative' : 'secondary'}
-              onClick={() => handleToggleWatch()}
+              onClick={() => onToggleWatch()}
               disabled={isWatchedLoading}
             >
               <FontAwesomeIcon icon={isWatched ? faEyeSlash : faEye} className="size-4" />

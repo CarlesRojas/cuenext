@@ -29,7 +29,7 @@ export function useWatchMovie(movie: MovieSectionItem) {
     },
   })
 
-  const handleToggleWatch = async () => {
+  const onToggleWatch = async () => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
     const mediaKey = `movie-${movie.tmdbId}`
@@ -48,6 +48,6 @@ export function useWatchMovie(movie: MovieSectionItem) {
   return {
     isWatched,
     isWatchedLoading: isLoading,
-    handleToggleWatch,
+    onToggleWatch,
   }
 }

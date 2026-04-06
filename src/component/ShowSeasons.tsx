@@ -30,7 +30,7 @@ export function ShowSeasons({ show }: Props) {
   if (allSeasonsLoaded && seasons.length === 0) return null
 
   return (
-    <div className="screen-px">
+    <div className="screen-px pb-4 md:pb-8">
       <div className="page-width mx-[unset] flex flex-col gap-4">
         {regularSeasons.map(season => (
           <ShowSeason key={season.id} season={season} />

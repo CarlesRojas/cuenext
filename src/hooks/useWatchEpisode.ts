@@ -46,7 +46,7 @@ export function useWatchEpisode(episode: TvSectionItem) {
     },
   })
 
-  const handleToggleWatch = async () => {
+  const onToggleWatch = async () => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
     const title = `S${episode.seasonNumber + 1} E${episode.episodeNumber + 1} of ${episode.name}`
@@ -66,6 +66,6 @@ export function useWatchEpisode(episode: TvSectionItem) {
   return {
     isWatched,
     isWatchedLoading: isLoading,
-    handleToggleWatch,
+    onToggleWatch,
   }
 }
