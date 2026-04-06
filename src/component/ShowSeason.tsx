@@ -129,7 +129,7 @@ export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Pr
               </DialogTitle>
             </DialogHeader>
 
-            <DialogFooter className="flex-row-reverse">
+            <DialogFooter>
               <DialogClose asChild>
                 <Button
                   variant={areAllEpisodesWatched ? 'negative' : 'default'}

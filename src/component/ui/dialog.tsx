@@ -26,7 +26,7 @@ function DialogOverlay({ className, ...props }: ComponentProps<typeof DialogPrim
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50',
+        'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/70 backdrop-blur-md',
         className,
       )}
       {...props}
@@ -48,19 +48,18 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'border-oklch(0.922 0 0) bg-oklch(1 0 0) data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 dark:border-oklch(1 0 0 / 10%) dark:bg-oklch(0.145 0 0) fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg',
+          'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[22px] border border-neutral-500/40 bg-neutral-800/60 p-6 shadow-lg duration-200 outline-none sm:max-w-lg',
           className,
         )}
         {...props}
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            className="ring-offset-oklch(1 0 0) focus:ring-oklch(0.708 0 0) data-[state=open]:bg-oklch(0.97 0 0) data-[state=open]:text-oklch(0.556 0 0) dark:ring-offset-oklch(0.145 0 0) dark:focus:ring-oklch(0.556 0 0) dark:data-[state=open]:bg-oklch(0.269 0 0) dark:data-[state=open]:text-oklch(0.708 0 0) absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-          >
-            <FontAwesomeIcon icon={faXmark} />
-            <span className="sr-only">Close</span>
+          <DialogPrimitive.Close data-slot="dialog-close" asChild>
+            <Button variant="ghost" size="iconSmall" className="absolute top-4 right-4">
+              <FontAwesomeIcon icon={faXmark} />
+              <span className="sr-only">Close</span>
+            </Button>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -69,13 +68,7 @@ function DialogContent({
 }
 
 function DialogHeader({ className, ...props }: ComponentProps<'div'>) {
-  return (
-    <div
-      data-slot="dialog-header"
-      className={cn('flex flex-col gap-2 text-center sm:text-left', className)}
-      {...props}
-    />
-  )
+  return <div data-slot="dialog-header" className={cn('mr-8 flex flex-col gap-2 text-left', className)} {...props} />
 }
 
 function DialogFooter({
@@ -87,11 +80,7 @@ function DialogFooter({
   showCloseButton?: boolean
 }) {
   return (
-    <div
-      data-slot="dialog-footer"
-      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
-      {...props}
-    >
+    <div data-slot="dialog-footer" className={cn('flex flex-row-reverse justify-start gap-2', className)} {...props}>
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
