@@ -6,6 +6,5 @@ interface ShowSeasonsProps {
 }
 
 export function ShowSeasons({ show, seasons }: ShowSeasonsProps) {
-  console.log({ show, seasons })
   return null
 }
