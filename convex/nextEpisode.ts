@@ -33,14 +33,16 @@ export const updateNextEpisode = action({
     }
 
     const watchedEpisodes = await context.runQuery(api.watch.getWatchedShowEpisodes, { showTmdbId: args.tmdbId })
+    const watchedEpisodesWithoutSpecials = watchedEpisodes.filter(ep => ep.seasonNumber >= 0)
 
     const totalEpisodes = seasonEpisodeCounts.reduce((sum, count) => sum + count, 0)
-    const watchedPercentage = totalEpisodes > 0 ? Math.round((watchedEpisodes.length / totalEpisodes) * 100) : 0
+    const watchedPercentage =
+      totalEpisodes > 0 ? Math.round((watchedEpisodesWithoutSpecials.length / totalEpisodes) * 100) : 0
 
     let nextSeasonNumber = -1
     let nextEpisodeNumber = -1
 
-    const watchedSet = new Set(watchedEpisodes.map((ep: any) => `${ep.seasonNumber}-${ep.episodeNumber}`))
+    const watchedSet = new Set(watchedEpisodesWithoutSpecials.map(ep => `${ep.seasonNumber}-${ep.episodeNumber}`))
     found: for (let seasonIndex = 0; seasonIndex < seasonEpisodeCounts.length; seasonIndex++) {
       const episodeCount = seasonEpisodeCounts[seasonIndex]
 
@@ -55,7 +57,10 @@ export const updateNextEpisode = action({
 
     const updateData = {
       showTmdbId: args.tmdbId,
-      lastWatchedAt: watchedEpisodes.length > 0 ? Math.max(...watchedEpisodes.map((ep: any) => ep.watchedAt)) : null,
+      lastWatchedAt:
+        watchedEpisodesWithoutSpecials.length > 0
+          ? Math.max(...watchedEpisodesWithoutSpecials.map(ep => ep.watchedAt))
+          : null,
       seasonNumber: nextSeasonNumber,
       episodeNumber: nextEpisodeNumber,
       seasonEpisodeCounts,
