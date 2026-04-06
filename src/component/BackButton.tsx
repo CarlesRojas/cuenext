@@ -4,15 +4,20 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 
-const BackButton = () => {
+interface Props {
+  className?: string
+}
+
+const BackButton = ({ className }: Props) => {
   const router = useRouter()
   const navigate = useNavigate()
   const searchParams = useSearchParams()
 
   return (
     <Button
-      variant="frost"
+      variant="secondary"
       size="icon"
+      className={className}
       onClick={() => {
         navigate({ to: '.', replace: true, search: { media: searchParams.media } })
         router.history.back()
