@@ -87,7 +87,7 @@ function App() {
               {tvSections.waitingForEpisodes.map(item => (
                 <PosterCard
                   key={item.id}
-                  id={item.tmdbId}
+                  id={item.showTmdbId}
                   title={item.name}
                   media="tv"
                   imagePaths={[item.poster, item.backdrop]}
@@ -105,7 +105,7 @@ function App() {
                 return (
                   <PosterCard
                     key={item.id}
-                    id={item.tmdbId}
+                    id={item.showTmdbId}
                     title={item.name}
                     media="tv"
                     imagePaths={[item.poster, item.backdrop]}
@@ -121,7 +121,7 @@ function App() {
               {tvSections.finished.map(item => (
                 <PosterCard
                   key={item.id}
-                  id={item.tmdbId}
+                  id={item.showTmdbId}
                   title={item.name}
                   media="tv"
                   imagePaths={[item.poster, item.backdrop]}

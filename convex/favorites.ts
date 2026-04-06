@@ -60,7 +60,7 @@ export const getFavoriteShows = query({
 
     const favorites: TvSectionItem[] = favoriteShowFollows.map(follow => ({
       id: `$${follow.tmdbId}`,
-      tmdbId: follow.tmdbId,
+      showTmdbId: follow.tmdbId,
       lastWatchedAt: null,
       manuallyStopped: false,
       seasonNumber: 0,

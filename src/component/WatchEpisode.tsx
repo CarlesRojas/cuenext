@@ -12,7 +12,7 @@ export default function WatchEpisode({ episode }: Props) {
 
   return (
     <PosterCard
-      id={episode.tmdbId}
+      id={episode.showTmdbId}
       title={episode.name}
       media="tv"
       imagePaths={[episode.poster, episode.backdrop]}

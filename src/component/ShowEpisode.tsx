@@ -16,22 +16,11 @@ const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason }: Props) 
   const { id, season_number, runtime, still_path, name, air_date, episode_number } = episode
 
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({
-    tmdbId: showId,
+    showTmdbId: showId,
     name: episode.name,
-    seasonNumber: episode.season_number,
-    episodeNumber: episode.episode_number,
+    seasonNumber: episode.season_number - 1,
+    episodeNumber: episode.episode_number - 1,
   })
-  if (isWatchedLoading) console.log(episode.name, isWatched)
-
-  // if (!isWatchedLoading)
-  //   console.log({
-  //     isWatched,
-  //     isWatchedLoading,
-  //     tmdbId: showId,
-  //     name: episode.name,
-  //     seasonNumber: episode.season_number - 1,
-  //     episodeNumber: episode.episode_number - 1,
-  //   })
 
   const [hasImage, setHasImage] = useState(true)
 

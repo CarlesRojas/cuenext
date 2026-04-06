@@ -73,6 +73,20 @@ export const getWatchedEpisodes = query({
   },
 })
 
+export const getWatchedEpisodesForShow = query({
+  args: { showTmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const episodes = await context.db
+      .query('episode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
+      .collect()
+
+    return episodes
+  },
+})
+
 export const checkEpisodeWatched = query({
   args: {
     showTmdbId: v.number(),

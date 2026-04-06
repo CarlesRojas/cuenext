@@ -37,7 +37,7 @@ export const getTvSections = query({
 
       const item: TvSectionItem = {
         id: `${follow.tmdbId}-${nextEp.seasonNumber}-${nextEp.episodeNumber}`,
-        tmdbId: follow.tmdbId,
+        showTmdbId: follow.tmdbId,
         lastWatchedAt: nextEp.lastWatchedAt,
         manuallyStopped: isStopped,
         seasonNumber: nextEp.seasonNumber,

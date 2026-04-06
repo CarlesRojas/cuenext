@@ -1,5 +1,5 @@
 export type TvSectionItemMinimal = {
-  tmdbId: number
+  showTmdbId: number
   seasonNumber: number
   episodeNumber: number
   name: string
@@ -7,7 +7,7 @@ export type TvSectionItemMinimal = {
 
 export type TvSectionItem = {
   id: string
-  tmdbId: number
+  showTmdbId: number
   lastWatchedAt: number | null
   manuallyStopped: boolean
   seasonNumber: number
@@ -19,6 +19,7 @@ export type TvSectionItem = {
   poster?: string | null
   backdrop?: string | null
 }
+
 export type MovieSectionItem = {
   tmdbId: number
   watchedAt?: number | null
