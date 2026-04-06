@@ -28,6 +28,8 @@ export default function UpcomingEpisode(props: UpcomingEpisodeItem) {
     if (episodeName) tag += ` • ${episodeName}`
   } else tag = 'New Episode'
 
+  const daysUntilAir = Math.ceil((new Date(airDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+
   return (
     <RowCard
       media="tv"
@@ -38,6 +40,16 @@ export default function UpcomingEpisode(props: UpcomingEpisodeItem) {
       backdropPath={episode.backdrop_path}
       subtitle={[formattedAirDate, tag].filter(Boolean).join(' • ')}
       overview={episode.next_episode_to_air?.overview || episode.overview}
+      rightContent={
+        daysUntilAir > 0 && (
+          <div className="flex flex-col items-end justify-center">
+            <span className="text-lg leading-tight font-semibold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
+            <span className="text-xs leading-tight whitespace-nowrap text-sky-500">
+              {daysUntilAir === 1 ? 'day' : 'days'}
+            </span>
+          </div>
+        )
+      }
     />
   )
 }

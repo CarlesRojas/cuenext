@@ -22,6 +22,8 @@ export default function UpcomingMovie(props: UpcomingMovieItem) {
 
   const runtime = movie.runtime ? `${movie.runtime}m` : undefined
 
+  const daysUntilAir = Math.ceil((new Date(airDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+
   return (
     <RowCard
       media="movie"
@@ -32,6 +34,16 @@ export default function UpcomingMovie(props: UpcomingMovieItem) {
       backdropPath={movie.backdrop_path}
       subtitle={[formattedAirDate, runtime].filter(Boolean).join(' • ')}
       overview={movie.overview}
+      rightContent={
+        daysUntilAir > 0 && (
+          <div className="flex flex-col items-end justify-center">
+            <span className="text-lg leading-tight font-semibold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
+            <span className="text-xs leading-tight whitespace-nowrap text-sky-500">
+              {daysUntilAir === 1 ? 'day' : 'days'}
+            </span>
+          </div>
+        )
+      }
     />
   )
 }

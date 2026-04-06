@@ -95,8 +95,10 @@ const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason, showName,
 
         {!hasAired && daysUntilAir !== null && (
           <div className="flex flex-col items-end justify-center">
-            <span className="text-lg leading-tight font-semibold text-sky-500">{daysUntilAir}</span>
-            <span className="text-xs leading-tight text-sky-500">{daysUntilAir === 1 ? 'day' : 'days'}</span>
+            <span className="text-lg leading-tight font-semibold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
+            <span className="text-xs leading-tight whitespace-nowrap text-sky-500">
+              {daysUntilAir === 1 ? 'day' : 'days'}
+            </span>
           </div>
         )}
       </div>

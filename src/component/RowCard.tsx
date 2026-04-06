@@ -6,6 +6,7 @@ import type { MediaType } from '#/type/media'
 import { faClapperboard, faPlus, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 interface CommonProps {
@@ -26,6 +27,7 @@ interface LoadedProps extends CommonProps {
   backdropPath?: string | null | undefined
   overview: string
 
+  rightContent?: ReactNode
   showFollow?: boolean
   followButtonText?: string
   isFollowed?: boolean
@@ -62,6 +64,7 @@ export default function RowCard(props: Props) {
     subtitle,
     overview,
 
+    rightContent,
     followButtonText,
     showFollow = false,
     isFollowed = false,
@@ -154,9 +157,13 @@ export default function RowCard(props: Props) {
         )}
 
         <div className="flex flex-col justify-between p-3 lg:p-4">
-          <div className={cn('flex flex-col', showFollow && onToggleFollow && 'pr-24')}>
-            <h2 className="line-clamp-1 text-lg leading-6 font-semibold">{title}</h2>
-            {subtitle && <p className="line-clamp-1 text-sm text-neutral-400">{subtitle}</p>}
+          <div className={cn('flex justify-between', showFollow && onToggleFollow && 'pr-24')}>
+            <div className="flex flex-col">
+              <h2 className="line-clamp-1 text-lg leading-6 font-semibold">{title}</h2>
+              {subtitle && <p className="line-clamp-1 text-sm text-neutral-400">{subtitle}</p>}
+            </div>
+
+            {rightContent}
           </div>
 
           <p className="line-clamp-4 text-sm leading-snug text-neutral-400">{overview}</p>
