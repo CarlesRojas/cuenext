@@ -54,6 +54,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
             onNoImage={() => setHasImage(false)}
             className="h-full max-h-full w-full max-w-full object-cover object-center"
             alt={name}
+            minSize="w342"
           />
 
           <div

@@ -56,6 +56,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             onNoImage={() => setHasImage(false)}
             className="h-full max-h-full w-full max-w-full object-cover object-center"
             alt={title}
+            minSize="w342"
           />
 
           <div
