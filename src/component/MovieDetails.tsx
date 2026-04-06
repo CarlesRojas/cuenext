@@ -1,9 +1,10 @@
 import { Button } from '#/component/ui/button'
 import { useFavoriteMovie } from '#/hooks/useFavoriteMovie'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
+import { useImageFallback } from '#/hooks/useImageFallback'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
 import { cn } from '#/lib/cn'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
+import { getTmdbImageUrls } from '#/lib/tmdbImage'
 import type { TmdbMovie } from '#/type/tmdb'
 import { faEye, faEyeSlash, faHeart, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -34,8 +35,15 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
       })()
     : null
 
-  const posterUrl = getTmdbImageUrl(poster_path, 'original')
-  const backdropUrl = getTmdbImageUrl(backdrop_path, 'original') || posterUrl
+  const mobileImage = useImageFallback([
+    ...getTmdbImageUrls(backdrop_path, ['w342', 'w500']),
+    ...getTmdbImageUrls(poster_path, ['w500']),
+  ])
+
+  const desktopImage = useImageFallback([
+    ...getTmdbImageUrls(backdrop_path, ['original']),
+    ...getTmdbImageUrls(poster_path, ['original']),
+  ])
 
   const formattedReleaseDate = release_date
     ? new Date(release_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -46,21 +54,40 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
 
   return (
     <div className="flex h-fit w-full flex-col gap-8">
+      {desktopImage.hasImage && (
+        <section
+          className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
+          style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
+        >
+          <img
+            src={mobileImage.imageUrl}
+            alt={title}
+            onError={mobileImage.handleImageError}
+            className="h-full max-h-full w-full max-w-full object-cover object-center"
+          />
+
+          <img
+            src={desktopImage.imageUrl}
+            alt={title}
+            onError={desktopImage.handleImageError}
+            className="absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center"
+          />
+
+          <div
+            className="absolute inset-0 size-full backdrop-blur"
+            style={{ maskImage: 'linear-gradient(to bottom, transparent 30%, black)' }}
+          />
+
+          <div className="absolute inset-0 size-full bg-radial from-transparent from-40% to-neutral-950 to-90%" />
+        </section>
+      )}
+
       <section
-        className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
-        style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
+        className={cn(
+          'screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
+          !desktopImage.hasImage && 'pt-23!',
+        )}
       >
-        <img src={backdropUrl} alt={title} className="h-full max-h-full w-full max-w-full object-cover object-center" />
-
-        <div
-          className="absolute inset-0 size-full backdrop-blur"
-          style={{ maskImage: 'linear-gradient(to bottom, transparent 30%, black)' }}
-        />
-
-        <div className="absolute inset-0 size-full bg-radial from-transparent from-40% to-neutral-950 to-90%" />
-      </section>
-
-      <section className="screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{title}</h1>
 
         <p className="leading-snug font-medium tracking-wide">

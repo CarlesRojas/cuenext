@@ -1,9 +1,10 @@
 import { Button } from '#/component/ui/button'
 import { useFavoriteEpisode } from '#/hooks/useFavoriteEpisode'
 import { useFollowEpisode } from '#/hooks/useFollowEpisode'
+import { useImageFallback } from '#/hooks/useImageFallback'
 import { useStopEpisode } from '#/hooks/useStopEpisode'
 import { cn } from '#/lib/cn'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
+import { getTmdbImageUrls } from '#/lib/tmdbImage'
 import type { TmdbTv } from '#/type/tmdb'
 import { faHeart, faMinus, faPlay, faPlus, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -35,8 +36,15 @@ export function ShowDetails({ show }: ShowDetailsProps) {
   const numberOfSeasons = seasons?.length || number_of_seasons || null
   const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
 
-  const posterUrl = getTmdbImageUrl(poster_path, 'original')
-  const backdropUrl = getTmdbImageUrl(backdrop_path, 'original') || posterUrl
+  const mobileImage = useImageFallback([
+    ...getTmdbImageUrls(backdrop_path, ['w342', 'w500']),
+    ...getTmdbImageUrls(poster_path, ['w500']),
+  ])
+
+  const desktopImage = useImageFallback([
+    ...getTmdbImageUrls(backdrop_path, ['original']),
+    ...getTmdbImageUrls(poster_path, ['original']),
+  ])
 
   const formattedReleaseDate = first_air_date
     ? new Date(first_air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -44,21 +52,40 @@ export function ShowDetails({ show }: ShowDetailsProps) {
 
   return (
     <div className="flex h-fit w-full flex-col gap-8">
+      {desktopImage.hasImage && (
+        <section
+          className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
+          style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
+        >
+          <img
+            src={mobileImage.imageUrl}
+            alt={name}
+            onError={mobileImage.handleImageError}
+            className="h-full max-h-full w-full max-w-full object-cover object-center"
+          />
+
+          <img
+            src={desktopImage.imageUrl}
+            alt={name}
+            onError={desktopImage.handleImageError}
+            className="absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center"
+          />
+
+          <div
+            className="absolute inset-0 size-full backdrop-blur"
+            style={{ maskImage: 'linear-gradient(to bottom, transparent 30%, black)' }}
+          />
+
+          <div className="absolute inset-0 size-full bg-radial from-transparent from-40% to-neutral-950 to-90%" />
+        </section>
+      )}
+
       <section
-        className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
-        style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
+        className={cn(
+          'screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
+          !desktopImage.hasImage && 'pt-23!',
+        )}
       >
-        <img src={backdropUrl} alt={name} className="h-full max-h-full w-full max-w-full object-cover object-center" />
-
-        <div
-          className="absolute inset-0 size-full backdrop-blur"
-          style={{ maskImage: 'linear-gradient(to bottom, transparent 30%, black)' }}
-        />
-
-        <div className="absolute inset-0 size-full bg-radial from-transparent from-40% to-neutral-950 to-90%" />
-      </section>
-
-      <section className="screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{name}</h1>
 
         <p className="leading-snug font-medium tracking-wide">
