@@ -1,13 +1,13 @@
+import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Button } from '#/component/ui/button'
 import { useFavoriteMovie } from '#/hooks/useFavoriteMovie'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
-import { useImageFallback } from '#/hooks/useImageFallback'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
 import { cn } from '#/lib/cn'
-import { getTmdbImageUrls } from '#/lib/tmdbImage'
 import type { TmdbMovie } from '#/type/tmdb'
 import { faEye, faEyeSlash, faHeart, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useState } from 'react'
 
 interface MovieDetailsProps {
   movie: TmdbMovie
@@ -35,15 +35,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
       })()
     : null
 
-  const mobileImage = useImageFallback([
-    ...getTmdbImageUrls(backdrop_path, ['w342', 'w500']),
-    ...getTmdbImageUrls(poster_path, ['w500']),
-  ])
-
-  const desktopImage = useImageFallback([
-    ...getTmdbImageUrls(backdrop_path, ['original']),
-    ...getTmdbImageUrls(poster_path, ['original']),
-  ])
+  const [hasImage, setHasImage] = useState(true)
 
   const formattedReleaseDate = release_date
     ? new Date(release_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -54,23 +46,16 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
 
   return (
     <div className="flex h-fit w-full flex-col gap-8">
-      {desktopImage.hasImage && (
+      {hasImage && (
         <section
           className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
           style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
         >
-          <img
-            src={mobileImage.imageUrl}
-            alt={title}
-            onError={mobileImage.handleImageError}
+          <ProgressiveImage
+            paths={[backdrop_path, poster_path]}
+            onNoImage={() => setHasImage(false)}
             className="h-full max-h-full w-full max-w-full object-cover object-center"
-          />
-
-          <img
-            src={desktopImage.imageUrl}
             alt={title}
-            onError={desktopImage.handleImageError}
-            className="absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center"
           />
 
           <div
@@ -85,7 +70,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
       <section
         className={cn(
           'screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
-          !desktopImage.hasImage && 'pt-23!',
+          !hasImage && 'pt-23!',
         )}
       >
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{title}</h1>
