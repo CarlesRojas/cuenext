@@ -85,7 +85,7 @@ function RouteComponent() {
         <BackButton />
       </header>
 
-      <div className="flex w-full flex-col gap-8">
+      <div className="flex w-full flex-col gap-4">
         {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
 
         {media === 'tv' && show.data && <ShowDetails show={show.data} />}
