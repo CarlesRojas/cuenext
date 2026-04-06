@@ -99,9 +99,21 @@ function App() {
 
           {tvSections && tvSections.stoppedWatching.length > 0 && (
             <Section title="Stopped watching" defaultCollapsed>
-              {tvSections.stoppedWatching.map(item => (
-                <WatchEpisode key={item.id} episode={item} />
-              ))}
+              {tvSections.stoppedWatching.map(item => {
+                const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
+                if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
+
+                return (
+                  <PosterCard
+                    key={item.id}
+                    id={item.tmdbId}
+                    title={item.name}
+                    media="tv"
+                    imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                    progressPercentage={item.watchedPercentage}
+                  />
+                )
+              })}
             </Section>
           )}
 
