@@ -8,10 +8,16 @@ export const getUpcomingTvWatchlist = query({
 
     const tvFollows = await context.db
       .query('follow')
-      .withIndex('by_user_type_manually_stopped', q =>
-        q.eq('userId', userId).eq('type', 'tv').eq('manuallyStopped', false),
-      )
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
       .collect()
+
+    const stoppedShows = await context.db
+      .query('stopped')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    const stoppedShowIds = new Set(stoppedShows.map(s => s.tmdbId))
+    const nonStoppedTvFollows = tvFollows.filter(follow => !stoppedShowIds.has(follow.tmdbId))
 
     const tvUpcoming: Array<{
       tmdbId: number
@@ -21,7 +27,7 @@ export const getUpcomingTvWatchlist = query({
       type: 'tv'
     }> = []
 
-    for (const follow of tvFollows) {
+    for (const follow of nonStoppedTvFollows) {
       const nextEp = await context.db
         .query('nextEpisode')
         .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', follow.tmdbId))
@@ -52,9 +58,7 @@ export const getUpcomingMoviesWatchlist = query({
 
     const movieFollows = await context.db
       .query('follow')
-      .withIndex('by_user_type_manually_stopped', q =>
-        q.eq('userId', userId).eq('type', 'movie').eq('manuallyStopped', false),
-      )
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
       .collect()
 
     const watchedMovies = await context.db

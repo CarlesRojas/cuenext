@@ -11,36 +11,36 @@ export function useWatchEpisode(episode: TvSectionItem) {
   const { showUndoToast } = useUndoToast()
 
   const { data: isWatched, isFetching: isWatchedLoading } = useQuery({
-    ...convexQuery(api.progress.checkEpisodeWatched, {
+    ...convexQuery(api.watch.checkEpisodeWatched, {
       showTmdbId: episode.tmdbId,
       seasonNumber: episode.seasonNumber,
       episodeNumber: episode.episodeNumber,
     }),
   })
 
-  const markEpisodeWatched = useDbMutation(api.progress.markEpisodeWatched)
-  const unmarkEpisodeWatched = useDbMutation(api.progress.unmarkEpisodeWatched)
+  const markEpisodeWatched = useDbMutation(api.watch.markEpisodeWatched)
+  const unmarkEpisodeWatched = useDbMutation(api.watch.unmarkEpisodeWatched)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
   const watch = useMutation({
     mutationFn: async () => {
-      const wasManuallyStopped = await markEpisodeWatched({
+      const wasStopped = await markEpisodeWatched({
         showTmdbId: episode.tmdbId,
         seasonNumber: episode.seasonNumber,
         episodeNumber: episode.episodeNumber,
       })
       await updateNextEpisode({ tmdbId: episode.tmdbId })
-      return wasManuallyStopped
+      return wasStopped
     },
   })
 
   const unwatch = useMutation({
-    mutationFn: async ({ wasManuallyStopped }: { wasManuallyStopped?: boolean }) => {
+    mutationFn: async ({ wasStopped }: { wasStopped?: boolean }) => {
       await unmarkEpisodeWatched({
         showTmdbId: episode.tmdbId,
         seasonNumber: episode.seasonNumber,
         episodeNumber: episode.episodeNumber,
-        wasManuallyStopped,
+        wasStopped,
       })
       await updateNextEpisode({ tmdbId: episode.tmdbId })
     },
@@ -56,13 +56,8 @@ export function useWatchEpisode(episode: TvSectionItem) {
       await unwatch.mutateAsync({})
       showUndoToast(title, 'unwatch', mediaKey, async () => await watch.mutateAsync())
     } else {
-      const wasManuallyStopped = await watch.mutateAsync()
-      showUndoToast(
-        title,
-        'watch',
-        mediaKey,
-        async () => await unwatch.mutateAsync({ wasManuallyStopped: wasManuallyStopped ?? undefined }),
-      )
+      const wasStopped = await watch.mutateAsync()
+      showUndoToast(title, 'watch', mediaKey, async () => await unwatch.mutateAsync({ wasStopped }))
     }
   }
 

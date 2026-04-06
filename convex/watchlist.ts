@@ -12,6 +12,13 @@ export const getTvSections = query({
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
       .collect()
 
+    const stoppedShows = await context.db
+      .query('stopped')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    const stoppedShowIds = new Set(stoppedShows.map(s => s.tmdbId))
+
     const watchNext: TvSectionItem[] = []
     const haventStarted: TvSectionItem[] = []
     const stoppedWatching: TvSectionItem[] = []
@@ -26,11 +33,13 @@ export const getTvSections = query({
 
       if (!nextEp) continue
 
+      const isStopped = stoppedShowIds.has(follow.tmdbId)
+
       const item: TvSectionItem = {
         id: `${follow.tmdbId}-${nextEp.seasonNumber}-${nextEp.episodeNumber}`,
         tmdbId: follow.tmdbId,
         lastWatchedAt: nextEp.lastWatchedAt,
-        manuallyStopped: follow.manuallyStopped,
+        manuallyStopped: isStopped,
         seasonNumber: nextEp.seasonNumber,
         episodeNumber: nextEp.episodeNumber,
         followedAt: follow.followedAt,
@@ -43,10 +52,9 @@ export const getTvSections = query({
 
       const noMoreEpisodes = nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1
 
-      if (noMoreEpisodes) {
-        if (nextEp.status === 'ended') finished.push(item)
-        else waitingForEpisodes.push(item)
-      } else if (follow.manuallyStopped) stoppedWatching.push(item)
+      if (noMoreEpisodes && nextEp.status === 'ended') finished.push(item)
+      else if (isStopped) stoppedWatching.push(item)
+      else if (noMoreEpisodes) waitingForEpisodes.push(item)
       else if (nextEp.seasonNumber === 0 && nextEp.episodeNumber === 0) haventStarted.push(item)
       else watchNext.push(item)
     }
@@ -91,7 +99,7 @@ export const getMovieSections = query({
       }
 
       if (item.watchedAt) finished.push(item)
-      else if (!follow.manuallyStopped) watchNext.push(item)
+      else watchNext.push(item)
     }
 
     watchNext.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))

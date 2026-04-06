@@ -9,7 +9,7 @@ export const getMovieStats = action({
   handler: async context => {
     await requireUser(context)
 
-    const movies: { tmdbId: number }[] = await context.runQuery(api.progress.getWatchedMovies)
+    const movies: { tmdbId: number }[] = await context.runQuery(api.watch.getWatchedMovies)
     const moviesWatchedCount = movies.length
 
     const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'movie' })
@@ -45,7 +45,7 @@ export const getShowStats = action({
       showTmdbId: number
       seasonNumber: number
       episodeNumber: number
-    }[] = await context.runQuery(api.progress.getWatchedEpisodes)
+    }[] = await context.runQuery(api.watch.getWatchedEpisodes)
     const episodesWatchedCount: number = episodes.length
 
     const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'tv' })

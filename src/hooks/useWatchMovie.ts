@@ -11,11 +11,11 @@ export function useWatchMovie(movie: MovieSectionItem) {
   const { showUndoToast } = useUndoToast()
 
   const { data: isWatched, isFetching: isWatchedLoading } = useQuery(
-    convexQuery(api.progress.checkMovieWatched, { tmdbId: movie.tmdbId }),
+    convexQuery(api.watch.checkMovieWatched, { tmdbId: movie.tmdbId }),
   )
 
-  const markMovieWatched = useDbMutation(api.progress.markMovieWatched)
-  const unmarkMovieWatched = useDbMutation(api.progress.unmarkMovieWatched)
+  const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
+  const unmarkMovieWatched = useDbMutation(api.watch.unmarkMovieWatched)
 
   const watch = useMutation({
     mutationFn: async () => {

@@ -124,7 +124,8 @@
 
 - `library.unfollow({ type, tmdbId })`: remove from `follow`; optionally cascade delete progress rows (`movie` / `episode` / `nextEpisode`).
 
-- `library.setStopped({ type, tmdbId, stopped })`: toggle `manuallyStopped` (primarily used for TV, but can be allowed for movies too).
+- `stopped.setStopped({ tmdbId })`: mark item as stopped
+- `stopped.setUnstopped({ tmdbId })`: mark item as unstopped (primarily used for TV, but can be allowed for movies too).
 
 - `library.listFollowed({ type })`: list followed TMDB ids for the user (base for watchlist/upcoming).
 

@@ -10,7 +10,7 @@ export const updateNextEpisode = action({
     const now = Date.now()
     const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000
 
-    const existingNextEpisode = await context.runQuery(api.progress.getNextEpisode, { tmdbId: args.tmdbId })
+    const existingNextEpisode = await context.runQuery(api.watch.getNextEpisode, { tmdbId: args.tmdbId })
 
     let seasonEpisodeCounts: number[] = existingNextEpisode?.seasonEpisodeCounts ?? []
     let status: 'ended' | 'ongoing' = existingNextEpisode?.status ?? 'ongoing'
@@ -32,7 +32,7 @@ export const updateNextEpisode = action({
       status = showDetails.status?.toLowerCase() === 'ended' ? 'ended' : 'ongoing'
     }
 
-    const watchedEpisodes = await context.runQuery(api.progress.getWatchedShowEpisodes, { showTmdbId: args.tmdbId })
+    const watchedEpisodes = await context.runQuery(api.watch.getWatchedShowEpisodes, { showTmdbId: args.tmdbId })
 
     const totalEpisodes = seasonEpisodeCounts.reduce((sum, count) => sum + count, 0)
     const watchedPercentage = totalEpisodes > 0 ? Math.round((watchedEpisodes.length / totalEpisodes) * 100) : 0
@@ -69,6 +69,6 @@ export const updateNextEpisode = action({
       status,
     }
 
-    await context.runMutation(api.progress.upsertNextEpisode, updateData)
+    await context.runMutation(api.watch.upsertNextEpisode, updateData)
   },
 })

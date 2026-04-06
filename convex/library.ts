@@ -29,7 +29,6 @@ export const follow = mutation({
       poster: args.poster,
       backdrop: args.backdrop,
       followedAt: now,
-      manuallyStopped: false,
     })
   },
 })
@@ -51,26 +50,6 @@ export const unfollow = mutation({
   },
 })
 
-export const setStopped = mutation({
-  args: {
-    type: v.union(v.literal('movie'), v.literal('tv')),
-    tmdbId: v.number(),
-    stopped: v.boolean(),
-  },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const existing = await context.db
-      .query('follow')
-      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
-      .unique()
-
-    if (!existing) return
-
-    await context.db.patch(existing._id, { manuallyStopped: args.stopped })
-  },
-})
-
 export const listFollowed = query({
   args: { type: v.union(v.literal('movie'), v.literal('tv')) },
   handler: async (context, args) => {
@@ -82,21 +61,5 @@ export const listFollowed = query({
       .collect()
 
     return follows.map(f => f.tmdbId)
-  },
-})
-
-export const listStopped = query({
-  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const stoppedItems = await context.db
-      .query('follow')
-      .withIndex('by_user_type_manually_stopped', q =>
-        q.eq('userId', userId).eq('type', args.type).eq('manuallyStopped', true),
-      )
-      .collect()
-
-    return stoppedItems.map(f => f.tmdbId)
   },
 })

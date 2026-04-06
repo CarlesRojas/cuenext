@@ -8,10 +8,20 @@ export const getFavoriteMovies = query({
   handler: async context => {
     const userId = await requireUser(context)
 
-    const favoriteMovieFollows = await context.db
-      .query('follow')
-      .withIndex('by_user_type_favorite', q => q.eq('userId', userId).eq('type', 'movie').eq('favorite', true))
+    const favoriteItems = await context.db
+      .query('favorite')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
       .collect()
+
+    const favoriteMovieFollows = []
+
+    const allMovieFollows = await context.db
+      .query('follow')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
+      .collect()
+
+    const favoriteIds = new Set(favoriteItems.map(f => f.tmdbId))
+    favoriteMovieFollows.push(...allMovieFollows.filter(follow => favoriteIds.has(follow.tmdbId)))
 
     const favorites: MovieSectionItem[] = favoriteMovieFollows.map(follow => ({
       tmdbId: follow.tmdbId,
@@ -32,16 +42,26 @@ export const getFavoriteShows = query({
   handler: async context => {
     const userId = await requireUser(context)
 
-    const favoriteShowFollows = await context.db
-      .query('follow')
-      .withIndex('by_user_type_favorite', q => q.eq('userId', userId).eq('type', 'tv').eq('favorite', true))
+    const favoriteItems = await context.db
+      .query('favorite')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
       .collect()
+
+    const favoriteShowFollows = []
+
+    const allTvFollows = await context.db
+      .query('follow')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
+      .collect()
+
+    const favoriteIds = new Set(favoriteItems.map(f => f.tmdbId))
+    favoriteShowFollows.push(...allTvFollows.filter(follow => favoriteIds.has(follow.tmdbId)))
 
     const favorites: TvSectionItem[] = favoriteShowFollows.map(follow => ({
       id: `$${follow.tmdbId}`,
       tmdbId: follow.tmdbId,
       lastWatchedAt: null,
-      manuallyStopped: follow.manuallyStopped,
+      manuallyStopped: false,
       seasonNumber: 0,
       episodeNumber: 0,
       followedAt: follow.followedAt,
@@ -66,16 +86,18 @@ export const favoriteItem = mutation({
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    const existingFollow = await context.db
-      .query('follow')
+    const existingFavorite = await context.db
+      .query('favorite')
       .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (!existingFollow) throw new Error('Item must be followed before it can be favorited')
-
-    await context.db.patch(existingFollow._id, { favorite: true })
-
-    return existingFollow._id
+    if (!existingFavorite)
+      await context.db.insert('favorite', {
+        userId,
+        type: args.type,
+        tmdbId: args.tmdbId,
+        favoritedAt: Date.now(),
+      })
   },
 })
 
@@ -87,16 +109,12 @@ export const unfavoriteItem = mutation({
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    const existingFollow = await context.db
-      .query('follow')
+    const existingFavorite = await context.db
+      .query('favorite')
       .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (!existingFollow) throw new Error('Item not found in follow list')
-
-    await context.db.patch(existingFollow._id, { favorite: false })
-
-    return existingFollow._id
+    if (existingFavorite) await context.db.delete(existingFavorite._id)
   },
 })
 
@@ -106,8 +124,8 @@ export const listFavorites = query({
     const userId = await requireUser(context)
 
     const favorites = await context.db
-      .query('follow')
-      .withIndex('by_user_type_favorite', q => q.eq('userId', userId).eq('type', args.type).eq('favorite', true))
+      .query('favorite')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', args.type))
       .collect()
 
     return favorites.map(f => f.tmdbId)

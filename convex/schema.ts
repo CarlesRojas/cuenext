@@ -10,13 +10,26 @@ export default defineSchema({
     poster: v.union(v.string(), v.null()),
     backdrop: v.union(v.string(), v.null()),
     followedAt: v.number(),
-    manuallyStopped: v.boolean(),
-    favorite: v.optional(v.boolean()),
   })
     .index('by_user_type', ['userId', 'type'])
-    .index('by_user_type_manually_stopped', ['userId', 'type', 'manuallyStopped'])
-    .index('by_user_type_favorite', ['userId', 'type', 'favorite'])
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
+
+  favorite: defineTable({
+    userId: v.string(),
+    type: v.union(v.literal('movie'), v.literal('tv')),
+    tmdbId: v.number(),
+    favoritedAt: v.number(),
+  })
+    .index('by_user_type', ['userId', 'type'])
+    .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
+
+  stopped: defineTable({
+    userId: v.string(),
+    tmdbId: v.number(),
+    stoppedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_user_tmdbId', ['userId', 'tmdbId']),
 
   movie: defineTable({
     userId: v.string(),

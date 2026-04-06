@@ -11,18 +11,19 @@ export function useStopEpisode(episode: TmdbTvMinimal) {
   const { showUndoToast } = useUndoToast()
 
   const { data: stoppedMedia, isFetching: isStoppedLoading } = useQuery({
-    ...convexQuery(api.library.listStopped, { type: 'tv' }),
+    ...convexQuery(api.stopped.listStopped),
     enabled: clerk.isSignedIn,
   })
 
-  const setStopped = useDbMutation(api.library.setStopped)
+  const setStopped = useDbMutation(api.stopped.setStopped)
+  const setUnstopped = useDbMutation(api.stopped.setUnstopped)
 
   const stopItem = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await setStopped({ type: 'tv', tmdbId: id, stopped: true }),
+    mutationFn: async ({ id }: { id: number }) => await setStopped({ tmdbId: id }),
   })
 
   const unstopItem = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await setStopped({ type: 'tv', tmdbId: id, stopped: false }),
+    mutationFn: async ({ id }: { id: number }) => await setUnstopped({ tmdbId: id }),
   })
 
   const toggleStopped = async (id: number, title: string) => {

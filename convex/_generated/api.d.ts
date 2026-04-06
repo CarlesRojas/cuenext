@@ -12,12 +12,13 @@ import type * as favorites from "../favorites.js";
 import type * as lib_tmdbClient from "../lib/tmdbClient.js";
 import type * as library from "../library.js";
 import type * as nextEpisode from "../nextEpisode.js";
-import type * as progress from "../progress.js";
 import type * as requireUser from "../requireUser.js";
 import type * as stats from "../stats.js";
+import type * as stopped from "../stopped.js";
 import type * as tmdb from "../tmdb.js";
 import type * as tmdbCache from "../tmdbCache.js";
 import type * as upcoming from "../upcoming.js";
+import type * as watch from "../watch.js";
 import type * as watchlist from "../watchlist.js";
 
 import type {
@@ -31,12 +32,13 @@ declare const fullApi: ApiFromModules<{
   "lib/tmdbClient": typeof lib_tmdbClient;
   library: typeof library;
   nextEpisode: typeof nextEpisode;
-  progress: typeof progress;
   requireUser: typeof requireUser;
   stats: typeof stats;
+  stopped: typeof stopped;
   tmdb: typeof tmdb;
   tmdbCache: typeof tmdbCache;
   upcoming: typeof upcoming;
+  watch: typeof watch;
   watchlist: typeof watchlist;
 }>;
 

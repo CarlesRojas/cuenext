@@ -120,14 +120,15 @@ export const markEpisodeWatched = mutation({
 
     if (!existing) await context.db.insert('episode', { userId, ...args, watchedAt: now })
 
-    const followEntry = await context.db
-      .query('follow')
-      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
+    const stoppedEntry = await context.db
+      .query('stopped')
+      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.showTmdbId))
       .unique()
 
-    if (followEntry && followEntry.manuallyStopped) await context.db.patch(followEntry._id, { manuallyStopped: false })
+    const wasStopped = !!stoppedEntry
 
-    return followEntry && followEntry.manuallyStopped
+    if (stoppedEntry) await context.db.delete(stoppedEntry._id)
+    return wasStopped
   },
 })
 
@@ -136,7 +137,7 @@ export const unmarkEpisodeWatched = mutation({
     showTmdbId: v.number(),
     seasonNumber: v.number(),
     episodeNumber: v.number(),
-    wasManuallyStopped: v.optional(v.boolean()),
+    wasStopped: v.optional(v.boolean()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -156,13 +157,13 @@ export const unmarkEpisodeWatched = mutation({
 
     await context.db.delete(existing._id)
 
-    if (args.wasManuallyStopped) {
-      const followEntry = await context.db
-        .query('follow')
-        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
+    if (args.wasStopped) {
+      const stoppedEntry = await context.db
+        .query('stopped')
+        .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.showTmdbId))
         .unique()
 
-      if (followEntry) await context.db.patch(followEntry._id, { manuallyStopped: true })
+      if (!stoppedEntry) await context.db.insert('stopped', { userId, tmdbId: args.showTmdbId, stoppedAt: Date.now() })
     }
   },
 })
