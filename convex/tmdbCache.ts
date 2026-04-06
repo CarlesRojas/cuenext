@@ -15,7 +15,16 @@ export const CACHE_DURATIONS = {
   ONE_DAY: 24 * 60 * 60 * 1000,
   THREE_DAYS: 3 * 24 * 60 * 60 * 1000,
   ONE_WEEK: 7 * 24 * 60 * 60 * 1000,
+  MIDNIGHT: 'MIDNIGHT' as const, // Special value that expires at start of next day
 } as const
+
+export function getTimeUntilNextDay(): number {
+  const now = new Date()
+  const nextDay = new Date(now)
+  nextDay.setDate(nextDay.getDate() + 1)
+  nextDay.setHours(0, 0, 0, 0) // Set to start of day (midnight)
+  return nextDay.getTime() - now.getTime()
+}
 
 async function getCachedTmdbData(context: ActionCtx, endpoint: string): Promise<any | null> {
   const cached = await context.runQuery(api.tmdbCache.getCachedData, { endpoint })
@@ -34,10 +43,14 @@ async function setCachedTmdbData(
   context: ActionCtx,
   endpoint: string,
   data: any,
-  customDuration?: number,
+  customDuration?: number | typeof CACHE_DURATIONS.MIDNIGHT,
 ): Promise<void> {
   const now = Date.now()
-  const duration = customDuration ?? CACHE_DURATIONS.ONE_DAY
+  let duration: number
+
+  if (customDuration === CACHE_DURATIONS.MIDNIGHT) duration = getTimeUntilNextDay()
+  else duration = customDuration ?? getTimeUntilNextDay()
+
   const expiresAt = now + duration
 
   await context.runMutation(api.tmdbCache.setCachedData, {
@@ -53,9 +66,8 @@ export async function fetchTmdbCached<T extends z.ZodTypeAny>(
   schema: T,
   endpoint: string,
   params: Record<string, string> = {},
-  cacheDurationMs?: number,
+  cacheDurationMs?: number | typeof CACHE_DURATIONS.MIDNIGHT,
 ): Promise<z.infer<T>> {
-  // Create a cache key that includes params
   const paramsString = Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''
   const cacheKey = `${endpoint}${paramsString}`
 
