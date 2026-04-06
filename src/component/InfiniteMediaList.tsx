@@ -79,7 +79,10 @@ export function InfiniteMediaList<TItem>({
     const nextMonday = new Date(today)
     const daysUntilMonday = (8 - nextMonday.getDay()) % 7 || 7
     nextMonday.setDate(nextMonday.getDate() + daysUntilMonday)
-    if (itemDate < nextMonday) return 'this-week'
+    if (itemDate < nextMonday) {
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+      return dayNames[itemDate.getDay()]
+    }
 
     if (itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear()) return 'this-month'
 
@@ -110,8 +113,20 @@ export function InfiniteMediaList<TItem>({
         return 'Today'
       case 'tomorrow':
         return 'Tomorrow'
-      case 'this-week':
-        return 'This Week'
+      case 'monday':
+        return 'Monday'
+      case 'tuesday':
+        return 'Tuesday'
+      case 'wednesday':
+        return 'Wednesday'
+      case 'thursday':
+        return 'Thursday'
+      case 'friday':
+        return 'Friday'
+      case 'saturday':
+        return 'Saturday'
+      case 'sunday':
+        return 'Sunday'
       case 'this-month':
         return 'This Month'
       case 'later':
@@ -122,15 +137,30 @@ export function InfiniteMediaList<TItem>({
   }
 
   const getGroupOrder = (groupKey: string): number => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
     switch (groupKey) {
       case 'today':
         return 0
       case 'tomorrow':
         return 1
-      case 'this-week':
+      case 'monday':
         return 2
-      case 'this-month':
+      case 'tuesday':
         return 3
+      case 'wednesday':
+        return 4
+      case 'thursday':
+        return 5
+      case 'friday':
+        return 6
+      case 'saturday':
+        return 7
+      case 'sunday':
+        return 8
+      case 'this-month':
+        return 9
       case 'later':
         return 999
       default: {
@@ -148,8 +178,9 @@ export function InfiniteMediaList<TItem>({
           'November',
           'December',
         ]
+
         const monthIndex = monthNames.indexOf(groupKey)
-        return monthIndex !== -1 ? 4 + (11 - monthIndex) : 998
+        return monthIndex !== -1 ? 10 + (11 - monthIndex) : 998
       }
     }
   }
@@ -157,7 +188,14 @@ export function InfiniteMediaList<TItem>({
   const groupedItems = groupBy
     ? allItems.reduce(
         (groups, item) => {
-          const category = categorizeDate(groupBy(item))
+          const itemDate = groupBy(item)
+          const today = new Date()
+          const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+          const itemDateStart = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate())
+
+          if (itemDateStart < todayStart) return groups
+
+          const category = categorizeDate(itemDate)
           if (!(category in groups)) groups[category] = []
           groups[category].push(item)
           return groups
