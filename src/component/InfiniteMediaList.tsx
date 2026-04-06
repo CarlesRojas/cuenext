@@ -137,9 +137,6 @@ export function InfiniteMediaList<TItem>({
   }
 
   const getGroupOrder = (groupKey: string): number => {
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
     switch (groupKey) {
       case 'today':
         return 0
