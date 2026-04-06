@@ -79,7 +79,7 @@ export default function RowCard(props: Props) {
     <div
       className={cn(
         'group/poster relative flex',
-        'min-h-`40 h-40 max-h-40 w-full',
+        'h-40 max-h-40 min-h-40 w-full',
         isFollowLoading ? 'pointer-events-none' : '',
         className,
       )}
