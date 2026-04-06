@@ -59,6 +59,10 @@ export function ShowSeason({
     : null
   const numberOfAiredEpisodes = episodes ? episodes.filter(airedEpisodes).length : null
   const areAllEpisodesWatched = episodes ? numberOfWatchedEpisodes === numberOfAiredEpisodes : false
+  const progressPercentage =
+    numberOfWatchedEpisodes !== null && numberOfAiredEpisodes !== null && numberOfAiredEpisodes > 0
+      ? (numberOfWatchedEpisodes / numberOfAiredEpisodes) * 100
+      : 0
 
   const { isWatchEpisodesLoading, watchMultipleEpisodes, unwatchMultipleEpisodes } = useWatchEpisodes({
     showId,
@@ -119,6 +123,17 @@ export function ShowSeason({
           <div className="flex flex-col items-start pr-24">
             <h2 className="line-clamp-2 text-left text-lg leading-6 font-semibold text-wrap">{name}</h2>
             {formatedAirDate && <p className="line-clamp-1 text-left text-sm text-neutral-400">{formatedAirDate}</p>}
+
+            <div className="mt-3 h-1.5 w-full min-w-36 rounded-full bg-white/30">
+              <div
+                className="h-full rounded-full bg-white transition-[width] duration-300"
+                style={{ width: `${progressPercentage}%` }}
+                role="progressbar"
+                aria-valuenow={progressPercentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              />
+            </div>
           </div>
         </div>
       </Button>
