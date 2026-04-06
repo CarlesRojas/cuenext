@@ -4,6 +4,8 @@ import { env } from '#/env'
 import { ToastProvider } from '#/hooks/useUndoToast'
 import { seo } from '#/lib/seo'
 import appCss from '#/styles.css?url'
+import type { UrlParams } from '#/type/url'
+import { UrlParamsSchema } from '#/type/url'
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start'
 import { auth } from '@clerk/tanstack-react-start/server'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
@@ -33,6 +35,7 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
   convexClient: ConvexReactClient
   convexQueryClient: ConvexQueryClient
+  urlParams: UrlParams
 }>()({
   head: () => ({
     meta: [
@@ -64,12 +67,14 @@ export const Route = createRootRouteWithContext<{
     const { userId, token, isAuthenticated } = await fetchClerkAuth()
 
     if (token) context.context.convexQueryClient.serverHttpClient?.setAuth(token)
-    return { userId, token, isAuthenticated }
+
+    return { userId, token, isAuthenticated, urlParams: context.location.search }
   },
 
   notFoundComponent: () => <div>Not Found</div>,
   shellComponent: RootDocument,
   ssr: false,
+  validateSearch: UrlParamsSchema,
 })
 
 interface Props {

@@ -4,7 +4,7 @@ import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
-import { UrlParams } from '#/type/url'
+import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
 import { convexAction, convexQuery } from '@convex-dev/react-query'
 import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
@@ -67,7 +67,7 @@ function StatCard({
 
 export const Route = createFileRoute('/profile')({
   component: ProfilePage,
-  validateSearch: UrlParams,
+  validateSearch: UrlParamsSchema,
 })
 
 function ProfilePage() {

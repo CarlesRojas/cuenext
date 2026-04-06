@@ -7,7 +7,7 @@ import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
-import { UrlParams } from '#/type/url'
+import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexAction } from '@convex-dev/react-query'
 import { faForward, faSignIn } from '@fortawesome/free-solid-svg-icons'
@@ -17,7 +17,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/explore')({
   component: RouteComponent,
-  validateSearch: UrlParams,
+  validateSearch: UrlParamsSchema,
 })
 
 function RouteComponent() {

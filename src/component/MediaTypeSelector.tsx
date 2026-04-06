@@ -15,7 +15,7 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
   const location = useLocation()
   const [mediaType, setMediaType] = useMediaType()
 
-  const hide = location.pathname.startsWith('/tv') || location.pathname.startsWith('/movie')
+  const hide = location.pathname.startsWith('/media')
 
   return (
     <LiquidGlass

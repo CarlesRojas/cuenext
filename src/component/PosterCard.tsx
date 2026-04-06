@@ -3,8 +3,7 @@ import type { MediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
 import { faEye, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import type { LinkProps } from '@tanstack/react-router'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouteContext } from '@tanstack/react-router'
 
 interface CommonProps {
   className?: string
@@ -40,6 +39,8 @@ interface LoadedProps extends CommonProps {
 type Props = LoadingProps | LoadedProps
 
 export function PosterCard(props: Props) {
+  const context = useRouteContext({ strict: false })
+
   if (props.isLoading) {
     return (
       <div
@@ -86,7 +87,9 @@ export function PosterCard(props: Props) {
       )}
     >
       <Link
-        to={`/${mediaType}/${id}` as LinkProps['to']}
+        to="/media/$type/$tmdbId"
+        params={{ tmdbId: id.toString(), type: mediaType }}
+        search={context.urlParams}
         className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
         disabled={isWatchLoading || isFollowLoading}
       >

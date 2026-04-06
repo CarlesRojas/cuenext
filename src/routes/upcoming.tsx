@@ -5,7 +5,7 @@ import { Button } from '#/component/ui/button'
 import UpcomingEpisode from '#/component/UpcomingEpisode'
 import UpcomingMovie from '#/component/UpcomingMovie'
 import { useMediaType } from '#/hooks/useMediaType'
-import { UrlParams } from '#/type/url'
+import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -13,7 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/upcoming')({
   component: UpcomingPage,
-  validateSearch: UrlParams,
+  validateSearch: UrlParamsSchema,
 })
 
 function UpcomingPage() {

@@ -7,7 +7,7 @@ import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
 import type { TmdbMovieMinimal, TmdbTvMinimal } from '#/type/tmdb'
-import { UrlParams } from '#/type/url'
+import { UrlParamsSchema } from '#/type/url'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -15,7 +15,7 @@ import { useWindowSize } from 'usehooks-ts'
 
 export const Route = createFileRoute('/see-all/$list')({
   component: RouteComponent,
-  validateSearch: UrlParams,
+  validateSearch: UrlParamsSchema,
 })
 
 export enum SeeAllList {
