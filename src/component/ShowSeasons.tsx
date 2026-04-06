@@ -35,9 +35,13 @@ export function ShowSeasons({ show }: Props) {
     return episodes.some(episode => episode.episode_number > episodes.length)
   })
 
+  if (regularSeasons.length <= 0 && !specials) return null
+
   return (
     <div className="screen-px pb-4 md:pb-8">
       <div className="page-width mx-[unset] flex flex-col gap-4">
+        <h2 className="tracking text-lg font-semibold opacity-80">All episodes</h2>
+
         {regularSeasons.map(season => (
           <ShowSeason
             key={season.id}
@@ -49,6 +53,8 @@ export function ShowSeasons({ show }: Props) {
             showBackdrop={show.backdrop_path}
           />
         ))}
+
+        {specials && <h2 className="tracking mt-4 text-lg font-semibold opacity-80">Specials</h2>}
 
         {specials && (
           <ShowSeason
