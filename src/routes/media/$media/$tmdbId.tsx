@@ -1,4 +1,5 @@
 import { api } from '#/../convex/_generated/api'
+import BackButton from '#/component/BackButton'
 import { MovieDetails } from '#/component/MovieDetails'
 import { ShowDetails } from '#/component/ShowDetails'
 import { ShowSeasons } from '#/component/ShowSeasons'
@@ -40,6 +41,10 @@ function RouteComponent() {
 
   return (
     <div className="flex w-full flex-col gap-8">
+      <header className="screen-px screen-py absolute inset-x-0 top-0 z-20 w-full pt-8!">
+        <BackButton />
+      </header>
+
       {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
 
       {media === 'tv' && show.data && <ShowDetails show={show.data} />}
