@@ -31,6 +31,8 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const hideMediaTypeSelector = location.pathname.startsWith('/media')
+
   const mobileTabsRef = useRef<HTMLDivElement>(null)
   const [{ width: mobileTabsWidth }, setSize] = useState<Size>({ width: undefined })
 
@@ -54,9 +56,10 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
         className={cn(
           'fixed top-3 right-3 left-3 z-50 flex h-fit items-center justify-between gap-3 overflow-hidden opacity-100 transition-opacity',
           !showHeader && 'pointer-events-none! opacity-0',
+          hideMediaTypeSelector && 'left-[unset] w-fit justify-end',
         )}
       >
-        <MediaTypeSelector isMobile />
+        {!hideMediaTypeSelector && <MediaTypeSelector isMobile />}
         <User isMobile />
       </div>
 

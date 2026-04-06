@@ -27,7 +27,7 @@ function RouteComponent() {
 
   return (
     <div className="flex w-full flex-col gap-8">
-      <header className="screen-px screen-py absolute inset-x-0 top-0 z-20 w-full pt-8!">
+      <header className="md:pl-aside screen-py absolute inset-x-0 top-0 z-50 w-full px-3 pt-3! md:px-4 md:pt-8!">
         <BackButton />
       </header>
 

@@ -4,7 +4,7 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faClapperboard, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useLocation, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 
 interface MediaTypeSelectorProps {
@@ -12,18 +12,14 @@ interface MediaTypeSelectorProps {
 }
 
 export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) {
-  const location = useLocation()
   const { media, ...params } = useSearchParams()
   const navigate = useNavigate()
-
-  const hide = location.pathname.startsWith('/media')
 
   return (
     <LiquidGlass
       className={cn(
         'relative w-fit rounded-full bg-neutral-800/40 transition-opacity duration-300',
         !isMobile && 'w-full',
-        hide && 'pointer-events-none opacity-0',
       )}
     >
       <div

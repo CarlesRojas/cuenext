@@ -1,10 +1,20 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import ShowEpisode from '#/component/ShowEpisode'
 import { Button } from '#/component/ui/button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '#/component/ui/dialog'
+import { useWatchEpisodes } from '#/hooks/useWatchEpisodes'
 import type { TmdbSeason } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
-import { faEye, faTv } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
@@ -30,6 +40,11 @@ export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Pr
   const numberOfWatchedEpisodes = watchedEpisodes.data
     ? watchedEpisodes.data.filter(we => we.seasonNumber === season_number - 1).length
     : null
+  const areAllEpisodesWatched = episodes ? numberOfWatchedEpisodes === episodes.length : false
+
+  const { isWatchEpisodesLoading, watchMultipleEpisodes, unwatchMultipleEpisodes } = useWatchEpisodes({
+    showId,
+  })
 
   const [hasImage, setHasImage] = useState(true)
 
@@ -92,16 +107,58 @@ export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Pr
           </span>
         )}
 
-        <Button
-          variant="watch"
-          size="icon"
-          onClick={e => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        >
-          <FontAwesomeIcon icon={faEye} />
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="watch"
+              size="icon"
+              className="disabled:opacity-100"
+              disabled={isWatchEpisodesLoading || !episodes || episodes.length === 0}
+              data-state={areAllEpisodesWatched ? 'on' : 'off'}
+            >
+              <FontAwesomeIcon icon={isWatchEpisodesLoading ? faSpinner : faEye} spin={isWatchEpisodesLoading} />
+            </Button>
+          </DialogTrigger>
+
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {areAllEpisodesWatched
+                  ? `Do you want to mark all ${name} episodes as unwatched?`
+                  : `Do you want to mark all ${name} episodes as watched?`}
+              </DialogTitle>
+            </DialogHeader>
+
+            <DialogFooter className="flex-row-reverse">
+              <DialogClose asChild>
+                <Button
+                  variant={areAllEpisodesWatched ? 'negative' : 'default'}
+                  onClick={async () => {
+                    if (!season.episodes) return
+
+                    const episodesToToggle = season.episodes.map(ep => ({
+                      seasonNumber: season.season_number - 1,
+                      episodeNumber: ep.episode_number - 1,
+                    }))
+
+                    const seasonTitle = `${season.name || `Season ${season.season_number}`}`
+
+                    if (areAllEpisodesWatched) unwatchMultipleEpisodes(episodesToToggle, seasonTitle)
+                    else watchMultipleEpisodes(episodesToToggle, seasonTitle)
+                  }}
+                  disabled={isWatchEpisodesLoading}
+                >
+                  <FontAwesomeIcon icon={faEye} />
+                  {areAllEpisodesWatched ? 'Mark all as Unwatched' : 'Mark all as Watched'}
+                </Button>
+              </DialogClose>
+
+              <DialogClose asChild>
+                <Button variant="secondary">Cancel</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <AnimatePresence initial={false}>

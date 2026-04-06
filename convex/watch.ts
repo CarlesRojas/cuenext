@@ -233,3 +233,91 @@ export const upsertNextEpisode = mutation({
     else await context.db.insert('nextEpisode', { userId, ...args })
   },
 })
+
+export const markMultipleEpisodesAsWatched = mutation({
+  args: {
+    showTmdbId: v.number(),
+    episodes: v.array(
+      v.object({
+        seasonNumber: v.number(),
+        episodeNumber: v.number(),
+      }),
+    ),
+  },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+    const now = Date.now()
+
+    for (const episode of args.episodes) {
+      const existing = await context.db
+        .query('episode')
+        .withIndex('by_user_show_season_episode', q =>
+          q
+            .eq('userId', userId)
+            .eq('showTmdbId', args.showTmdbId)
+            .eq('seasonNumber', episode.seasonNumber)
+            .eq('episodeNumber', episode.episodeNumber),
+        )
+        .unique()
+
+      if (!existing)
+        await context.db.insert('episode', {
+          userId,
+          showTmdbId: args.showTmdbId,
+          seasonNumber: episode.seasonNumber,
+          episodeNumber: episode.episodeNumber,
+          watchedAt: now,
+        })
+    }
+
+    const stoppedEntry = await context.db
+      .query('stopped')
+      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.showTmdbId))
+      .unique()
+
+    const wasStopped = !!stoppedEntry
+    if (stoppedEntry) await context.db.delete(stoppedEntry._id)
+
+    return wasStopped
+  },
+})
+
+export const unmarkMultipleEpisodesAsWatched = mutation({
+  args: {
+    showTmdbId: v.number(),
+    episodes: v.array(
+      v.object({
+        seasonNumber: v.number(),
+        episodeNumber: v.number(),
+      }),
+    ),
+    wasStopped: v.optional(v.boolean()),
+  },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    for (const episode of args.episodes) {
+      const existing = await context.db
+        .query('episode')
+        .withIndex('by_user_show_season_episode', q =>
+          q
+            .eq('userId', userId)
+            .eq('showTmdbId', args.showTmdbId)
+            .eq('seasonNumber', episode.seasonNumber)
+            .eq('episodeNumber', episode.episodeNumber),
+        )
+        .unique()
+
+      if (existing) await context.db.delete(existing._id)
+    }
+
+    if (args.wasStopped) {
+      const stoppedEntry = await context.db
+        .query('stopped')
+        .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.showTmdbId))
+        .unique()
+
+      if (!stoppedEntry) await context.db.insert('stopped', { userId, tmdbId: args.showTmdbId, stoppedAt: Date.now() })
+    }
+  },
+})
