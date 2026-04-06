@@ -43,7 +43,7 @@ function RouteComponent() {
         <div className="page-width relative flex w-full items-baseline gap-4">
           <BackButton />
 
-          <h1 className="line-clamp-2 text-3xl leading-8 font-extrabold tracking-tight text-white md:text-4xl">
+          <h1 className="line-clamp-2 text-3xl leading-8 font-extrabold tracking-tight text-white md:text-4xl md:leading-10">
             {query ? `Results for '${query}'` : 'Search'}
           </h1>
         </div>

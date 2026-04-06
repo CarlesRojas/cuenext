@@ -66,6 +66,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
         </section>
       )}
 
+      {/* If these paddings change, change them in the onScroll function in src/routes/media/$media/$tmdbId.tsx */}
       <section
         className={cn(
           'screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',

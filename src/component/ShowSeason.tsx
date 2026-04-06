@@ -52,6 +52,7 @@ export function ShowSeason({
     : null
   const areAllEpisodesWatched = episodes ? numberOfWatchedEpisodes === episodes.length : false
 
+  // TODO when an episode has not aired, it should not be possible to add it here.
   const { isWatchEpisodesLoading, watchMultipleEpisodes, unwatchMultipleEpisodes } = useWatchEpisodes({
     showId,
     showName,

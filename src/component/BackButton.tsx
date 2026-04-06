@@ -3,12 +3,13 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useNavigate, useRouter } from '@tanstack/react-router'
+import type { ComponentProps } from 'react'
 
-interface Props {
+interface Props extends ComponentProps<'button'> {
   className?: string
 }
 
-const BackButton = ({ className }: Props) => {
+const BackButton = ({ className, ...rest }: Props) => {
   const router = useRouter()
   const navigate = useNavigate()
   const searchParams = useSearchParams()
@@ -22,6 +23,7 @@ const BackButton = ({ className }: Props) => {
         navigate({ to: '.', replace: true, search: { media: searchParams.media } })
         router.history.back()
       }}
+      {...rest}
     >
       <FontAwesomeIcon icon={faArrowLeft} size="lg" />
     </Button>

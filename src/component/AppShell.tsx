@@ -101,6 +101,7 @@ export default function AppShell({ children }: AppShellProps) {
         className="scroll-container relative flex size-full max-h-full min-h-full max-w-full min-w-full"
         onScroll={onScroll}
         ref={scrollContainer}
+        id="scroll-container"
       >
         <div className={cn('h-fit w-full', isMobile && 'pb-21')}>{children}</div>
       </main>
