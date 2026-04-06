@@ -135,7 +135,14 @@ export const markEpisodeWatched = mutation({
       )
       .unique()
 
-    if (!existing) await context.db.insert('episode', { userId, ...args, watchedAt: now })
+    if (!existing)
+      await context.db.insert('episode', {
+        userId,
+        watchedAt: now,
+        showTmdbId: args.showTmdbId,
+        seasonNumber: args.seasonNumber,
+        episodeNumber: args.episodeNumber,
+      })
 
     const stoppedEntry = await context.db
       .query('stopped')

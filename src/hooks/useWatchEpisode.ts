@@ -20,29 +20,20 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
   const watch = useMutation({
-    mutationFn: async () => {
-      const result = await markEpisodeWatched({
-        showTmdbId: episode.showTmdbId,
-        seasonNumber: episode.seasonNumber,
-        episodeNumber: episode.episodeNumber,
-        showName: episode.name,
-        showPoster: episode.poster ?? null,
-        showBackdrop: episode.backdrop ?? null,
-      })
-      await updateNextEpisode({ tmdbId: episode.showTmdbId })
+    mutationFn: async (args: Parameters<typeof markEpisodeWatched>[0]) => {
+      const result = await markEpisodeWatched(args)
+      await updateNextEpisode({ tmdbId: args.showTmdbId })
       return result
     },
   })
 
   const unwatch = useMutation({
-    mutationFn: async ({ wasStopped, wasNotFollowed }: { wasStopped?: boolean; wasNotFollowed?: boolean }) => {
-      await unmarkEpisodeWatched({
-        showTmdbId: episode.showTmdbId,
-        seasonNumber: episode.seasonNumber,
-        episodeNumber: episode.episodeNumber,
-        wasStopped,
-        wasNotFollowed,
-      })
+    mutationFn: async ({
+      wasStopped,
+      wasNotFollowed,
+      ...args
+    }: { wasStopped?: boolean; wasNotFollowed?: boolean } & Parameters<typeof unmarkEpisodeWatched>[0]) => {
+      await unmarkEpisodeWatched(args)
       await updateNextEpisode({ tmdbId: episode.showTmdbId })
     },
   })
@@ -58,11 +49,48 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
     const mediaKey = `tv-${episode.showTmdbId}`
 
     if (isWatched) {
-      await unwatch.mutateAsync({})
-      showUndoToast(title, 'unwatch', mediaKey, async () => await watch.mutateAsync())
+      await unwatch.mutateAsync({
+        showTmdbId: episode.showTmdbId,
+        seasonNumber: episode.seasonNumber,
+        episodeNumber: episode.episodeNumber,
+      })
+
+      showUndoToast(
+        title,
+        'unwatch',
+        mediaKey,
+        async () =>
+          await watch.mutateAsync({
+            showTmdbId: episode.showTmdbId,
+            seasonNumber: episode.seasonNumber,
+            episodeNumber: episode.episodeNumber,
+            showName: episode.name,
+            showPoster: episode.poster ?? null,
+            showBackdrop: episode.backdrop ?? null,
+          }),
+      )
     } else {
-      const result = await watch.mutateAsync()
-      showUndoToast(title, 'watch', mediaKey, async () => await unwatch.mutateAsync(result))
+      const result = await watch.mutateAsync({
+        showTmdbId: episode.showTmdbId,
+        seasonNumber: episode.seasonNumber,
+        episodeNumber: episode.episodeNumber,
+        showName: episode.name,
+        showPoster: episode.poster ?? null,
+        showBackdrop: episode.backdrop ?? null,
+      })
+
+      showUndoToast(
+        title,
+        'watch',
+        mediaKey,
+        async () =>
+          await unwatch.mutateAsync({
+            ...result,
+            showTmdbId: episode.showTmdbId,
+            seasonNumber: episode.seasonNumber,
+            episodeNumber: episode.episodeNumber,
+          }),
+      )
     }
   }
 
