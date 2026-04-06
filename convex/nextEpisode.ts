@@ -1,8 +1,17 @@
 import { v } from 'convex/values'
+import type { TmdbEpisode } from '../src/type/tmdb'
 import { tmdbTvSchema } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
 import { fetchTmdbCached } from './tmdbCache'
+
+const airedEpisodes = (episode: TmdbEpisode) => {
+  if (!episode.air_date) return false
+  const airDate = new Date(episode.air_date)
+  const today = new Date()
+
+  return airDate <= today
+}
 
 export const updateNextEpisode = action({
   args: { tmdbId: v.number() },
@@ -22,12 +31,20 @@ export const updateNextEpisode = action({
 
     if (needsSeasonDataUpdate) {
       const showDetails = await fetchTmdbCached(context, tmdbTvSchema, `/tv/${args.tmdbId}`)
+      const nonSpecialSeasons = showDetails.seasons?.filter(season => season.season_number > 0) || []
 
-      seasonEpisodeCounts =
-        showDetails.seasons
-          ?.filter(season => season.season_number > 0)
-          .sort((a, b) => a.season_number - b.season_number)
-          .map(season => season.episode_count) || []
+      const seasonDetailsPromises = nonSpecialSeasons.map(season =>
+        context.runAction(api.tmdb.getShowSeasonDetails, {
+          tmdbId: args.tmdbId,
+          seasonNumber: season.season_number,
+        }),
+      )
+
+      const allSeasonDetails = await Promise.all(seasonDetailsPromises)
+
+      seasonEpisodeCounts = allSeasonDetails.map(
+        seasonDetails => seasonDetails.episodes?.filter(airedEpisodes).length || 0,
+      )
 
       status = showDetails.status?.toLowerCase() === 'ended' ? 'ended' : 'ongoing'
     }

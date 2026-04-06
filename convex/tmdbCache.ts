@@ -73,11 +73,11 @@ export async function fetchTmdbCached<T extends z.ZodTypeAny>(
 
   const cachedData = await getCachedTmdbData(context, cacheKey)
   if (cachedData) {
-    console.log(`Cache hit for ${cacheKey}`)
+    // console.log(`Cache hit for ${cacheKey}`)
     return schema.parse(cachedData)
   }
 
-  console.log(`Cache miss ${cacheKey}, call TMDB`)
+  // console.log(`Cache miss ${cacheKey}, call TMDB`)
   const freshData = await fetchTmdb(schema, endpoint, params)
 
   await setCachedTmdbData(context, cacheKey, freshData, cacheDurationMs)

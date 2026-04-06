@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '#/component/ui/dialog'
 import { useWatchEpisodes } from '#/hooks/useWatchEpisodes'
-import type { TmdbSeason } from '#/type/tmdb'
+import type { TmdbEpisode, TmdbSeason } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { faEye, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
@@ -29,6 +29,13 @@ interface Props {
   showName: string
   showPoster?: string | null
   showBackdrop?: string | null
+}
+
+const airedEpisodes = (episode: TmdbEpisode) => {
+  if (!episode.air_date) return false
+  const airDate = new Date(episode.air_date)
+  const today = new Date()
+  return airDate <= today
 }
 
 export function ShowSeason({
@@ -50,9 +57,9 @@ export function ShowSeason({
   const numberOfWatchedEpisodes = watchedEpisodes.data
     ? watchedEpisodes.data.filter(we => we.seasonNumber === season_number - 1).length
     : null
-  const areAllEpisodesWatched = episodes ? numberOfWatchedEpisodes === episodes.length : false
+  const numberOfAiredEpisodes = episodes ? episodes.filter(airedEpisodes).length : null
+  const areAllEpisodesWatched = episodes ? numberOfWatchedEpisodes === numberOfAiredEpisodes : false
 
-  // TODO when an episode has not aired, it should not be possible to add it here.
   const { isWatchEpisodesLoading, watchMultipleEpisodes, unwatchMultipleEpisodes } = useWatchEpisodes({
     showId,
     showName,
@@ -67,6 +74,8 @@ export function ShowSeason({
     : undefined
 
   const [isCollapsed, setIsCollapsed] = useState(true)
+
+  if (!season.episodes || season.episodes.length === 0) return null
 
   return (
     <section
@@ -152,7 +161,7 @@ export function ShowSeason({
                   onClick={async () => {
                     if (!season.episodes) return
 
-                    const episodesToToggle = season.episodes.map(ep => ({
+                    const episodesToToggle = season.episodes.filter(airedEpisodes).map(ep => ({
                       seasonNumber: season.season_number - 1,
                       episodeNumber: ep.episode_number - 1,
                     }))
