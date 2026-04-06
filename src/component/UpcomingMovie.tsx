@@ -30,7 +30,7 @@ export default function UpcomingMovie(props: UpcomingMovieItem) {
 
   return (
     <RowCard
-      mediaType="movie"
+      media="movie"
       key={tmdbId}
       id={tmdbId}
       title={name}

@@ -4,7 +4,7 @@ import RowCard from '#/component/RowCard'
 import { Button } from '#/component/ui/button'
 import UpcomingEpisode from '#/component/UpcomingEpisode'
 import UpcomingMovie from '#/component/UpcomingMovie'
-import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { faSignIn } from '@fortawesome/free-solid-svg-icons'
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/upcoming')({
 })
 
 function UpcomingPage() {
-  const [mediaType] = useMediaType()
+  const { media } = useSearchParams()
   const clerk = useClerk()
 
   return (
@@ -44,7 +44,7 @@ function UpcomingPage() {
       <div className="screen-px">
         {clerk.isSignedIn && (
           <div className="page-width mx-[unset]">
-            {mediaType === 'movie' && (
+            {media === 'movie' && (
               <InfiniteMediaList
                 action={api.tmdb.getUpcomingMovies}
                 actionKey="upcoming-movies"
@@ -58,7 +58,7 @@ function UpcomingPage() {
               />
             )}
 
-            {mediaType === 'tv' && (
+            {media === 'tv' && (
               <InfiniteMediaList
                 action={api.tmdb.getUpcomingTv}
                 actionKey="upcoming-tv"

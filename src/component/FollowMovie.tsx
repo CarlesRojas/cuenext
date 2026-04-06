@@ -29,7 +29,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
 
     return (
       <RowCard
-        mediaType="movie"
+        media="movie"
         key={id}
         id={id}
         title={title}
@@ -48,7 +48,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
 
   return (
     <PosterCard
-      mediaType="movie"
+      media="movie"
       key={id}
       id={id}
       title={title}

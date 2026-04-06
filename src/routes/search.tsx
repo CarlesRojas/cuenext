@@ -4,7 +4,6 @@ import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
 import RowCard from '#/component/RowCard'
-import { useMediaType } from '#/hooks/useMediaType'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import type { TmdbMovieMinimal, TmdbTvMinimal } from '#/type/tmdb'
@@ -26,12 +25,10 @@ function MovieWrapper(props: TmdbMovieMinimal) {
 }
 
 function RouteComponent() {
-  const searchParams = useSearchParams()
+  const { media, query } = useSearchParams()
 
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
-
-  const [mediaType] = useMediaType()
 
   return (
     <div className="screen-py relative flex w-full flex-col pt-0!">
@@ -47,36 +44,36 @@ function RouteComponent() {
           <BackButton />
 
           <h1 className="line-clamp-2 text-3xl leading-8 font-extrabold tracking-tight text-white md:text-4xl">
-            {searchParams.query ? `Results for '${searchParams.query ?? ''}'` : 'Search'}
+            {query ? `Results for '${query}'` : 'Search'}
           </h1>
         </div>
       </header>
 
       <div className="screen-px relative w-full">
         <div className="page-width relative w-full">
-          {searchParams.query && mediaType === 'tv' && (
+          {query && media === 'tv' && (
             <InfiniteMediaList
               action={api.tmdb.searchTv}
               actionKey={'searchTv'}
-              params={{ query: searchParams.query }}
+              params={{ query: query }}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
           )}
 
-          {searchParams.query && mediaType === 'movie' && (
+          {query && media === 'movie' && (
             <InfiniteMediaList
               action={api.tmdb.searchMovies}
               actionKey={'searchMovies'}
-              params={{ query: searchParams.query }}
+              params={{ query: query }}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
           )}
 
-          {!searchParams.query && (
+          {!query && (
             <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">
-              Enter a search term to find movies and TV shows
+              {`Enter a search term to find ${media === 'tv' ? 'TV shows' : 'movies'}`}
             </p>
           )}
         </div>

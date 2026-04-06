@@ -7,22 +7,22 @@ import { convexAction } from '@convex-dev/react-query'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/media/$type/$tmdbId')({
+export const Route = createFileRoute('/media/$media/$tmdbId')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { tmdbId, type } = Route.useParams()
+  const { tmdbId, media } = Route.useParams()
   const tmdbIdNumber = Number(tmdbId)
 
   const show = useQuery({
     ...convexAction(api.tmdb.getShowDetails, { tmdbId: tmdbIdNumber }),
-    enabled: type === 'tv',
+    enabled: media === 'tv',
   })
 
   const movie = useQuery({
     ...convexAction(api.tmdb.getMovieDetails, { tmdbId: tmdbIdNumber }),
-    enabled: type === 'movie',
+    enabled: media === 'movie',
   })
 
   const seasonQueries = useQueries({
@@ -31,7 +31,7 @@ function RouteComponent() {
         tmdbId: tmdbIdNumber,
         seasonNumber: season.season_number,
       }),
-      enabled: type === 'tv' && !!show.data?.seasons?.length,
+      enabled: media === 'tv' && !!show.data?.seasons?.length,
     })),
   })
 
@@ -40,11 +40,11 @@ function RouteComponent() {
 
   return (
     <div className="flex w-full flex-col gap-8">
-      {type === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
+      {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
 
-      {type === 'tv' && show.data && <ShowDetails show={show.data} />}
+      {media === 'tv' && show.data && <ShowDetails show={show.data} />}
 
-      {type === 'tv' && show.data && allSeasonsLoaded && seasons.length > 0 && (
+      {media === 'tv' && show.data && allSeasonsLoaded && seasons.length > 0 && (
         <ShowSeasons show={show.data} seasons={seasons as TmdbSeason[]} />
       )}
     </div>

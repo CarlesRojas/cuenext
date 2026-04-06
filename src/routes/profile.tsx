@@ -1,7 +1,7 @@
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
-import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { UrlParamsSchema } from '#/type/url'
@@ -71,38 +71,38 @@ export const Route = createFileRoute('/profile')({
 })
 
 function ProfilePage() {
-  const [mediaType] = useMediaType()
+  const { media } = useSearchParams()
   const clerk = useClerk()
   const { user } = useUser()
 
   const { data: showStats } = useQuery({
     ...convexAction(api.stats.getShowStats),
-    enabled: !!user && mediaType === 'tv',
+    enabled: !!user && media === 'tv',
   })
 
   const { data: movieStats } = useQuery({
     ...convexAction(api.stats.getMovieStats),
-    enabled: !!user && mediaType === 'movie',
+    enabled: !!user && media === 'movie',
   })
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections),
-    enabled: mediaType === 'tv' && clerk.isSignedIn,
+    enabled: media === 'tv' && clerk.isSignedIn,
   })
 
   const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getMovieSections),
-    enabled: mediaType === 'movie' && clerk.isSignedIn,
+    enabled: media === 'movie' && clerk.isSignedIn,
   })
 
   const { data: favoriteShows, isPending: favoriteShowsLoading } = useQuery({
     ...convexQuery(api.favorites.getFavoriteShows),
-    enabled: mediaType === 'tv' && clerk.isSignedIn,
+    enabled: media === 'tv' && clerk.isSignedIn,
   })
 
   const { data: favoriteMovies, isPending: favoriteMoviesLoading } = useQuery({
     ...convexQuery(api.favorites.getFavoriteMovies),
-    enabled: mediaType === 'movie' && clerk.isSignedIn,
+    enabled: media === 'movie' && clerk.isSignedIn,
   })
 
   const isLoadingShows = tvSectionsLoading || favoriteShowsLoading
@@ -133,7 +133,7 @@ function ProfilePage() {
 
       <section className="screen-px mb-8">
         <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {user && mediaType === 'tv' && (
+          {user && media === 'tv' && (
             <>
               <StatCard
                 className="col-span-2"
@@ -160,7 +160,7 @@ function ProfilePage() {
             </>
           )}
 
-          {user && mediaType === 'movie' && (
+          {user && media === 'movie' && (
             <>
               <StatCard
                 className="col-span-2"
@@ -193,17 +193,17 @@ function ProfilePage() {
                 colorClassName="text-sky-500"
                 className="col-span-2"
                 value="-"
-                name={mediaType === 'tv' ? 'Show Time' : 'Movie Time'}
+                name={media === 'tv' ? 'Show Time' : 'Movie Time'}
               />
               <StatCard
                 colorClassName="text-lime-500"
                 value="-"
-                name={mediaType === 'tv' ? 'Episodes Watched' : 'Movies Watched'}
+                name={media === 'tv' ? 'Episodes Watched' : 'Movies Watched'}
               />
               <StatCard
                 colorClassName="text-amber-500"
                 value="-"
-                name={mediaType === 'tv' ? 'Followed Shows' : 'Followed Movies'}
+                name={media === 'tv' ? 'Followed Shows' : 'Followed Movies'}
               />
             </>
           )}
@@ -211,7 +211,7 @@ function ProfilePage() {
       </section>
 
       <div className="flex flex-col gap-6">
-        {mediaType === 'tv' && (
+        {media === 'tv' && (
           <>
             {isLoadingShows &&
               ['Finished Shows', 'Favorite Shows'].map((title, i) => (
@@ -228,7 +228,7 @@ function ProfilePage() {
                   key={item.id}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="tv"
+                  media="tv"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
@@ -246,7 +246,7 @@ function ProfilePage() {
                   key={item.id}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="tv"
+                  media="tv"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
@@ -260,7 +260,7 @@ function ProfilePage() {
           </>
         )}
 
-        {mediaType === 'movie' && (
+        {media === 'movie' && (
           <>
             {isLoadingMovies &&
               ['Finished Movies', 'Favorite Movies'].map((title, i) => (
@@ -277,7 +277,7 @@ function ProfilePage() {
                   key={item.tmdbId}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="movie"
+                  media="movie"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
@@ -295,7 +295,7 @@ function ProfilePage() {
                   key={item.tmdbId}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="movie"
+                  media="movie"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}

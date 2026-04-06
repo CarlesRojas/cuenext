@@ -4,7 +4,7 @@ import FollowMovie from '#/component/FollowMovie'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
-import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { UrlParamsSchema } from '#/type/url'
@@ -22,7 +22,7 @@ export const Route = createFileRoute('/explore')({
 
 function RouteComponent() {
   const clerk = useClerk()
-  const [mediaType] = useMediaType()
+  const { media } = useSearchParams()
 
   const today = new Date()
   const nextWeek = new Date(today)
@@ -40,17 +40,17 @@ function RouteComponent() {
       air_date_gte: minDate,
       air_date_lte: maxDate,
     }),
-    enabled: mediaType === 'tv',
+    enabled: media === 'tv',
   })
 
   const { data: top10Shows, isPending: top10ShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'popularity.desc' }),
-    enabled: mediaType === 'tv',
+    enabled: media === 'tv',
   })
 
   const { data: topRatedShows, isPending: topRatedShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
-    enabled: mediaType === 'tv',
+    enabled: media === 'tv',
   })
 
   // MOVIES
@@ -73,17 +73,17 @@ function RouteComponent() {
       include_adult: false,
       include_video: false,
     }),
-    enabled: mediaType === 'movie',
+    enabled: media === 'movie',
   })
 
   const { data: top10Movies, isPending: top10MoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc' }),
-    enabled: mediaType === 'movie',
+    enabled: media === 'movie',
   })
 
   const { data: topRatedMovies, isPending: topRatedMoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
-    enabled: mediaType === 'movie',
+    enabled: media === 'movie',
   })
 
   return (
@@ -107,7 +107,7 @@ function RouteComponent() {
         </div>
       )}
 
-      {mediaType === 'tv' ? (
+      {media === 'tv' && (
         <>
           <Section title="Dropping This Week" canCollapse={false} key="dropping-this-week">
             {onTheAirShows &&
@@ -162,7 +162,9 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
         </>
-      ) : (
+      )}
+
+      {media === 'movie' && (
         <>
           <Section title="Upcoming Movies" canCollapse={false} key="upcoming-movies">
             {upcomingMovies &&

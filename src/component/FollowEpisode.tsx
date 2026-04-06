@@ -29,7 +29,7 @@ export default function FollowEpisode({ episode, variant, number, followButtonTe
 
     return (
       <RowCard
-        mediaType="tv"
+        media="tv"
         key={id}
         id={id}
         title={name}
@@ -48,7 +48,7 @@ export default function FollowEpisode({ episode, variant, number, followButtonTe
 
   return (
     <PosterCard
-      mediaType="tv"
+      media="tv"
       key={id}
       id={id}
       title={name}

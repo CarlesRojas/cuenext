@@ -4,7 +4,7 @@ import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
 import RowCard from '#/component/RowCard'
-import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import type { TmdbMovieMinimal, TmdbTvMinimal } from '#/type/tmdb'
 import { UrlParamsSchema } from '#/type/url'
@@ -31,11 +31,10 @@ function MovieWrapper(props: TmdbMovieMinimal) {
 
 function RouteComponent() {
   const { list } = Route.useParams()
+  const { media } = useSearchParams()
 
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
-
-  const [mediaType] = useMediaType()
 
   const today = new Date()
   const nextWeek = new Date(today)
@@ -53,8 +52,8 @@ function RouteComponent() {
   const maxDateMovie = nextMonth.toISOString().split('T')[0]
 
   const getTitle = () => {
-    if (list === SeeAllList.UPCOMING) return mediaType === 'tv' ? 'Dropping This Week' : 'Upcoming Movies'
-    else return mediaType === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'
+    if (list === SeeAllList.UPCOMING) return media === 'tv' ? 'Dropping This Week' : 'Upcoming Movies'
+    else return media === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'
   }
 
   return (
@@ -78,7 +77,7 @@ function RouteComponent() {
 
       <div className="screen-px relative w-full">
         <div className="page-width relative w-full">
-          {mediaType === 'tv' && list === SeeAllList.UPCOMING && (
+          {media === 'tv' && list === SeeAllList.UPCOMING && (
             <InfiniteMediaList
               action={api.tmdb.getDiscoverShows}
               actionKey={`tv-${list}`}
@@ -92,7 +91,7 @@ function RouteComponent() {
             />
           )}
 
-          {mediaType === 'tv' && list === SeeAllList.TOP && (
+          {media === 'tv' && list === SeeAllList.TOP && (
             <InfiniteMediaList
               action={api.tmdb.getDiscoverShows}
               actionKey={`tv-${list}`}
@@ -105,7 +104,7 @@ function RouteComponent() {
             />
           )}
 
-          {mediaType === 'movie' && list === SeeAllList.UPCOMING && (
+          {media === 'movie' && list === SeeAllList.UPCOMING && (
             <InfiniteMediaList
               action={api.tmdb.getDiscoverMovies}
               actionKey={`movie-${list}`}
@@ -122,7 +121,7 @@ function RouteComponent() {
             />
           )}
 
-          {mediaType === 'movie' && list === SeeAllList.TOP && (
+          {media === 'movie' && list === SeeAllList.TOP && (
             <InfiniteMediaList
               action={api.tmdb.getDiscoverMovies}
               actionKey={`movie-${list}`}

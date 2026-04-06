@@ -1,7 +1,7 @@
 import { Button } from '#/component/ui/button'
-import type { MediaType } from '#/hooks/useMediaType'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
+import type { MediaType } from '#/type/media'
 import { faClapperboard, faPlus, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
@@ -18,7 +18,7 @@ interface LoadedProps extends CommonProps {
   isLoading?: false
   id: number
   title: string
-  mediaType: MediaType
+  media: MediaType
   subtitle?: string
   posterUrl?: string
   backdropUrl?: string
@@ -54,7 +54,7 @@ export default function RowCard(props: Props) {
 
     id,
     title,
-    mediaType,
+    media,
     posterUrl,
     backdropUrl,
     subtitle,
@@ -77,8 +77,8 @@ export default function RowCard(props: Props) {
       )}
     >
       <Link
-        to="/media/$type/$tmdbId"
-        params={{ tmdbId: id.toString(), type: mediaType }}
+        to="/media/$media/$tmdbId"
+        params={{ tmdbId: id.toString(), media }}
         search={searchParams}
         className="relative grid h-full w-full grid-cols-[auto_1fr] grid-rows-1 gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.05] focus-visible:scale-[1.05] disabled:pointer-events-none"
         disabled={isFollowLoading}
@@ -102,7 +102,7 @@ export default function RowCard(props: Props) {
         ) : (
           <div className="flex aspect-2/3 h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:hidden">
             <FontAwesomeIcon
-              icon={mediaType === 'movie' ? faClapperboard : faTv}
+              icon={media === 'movie' ? faClapperboard : faTv}
               size="6x"
               className="max-w-10 opacity-40"
             />
@@ -128,7 +128,7 @@ export default function RowCard(props: Props) {
         ) : (
           <div className="hidden aspect-video h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:flex">
             <FontAwesomeIcon
-              icon={mediaType === 'movie' ? faClapperboard : faTv}
+              icon={media === 'movie' ? faClapperboard : faTv}
               size="6x"
               className="max-w-10 opacity-40"
             />

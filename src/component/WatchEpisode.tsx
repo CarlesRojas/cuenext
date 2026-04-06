@@ -14,7 +14,7 @@ export default function WatchEpisode({ episode }: Props) {
     <PosterCard
       id={episode.tmdbId}
       title={episode.name}
-      mediaType="tv"
+      media="tv"
       imageUrl={getTmdbImageUrl(episode.poster, 'w342') || getTmdbImageUrl(episode.poster, 'original')}
       showWatch
       isWatched={isWatched}

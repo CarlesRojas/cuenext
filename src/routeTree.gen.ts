@@ -15,7 +15,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
-import { Route as MediaTypeTmdbIdRouteImport } from './routes/media/$type/$tmdbId'
+import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmdbId'
 
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
@@ -47,9 +47,9 @@ const SeeAllListRoute = SeeAllListRouteImport.update({
   path: '/see-all/$list',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MediaTypeTmdbIdRoute = MediaTypeTmdbIdRouteImport.update({
-  id: '/media/$type/$tmdbId',
-  path: '/media/$type/$tmdbId',
+const MediaMediaTmdbIdRoute = MediaMediaTmdbIdRouteImport.update({
+  id: '/media/$media/$tmdbId',
+  path: '/media/$media/$tmdbId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -60,7 +60,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
-  '/media/$type/$tmdbId': typeof MediaTypeTmdbIdRoute
+  '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +69,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
-  '/media/$type/$tmdbId': typeof MediaTypeTmdbIdRoute
+  '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +79,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
-  '/media/$type/$tmdbId': typeof MediaTypeTmdbIdRoute
+  '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +90,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/upcoming'
     | '/see-all/$list'
-    | '/media/$type/$tmdbId'
+    | '/media/$media/$tmdbId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,7 +99,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/upcoming'
     | '/see-all/$list'
-    | '/media/$type/$tmdbId'
+    | '/media/$media/$tmdbId'
   id:
     | '__root__'
     | '/'
@@ -108,7 +108,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/upcoming'
     | '/see-all/$list'
-    | '/media/$type/$tmdbId'
+    | '/media/$media/$tmdbId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,7 +118,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   UpcomingRoute: typeof UpcomingRoute
   SeeAllListRoute: typeof SeeAllListRoute
-  MediaTypeTmdbIdRoute: typeof MediaTypeTmdbIdRoute
+  MediaMediaTmdbIdRoute: typeof MediaMediaTmdbIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,11 +165,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeeAllListRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/media/$type/$tmdbId': {
-      id: '/media/$type/$tmdbId'
-      path: '/media/$type/$tmdbId'
-      fullPath: '/media/$type/$tmdbId'
-      preLoaderRoute: typeof MediaTypeTmdbIdRouteImport
+    '/media/$media/$tmdbId': {
+      id: '/media/$media/$tmdbId'
+      path: '/media/$media/$tmdbId'
+      fullPath: '/media/$media/$tmdbId'
+      preLoaderRoute: typeof MediaMediaTmdbIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -182,7 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   UpcomingRoute: UpcomingRoute,
   SeeAllListRoute: SeeAllListRoute,
-  MediaTypeTmdbIdRoute: MediaTypeTmdbIdRoute,
+  MediaMediaTmdbIdRoute: MediaMediaTmdbIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

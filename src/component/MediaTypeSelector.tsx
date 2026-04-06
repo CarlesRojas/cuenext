@@ -1,10 +1,10 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
 import { Button } from '#/component/ui/button'
-import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faClapperboard, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useLocation } from '@tanstack/react-router'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 
 interface MediaTypeSelectorProps {
@@ -13,7 +13,8 @@ interface MediaTypeSelectorProps {
 
 export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) {
   const location = useLocation()
-  const [mediaType, setMediaType] = useMediaType()
+  const { media, ...params } = useSearchParams()
+  const navigate = useNavigate()
 
   const hide = location.pathname.startsWith('/media')
 
@@ -34,10 +35,10 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
         <Button
           variant="ghost"
           size="small"
-          onClick={() => setMediaType('tv')}
-          className={cn(mediaType === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
+          onClick={() => navigate({ to: '.', replace: true, search: { media: 'tv', ...params } })}
+          className={cn(media === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
         >
-          {mediaType === 'tv' && (
+          {media === 'tv' && (
             <motion.div
               layoutId="media-indicator"
               className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
@@ -52,10 +53,10 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
         <Button
           variant="ghost"
           size="small"
-          onClick={() => setMediaType('movie')}
-          className={cn(mediaType === 'movie' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
+          onClick={() => navigate({ to: '.', replace: true, search: { media: 'movie', ...params } })}
+          className={cn(media === 'movie' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
         >
-          {mediaType === 'movie' && (
+          {media === 'movie' && (
             <motion.div
               layoutId="media-indicator"
               className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"

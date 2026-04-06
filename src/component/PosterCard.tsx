@@ -1,7 +1,7 @@
 import { Button } from '#/component/ui/button'
-import type { MediaType } from '#/hooks/useMediaType'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
+import type { MediaType } from '#/type/media'
 import { faEye, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
@@ -18,7 +18,7 @@ interface LoadedProps extends CommonProps {
   isLoading?: false
   id: number
   title: string
-  mediaType: MediaType
+  media: MediaType
   number?: number
   imageUrl?: string
 
@@ -60,7 +60,7 @@ export function PosterCard(props: Props) {
 
     id,
     title,
-    mediaType,
+    media,
     imageUrl,
     number,
     progressPercentage,
@@ -88,8 +88,8 @@ export function PosterCard(props: Props) {
       )}
     >
       <Link
-        to="/media/$type/$tmdbId"
-        params={{ tmdbId: id.toString(), type: mediaType }}
+        to="/media/$media/$tmdbId"
+        params={{ tmdbId: id.toString(), media }}
         search={searchParams}
         className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
         disabled={isWatchLoading || isFollowLoading}

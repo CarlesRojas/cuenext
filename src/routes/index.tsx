@@ -4,7 +4,7 @@ import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import WatchEpisode from '#/component/WatchEpisode'
 import WatchMovie from '#/component/WatchMovie'
-import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
@@ -21,16 +21,16 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const clerk = useClerk()
-  const [mediaType] = useMediaType()
+  const { media } = useSearchParams()
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections, {}),
-    enabled: mediaType === 'tv' && clerk.isSignedIn,
+    enabled: media === 'tv' && clerk.isSignedIn,
   })
 
   const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getMovieSections, {}),
-    enabled: mediaType === 'movie' && clerk.isSignedIn,
+    enabled: media === 'movie' && clerk.isSignedIn,
   })
 
   return (
@@ -54,7 +54,7 @@ function App() {
         </div>
       )}
 
-      {mediaType === 'tv' ? (
+      {media === 'tv' ? (
         <div className="flex flex-col gap-6">
           {tvSectionsLoading &&
             ['Watch next', "Haven't started", 'Waiting for episodes', 'Stopped watching', 'Finished'].map(
@@ -90,7 +90,7 @@ function App() {
                   key={item.id}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="tv"
+                  media="tv"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
@@ -112,7 +112,7 @@ function App() {
                   key={item.id}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="tv"
+                  media="tv"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}
@@ -145,7 +145,7 @@ function App() {
                   key={item.tmdbId}
                   id={item.tmdbId}
                   title={item.name}
-                  mediaType="movie"
+                  media="movie"
                   imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
                 />
               ))}

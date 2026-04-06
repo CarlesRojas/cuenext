@@ -1,7 +1,6 @@
 import { LiquidGlass } from '#/component/LiquidGlass'
 import { Button } from '#/component/ui/button'
 import { Input } from '#/component/ui/input'
-import { useMediaType } from '#/hooks/useMediaType'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
@@ -19,16 +18,14 @@ interface Props {
 }
 
 export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, setIsExpanded }: Props) {
-  const searchParams = useSearchParams()
+  const { media, query: urlQuery } = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
-
-  const [mediaType] = useMediaType()
 
   const formSchema = z.object({ query: z.string() })
 
   const form = useForm({
-    defaultValues: { query: searchParams.query ?? '' },
+    defaultValues: { query: urlQuery ?? '' },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value: { query } }) => {
       const sanitizedQuery = encodeURIComponent(query.trim())
@@ -36,16 +33,16 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
         navigate({
           to: '/search',
           replace: location.pathname === '/search',
-          search: { query: sanitizedQuery, media: mediaType },
+          search: { query: sanitizedQuery, media },
         })
     },
   })
 
-  useEffect(() => form.setFieldValue('query', searchParams.query ?? ''), [location.pathname, form])
+  useEffect(() => form.setFieldValue('query', urlQuery ?? ''), [location.pathname, form])
 
   const handleClear = (field: any) => {
     field.handleChange('')
-    navigate({ to: location.pathname, replace: true, search: { media: mediaType } })
+    navigate({ to: location.pathname, replace: true, search: { media } })
   }
 
   const handleInputChange = (field: any, value: string) => {
@@ -67,7 +64,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
             children={field => {
               return (
                 <Input
-                  placeholder={mediaType === 'movie' ? 'Search movies...' : 'Search TV shows...'}
+                  placeholder={media === 'movie' ? 'Search movies...' : 'Search TV shows...'}
                   value={field.state.value}
                   onChange={e => handleInputChange(field, e.target.value)}
                   onBlur={field.handleBlur}
@@ -119,7 +116,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
               name="query"
               children={field => (
                 <Input
-                  placeholder={mediaType === 'movie' ? 'Search movies...' : 'Search TV shows...'}
+                  placeholder={media === 'movie' ? 'Search movies...' : 'Search TV shows...'}
                   value={field.state.value}
                   onChange={e => handleInputChange(field, e.target.value)}
                   onBlur={field.handleBlur}
@@ -146,7 +143,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                 }
 
                 if (!location.pathname.startsWith('/search'))
-                  navigate({ to: '/search', replace: false, search: { media: mediaType } })
+                  navigate({ to: '/search', replace: false, search: { media } })
                 setIsExpanded?.(true)
               }}
               disabled={isExpanded && (!canSubmit || !query.trim())}
