@@ -67,8 +67,6 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
     watchedEpisodes.some(e => e.seasonNumber === episode.seasonNumber && e.episodeNumber === episode.episodeNumber)
   const isLoading = isWatchedLoading || watch.isPending || unwatch.isPending
 
-  console.log(episode.seasonNumber, episode.episodeNumber, isWatched)
-
   return {
     isWatched,
     isWatchedLoading: isLoading,

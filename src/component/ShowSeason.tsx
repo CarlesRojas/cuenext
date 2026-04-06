@@ -2,10 +2,14 @@ import { ProgressiveImage } from '#/component/ProgressiveImage'
 import ShowEpisode from '#/component/ShowEpisode'
 import { Button } from '#/component/ui/button'
 import type { TmdbSeason } from '#/type/tmdb'
+import { useClerk } from '@clerk/tanstack-react-start'
+import { convexQuery } from '@convex-dev/react-query'
 import { faEye, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
+import { api } from '../../convex/_generated/api'
 
 interface Props {
   showId: number
@@ -15,7 +19,17 @@ interface Props {
 }
 
 export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Props) {
-  const { id, name, air_date, poster_path, episodes } = season
+  const clerk = useClerk()
+  const { id, name, air_date, poster_path, episodes, season_number } = season
+
+  const watchedEpisodes = useQuery({
+    ...convexQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: showId }),
+    enabled: clerk.isSignedIn,
+  })
+
+  const numberOfWatchedEpisodes = watchedEpisodes.data
+    ? watchedEpisodes.data.filter(we => we.seasonNumber === season_number - 1).length
+    : null
 
   const [hasImage, setHasImage] = useState(true)
 
@@ -72,9 +86,9 @@ export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Pr
       </Button>
 
       <div className="absolute top-1 right-1 z-10 flex items-center gap-3">
-        {episodes && (
+        {episodes && numberOfWatchedEpisodes !== null && (
           <span className="line-clamp-1 text-sm text-neutral-400">
-            {43} / {episodes.length}
+            {numberOfWatchedEpisodes} / {episodes.length}
           </span>
         )}
 
