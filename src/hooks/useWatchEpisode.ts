@@ -1,12 +1,12 @@
 import { api } from '#/../convex/_generated/api'
 import { useUndoToast } from '#/hooks/useUndoToast'
-import type { TvSectionItem } from '#/type/section'
+import type { TvSectionItemMinimal } from '#/type/section'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
 
-export function useWatchEpisode(episode: TvSectionItem) {
+export function useWatchEpisode(episode: TvSectionItemMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 

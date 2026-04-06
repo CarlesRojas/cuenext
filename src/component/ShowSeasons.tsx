@@ -29,14 +29,33 @@ export function ShowSeasons({ show }: Props) {
   const allSeasonsLoaded = seasonQueries.every(query => !query.isPending)
   if (allSeasonsLoaded && seasons.length === 0) return null
 
+  const episodeNumbersResetWithSeason = !regularSeasons.some(season => {
+    const episodes = season.episodes
+    if (!episodes) return false
+    return episodes.some(episode => episode.episode_number > episodes.length)
+  })
+
   return (
     <div className="screen-px pb-4 md:pb-8">
       <div className="page-width mx-[unset] flex flex-col gap-4">
         {regularSeasons.map(season => (
-          <ShowSeason key={season.id} season={season} />
+          <ShowSeason
+            key={season.id}
+            showId={show.id}
+            season={season}
+            episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+          />
         ))}
 
-        {specials && <ShowSeason key={specials.id} season={specials} isSpecials />}
+        {specials && (
+          <ShowSeason
+            key={specials.id}
+            showId={show.id}
+            season={specials}
+            isSpecials
+            episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+          />
+        )}
       </div>
     </div>
   )

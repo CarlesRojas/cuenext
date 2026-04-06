@@ -8,11 +8,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
 interface Props {
+  showId: number
   season: TmdbSeason
   isSpecials?: boolean
+  episodeNumbersResetWithSeason: boolean
 }
 
-export function ShowSeason({ season }: Props) {
+export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Props) {
   const { id, name, air_date, poster_path, episodes } = season
 
   const [hasImage, setHasImage] = useState(true)
@@ -35,28 +37,28 @@ export function ShowSeason({ season }: Props) {
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         {poster_path && hasImage ? (
-          <div className="relative aspect-video h-full rounded-[22px] bg-neutral-900">
+          <div className="relative aspect-4/3 h-full rounded-[22px] bg-neutral-900 lg:aspect-video">
             <ProgressiveImage
               paths={[poster_path]}
               alt={name}
-              className="absolute inset-y-0 left-0 aspect-video h-full scale-200 rounded-[22px] object-cover object-center opacity-30 blur-2xl"
-              minSize="w342"
-              maxSize="w342"
+              className="absolute inset-y-0 left-0 size-full scale-200 rounded-[22px] object-cover object-center opacity-30 blur-2xl lg:aspect-video"
+              minSize="w185"
+              maxSize="w185"
               loading="lazy"
             />
 
             <ProgressiveImage
               paths={[poster_path]}
               alt={name}
-              className="aspect-video h-full rounded-[22px] object-cover object-center"
+              className="size-full rounded-[22px] object-cover object-center lg:aspect-video"
               onNoImage={() => setHasImage(false)}
-              minSize="w342"
-              maxSize="w342"
+              minSize="w185"
+              maxSize="w185"
               loading="lazy"
             />
           </div>
         ) : (
-          <div className="flex aspect-video h-full items-center justify-center rounded-[22px] bg-neutral-900">
+          <div className="flex aspect-4/3 h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:aspect-video">
             <FontAwesomeIcon icon={faTv} size="6x" className="max-w-10 opacity-40" />
           </div>
         )}
@@ -77,7 +79,7 @@ export function ShowSeason({ season }: Props) {
         )}
 
         <Button
-          variant="secondary"
+          variant="watch"
           size="icon"
           onClick={e => {
             e.preventDefault()
@@ -97,9 +99,14 @@ export function ShowSeason({ season }: Props) {
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="relative overflow-hidden"
           >
-            <ul className="flex w-full flex-col gap-2 p-2">
+            <ul className="mt-4 flex w-full flex-col gap-2 p-2">
               {episodes?.map(episode => (
-                <ShowEpisode key={episode.id} episode={episode} />
+                <ShowEpisode
+                  key={episode.id}
+                  showId={showId}
+                  episode={episode}
+                  episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+                />
               ))}
             </ul>
           </motion.div>

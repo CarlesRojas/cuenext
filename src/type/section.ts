@@ -1,3 +1,10 @@
+export type TvSectionItemMinimal = {
+  tmdbId: number
+  seasonNumber: number
+  episodeNumber: number
+  name: string
+}
+
 export type TvSectionItem = {
   id: string
   tmdbId: number
@@ -12,7 +19,6 @@ export type TvSectionItem = {
   poster?: string | null
   backdrop?: string | null
 }
-
 export type MovieSectionItem = {
   tmdbId: number
   watchedAt?: number | null

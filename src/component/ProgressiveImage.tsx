@@ -42,8 +42,6 @@ export function ProgressiveImage({
     if (!smallImage.hasImage && !largeImage.hasImage) onNoImage?.()
   }, [smallImage.hasImage, largeImage.hasImage, onNoImage])
 
-  console.log(smallSizes, bigSizes)
-
   return (
     <>
       {smallImage.hasImage && !largeImageLoaded && minSize !== maxSize && (
@@ -51,7 +49,7 @@ export function ProgressiveImage({
           {...imgProps}
           src={smallImage.imageUrl}
           onError={smallImage.handleImageError}
-          className={cn('absolute inset-0', className)}
+          className={cn('pointer-events-none absolute inset-0 select-none', className)}
         />
       )}
 
@@ -61,7 +59,7 @@ export function ProgressiveImage({
           src={largeImage.imageUrl}
           onError={largeImage.handleImageError}
           onLoad={() => setLargeImageLoaded(true)}
-          className={className}
+          className={cn('pointer-events-none select-none', className)}
         />
       )}
     </>

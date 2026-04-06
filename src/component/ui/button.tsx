@@ -26,12 +26,21 @@ const buttonVariants = cva(
           'data-[checked=true]:bg-sky-500/80 data-[checked=true]:hover:bg-sky-600/80 data-[checked=true]:focus-visible:bg-sky-600/80',
         ],
         input: ['text-white/70 hover:text-white focus-visible:text-white'],
+
         favorite: [
           'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
           'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
 
           'data-[state=on]:border-rose-500/40 data-[state=on]:bg-rose-500/15 data-[state=on]:text-rose-500',
           'data-[state=on]:hover:bg-rose-500/25 data-[state=on]:focus-visible:bg-rose-500/25',
+        ],
+
+        watch: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
+          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
+
+          'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/20 data-[state=on]:text-sky-500',
+          'data-[state=on]:hover:bg-sky-500/40 data-[state=on]:focus-visible:bg-sky-500/40',
         ],
       },
       size: {

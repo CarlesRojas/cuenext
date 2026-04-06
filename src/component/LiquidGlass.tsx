@@ -140,7 +140,13 @@ export function LiquidGlass({
               !freeze && 'animate-spin',
             )}
           >
-            <img ref={bgImgRef} src={background} style={bgImgStyle} alt="" />
+            <img
+              ref={bgImgRef}
+              src={background}
+              style={bgImgStyle}
+              alt=""
+              className="pointer-events-none select-none"
+            />
           </div>
         </div>
       )}
