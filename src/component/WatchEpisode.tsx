@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function WatchEpisode({ episode }: Props) {
-  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode(episode)
+  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({ ...episode })
 
   return (
     <PosterCard

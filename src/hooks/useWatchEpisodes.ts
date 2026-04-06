@@ -6,6 +6,9 @@ import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 interface UseWatchEpisodesProps {
   showId: number
+  showName: string
+  showPoster?: string | null
+  showBackdrop?: string | null
 }
 
 interface EpisodeIdentifier {
@@ -13,7 +16,7 @@ interface EpisodeIdentifier {
   episodeNumber: number
 }
 
-export function useWatchEpisodes({ showId }: UseWatchEpisodesProps) {
+export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }: UseWatchEpisodesProps) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
@@ -23,22 +26,34 @@ export function useWatchEpisodes({ showId }: UseWatchEpisodesProps) {
 
   const watchEpisodes = useMutation({
     mutationFn: async ({ episodes }: { episodes: EpisodeIdentifier[] }) => {
-      const wasStopped = await markEpisodesWatched({
+      const result = await markEpisodesWatched({
         showTmdbId: showId,
         episodes,
+        showName,
+        showPoster: showPoster ?? null,
+        showBackdrop: showBackdrop ?? null,
       })
 
       await updateNextEpisode({ tmdbId: showId })
-      return wasStopped
+      return result
     },
   })
 
   const unwatchEpisodes = useMutation({
-    mutationFn: async ({ episodes, wasStopped }: { episodes: EpisodeIdentifier[]; wasStopped?: boolean }) => {
+    mutationFn: async ({
+      episodes,
+      wasStopped,
+      wasNotFollowed,
+    }: {
+      episodes: EpisodeIdentifier[]
+      wasStopped?: boolean
+      wasNotFollowed?: boolean
+    }) => {
       await unmarkEpisodesWatched({
         showTmdbId: showId,
         episodes,
         wasStopped,
+        wasNotFollowed,
       })
 
       await updateNextEpisode({ tmdbId: showId })
@@ -48,12 +63,12 @@ export function useWatchEpisodes({ showId }: UseWatchEpisodesProps) {
   const watchMultipleEpisodes = async (episodes: EpisodeIdentifier[], title: string) => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
-    const wasStopped = await watchEpisodes.mutateAsync({ episodes })
+    const result = await watchEpisodes.mutateAsync({ episodes })
     showUndoToast(
       title,
       'watchMultiple',
       `tv-${showId}`,
-      async () => await unwatchEpisodes.mutateAsync({ episodes, wasStopped }),
+      async () => await unwatchEpisodes.mutateAsync({ episodes, ...result }),
     )
   }
 

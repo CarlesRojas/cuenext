@@ -21,23 +21,27 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
 
   const watch = useMutation({
     mutationFn: async () => {
-      const wasStopped = await markEpisodeWatched({
+      const result = await markEpisodeWatched({
         showTmdbId: episode.showTmdbId,
         seasonNumber: episode.seasonNumber,
         episodeNumber: episode.episodeNumber,
+        showName: episode.name,
+        showPoster: episode.poster ?? null,
+        showBackdrop: episode.backdrop ?? null,
       })
       await updateNextEpisode({ tmdbId: episode.showTmdbId })
-      return wasStopped
+      return result
     },
   })
 
   const unwatch = useMutation({
-    mutationFn: async ({ wasStopped }: { wasStopped?: boolean }) => {
+    mutationFn: async ({ wasStopped, wasNotFollowed }: { wasStopped?: boolean; wasNotFollowed?: boolean }) => {
       await unmarkEpisodeWatched({
         showTmdbId: episode.showTmdbId,
         seasonNumber: episode.seasonNumber,
         episodeNumber: episode.episodeNumber,
         wasStopped,
+        wasNotFollowed,
       })
       await updateNextEpisode({ tmdbId: episode.showTmdbId })
     },
@@ -57,8 +61,8 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
       await unwatch.mutateAsync({})
       showUndoToast(title, 'unwatch', mediaKey, async () => await watch.mutateAsync())
     } else {
-      const wasStopped = await watch.mutateAsync()
-      showUndoToast(title, 'watch', mediaKey, async () => await unwatch.mutateAsync({ wasStopped }))
+      const result = await watch.mutateAsync()
+      showUndoToast(title, 'watch', mediaKey, async () => await unwatch.mutateAsync(result))
     }
   }
 

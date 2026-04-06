@@ -26,9 +26,19 @@ interface Props {
   season: TmdbSeason
   isSpecials?: boolean
   episodeNumbersResetWithSeason: boolean
+  showName: string
+  showPoster?: string | null
+  showBackdrop?: string | null
 }
 
-export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Props) {
+export function ShowSeason({
+  showId,
+  season,
+  episodeNumbersResetWithSeason,
+  showName,
+  showPoster,
+  showBackdrop,
+}: Props) {
   const clerk = useClerk()
   const { id, name, air_date, poster_path, episodes, season_number } = season
 
@@ -44,6 +54,9 @@ export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Pr
 
   const { isWatchEpisodesLoading, watchMultipleEpisodes, unwatchMultipleEpisodes } = useWatchEpisodes({
     showId,
+    showName,
+    showPoster,
+    showBackdrop,
   })
 
   const [hasImage, setHasImage] = useState(true)
@@ -177,6 +190,9 @@ export function ShowSeason({ showId, season, episodeNumbersResetWithSeason }: Pr
                   showId={showId}
                   episode={episode}
                   episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+                  showName={showName}
+                  showPoster={showPoster}
+                  showBackdrop={showBackdrop}
                 />
               ))}
             </ul>

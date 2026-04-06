@@ -3,6 +3,8 @@ export type TvSectionItemMinimal = {
   seasonNumber: number
   episodeNumber: number
   name: string
+  poster?: string | null
+  backdrop?: string | null
 }
 
 export type TvSectionItem = {

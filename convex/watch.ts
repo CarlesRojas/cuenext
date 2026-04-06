@@ -116,8 +116,11 @@ export const markEpisodeWatched = mutation({
     showTmdbId: v.number(),
     seasonNumber: v.number(),
     episodeNumber: v.number(),
+    showName: v.string(),
+    showPoster: v.union(v.string(), v.null()),
+    showBackdrop: v.union(v.string(), v.null()),
   },
-  handler: async (context, args) => {
+  handler: async (context, { showName, showPoster, showBackdrop, ...args }) => {
     const userId = await requireUser(context)
     const now = Date.now()
 
@@ -142,7 +145,26 @@ export const markEpisodeWatched = mutation({
     const wasStopped = !!stoppedEntry
 
     if (stoppedEntry) await context.db.delete(stoppedEntry._id)
-    return wasStopped
+
+    const followEntry = await context.db
+      .query('follow')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
+      .unique()
+
+    const wasNotFollowed = !followEntry
+
+    if (wasNotFollowed)
+      await context.db.insert('follow', {
+        userId,
+        type: 'tv' as const,
+        tmdbId: args.showTmdbId,
+        name: showName,
+        poster: showPoster,
+        backdrop: showBackdrop,
+        followedAt: now,
+      })
+
+    return { wasStopped, wasNotFollowed }
   },
 })
 
@@ -152,6 +174,7 @@ export const unmarkEpisodeWatched = mutation({
     seasonNumber: v.number(),
     episodeNumber: v.number(),
     wasStopped: v.optional(v.boolean()),
+    wasNotFollowed: v.optional(v.boolean()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -178,6 +201,15 @@ export const unmarkEpisodeWatched = mutation({
         .unique()
 
       if (!stoppedEntry) await context.db.insert('stopped', { userId, tmdbId: args.showTmdbId, stoppedAt: Date.now() })
+    }
+
+    if (args.wasNotFollowed) {
+      const followEntry = await context.db
+        .query('follow')
+        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
+        .unique()
+
+      if (followEntry) await context.db.delete(followEntry._id)
     }
   },
 })
@@ -243,8 +275,11 @@ export const markMultipleEpisodesAsWatched = mutation({
         episodeNumber: v.number(),
       }),
     ),
+    showName: v.string(),
+    showPoster: v.union(v.string(), v.null()),
+    showBackdrop: v.union(v.string(), v.null()),
   },
-  handler: async (context, args) => {
+  handler: async (context, { showName, showPoster, showBackdrop, ...args }) => {
     const userId = await requireUser(context)
     const now = Date.now()
 
@@ -276,9 +311,28 @@ export const markMultipleEpisodesAsWatched = mutation({
       .unique()
 
     const wasStopped = !!stoppedEntry
+
     if (stoppedEntry) await context.db.delete(stoppedEntry._id)
 
-    return wasStopped
+    const followEntry = await context.db
+      .query('follow')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
+      .unique()
+
+    const wasNotFollowed = !followEntry
+
+    if (wasNotFollowed)
+      await context.db.insert('follow', {
+        userId,
+        type: 'tv' as const,
+        tmdbId: args.showTmdbId,
+        name: showName,
+        poster: showPoster,
+        backdrop: showBackdrop,
+        followedAt: now,
+      })
+
+    return { wasStopped, wasNotFollowed }
   },
 })
 
@@ -292,6 +346,7 @@ export const unmarkMultipleEpisodesAsWatched = mutation({
       }),
     ),
     wasStopped: v.optional(v.boolean()),
+    wasNotFollowed: v.optional(v.boolean()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -318,6 +373,15 @@ export const unmarkMultipleEpisodesAsWatched = mutation({
         .unique()
 
       if (!stoppedEntry) await context.db.insert('stopped', { userId, tmdbId: args.showTmdbId, stoppedAt: Date.now() })
+    }
+
+    if (args.wasNotFollowed) {
+      const followEntry = await context.db
+        .query('follow')
+        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
+        .unique()
+
+      if (followEntry) await context.db.delete(followEntry._id)
     }
   },
 })

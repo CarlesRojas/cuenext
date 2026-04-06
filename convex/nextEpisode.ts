@@ -37,8 +37,8 @@ export const updateNextEpisode = action({
     const totalEpisodes = seasonEpisodeCounts.reduce((sum, count) => sum + count, 0)
     const watchedPercentage = totalEpisodes > 0 ? Math.round((watchedEpisodes.length / totalEpisodes) * 100) : 0
 
-    let nextSeasonNumber = 0
-    let nextEpisodeNumber = 0
+    let nextSeasonNumber = -1
+    let nextEpisodeNumber = -1
 
     const watchedSet = new Set(watchedEpisodes.map((ep: any) => `${ep.seasonNumber}-${ep.episodeNumber}`))
     found: for (let seasonIndex = 0; seasonIndex < seasonEpisodeCounts.length; seasonIndex++) {
@@ -51,11 +51,6 @@ export const updateNextEpisode = action({
           break found
         }
       }
-    }
-
-    if (totalEpisodes === 0 || watchedEpisodes.length === totalEpisodes) {
-      nextSeasonNumber = -1
-      nextEpisodeNumber = -1
     }
 
     const updateData = {

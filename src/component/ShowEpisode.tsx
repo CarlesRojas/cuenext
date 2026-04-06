@@ -10,16 +10,21 @@ interface Props {
   showId: number
   episode: TmdbEpisode
   episodeNumbersResetWithSeason: boolean
+  showName: string
+  showPoster?: string | null
+  showBackdrop?: string | null
 }
 
-const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason }: Props) => {
+const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason, showName, showPoster, showBackdrop }: Props) => {
   const { id, season_number, runtime, still_path, name, air_date, episode_number } = episode
 
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({
     showTmdbId: showId,
-    name: episode.name,
     seasonNumber: episode.season_number - 1,
     episodeNumber: episode.episode_number - 1,
+    name: showName,
+    poster: showPoster,
+    backdrop: showBackdrop,
   })
 
   const [hasImage, setHasImage] = useState(true)

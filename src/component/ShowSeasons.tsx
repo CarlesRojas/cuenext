@@ -44,6 +44,9 @@ export function ShowSeasons({ show }: Props) {
             showId={show.id}
             season={season}
             episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+            showName={show.name}
+            showPoster={show.poster_path}
+            showBackdrop={show.backdrop_path}
           />
         ))}
 
@@ -54,6 +57,9 @@ export function ShowSeasons({ show }: Props) {
             season={specials}
             isSpecials
             episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+            showName={show.name}
+            showPoster={show.poster_path}
+            showBackdrop={show.backdrop_path}
           />
         )}
       </div>
