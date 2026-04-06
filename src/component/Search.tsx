@@ -6,7 +6,7 @@ import { cn } from '#/lib/cn'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
-import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
 
@@ -21,11 +21,8 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
   const [mediaType] = useMediaType()
   const navigate = useNavigate()
   const location = useLocation()
-  const router = useRouter()
 
-  const formSchema = z.object({
-    query: z.string(),
-  })
+  const formSchema = z.object({ query: z.string() })
 
   const form = useForm({
     defaultValues: { query: location.search.query ? decodeURIComponent(location.search.query) : '' },
@@ -48,15 +45,11 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
 
   const handleClear = (field: any) => {
     field.handleChange('')
-
-    if (location.pathname === '/search') router.history.back()
-    else navigate({ to: location.pathname, replace: true, search: { media: mediaType } })
+    navigate({ to: location.pathname, replace: true, search: { media: mediaType } })
   }
 
   const handleInputChange = (field: any, value: string) => {
     field.handleChange(value)
-
-    if (value.trim() === '' && location.pathname === '/search') router.history.back()
   }
 
   if (!isMobile) {
@@ -147,8 +140,13 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
               variant={isExpanded ? 'default' : 'ghost'}
               size="icon"
               onClick={() => {
-                if (!isExpanded) setIsExpanded?.(true)
-                else form.handleSubmit()
+                if (isExpanded) {
+                  form.handleSubmit()
+                  return
+                }
+
+                if (!location.pathname.startsWith('/search')) navigate({ to: '/search', replace: false })
+                setIsExpanded?.(true)
               }}
               disabled={isExpanded && (!canSubmit || !query.trim())}
               className="m-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12"

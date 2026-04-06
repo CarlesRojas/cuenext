@@ -7,7 +7,7 @@ import { User } from '#/component/User'
 import { cn } from '#/lib/cn'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link, useLocation, useRouter } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -28,7 +28,6 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
   const mobileTabsRef = useRef<HTMLDivElement>(null)
   const [{ width: mobileTabsWidth }, setSize] = useState<Size>({ width: undefined })
   const location = useLocation()
-  const router = useRouter()
 
   const onResize = useDebounceCallback(setSize, 200)
 
@@ -104,10 +103,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => {
-                  setIsExpanded(false)
-                  if (location.pathname === '/search') router.history.back()
-                }}
+                onClick={() => setIsExpanded(false)}
                 className={cn(
                   'm-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12 opacity-0 transition-opacity duration-300 ease-in-out',
                   isExpanded && 'pointer-events-auto opacity-100',
