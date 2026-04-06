@@ -15,6 +15,10 @@ const buttonVariants = cva(
           'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
           'hover:bg-neutral-500/25 focus-visible:bg-neutral-500/25',
         ],
+        negative: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden [&_svg]:text-red-400/80',
+          'hover:bg-neutral-500/25 focus-visible:bg-neutral-500/25',
+        ],
         ghost: ['text-white hover:bg-neutral-400/10 focus-visible:bg-neutral-400/10'],
         link: ['text-white hover:text-sky-500 focus-visible:text-sky-500'],
         frost: [

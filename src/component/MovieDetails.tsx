@@ -92,13 +92,21 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
         {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
 
         <div className="flex max-w-3xl flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => toggleFollow(id, title)} disabled={isFollowedLoading}>
+          <Button
+            variant={isFollowed ? 'negative' : 'default'}
+            onClick={() => toggleFollow(id, title)}
+            disabled={isFollowedLoading}
+          >
             <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
             <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
           </Button>
 
           {!isFollowedLoading && isFollowed && (
-            <Button variant="secondary" onClick={() => handleToggleWatch()} disabled={isWatchedLoading}>
+            <Button
+              variant={isWatched ? 'negative' : 'secondary'}
+              onClick={() => handleToggleWatch()}
+              disabled={isWatchedLoading}
+            >
               <FontAwesomeIcon icon={isWatched ? faEyeSlash : faEye} className="size-4" />
               <span>{isWatched ? 'Mark as Unwatched' : 'Mark as Watched'}</span>
             </Button>

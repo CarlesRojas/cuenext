@@ -92,14 +92,18 @@ export function ShowDetails({ show }: ShowDetailsProps) {
         {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
 
         <div className="flex max-w-3xl flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => toggleFollow(id, name)} disabled={isFollowedLoading}>
+          <Button
+            variant={isFollowed ? 'negative' : 'default'}
+            onClick={() => toggleFollow(id, name)}
+            disabled={isFollowedLoading}
+          >
             <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
             <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
           </Button>
 
           {!isFollowedLoading && isFollowed && (
             <Button
-              variant="secondary"
+              variant={isStopped ? 'secondary' : 'negative'}
               onClick={() => toggleStopped(id, name)}
               disabled={isStoppedLoading}
               data-state={!isStoppedLoading && isStopped ? 'on' : 'off'}

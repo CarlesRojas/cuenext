@@ -6,6 +6,7 @@ import {
   faHeart,
   faHeartBroken,
   faMinus,
+  faPlay,
   faPlus,
   faStop,
   faUndo,
@@ -56,7 +57,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         break
       case 'unfollow':
         icon = faMinus
-        iconClass = 'text-neutral-400'
+        iconClass = 'text-red-400'
         message = `Unfollowed ${title}`
         break
       case 'watch':
@@ -66,7 +67,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         break
       case 'unwatch':
         icon = faEyeSlash
-        iconClass = 'text-neutral-400'
+        iconClass = 'text-red-400'
         message = `Unwatched ${title}`
         break
       case 'favorite':
@@ -81,13 +82,13 @@ export function ToastProvider({ children }: ToastProviderProps) {
         break
       case 'stop':
         icon = faStop
-        iconClass = 'text-red-500'
-        message = `Stopped ${title}`
+        iconClass = 'text-red-400'
+        message = `Stopped watching ${title}`
         break
       case 'unstop':
-        icon = faStop
-        iconClass = 'text-neutral-400'
-        message = `Unstopped ${title}`
+        icon = faPlay
+        iconClass = 'text-sky-500'
+        message = `Resumed watching ${title}`
         break
     }
 
