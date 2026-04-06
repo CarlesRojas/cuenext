@@ -1,3 +1,4 @@
+import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
@@ -5,6 +6,7 @@ import type { MediaType } from '#/type/media'
 import { faClapperboard, faPlus, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
 
 interface CommonProps {
   className?: string
@@ -20,8 +22,8 @@ interface LoadedProps extends CommonProps {
   title: string
   media: MediaType
   subtitle?: string
-  posterUrl?: string
-  backdropUrl?: string
+  posterPath?: string | null | undefined
+  backdropPath?: string | null | undefined
   overview: string
 
   showFollow?: boolean
@@ -55,8 +57,8 @@ export default function RowCard(props: Props) {
     id,
     title,
     media,
-    posterUrl,
-    backdropUrl,
+    posterPath,
+    backdropPath,
     subtitle,
     overview,
 
@@ -67,11 +69,17 @@ export default function RowCard(props: Props) {
     isFollowLoading = false,
   } = props
 
+  const posterPaths = [posterPath]
+  const backdropPaths = [backdropPath, posterPath]
+
+  const [hasPosterImage, setHasPosterImage] = useState(true)
+  const [hasBackdropImage, setHasBackdropImage] = useState(true)
+
   return (
     <div
       className={cn(
         'group/poster relative flex',
-        'h-40 max-h-40 min-h-40 w-full',
+        'min-h-`40 h-40 max-h-40 w-full',
         isFollowLoading ? 'pointer-events-none' : '',
         className,
       )}
@@ -83,22 +91,23 @@ export default function RowCard(props: Props) {
         className="relative grid h-full w-full grid-cols-[auto_1fr] grid-rows-1 gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.05] focus-visible:scale-[1.05] disabled:pointer-events-none"
         disabled={isFollowLoading}
       >
-        {posterUrl ? (
-          <>
-            <img
-              src={posterUrl}
+        {hasPosterImage ? (
+          <div className="relative aspect-2/3 h-full lg:hidden">
+            <ProgressiveImage
+              paths={posterPaths}
               alt={title}
-              className="absolute inset-y-0 left-0 aspect-2/3 h-full scale-200 rounded-[22px] object-cover opacity-30 blur-2xl lg:hidden"
+              className="absolute inset-y-0 left-0 aspect-2/3 h-full scale-200 rounded-[22px] object-cover opacity-30 blur-2xl"
               loading="lazy"
             />
 
-            <img
-              src={posterUrl}
+            <ProgressiveImage
+              paths={posterPaths}
               alt={title}
-              className="relative aspect-2/3 h-full rounded-[22px] object-cover lg:hidden"
+              className="aspect-2/3 h-full rounded-[22px] object-cover"
+              onNoImage={() => setHasPosterImage(false)}
               loading="lazy"
             />
-          </>
+          </div>
         ) : (
           <div className="flex aspect-2/3 h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:hidden">
             <FontAwesomeIcon
@@ -109,22 +118,23 @@ export default function RowCard(props: Props) {
           </div>
         )}
 
-        {backdropUrl ? (
-          <>
-            <img
-              src={backdropUrl}
+        {hasBackdropImage ? (
+          <div className="relative hidden aspect-video h-full lg:block">
+            <ProgressiveImage
+              paths={backdropPaths}
               alt={title}
-              className="absolute inset-0 hidden aspect-video h-full scale-150 rounded-[22px] object-cover opacity-30 blur-2xl lg:block"
+              className="absolute inset-0 aspect-video h-full scale-150 rounded-[22px] object-cover opacity-30 blur-2xl"
               loading="lazy"
             />
 
-            <img
-              src={backdropUrl}
+            <ProgressiveImage
+              paths={backdropPaths}
               alt={title}
-              className="relative hidden aspect-video h-full rounded-[22px] object-cover lg:block"
+              className="aspect-video h-full rounded-[22px] object-cover"
+              onNoImage={() => setHasBackdropImage(false)}
               loading="lazy"
             />
-          </>
+          </div>
         ) : (
           <div className="hidden aspect-video h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:flex">
             <FontAwesomeIcon

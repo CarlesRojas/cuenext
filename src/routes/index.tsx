@@ -5,7 +5,6 @@ import { Button } from '#/component/ui/button'
 import WatchEpisode from '#/component/WatchEpisode'
 import WatchMovie from '#/component/WatchMovie'
 import useSearchParams from '#/hooks/useSearchParams'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
@@ -91,7 +90,7 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   media="tv"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
             </Section>
@@ -109,7 +108,7 @@ function App() {
                     id={item.tmdbId}
                     title={item.name}
                     media="tv"
-                    imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                    imagePaths={[item.poster, item.backdrop]}
                     progressPercentage={item.watchedPercentage}
                   />
                 )
@@ -125,7 +124,7 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   media="tv"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
             </Section>
@@ -158,7 +157,7 @@ function App() {
                   id={item.tmdbId}
                   title={item.name}
                   media="movie"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
             </Section>

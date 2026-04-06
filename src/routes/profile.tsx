@@ -3,7 +3,6 @@ import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
 import { convexAction, convexQuery } from '@convex-dev/react-query'
@@ -229,7 +228,7 @@ function ProfilePage() {
                   id={item.tmdbId}
                   title={item.name}
                   media="tv"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
 
@@ -247,7 +246,7 @@ function ProfilePage() {
                   id={item.tmdbId}
                   title={item.name}
                   media="tv"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
 
@@ -278,7 +277,7 @@ function ProfilePage() {
                   id={item.tmdbId}
                   title={item.name}
                   media="movie"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
 
@@ -296,7 +295,7 @@ function ProfilePage() {
                   id={item.tmdbId}
                   title={item.name}
                   media="movie"
-                  imageUrl={getTmdbImageUrl(item.poster, 'w342') || getTmdbImageUrl(item.poster, 'original')}
+                  imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
 

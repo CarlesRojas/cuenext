@@ -1,6 +1,6 @@
 import { PosterCard } from '#/component/PosterCard'
 import { useWatchEpisode } from '#/hooks/useWatchEpisode'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
+
 import type { TvSectionItem } from '#/type/section'
 
 interface Props {
@@ -15,7 +15,7 @@ export default function WatchEpisode({ episode }: Props) {
       id={episode.tmdbId}
       title={episode.name}
       media="tv"
-      imageUrl={getTmdbImageUrl(episode.poster, 'w342') || getTmdbImageUrl(episode.poster, 'original')}
+      imagePaths={[episode.poster, episode.backdrop]}
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}

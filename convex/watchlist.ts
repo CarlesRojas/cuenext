@@ -96,6 +96,7 @@ export const getMovieSections = query({
         followedAt: follow.followedAt,
         name: follow.name,
         poster: follow.poster,
+        backdrop: follow.backdrop,
       }
 
       if (item.watchedAt) finished.push(item)

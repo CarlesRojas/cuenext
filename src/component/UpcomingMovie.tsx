@@ -1,5 +1,4 @@
 import RowCard from '#/component/RowCard'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { TmdbMovie } from '#/type/tmdb'
 
 interface UpcomingMovieItem {
@@ -15,11 +14,6 @@ interface UpcomingMovieItem {
 export default function UpcomingMovie(props: UpcomingMovieItem) {
   const { tmdbId, name, movie, airDate } = props
 
-  const posterUrl = getTmdbImageUrl(movie.poster_path, 'w342') || getTmdbImageUrl(movie.poster_path, 'original')
-
-  const backdropUrl =
-    getTmdbImageUrl(movie.backdrop_path, 'w780') || getTmdbImageUrl(movie.backdrop_path, 'original') || posterUrl
-
   const formattedAirDate = new Date(airDate).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -34,8 +28,8 @@ export default function UpcomingMovie(props: UpcomingMovieItem) {
       key={tmdbId}
       id={tmdbId}
       title={name}
-      posterUrl={posterUrl}
-      backdropUrl={backdropUrl}
+      posterPath={movie.poster_path}
+      backdropPath={movie.backdrop_path}
       subtitle={[formattedAirDate, runtime].filter(Boolean).join(' • ')}
       overview={movie.overview}
     />

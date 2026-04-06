@@ -23,8 +23,10 @@ export function ProgressiveImage({ paths, onNoImage, minSize = 'w92', className,
   const largeImage = useImageFallback(largeImageUrls)
 
   useEffect(() => {
-    if (!largeImage.hasImage) onNoImage?.()
-  }, [largeImage.hasImage, onNoImage])
+    if (!smallImage.hasImage && !largeImage.hasImage) {
+      onNoImage?.()
+    }
+  }, [smallImage.hasImage, largeImage.hasImage, onNoImage])
 
   return (
     <>

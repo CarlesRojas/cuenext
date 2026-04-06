@@ -1,7 +1,7 @@
 import { PosterCard } from '#/component/PosterCard'
 import RowCard from '#/component/RowCard'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
+
 import type { TmdbMovieMinimal } from '#/type/tmdb'
 
 interface Props {
@@ -16,12 +16,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
 
   const { id, title, overview, poster_path, backdrop_path, release_date } = movie
 
-  const posterUrl = getTmdbImageUrl(poster_path, 'w342') || getTmdbImageUrl(poster_path, 'original')
-
   if (variant === 'row') {
-    const backdropUrl =
-      getTmdbImageUrl(backdrop_path, 'w780') || getTmdbImageUrl(backdrop_path, 'original') || posterUrl
-
     const releaseDate = release_date ? new Date(release_date) : null
     const formattedReleaseDate = releaseDate
       ? releaseDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -33,8 +28,8 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
         key={id}
         id={id}
         title={title}
-        posterUrl={posterUrl}
-        backdropUrl={backdropUrl}
+        posterPath={poster_path}
+        backdropPath={backdrop_path}
         subtitle={formattedReleaseDate}
         overview={overview}
         showFollow
@@ -53,7 +48,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
       id={id}
       title={title}
       number={number}
-      imageUrl={posterUrl}
+      imagePaths={[poster_path, backdrop_path]}
       showFollow
       isFollowed={isFollowed}
       onToggleFollow={() => toggleFollow(id, title)}

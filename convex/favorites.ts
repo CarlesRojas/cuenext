@@ -29,6 +29,7 @@ export const getFavoriteMovies = query({
       followedAt: follow.followedAt,
       name: follow.name,
       poster: follow.poster,
+      backdrop: follow.backdrop,
     }))
 
     favorites.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))

@@ -1,3 +1,4 @@
+import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
@@ -5,6 +6,7 @@ import type { MediaType } from '#/type/media'
 import { faEye, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
 
 interface CommonProps {
   className?: string
@@ -20,7 +22,7 @@ interface LoadedProps extends CommonProps {
   title: string
   media: MediaType
   number?: number
-  imageUrl?: string
+  imagePaths?: (string | null | undefined)[]
 
   showWatch?: boolean
   watchButtonText?: string
@@ -41,6 +43,7 @@ type Props = LoadingProps | LoadedProps
 
 export function PosterCard(props: Props) {
   const searchParams = useSearchParams()
+  const [hasImage, setHasImage] = useState(true)
 
   if (props.isLoading) {
     return (
@@ -61,7 +64,7 @@ export function PosterCard(props: Props) {
     id,
     title,
     media,
-    imageUrl,
+    imagePaths,
     number,
     progressPercentage,
 
@@ -94,9 +97,16 @@ export function PosterCard(props: Props) {
         className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
         disabled={isWatchLoading || isFollowLoading}
       >
-        {imageUrl ? (
-          <img src={imageUrl} alt={title} className="h-full w-full object-cover" loading="lazy" />
-        ) : (
+        <ProgressiveImage
+          paths={imagePaths || []}
+          alt={title}
+          className="h-full w-full object-cover"
+          loading="lazy"
+          minSize="w342"
+          onNoImage={() => setHasImage(false)}
+        />
+
+        {!hasImage && (
           <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-center text-sm text-neutral-500">
             {title}
           </div>

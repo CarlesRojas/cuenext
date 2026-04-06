@@ -1,6 +1,5 @@
 import { PosterCard } from '#/component/PosterCard'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
-import { getTmdbImageUrl } from '#/lib/tmdbImage'
 import type { MovieSectionItem } from '#/type/section'
 
 interface Props {
@@ -15,7 +14,7 @@ export default function WatchMovie({ movie }: Props) {
       id={movie.tmdbId}
       title={movie.name}
       media="movie"
-      imageUrl={getTmdbImageUrl(movie.poster, 'w342') || getTmdbImageUrl(movie.poster, 'original')}
+      imagePaths={[movie.poster, movie.backdrop]}
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}
