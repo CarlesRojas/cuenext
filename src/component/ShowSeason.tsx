@@ -79,11 +79,11 @@ export function ShowSeason({
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         {poster_path && hasImage ? (
-          <div className="relative aspect-4/3 h-full rounded-[22px] bg-neutral-900 lg:aspect-video">
+          <div className="relative aspect-square h-full rounded-[22px] bg-neutral-900 lg:aspect-video">
             <ProgressiveImage
               paths={[poster_path]}
               alt={name}
-              className="absolute inset-y-0 left-0 size-full scale-200 rounded-[22px] object-cover object-center opacity-30 blur-2xl lg:aspect-video"
+              className="absolute inset-y-0 left-0 size-full scale-200 rounded-[22px] object-cover object-top opacity-30 blur-2xl lg:aspect-video lg:object-center"
               minSize="w185"
               maxSize="w185"
               loading="lazy"
@@ -92,7 +92,7 @@ export function ShowSeason({
             <ProgressiveImage
               paths={[poster_path]}
               alt={name}
-              className="size-full rounded-[22px] object-cover object-center lg:aspect-video"
+              className="size-full rounded-[22px] object-cover object-top lg:aspect-video lg:object-center"
               onNoImage={() => setHasImage(false)}
               minSize="w185"
               maxSize="w185"
@@ -100,12 +100,12 @@ export function ShowSeason({
             />
           </div>
         ) : (
-          <div className="flex aspect-4/3 h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:aspect-video">
+          <div className="flex aspect-square h-full items-center justify-center rounded-[22px] bg-neutral-900 lg:aspect-video">
             <FontAwesomeIcon icon={faTv} size="6x" className="max-w-10 opacity-40" />
           </div>
         )}
 
-        <div className="flex items-center justify-between p-3 lg:p-4">
+        <div className="flex items-center justify-between p-1 md:p-2 lg:p-4">
           <div className="flex flex-col items-start pr-24">
             <h2 className="line-clamp-2 text-left text-lg leading-6 font-semibold text-wrap">{name}</h2>
             {formatedAirDate && <p className="line-clamp-1 text-left text-sm text-neutral-400">{formatedAirDate}</p>}
@@ -113,13 +113,15 @@ export function ShowSeason({
         </div>
       </Button>
 
-      <div className="absolute top-1 right-1 z-10 flex items-center gap-3">
-        {episodes && numberOfWatchedEpisodes !== null && (
-          <span className="line-clamp-1 text-sm text-neutral-400">
+      {episodes && numberOfWatchedEpisodes !== null && (
+        <div className="pointer-events-none absolute top-1 right-12 z-10 flex h-11 items-center pr-2">
+          <span className="pointer-events-none line-clamp-1 w-fit text-right text-sm text-neutral-400">
             {numberOfWatchedEpisodes} / {episodes.length}
           </span>
-        )}
+        </div>
+      )}
 
+      <div className="absolute top-1 right-1 z-10">
         <Dialog>
           <DialogTrigger asChild>
             <Button
