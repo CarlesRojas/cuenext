@@ -92,7 +92,7 @@ export default function RowCard(props: Props) {
         disabled={isFollowLoading}
       >
         {hasPosterImage ? (
-          <div className="relative aspect-2/3 h-full lg:hidden">
+          <div className="relative aspect-2/3 h-full rounded-[22px] bg-neutral-900 lg:hidden">
             <ProgressiveImage
               paths={posterPaths}
               alt={title}
@@ -119,7 +119,7 @@ export default function RowCard(props: Props) {
         )}
 
         {hasBackdropImage ? (
-          <div className="relative hidden aspect-video h-full lg:block">
+          <div className="relative hidden aspect-video h-full rounded-[22px] bg-neutral-900 lg:block">
             <ProgressiveImage
               paths={backdropPaths}
               alt={title}
