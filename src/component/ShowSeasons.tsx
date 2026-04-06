@@ -1,6 +1,7 @@
 import { api } from '#/../convex/_generated/api'
 import ShowEpisode from '#/component/ShowEpisode'
 import { ShowSeason } from '#/component/ShowSeason'
+import { useShowInfo } from '#/hooks/useShowInfo'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
 import { convexAction, convexQuery } from '@convex-dev/react-query'
@@ -21,6 +22,8 @@ export function ShowSeasons({ show }: Props) {
     })),
   })
 
+  const showInfo = useShowInfo(show.id)
+
   const nextEpisode = useQuery({
     ...convexQuery(api.watch.getNextEpisode, { tmdbId: show.id }),
   })
@@ -34,12 +37,6 @@ export function ShowSeasons({ show }: Props) {
 
   const allSeasonsLoaded = seasonQueries.every(query => !query.isPending)
   if (allSeasonsLoaded && seasons.length === 0) return null
-
-  const episodeNumbersResetWithSeason = !regularSeasons.some(season => {
-    const episodes = season.episodes
-    if (!episodes) return false
-    return episodes.some(episode => episode.episode_number > episodes.length)
-  })
 
   const completeNextEpisode = nextEpisode.data
     ? regularSeasons
@@ -62,7 +59,7 @@ export function ShowSeasons({ show }: Props) {
         {completeNextEpisode && (
           <ShowEpisode
             episode={completeNextEpisode}
-            episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+            episodeNumbersResetWithSeason={showInfo?.episodeNumbersResetWithSeason ?? false}
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
@@ -81,7 +78,7 @@ export function ShowSeasons({ show }: Props) {
             key={season.id}
             showId={show.id}
             season={season}
-            episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+            episodeNumbersResetWithSeason={showInfo?.episodeNumbersResetWithSeason ?? false}
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
@@ -105,7 +102,7 @@ export function ShowSeasons({ show }: Props) {
             showId={show.id}
             season={specials}
             isSpecials
-            episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+            episodeNumbersResetWithSeason={showInfo?.episodeNumbersResetWithSeason ?? false}
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}

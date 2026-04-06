@@ -13,6 +13,7 @@ import type * as lib_tmdbClient from "../lib/tmdbClient.js";
 import type * as library from "../library.js";
 import type * as nextEpisode from "../nextEpisode.js";
 import type * as requireUser from "../requireUser.js";
+import type * as showInfo from "../showInfo.js";
 import type * as stats from "../stats.js";
 import type * as stopped from "../stopped.js";
 import type * as tmdb from "../tmdb.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   library: typeof library;
   nextEpisode: typeof nextEpisode;
   requireUser: typeof requireUser;
+  showInfo: typeof showInfo;
   stats: typeof stats;
   stopped: typeof stopped;
   tmdb: typeof tmdb;

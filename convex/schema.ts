@@ -68,4 +68,10 @@ export default defineSchema({
     createdAt: v.number(),
     expiresAt: v.number(),
   }).index('by_endpoint', ['endpoint']),
+
+  showInfo: defineTable({
+    tmdbId: v.number(),
+    episodeNumbersResetWithSeason: v.boolean(),
+    updatedAt: v.number(),
+  }).index('by_tmdbId', ['tmdbId']),
 })

@@ -1,4 +1,5 @@
 import { PosterCard } from '#/component/PosterCard'
+import { useShowInfo } from '#/hooks/useShowInfo'
 import { useWatchEpisode } from '#/hooks/useWatchEpisode'
 
 import type { TvSectionItem } from '#/type/section'
@@ -10,6 +11,10 @@ interface Props {
 export default function WatchEpisode({ episode }: Props) {
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({ ...episode })
 
+  const showInfo = useShowInfo(episode.showTmdbId)
+  // TODO if it only has one season this calculation is wrong
+  const episodeNumbersResetWithSeason = showInfo?.episodeNumbersResetWithSeason ?? false
+
   return (
     <PosterCard
       id={episode.showTmdbId}
@@ -20,7 +25,11 @@ export default function WatchEpisode({ episode }: Props) {
       isWatched={isWatched}
       onToggleWatch={onToggleWatch}
       isWatchLoading={isWatchedLoading}
-      watchButtonText={`S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`}
+      watchButtonText={
+        episodeNumbersResetWithSeason
+          ? `S${episode.seasonNumber}, E${episode.episodeNumber}`
+          : `E${episode.episodeNumber}`
+      }
       progressPercentage={episode.watchedPercentage}
     />
   )
