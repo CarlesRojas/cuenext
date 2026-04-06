@@ -8,7 +8,7 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link, useLocation, useRouter } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate, useRouter } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -28,10 +28,11 @@ type Size = {
 const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const mobileTabsRef = useRef<HTMLDivElement>(null)
   const [{ width: mobileTabsWidth }, setSize] = useState<Size>({ width: undefined })
-  const location = useLocation()
 
   const onResize = useDebounceCallback(setSize, 200)
 
@@ -110,7 +111,10 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                 size="icon"
                 onClick={() => {
                   setIsExpanded(false)
-                  if (location.pathname === '/search') router.history.back()
+                  if (location.pathname === '/search') {
+                    navigate({ to: '.', replace: true, search: { media: searchParams.media } })
+                    router.history.back()
+                  }
                 }}
                 className={cn(
                   'm-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12 opacity-0 transition-opacity duration-300 ease-in-out',
