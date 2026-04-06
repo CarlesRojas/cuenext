@@ -36,7 +36,7 @@ export const setUnstopped = mutation({
 
 export const listStopped = query({
   args: {},
-  handler: async (context, args) => {
+  handler: async context => {
     const userId = await requireUser(context)
 
     const stoppedItems = await context.db
