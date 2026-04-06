@@ -10,14 +10,28 @@ interface Props extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src' | 
   paths: (string | null | undefined)[]
   onNoImage?: () => void
   minSize?: ImageSize
+  maxSize?: ImageSize
 }
 
-export function ProgressiveImage({ paths, onNoImage, minSize = 'w92', className, ...imgProps }: Props) {
+export function ProgressiveImage({
+  paths,
+  onNoImage,
+  minSize = 'w92',
+  maxSize = 'original',
+  className,
+  ...imgProps
+}: Props) {
   const minSizeIndex = IMAGE_SIZES.indexOf(minSize)
-  const allowedSizes = minSizeIndex >= 0 ? IMAGE_SIZES.slice(minSizeIndex) : IMAGE_SIZES
+  const maxSizeIndex = IMAGE_SIZES.indexOf(maxSize)
 
-  const smallImageUrls = paths.flatMap(path => getTmdbImageUrls(path, allowedSizes))
-  const largeImageUrls = paths.flatMap(path => getTmdbImageUrls(path, ['original']))
+  const startIndex = minSizeIndex >= 0 ? minSizeIndex : 0
+  const endIndex = maxSizeIndex >= 0 ? maxSizeIndex + 1 : IMAGE_SIZES.length
+
+  const smallSizes = IMAGE_SIZES.slice(startIndex, endIndex)
+  const bigSizes = IMAGE_SIZES.slice(endIndex)
+
+  const smallImageUrls = paths.flatMap(path => getTmdbImageUrls(path, smallSizes))
+  const largeImageUrls = paths.flatMap(path => getTmdbImageUrls(path, bigSizes))
 
   const smallImage = useImageFallback(smallImageUrls)
   const largeImage = useImageFallback(largeImageUrls)
@@ -30,7 +44,7 @@ export function ProgressiveImage({ paths, onNoImage, minSize = 'w92', className,
 
   return (
     <>
-      {smallImage.hasImage && (
+      {smallImage.hasImage && minSize !== maxSize && (
         <img {...imgProps} src={smallImage.imageUrl} onError={smallImage.handleImageError} className={className} />
       )}
 

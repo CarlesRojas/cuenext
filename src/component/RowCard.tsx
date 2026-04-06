@@ -97,6 +97,8 @@ export default function RowCard(props: Props) {
               paths={posterPaths}
               alt={title}
               className="absolute inset-y-0 left-0 aspect-2/3 h-full scale-200 rounded-[22px] object-cover opacity-30 blur-2xl"
+              minSize="w342"
+              maxSize="w342"
               loading="lazy"
             />
 
@@ -105,6 +107,8 @@ export default function RowCard(props: Props) {
               alt={title}
               className="aspect-2/3 h-full rounded-[22px] object-cover"
               onNoImage={() => setHasPosterImage(false)}
+              minSize="w342"
+              maxSize="w342"
               loading="lazy"
             />
           </div>
@@ -124,6 +128,8 @@ export default function RowCard(props: Props) {
               paths={backdropPaths}
               alt={title}
               className="absolute inset-0 aspect-video h-full scale-150 rounded-[22px] object-cover opacity-30 blur-2xl"
+              minSize="w342"
+              maxSize="w342"
               loading="lazy"
             />
 
@@ -132,6 +138,8 @@ export default function RowCard(props: Props) {
               alt={title}
               className="aspect-video h-full rounded-[22px] object-cover"
               onNoImage={() => setHasBackdropImage(false)}
+              minSize="w342"
+              maxSize="w342"
               loading="lazy"
             />
           </div>

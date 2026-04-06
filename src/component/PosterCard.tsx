@@ -103,6 +103,7 @@ export function PosterCard(props: Props) {
           className="h-full w-full object-cover"
           loading="lazy"
           minSize="w342"
+          maxSize="w342"
           onNoImage={() => setHasImage(false)}
         />
 
