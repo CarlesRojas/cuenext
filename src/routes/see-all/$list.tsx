@@ -1,16 +1,14 @@
 import { api } from '#/../convex/_generated/api'
+import BackButton from '#/component/BackButton'
 import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
 import RowCard from '#/component/RowCard'
-import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
 import { cn } from '#/lib/cn'
 import type { TmdbMovieMinimal, TmdbTvMinimal } from '#/type/tmdb'
 import { UrlParamsSchema } from '#/type/url'
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useWindowSize } from 'usehooks-ts'
 
 export const Route = createFileRoute('/see-all/$list')({
@@ -32,7 +30,6 @@ function MovieWrapper(props: TmdbMovieMinimal) {
 }
 
 function RouteComponent() {
-  const navigate = useNavigate()
   const { list } = Route.useParams()
 
   const { width = 0 } = useWindowSize()
@@ -71,15 +68,7 @@ function RouteComponent() {
         }}
       >
         <div className="page-width relative flex w-full items-baseline gap-4">
-          <Button
-            variant="frost"
-            size="icon"
-            onClick={() => {
-              navigate({ to: '/explore', search: { media: mediaType } })
-            }}
-          >
-            <FontAwesomeIcon icon={faArrowLeft} size="lg" />
-          </Button>
+          <BackButton />
 
           <h1 className="line-clamp-2 text-3xl leading-8 font-extrabold tracking-tight text-white md:text-4xl">
             {getTitle()}

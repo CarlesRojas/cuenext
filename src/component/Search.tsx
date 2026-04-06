@@ -145,7 +145,8 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                   return
                 }
 
-                if (!location.pathname.startsWith('/search')) navigate({ to: '/search', replace: false })
+                if (!location.pathname.startsWith('/search'))
+                  navigate({ to: '/search', replace: false, search: { media: mediaType } })
                 setIsExpanded?.(true)
               }}
               disabled={isExpanded && (!canSubmit || !query.trim())}

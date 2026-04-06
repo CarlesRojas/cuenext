@@ -111,6 +111,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                 size="icon"
                 onClick={() => {
                   setIsExpanded(false)
+
                   if (location.pathname === '/search') {
                     navigate({ to: '.', replace: true, search: { media: searchParams.media } })
                     router.history.back()
