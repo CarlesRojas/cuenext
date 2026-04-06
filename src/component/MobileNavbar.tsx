@@ -4,10 +4,11 @@ import { MediaTypeSelector } from '#/component/MediaTypeSelector'
 import { Search } from '#/component/Search'
 import { Button } from '#/component/ui/button'
 import { User } from '#/component/User'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link, useLocation, useRouteContext, useRouter } from '@tanstack/react-router'
+import { Link, useLocation, useRouter } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -25,7 +26,7 @@ type Size = {
 }
 
 const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
-  const context = useRouteContext({ strict: false })
+  const searchParams = useSearchParams()
   const router = useRouter()
 
   const mobileTabsRef = useRef<HTMLDivElement>(null)
@@ -78,7 +79,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
               <Link
                 key={item.to}
                 to={item.to}
-                search={context.urlParams}
+                search={searchParams}
                 activeProps={{ className: 'text-sky-500' }}
                 inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                 className={cn(

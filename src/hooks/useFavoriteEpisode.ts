@@ -10,7 +10,7 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: favoriteMedia, isPending: isFavoriteLoading } = useQuery({
+  const { data: favoriteMedia, isFetching: isFavoriteLoading } = useQuery({
     ...convexQuery(api.favorites.listFavorites, { type: 'tv' }),
     enabled: clerk.isSignedIn,
   })
@@ -46,7 +46,7 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
 
   return {
     isFavorited,
-    isLoading,
+    isFavoritedLoading: isLoading,
     toggleFavorite,
   }
 }

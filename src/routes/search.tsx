@@ -5,12 +5,13 @@ import { InfiniteMediaList } from '#/component/InfiniteMediaList'
 import RowCard from '#/component/RowCard'
 import { Button } from '#/component/ui/button'
 import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import type { TmdbMovieMinimal, TmdbTvMinimal } from '#/type/tmdb'
 import { UrlParamsSchema } from '#/type/url'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { createFileRoute, useNavigate, useRouter, useSearch } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useWindowSize } from 'usehooks-ts'
 
 export const Route = createFileRoute('/search')({
@@ -29,7 +30,7 @@ function MovieWrapper(props: TmdbMovieMinimal) {
 function RouteComponent() {
   const router = useRouter()
   const navigate = useNavigate()
-  const search = useSearch({ from: '/search' })
+  const searchParams = useSearchParams()
 
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
@@ -51,7 +52,7 @@ function RouteComponent() {
             variant="frost"
             size="icon"
             onClick={() => {
-              navigate({ to: '.', replace: true, search: { media: search.media } })
+              navigate({ to: '.', replace: true, search: { media: searchParams.media } })
               router.history.back()
             }}
           >
@@ -59,34 +60,34 @@ function RouteComponent() {
           </Button>
 
           <h1 className="line-clamp-2 text-3xl leading-8 font-extrabold tracking-tight text-white md:text-4xl">
-            {search.query ? `Results for '${decodeURIComponent(search.query)}'` : 'Search'}
+            {searchParams.query ? `Results for '${searchParams.query ?? ''}'` : 'Search'}
           </h1>
         </div>
       </header>
 
       <div className="screen-px relative w-full">
         <div className="page-width relative w-full">
-          {search.query && mediaType === 'tv' && (
+          {searchParams.query && mediaType === 'tv' && (
             <InfiniteMediaList
               action={api.tmdb.searchTv}
               actionKey={'searchTv'}
-              params={{ query: search.query }}
+              params={{ query: searchParams.query }}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
           )}
 
-          {search.query && mediaType === 'movie' && (
+          {searchParams.query && mediaType === 'movie' && (
             <InfiniteMediaList
               action={api.tmdb.searchMovies}
               actionKey={'searchMovies'}
-              params={{ query: search.query }}
+              params={{ query: searchParams.query }}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
           )}
 
-          {!search.query && (
+          {!searchParams.query && (
             <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">
               Enter a search term to find movies and TV shows
             </p>

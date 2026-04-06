@@ -27,8 +27,8 @@ export function ShowDetails({ show }: ShowDetailsProps) {
     tagline,
   } = show
 
-  const { isFollowed, isLoading: isFollowLoading, toggleFollow } = useFollowEpisode(show)
-  const { isFavorited, isLoading: isFavoriteLoading, toggleFavorite } = useFavoriteEpisode(show)
+  const { isFollowed, isFollowedLoading, toggleFollow } = useFollowEpisode(show)
+  const { isFavorited, isFavoritedLoading, toggleFavorite } = useFavoriteEpisode(show)
   const { isStopped, isStoppedLoading, toggleStopped } = useStopEpisode(show)
 
   const seasons = seasonsWithSpecials?.filter(season => season.season_number !== 0)
@@ -92,12 +92,12 @@ export function ShowDetails({ show }: ShowDetailsProps) {
         {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
 
         <div className="flex max-w-3xl flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => toggleFollow(id, name)} disabled={isFollowLoading}>
+          <Button variant="secondary" onClick={() => toggleFollow(id, name)} disabled={isFollowedLoading}>
             <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
             <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
           </Button>
 
-          {!isFollowLoading && isFollowed && (
+          {!isFollowedLoading && isFollowed && (
             <Button
               variant="secondary"
               onClick={() => toggleStopped(id, name)}
@@ -109,13 +109,13 @@ export function ShowDetails({ show }: ShowDetailsProps) {
             </Button>
           )}
 
-          {!isFollowLoading && isFollowed && (
+          {!isFollowedLoading && isFollowed && (
             <Button
               size="icon"
               variant="favorite"
               onClick={() => toggleFavorite(id, name)}
-              disabled={isFavoriteLoading}
-              data-state={!isFavoriteLoading && isFavorited ? 'on' : 'off'}
+              disabled={isFavoritedLoading}
+              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
             >
               <FontAwesomeIcon icon={faHeart} className="size-5" />
             </Button>

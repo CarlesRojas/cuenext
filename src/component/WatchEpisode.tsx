@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function WatchEpisode({ episode }: Props) {
-  const { isWatched, isLoading, handleToggleWatch } = useWatchEpisode(episode)
+  const { isWatched, isWatchedLoading, handleToggleWatch } = useWatchEpisode(episode)
 
   return (
     <PosterCard
@@ -19,7 +19,7 @@ export default function WatchEpisode({ episode }: Props) {
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}
-      isWatchLoading={isLoading}
+      isWatchLoading={isWatchedLoading}
       watchButtonText={`S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`}
       progressPercentage={episode.watchedPercentage}
     />

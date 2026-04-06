@@ -1,9 +1,10 @@
 import { Button } from '#/component/ui/button'
 import type { MediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faClapperboard, faPlus, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link, useRouteContext } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 
 interface CommonProps {
   className?: string
@@ -33,7 +34,7 @@ interface LoadedProps extends CommonProps {
 type Props = LoadingProps | LoadedProps
 
 export default function RowCard(props: Props) {
-  const context = useRouteContext({ strict: false })
+  const searchParams = useSearchParams()
 
   if (props.isLoading) {
     return (
@@ -78,7 +79,7 @@ export default function RowCard(props: Props) {
       <Link
         to="/media/$type/$tmdbId"
         params={{ tmdbId: id.toString(), type: mediaType }}
-        search={context.urlParams}
+        search={searchParams}
         className="relative grid h-full w-full grid-cols-[auto_1fr] grid-rows-1 gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.05] focus-visible:scale-[1.05] disabled:pointer-events-none"
         disabled={isFollowLoading}
       >

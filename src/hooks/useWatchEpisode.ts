@@ -10,7 +10,7 @@ export function useWatchEpisode(episode: TvSectionItem) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isWatched } = useQuery({
+  const { data: isWatched, isFetching: isWatchedLoading } = useQuery({
     ...convexQuery(api.progress.checkEpisodeWatched, {
       showTmdbId: episode.tmdbId,
       seasonNumber: episode.seasonNumber,
@@ -66,11 +66,11 @@ export function useWatchEpisode(episode: TvSectionItem) {
     }
   }
 
-  const isLoading = watch.isPending || unwatch.isPending
+  const isLoading = isWatchedLoading || watch.isPending || unwatch.isPending
 
   return {
     isWatched,
-    isLoading,
+    isWatchedLoading: isLoading,
     handleToggleWatch,
   }
 }

@@ -2,6 +2,7 @@ import { LiquidGlass } from '#/component/LiquidGlass'
 import { Button } from '#/component/ui/button'
 import { Input } from '#/component/ui/input'
 import { useMediaType } from '#/hooks/useMediaType'
+import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -18,14 +19,16 @@ interface Props {
 }
 
 export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, setIsExpanded }: Props) {
-  const [mediaType] = useMediaType()
+  const searchParams = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const [mediaType] = useMediaType()
 
   const formSchema = z.object({ query: z.string() })
 
   const form = useForm({
-    defaultValues: { query: location.search.query ? decodeURIComponent(location.search.query) : '' },
+    defaultValues: { query: searchParams.query ?? '' },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value: { query } }) => {
       const sanitizedQuery = encodeURIComponent(query.trim())
@@ -38,10 +41,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
     },
   })
 
-  useEffect(() => {
-    const currentQuery = location.search.query ? decodeURIComponent(location.search.query) : ''
-    form.setFieldValue('query', currentQuery)
-  }, [location.pathname, form])
+  useEffect(() => form.setFieldValue('query', searchParams.query ?? ''), [location.pathname, form])
 
   const handleClear = (field: any) => {
     field.handleChange('')

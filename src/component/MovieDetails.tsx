@@ -15,13 +15,9 @@ interface MovieDetailsProps {
 export function MovieDetails({ movie }: MovieDetailsProps) {
   const { id, title, poster_path, backdrop_path, release_date, runtime, overview, status, genres, tagline } = movie
 
-  const { isFollowed, isLoading: isFollowLoading, toggleFollow } = useFollowMovie(movie)
-  const { isFavorited, isLoading: isFavoriteLoading, toggleFavorite } = useFavoriteMovie(movie)
-  const {
-    isWatched,
-    isLoading: isWatchLoading,
-    handleToggleWatch,
-  } = useWatchMovie({
+  const { isFollowed, isFollowedLoading, toggleFollow } = useFollowMovie(movie)
+  const { isFavorited, isFavoritedLoading, toggleFavorite } = useFavoriteMovie(movie)
+  const { isWatched, isWatchedLoading, handleToggleWatch } = useWatchMovie({
     ...movie,
     name: title,
     poster: poster_path,
@@ -96,25 +92,25 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
         {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
 
         <div className="flex max-w-3xl flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => toggleFollow(id, title)} disabled={isFollowLoading}>
+          <Button variant="secondary" onClick={() => toggleFollow(id, title)} disabled={isFollowedLoading}>
             <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
             <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
           </Button>
 
-          {!isFollowLoading && isFollowed && (
-            <Button variant="secondary" onClick={() => handleToggleWatch()} disabled={isWatchLoading}>
+          {!isFollowedLoading && isFollowed && (
+            <Button variant="secondary" onClick={() => handleToggleWatch()} disabled={isWatchedLoading}>
               <FontAwesomeIcon icon={isWatched ? faEyeSlash : faEye} className="size-4" />
               <span>{isWatched ? 'Mark as Unwatched' : 'Mark as Watched'}</span>
             </Button>
           )}
 
-          {!isFollowLoading && isFollowed && (
+          {!isFollowedLoading && isFollowed && (
             <Button
               size="icon"
               variant="favorite"
               onClick={() => toggleFavorite(id, title)}
-              disabled={isFavoriteLoading}
-              data-state={!isFavoriteLoading && isFavorited ? 'on' : 'off'}
+              disabled={isFavoritedLoading}
+              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
             >
               <FontAwesomeIcon icon={faHeart} className="size-5" />
             </Button>

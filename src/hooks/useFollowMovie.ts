@@ -10,7 +10,7 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
+  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
     ...convexQuery(api.library.listFollowed, { type: 'movie' }),
     enabled: clerk.isSignedIn,
   })
@@ -56,7 +56,7 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
 
   return {
     isFollowed,
-    isLoading,
+    isFollowedLoading: isLoading,
     toggleFollow,
   }
 }

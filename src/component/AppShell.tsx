@@ -3,13 +3,14 @@ import { MediaTypeSelector } from '#/component/MediaTypeSelector'
 import MobileNavbar from '#/component/MobileNavbar'
 import { Search } from '#/component/Search'
 import { User } from '#/component/User'
+import useSearchParams from '#/hooks/useSearchParams'
 import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
-import { ClientOnly, Link, useRouteContext } from '@tanstack/react-router'
+import { ClientOnly, Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { useRef, useState } from 'react'
@@ -33,7 +34,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
-  const context = useRouteContext({ strict: false })
+  const searchParams = useSearchParams()
 
   const { visualHeight, fullHeight } = useViewportHeight()
   const { width = 0 } = useWindowSize()
@@ -63,7 +64,7 @@ export default function AppShell({ children }: AppShellProps) {
                     <Link
                       key={item.to}
                       to={item.to}
-                      search={context.urlParams}
+                      search={searchParams}
                       activeProps={{ className: 'text-sky-500' }}
                       inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                       className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"

@@ -10,7 +10,9 @@ export function useWatchMovie(movie: MovieSectionItem) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isWatched } = useQuery(convexQuery(api.progress.checkMovieWatched, { tmdbId: movie.tmdbId }))
+  const { data: isWatched, isFetching: isWatchedLoading } = useQuery(
+    convexQuery(api.progress.checkMovieWatched, { tmdbId: movie.tmdbId }),
+  )
 
   const markMovieWatched = useDbMutation(api.progress.markMovieWatched)
   const unmarkMovieWatched = useDbMutation(api.progress.unmarkMovieWatched)
@@ -41,11 +43,11 @@ export function useWatchMovie(movie: MovieSectionItem) {
     }
   }
 
-  const isLoading = watch.isPending || unwatch.isPending
+  const isLoading = isWatchedLoading || watch.isPending || unwatch.isPending
 
   return {
     isWatched,
-    isLoading,
+    isWatchedLoading: isLoading,
     handleToggleWatch,
   }
 }

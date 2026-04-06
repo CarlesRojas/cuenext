@@ -31,7 +31,7 @@ export function getRouter() {
   const router = createTanStackRouter({
     routeTree,
 
-    context: { queryClient, convexClient, convexQueryClient },
+    context: { queryClient, convexClient, convexQueryClient, urlParams: {} },
 
     defaultPreload: 'intent',
     scrollRestoration: true,

@@ -10,7 +10,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia, isPending: isFollowedLoading } = useQuery({
+  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
     ...convexQuery(api.library.listFollowed, { type: 'tv' }),
     enabled: clerk.isSignedIn,
   })
@@ -59,7 +59,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
 
   return {
     isFollowed,
-    isLoading,
+    isFollowedLoading: isLoading,
     toggleFollow,
   }
 }

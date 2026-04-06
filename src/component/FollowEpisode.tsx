@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function FollowEpisode({ episode, variant, number, followButtonText }: Props) {
-  const { isFollowed, isLoading, toggleFollow } = useFollowEpisode(episode)
+  const { isFollowed, isFollowedLoading, toggleFollow } = useFollowEpisode(episode)
 
   const { id, name, overview, poster_path, backdrop_path, first_air_date } = episode
 
@@ -40,7 +40,7 @@ export default function FollowEpisode({ episode, variant, number, followButtonTe
         showFollow
         isFollowed={isFollowed}
         onToggleFollow={() => toggleFollow(id, name)}
-        isFollowLoading={isLoading}
+        isFollowLoading={isFollowedLoading}
         followButtonText={followButtonText}
       />
     )
@@ -57,7 +57,7 @@ export default function FollowEpisode({ episode, variant, number, followButtonTe
       showFollow
       isFollowed={isFollowed}
       onToggleFollow={() => toggleFollow(id, name)}
-      isFollowLoading={isLoading}
+      isFollowLoading={isFollowedLoading}
       followButtonText={followButtonText}
     />
   )

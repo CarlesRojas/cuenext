@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function FollowMovie({ movie, variant, number, followButtonText }: Props) {
-  const { isFollowed, isLoading, toggleFollow } = useFollowMovie(movie)
+  const { isFollowed, isFollowedLoading, toggleFollow } = useFollowMovie(movie)
 
   const { id, title, overview, poster_path, backdrop_path, release_date } = movie
 
@@ -40,7 +40,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
         showFollow
         isFollowed={isFollowed}
         onToggleFollow={() => toggleFollow(id, title)}
-        isFollowLoading={isLoading}
+        isFollowLoading={isFollowedLoading}
         followButtonText={followButtonText}
       />
     )
@@ -57,7 +57,7 @@ export default function FollowMovie({ movie, variant, number, followButtonText }
       showFollow
       isFollowed={isFollowed}
       onToggleFollow={() => toggleFollow(id, title)}
-      isFollowLoading={isLoading}
+      isFollowLoading={isFollowedLoading}
     />
   )
 }

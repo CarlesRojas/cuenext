@@ -10,7 +10,7 @@ export function useStopEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: stoppedMedia, isPending: isStoppedLoading } = useQuery({
+  const { data: stoppedMedia, isFetching: isStoppedLoading } = useQuery({
     ...convexQuery(api.library.listStopped, { type: 'tv' }),
     enabled: clerk.isSignedIn,
   })

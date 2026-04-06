@@ -33,8 +33,6 @@ export function useViewportHeight(): ViewportInfo {
     setViewport({ visualHeight, fullHeight, isKeyboardOpen: fullHeight - visualHeight > 100 })
   }, [])
 
-  // const onUpdateViewport = useDebounceCallback(updateViewportInternal, 200, { maxWait: 50 })
-
   useEffect(() => {
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', updateViewportInternal)

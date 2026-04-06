@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function WatchMovie({ movie }: Props) {
-  const { isWatched, isLoading, handleToggleWatch } = useWatchMovie(movie)
+  const { isWatched, isWatchedLoading, handleToggleWatch } = useWatchMovie(movie)
 
   return (
     <PosterCard
@@ -19,7 +19,7 @@ export default function WatchMovie({ movie }: Props) {
       showWatch
       isWatched={isWatched}
       onToggleWatch={handleToggleWatch}
-      isWatchLoading={isLoading}
+      isWatchLoading={isWatchedLoading}
     />
   )
 }
