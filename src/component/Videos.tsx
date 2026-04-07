@@ -32,18 +32,11 @@ function VideoItem({ video }: VideoItemProps) {
 
   const handleClick = () => {
     if (isIOS) {
-      // Try to open in YouTube app first
       const youtubeAppUrl = `youtube://watch?v=${video.key}`
 
-      // Create a temporary link to try the YouTube app URL
       const link = document.createElement('a')
       link.href = youtubeAppUrl
       link.click()
-
-      // Fallback to web URL after a short delay if the app doesn't open
-      setTimeout(() => {
-        window.open(videoUrl, '_blank', 'noopener,noreferrer')
-      }, 500)
     } else {
       window.open(videoUrl, '_blank', 'noopener,noreferrer')
     }
