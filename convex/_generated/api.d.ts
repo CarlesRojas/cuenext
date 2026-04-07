@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as favorites from "../favorites.js";
 import type * as lib_tmdbClient from "../lib/tmdbClient.js";
 import type * as library from "../library.js";
@@ -29,6 +30,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   favorites: typeof favorites;
   "lib/tmdbClient": typeof lib_tmdbClient;
   library: typeof library;
