@@ -27,8 +27,8 @@ export default function WatchEpisode({ episode }: Props) {
       isWatchLoading={isWatchedLoading}
       watchButtonText={
         episodeNumbersResetWithSeason
-          ? `S${episode.seasonNumber}, E${episode.episodeNumber}`
-          : `E${episode.episodeNumber}`
+          ? `S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`
+          : `E${episode.episodeNumber + 1}`
       }
       progressPercentage={episode.watchedPercentage}
     />
