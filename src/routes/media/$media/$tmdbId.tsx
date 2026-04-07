@@ -1,5 +1,6 @@
 import { api } from '#/../convex/_generated/api'
 import BackButton from '#/component/BackButton'
+import { Cast } from '#/component/Cast'
 import { MovieDetails } from '#/component/MovieDetails'
 import { Recommendations } from '#/component/Recommendations'
 import { ShowDetails } from '#/component/ShowDetails'
@@ -96,6 +97,7 @@ function RouteComponent() {
         {media === 'tv' && show.data && <ShowSeasons show={show.data} />}
 
         <WatchProviders tmdbId={tmdbIdNumber} media={media as MediaType} />
+        <Cast tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Recommendations tmdbId={tmdbIdNumber} media={media as MediaType} />
       </div>

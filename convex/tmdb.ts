@@ -2,6 +2,7 @@ import { v } from 'convex/values'
 import type { TmdbMovie, TmdbTv } from '../src/type/tmdb'
 import {
   paginated,
+  tmdbCreditsSchema,
   tmdbMovieMinimalSchema,
   tmdbMovieSchema,
   tmdbSeasonSchema,
@@ -377,6 +378,20 @@ export const getTvVideos = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
     return fetchTmdbCached(context, tmdbVideosResponseSchema, `/tv/${args.tmdbId}/videos`, {}, CACHE_DURATIONS.ONE_WEEK)
+  },
+})
+
+export const getMovieCredits = action({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    return fetchTmdbCached(context, tmdbCreditsSchema, `/movie/${args.tmdbId}/credits`, {}, CACHE_DURATIONS.ONE_WEEK)
+  },
+})
+
+export const getTvCredits = action({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    return fetchTmdbCached(context, tmdbCreditsSchema, `/tv/${args.tmdbId}/credits`, {}, CACHE_DURATIONS.ONE_WEEK)
   },
 })
 

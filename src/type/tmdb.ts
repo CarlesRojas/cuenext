@@ -182,6 +182,41 @@ export const tmdbVideosResponseSchema = z.object({
   results: z.array(tmdbVideoSchema),
 })
 
+export const tmdbCastMemberSchema = z.object({
+  adult: z.boolean().optional(),
+  gender: z.number().optional(),
+  id: z.number(),
+  known_for_department: z.string().optional(),
+  name: z.string(),
+  original_name: z.string().optional(),
+  popularity: z.number().optional(),
+  profile_path: z.string().nullable().optional(),
+  cast_id: z.number().optional(),
+  character: z.string().optional(),
+  credit_id: z.string(),
+  order: z.number().optional(),
+})
+
+export const tmdbCrewMemberSchema = z.object({
+  adult: z.boolean().optional(),
+  gender: z.number().optional(),
+  id: z.number(),
+  known_for_department: z.string().optional(),
+  name: z.string(),
+  original_name: z.string().optional(),
+  popularity: z.number().optional(),
+  profile_path: z.string().nullable().optional(),
+  credit_id: z.string(),
+  department: z.string().optional(),
+  job: z.string().optional(),
+})
+
+export const tmdbCreditsSchema = z.object({
+  id: z.number(),
+  cast: z.array(tmdbCastMemberSchema),
+  crew: z.array(tmdbCrewMemberSchema),
+})
+
 export type TmdbMovieMinimal = z.infer<typeof tmdbMovieMinimalSchema>
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
 export type TmdbTv = z.infer<typeof tmdbTvSchema>
@@ -193,3 +228,6 @@ export type TmdbProvider = z.infer<typeof tmdbProviderSchema>
 export type TmdbWatchProviders = z.infer<typeof tmdbWatchProvidersSchema>
 export type TmdbVideo = z.infer<typeof tmdbVideoSchema>
 export type TmdbVideosResponse = z.infer<typeof tmdbVideosResponseSchema>
+export type TmdbCastMember = z.infer<typeof tmdbCastMemberSchema>
+export type TmdbCrewMember = z.infer<typeof tmdbCrewMemberSchema>
+export type TmdbCredits = z.infer<typeof tmdbCreditsSchema>
