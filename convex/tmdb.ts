@@ -7,10 +7,11 @@ import {
   tmdbSeasonSchema,
   tmdbTvMinimalSchema,
   tmdbTvSchema,
+  tmdbWatchProvidersSchema,
 } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
-import { fetchTmdbCached } from './tmdbCache'
+import { CACHE_DURATIONS, fetchTmdbCached } from './tmdbCache'
 
 export const getDiscoverMovies = action({
   args: {
@@ -298,6 +299,32 @@ export const getShowDetails = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
     return fetchTmdbCached(context, tmdbTvSchema, `/tv/${args.tmdbId}`)
+  },
+})
+
+export const getMovieWatchProviders = action({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    return fetchTmdbCached(
+      context,
+      tmdbWatchProvidersSchema,
+      `/movie/${args.tmdbId}/watch/providers`,
+      {},
+      CACHE_DURATIONS.ONE_WEEK,
+    )
+  },
+})
+
+export const getShowWatchProviders = action({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    return fetchTmdbCached(
+      context,
+      tmdbWatchProvidersSchema,
+      `/tv/${args.tmdbId}/watch/providers`,
+      {},
+      CACHE_DURATIONS.ONE_WEEK,
+    )
   },
 })
 

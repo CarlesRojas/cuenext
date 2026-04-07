@@ -1,5 +1,5 @@
+import RowCard from '#/component/RowCard'
 import type { TmdbTv } from '#/type/tmdb'
-import RowCard from './RowCard'
 
 interface UpcomingEpisodeItem {
   tmdbId: number

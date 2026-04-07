@@ -56,7 +56,7 @@ export function ShowSeasons({ show }: Props) {
   return (
     <div className="screen-px pb-4 md:pb-8">
       <div className="page-width mx-[unset] flex flex-col gap-4">
-        {completeNextEpisode && <h2 className="tracking text-lg font-semibold opacity-80">Next Episode</h2>}
+        {completeNextEpisode && <h2 className="text-lg font-semibold opacity-80">Next Episode</h2>}
 
         {completeNextEpisode && (
           <ShowEpisode
@@ -70,9 +70,7 @@ export function ShowSeasons({ show }: Props) {
         )}
 
         {regularSeasons.length > 0 && (
-          <h2 className={cn('tracking text-lg font-semibold opacity-80', completeNextEpisode && 'mt-4')}>
-            All episodes
-          </h2>
+          <h2 className={cn('text-lg font-semibold opacity-80', completeNextEpisode && 'mt-4')}>All episodes</h2>
         )}
 
         {regularSeasons.map(season => (

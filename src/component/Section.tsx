@@ -30,7 +30,7 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
         className={cn('px-4', !isMobile && 'pl-aside', !canCollapse && 'pointer-events-none!')}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <h2 className="tracking text-lg font-semibold opacity-80">{title}</h2>
+        <h2 className="text-lg font-semibold opacity-80">{title}</h2>
 
         {canCollapse && (
           <motion.div

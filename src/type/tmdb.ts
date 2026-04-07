@@ -142,6 +142,28 @@ export function paginated<T extends z.ZodTypeAny>(itemSchema: T) {
   })
 }
 
+export const tmdbProviderSchema = z.object({
+  logo_path: z.string(),
+  provider_id: z.number(),
+  provider_name: z.string(),
+  display_priority: z.number(),
+})
+
+export const tmdbWatchProvidersSchema = z.object({
+  id: z.number(),
+  results: z.record(
+    z.string(),
+    z.object({
+      link: z.string().optional(),
+      buy: z.array(tmdbProviderSchema).optional(),
+      rent: z.array(tmdbProviderSchema).optional(),
+      flatrate: z.array(tmdbProviderSchema).optional(),
+      free: z.array(tmdbProviderSchema).optional(),
+      ads: z.array(tmdbProviderSchema).optional(),
+    }),
+  ),
+})
+
 export type TmdbMovieMinimal = z.infer<typeof tmdbMovieMinimalSchema>
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
 export type TmdbTv = z.infer<typeof tmdbTvSchema>
@@ -149,3 +171,5 @@ export type TmdbTvMinimal = z.infer<typeof tmdbTvMinimalSchema>
 export type TmdbPerson = z.infer<typeof tmdbPersonSchema>
 export type TmdbEpisode = z.infer<typeof tmdbEpisodeSchema>
 export type TmdbSeason = z.infer<typeof tmdbSeasonSchema>
+export type TmdbProvider = z.infer<typeof tmdbProviderSchema>
+export type TmdbWatchProviders = z.infer<typeof tmdbWatchProvidersSchema>

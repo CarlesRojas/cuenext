@@ -3,7 +3,9 @@ import BackButton from '#/component/BackButton'
 import { MovieDetails } from '#/component/MovieDetails'
 import { ShowDetails } from '#/component/ShowDetails'
 import { ShowSeasons } from '#/component/ShowSeasons'
+import { WatchProviders } from '#/component/WatchProviders'
 import { cn } from '#/lib/cn'
+import type { MediaType } from '#/type/media'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -87,9 +89,11 @@ function RouteComponent() {
 
       <div className="flex w-full flex-col gap-4">
         {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
-
         {media === 'tv' && show.data && <ShowDetails show={show.data} />}
+
         {media === 'tv' && show.data && <ShowSeasons show={show.data} />}
+
+        <WatchProviders tmdbId={tmdbIdNumber} media={media as MediaType} />
       </div>
     </div>
   )

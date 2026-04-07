@@ -59,7 +59,7 @@ export function ProgressiveImage({
           src={largeImage.imageUrl}
           onError={largeImage.handleImageError}
           onLoad={() => setLargeImageLoaded(true)}
-          className={cn('pointer-events-none select-none', className)}
+          className={cn('select-none', className)}
         />
       )}
     </>

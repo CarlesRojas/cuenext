@@ -105,7 +105,7 @@ function DialogDescription({ className, ...props }: ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn('text-oklch(0.556 0 0) dark:text-oklch(0.708 0 0) text-sm', className)}
+      className={cn('text-oklch(0.556 0 0) text-sm', className)}
       {...props}
     />
   )
