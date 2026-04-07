@@ -85,7 +85,7 @@ export function Videos({ tmdbId, media }: VideosProps) {
     ...convexAction(media === 'movie' ? api.tmdb.getMovieVideos : api.tmdb.getTvVideos, { tmdbId }),
   })
 
-  if (!videos.data?.results?.length) return null
+  if (!videos.data?.results.length) return null
 
   const sortedVideos = videos.data.results
     .filter(video => video.site.toLowerCase() === 'youtube')
