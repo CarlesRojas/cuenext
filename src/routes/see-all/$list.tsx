@@ -19,6 +19,7 @@ export const Route = createFileRoute('/see-all/$list')({
 export enum SeeAllList {
   UPCOMING = 'upcoming',
   TOP = 'top',
+  TRENDING = 'trending',
 }
 
 function EpisodeWrapper(props: TmdbTvMinimal) {
@@ -53,6 +54,7 @@ function RouteComponent() {
 
   const getTitle = () => {
     if (list === SeeAllList.UPCOMING) return media === 'tv' ? 'Dropping This Week' : 'Upcoming Movies'
+    else if (list === SeeAllList.TRENDING) return media === 'tv' ? 'Trending Shows' : 'Trending Movies'
     else return media === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'
   }
 
@@ -91,6 +93,16 @@ function RouteComponent() {
             />
           )}
 
+          {media === 'tv' && list === SeeAllList.TRENDING && (
+            <InfiniteMediaList
+              action={api.tmdb.getTrendingTv}
+              actionKey={`tv-${list}`}
+              params={{ time_window: 'week' }}
+              Component={EpisodeWrapper}
+              LoadingComponent={<RowCard isLoading />}
+            />
+          )}
+
           {media === 'tv' && list === SeeAllList.TOP && (
             <InfiniteMediaList
               action={api.tmdb.getDiscoverShows}
@@ -116,6 +128,16 @@ function RouteComponent() {
                 include_adult: false,
                 include_video: false,
               }}
+              Component={MovieWrapper}
+              LoadingComponent={<RowCard isLoading />}
+            />
+          )}
+
+          {media === 'movie' && list === SeeAllList.TRENDING && (
+            <InfiniteMediaList
+              action={api.tmdb.getTrendingMovies}
+              actionKey={`movie-${list}`}
+              params={{ time_window: 'week' }}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />

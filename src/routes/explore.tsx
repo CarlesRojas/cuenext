@@ -43,8 +43,8 @@ function RouteComponent() {
     enabled: media === 'tv',
   })
 
-  const { data: top10Shows, isPending: top10ShowsLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'popularity.desc' }),
+  const { data: trendingShows, isPending: trendingShowsLoading } = useQuery({
+    ...convexAction(api.tmdb.getTrendingTv, { page: 1, time_window: 'week' }),
     enabled: media === 'tv',
   })
 
@@ -76,8 +76,8 @@ function RouteComponent() {
     enabled: media === 'movie',
   })
 
-  const { data: top10Movies, isPending: top10MoviesLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc' }),
+  const { data: trendingMovies, isPending: trendingMoviesLoading } = useQuery({
+    ...convexAction(api.tmdb.getTrendingMovies, { page: 1, time_window: 'week' }),
     enabled: media === 'movie',
   })
 
@@ -129,17 +129,26 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top 10 Shows" canCollapse={false} key="top10-shows">
-            {top10Shows &&
-              top10Shows.results
-                .slice(0, 10)
-                .map((tv: TmdbTv, index: number) => (
-                  <FollowEpisode key={tv.id} episode={tv} number={index + 1} variant="poster" />
-                ))}
+          <Section title="Trending Shows" canCollapse={false} key="trending-shows">
+            {trendingShows &&
+              trendingShows.results.map((tv: TmdbTv, index: number) => (
+                <FollowEpisode key={tv.id} episode={tv} number={index + 1} variant="poster" />
+              ))}
 
-            {!top10Shows &&
-              top10ShowsLoading &&
-              Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
+            {trendingShows && (
+              <div className="flex h-full w-fit items-center justify-center">
+                <Button asChild>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={{ media: 'tv' }}>
+                    <FontAwesomeIcon icon={faForward} className="size-4" />
+                    <span>See all</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
+
+            {!trendingShows &&
+              trendingShowsLoading &&
+              Array.from({ length: 20 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
           <Section title="Top Rated Shows" canCollapse={false} key="top-rated-shows">
@@ -188,16 +197,25 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top 10 Movies" canCollapse={false} key="top10-movies">
-            {top10Movies &&
-              top10Movies.results
-                .slice(0, 10)
-                .map((movie: TmdbMovie, index: number) => (
-                  <FollowMovie key={movie.id} movie={movie} number={index + 1} variant="poster" />
-                ))}
+          <Section title="Trending Movies" canCollapse={false} key="trending-movies">
+            {trendingMovies &&
+              trendingMovies.results.map((movie: TmdbMovie, index: number) => (
+                <FollowMovie key={movie.id} movie={movie} number={index + 1} variant="poster" />
+              ))}
 
-            {!top10Movies &&
-              top10MoviesLoading &&
+            {trendingMovies && (
+              <div className="flex h-full w-fit items-center justify-center">
+                <Button asChild>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={{ media: 'movie' }}>
+                    <FontAwesomeIcon icon={faForward} className="size-4" />
+                    <span>See all</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
+
+            {!trendingMovies &&
+              trendingMoviesLoading &&
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 

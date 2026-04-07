@@ -521,3 +521,33 @@ export const getUpcomingMovies = action({
     }
   },
 })
+
+export const getTrendingMovies = action({
+  args: {
+    page: v.optional(v.number()),
+    time_window: v.optional(v.union(v.literal('day'), v.literal('week'))),
+  },
+  handler: async (context, args) => {
+    const timeWindow = args.time_window || 'week'
+    const page = args.page || 1
+
+    return fetchTmdbCached(context, paginated(tmdbMovieSchema), `/trending/movie/${timeWindow}`, {
+      page: String(page),
+    })
+  },
+})
+
+export const getTrendingTv = action({
+  args: {
+    page: v.optional(v.number()),
+    time_window: v.optional(v.union(v.literal('day'), v.literal('week'))),
+  },
+  handler: async (context, args) => {
+    const timeWindow = args.time_window || 'week'
+    const page = args.page || 1
+
+    return fetchTmdbCached(context, paginated(tmdbTvSchema), `/trending/tv/${timeWindow}`, {
+      page: String(page),
+    })
+  },
+})
