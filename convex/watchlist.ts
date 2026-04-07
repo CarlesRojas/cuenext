@@ -48,6 +48,7 @@ export const getTvSections = query({
         name: follow.name,
         poster: follow.poster,
         backdrop: follow.backdrop,
+        numberOfSeasons: nextEp.numberOfSeasons,
       }
 
       const noMoreEpisodes = nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1

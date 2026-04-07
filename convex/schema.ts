@@ -56,6 +56,7 @@ export default defineSchema({
     lastWatchedAt: v.union(v.number(), v.null()),
     seasonNumber: v.number(),
     episodeNumber: v.number(),
+    numberOfSeasons: v.number(),
     seasonEpisodeCounts: v.array(v.number()),
     seasonDataUpdatedAt: v.union(v.number(), v.null()),
     watchedPercentage: v.number(),
@@ -71,7 +72,7 @@ export default defineSchema({
 
   showInfo: defineTable({
     tmdbId: v.number(),
-    episodeNumbersResetWithSeason: v.boolean(),
+    continuousEpisodeNumbers: v.boolean(),
     updatedAt: v.number(),
   }).index('by_tmdbId', ['tmdbId']),
 })

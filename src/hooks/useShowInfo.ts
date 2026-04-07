@@ -10,7 +10,6 @@ export function useShowInfo(showId: number) {
   )
 
   const showInfoMissing = !showInfoLoading && !existingShowInfo
-  console.log(showInfoMissing)
 
   const { data: show, isPending: showLoading } = useQuery({
     ...convexAction(api.tmdb.getShowDetails, { tmdbId: showId }),
@@ -30,7 +29,7 @@ export function useShowInfo(showId: number) {
   const saveShowInfo = useDbMutation(api.showInfo.saveShowInfo)
 
   const [showInfo, setShowInfo] = useState<{
-    episodeNumbersResetWithSeason?: boolean
+    continuousEpisodeNumbers?: boolean
   }>({})
 
   const isLoading =
@@ -51,14 +50,14 @@ export function useShowInfo(showId: number) {
 
       const regularSeasons = seasons.filter(season => season.season_number !== 0)
 
-      const episodeNumbersResetWithSeason = !regularSeasons.some(season => {
+      const continuousEpisodeNumbers = regularSeasons.some(season => {
         const episodes = season.episodes
         if (!episodes) return false
         return episodes.some(episode => episode.episode_number > episodes.length)
       })
 
-      await saveShowInfo({ tmdbId: showId, episodeNumbersResetWithSeason })
-      setShowInfo({ episodeNumbersResetWithSeason })
+      await saveShowInfo({ tmdbId: showId, continuousEpisodeNumbers })
+      setShowInfo({ continuousEpisodeNumbers })
     }
 
     calculateResetWithSeason()

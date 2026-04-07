@@ -37,8 +37,8 @@ export default function UpcomingMovie(props: UpcomingMovieItem) {
       rightContent={
         daysUntilAir > 0 && (
           <div className="flex flex-col items-end justify-center">
-            <span className="text-lg leading-tight font-semibold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
-            <span className="text-xs leading-tight whitespace-nowrap text-sky-500">
+            <span className="text-lg leading-tight font-bold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
+            <span className="text-xs leading-3 font-medium whitespace-nowrap text-sky-500">
               {daysUntilAir === 1 ? 'day' : 'days'}
             </span>
           </div>

@@ -12,8 +12,7 @@ export default function WatchEpisode({ episode }: Props) {
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({ ...episode })
 
   const showInfo = useShowInfo(episode.showTmdbId)
-  // TODO if it only has one season this calculation is wrong
-  const episodeNumbersResetWithSeason = showInfo?.episodeNumbersResetWithSeason ?? false
+  const continuousEpisodeNumbers = showInfo?.continuousEpisodeNumbers || episode.numberOfSeasons === 1
 
   return (
     <PosterCard
@@ -26,9 +25,9 @@ export default function WatchEpisode({ episode }: Props) {
       onToggleWatch={onToggleWatch}
       isWatchLoading={isWatchedLoading}
       watchButtonText={
-        episodeNumbersResetWithSeason
-          ? `S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`
-          : `E${episode.episodeNumber + 1}`
+        continuousEpisodeNumbers
+          ? `E${episode.episodeNumber + 1}`
+          : `S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`
       }
       progressPercentage={episode.watchedPercentage}
     />

@@ -258,6 +258,7 @@ export const upsertNextEpisode = mutation({
     seasonEpisodeCounts: v.array(v.number()),
     seasonDataUpdatedAt: v.union(v.number(), v.null()),
     watchedPercentage: v.number(),
+    numberOfSeasons: v.number(),
     status: v.union(v.literal('ended'), v.literal('ongoing')),
   },
   handler: async (context, args) => {

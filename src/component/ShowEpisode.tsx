@@ -9,13 +9,13 @@ import { useState } from 'react'
 interface Props {
   showId: number
   episode: TmdbEpisode
-  episodeNumbersResetWithSeason: boolean
+  continuousEpisodeNumbers: boolean
   showName: string
   showPoster?: string | null
   showBackdrop?: string | null
 }
 
-const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason, showName, showPoster, showBackdrop }: Props) => {
+const ShowEpisode = ({ showId, episode, continuousEpisodeNumbers, showName, showPoster, showBackdrop }: Props) => {
   const { id, season_number, runtime, still_path, name, air_date, episode_number } = episode
 
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({
@@ -33,7 +33,7 @@ const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason, showName,
   const hasAired = airDate ? airDate <= new Date() : false
   const daysUntilAir = airDate ? Math.ceil((airDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null
 
-  const episodeNumber = episodeNumbersResetWithSeason ? `S${season_number}, E${episode_number}` : `E${episode_number}`
+  const episodeNumber = continuousEpisodeNumbers ? `E${episode_number}` : `S${season_number}, E${episode_number}`
 
   return (
     <div
@@ -95,8 +95,8 @@ const ShowEpisode = ({ showId, episode, episodeNumbersResetWithSeason, showName,
 
         {!hasAired && daysUntilAir !== null && (
           <div className="flex flex-col items-end justify-center">
-            <span className="text-lg leading-tight font-semibold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
-            <span className="text-xs leading-tight whitespace-nowrap text-sky-500">
+            <span className="text-lg leading-tight font-bold whitespace-nowrap text-sky-500">{daysUntilAir}</span>
+            <span className="text-xs leading-3 font-medium whitespace-nowrap text-sky-500">
               {daysUntilAir === 1 ? 'day' : 'days'}
             </span>
           </div>

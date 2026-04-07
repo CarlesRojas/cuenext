@@ -23,6 +23,7 @@ export const updateNextEpisode = action({
 
     let seasonEpisodeCounts: number[] = existingNextEpisode?.seasonEpisodeCounts ?? []
     let status: 'ended' | 'ongoing' = existingNextEpisode?.status ?? 'ongoing'
+    let numberOfSeasons = existingNextEpisode?.numberOfSeasons ?? 0
 
     const needsSeasonDataUpdate =
       !existingNextEpisode ||
@@ -47,6 +48,8 @@ export const updateNextEpisode = action({
       )
 
       status = showDetails.status?.toLowerCase() === 'ended' ? 'ended' : 'ongoing'
+
+      numberOfSeasons = nonSpecialSeasons.length
     }
 
     const watchedEpisodes = await context.runQuery(api.watch.getWatchedShowEpisodes, { showTmdbId: args.tmdbId })
@@ -83,6 +86,7 @@ export const updateNextEpisode = action({
       seasonEpisodeCounts,
       seasonDataUpdatedAt: needsSeasonDataUpdate ? now : existingNextEpisode.seasonDataUpdatedAt,
       watchedPercentage,
+      numberOfSeasons,
       status,
     }
 

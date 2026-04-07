@@ -14,6 +14,7 @@ export type TvSectionItem = {
   manuallyStopped: boolean
   seasonNumber: number
   episodeNumber: number
+  numberOfSeasons: number
   followedAt?: number
   watchedPercentage: number
   status: 'ended' | 'ongoing'

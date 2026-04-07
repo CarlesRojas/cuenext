@@ -71,6 +71,7 @@ export const getFavoriteShows = query({
       name: follow.name,
       poster: follow.poster,
       backdrop: follow.backdrop,
+      numberOfSeasons: 1, // We are not using this for favorites
     }))
 
     favorites.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))

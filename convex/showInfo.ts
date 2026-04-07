@@ -16,7 +16,7 @@ export const getShowInfo = query({
 export const saveShowInfo = mutation({
   args: {
     tmdbId: v.number(),
-    episodeNumbersResetWithSeason: v.boolean(),
+    continuousEpisodeNumbers: v.boolean(),
   },
   handler: async (context, args) => {
     const now = Date.now()
@@ -28,13 +28,13 @@ export const saveShowInfo = mutation({
 
     if (existing)
       await context.db.patch(existing._id, {
-        episodeNumbersResetWithSeason: args.episodeNumbersResetWithSeason,
+        continuousEpisodeNumbers: args.continuousEpisodeNumbers,
         updatedAt: now,
       })
     else
       await context.db.insert('showInfo', {
         tmdbId: args.tmdbId,
-        episodeNumbersResetWithSeason: args.episodeNumbersResetWithSeason,
+        continuousEpisodeNumbers: args.continuousEpisodeNumbers,
         updatedAt: now,
       })
   },

@@ -157,7 +157,7 @@ export default function RowCard(props: Props) {
         )}
 
         <div className="flex flex-col justify-between p-3 lg:p-4">
-          <div className={cn('flex justify-between', showFollow && onToggleFollow && 'pr-24')}>
+          <div className={cn('flex justify-between gap-3', showFollow && onToggleFollow && 'pr-24')}>
             <div className="flex flex-col">
               <h2 className="line-clamp-1 text-lg leading-6 font-semibold">{title}</h2>
               {subtitle && <p className="line-clamp-1 text-sm text-neutral-400">{subtitle}</p>}

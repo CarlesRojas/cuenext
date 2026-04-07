@@ -25,7 +25,7 @@ interface Props {
   showId: number
   season: TmdbSeason
   isSpecials?: boolean
-  episodeNumbersResetWithSeason: boolean
+  continuousEpisodeNumbers: boolean
   showName: string
   showPoster?: string | null
   showBackdrop?: string | null
@@ -38,14 +38,7 @@ const airedEpisodes = (episode: TmdbEpisode) => {
   return airDate <= today
 }
 
-export function ShowSeason({
-  showId,
-  season,
-  episodeNumbersResetWithSeason,
-  showName,
-  showPoster,
-  showBackdrop,
-}: Props) {
+export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName, showPoster, showBackdrop }: Props) {
   const clerk = useClerk()
   const { id, name, air_date, poster_path, episodes, season_number } = season
 
@@ -216,7 +209,7 @@ export function ShowSeason({
                   key={episode.id}
                   showId={showId}
                   episode={episode}
-                  episodeNumbersResetWithSeason={episodeNumbersResetWithSeason}
+                  continuousEpisodeNumbers={continuousEpisodeNumbers}
                   showName={showName}
                   showPoster={showPoster}
                   showBackdrop={showBackdrop}

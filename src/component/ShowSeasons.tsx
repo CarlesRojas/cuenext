@@ -51,6 +51,8 @@ export function ShowSeasons({ show }: Props) {
 
   if (regularSeasons.length <= 0 && !specials) return null
 
+  const continuousEpisodeNumbers = showInfo?.continuousEpisodeNumbers || regularSeasons.length === 1
+
   return (
     <div className="screen-px pb-4 md:pb-8">
       <div className="page-width mx-[unset] flex flex-col gap-4">
@@ -59,7 +61,7 @@ export function ShowSeasons({ show }: Props) {
         {completeNextEpisode && (
           <ShowEpisode
             episode={completeNextEpisode}
-            episodeNumbersResetWithSeason={showInfo?.episodeNumbersResetWithSeason ?? false}
+            continuousEpisodeNumbers={continuousEpisodeNumbers}
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
@@ -78,7 +80,7 @@ export function ShowSeasons({ show }: Props) {
             key={season.id}
             showId={show.id}
             season={season}
-            episodeNumbersResetWithSeason={showInfo?.episodeNumbersResetWithSeason ?? false}
+            continuousEpisodeNumbers={continuousEpisodeNumbers}
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
@@ -102,7 +104,7 @@ export function ShowSeasons({ show }: Props) {
             showId={show.id}
             season={specials}
             isSpecials
-            episodeNumbersResetWithSeason={showInfo?.episodeNumbersResetWithSeason ?? false}
+            continuousEpisodeNumbers={continuousEpisodeNumbers}
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
