@@ -1,6 +1,7 @@
 import { api } from '#/../convex/_generated/api'
 import BackButton from '#/component/BackButton'
 import { MovieDetails } from '#/component/MovieDetails'
+import { Recommendations } from '#/component/Recommendations'
 import { ShowDetails } from '#/component/ShowDetails'
 import { ShowSeasons } from '#/component/ShowSeasons'
 import { Videos } from '#/component/Videos'
@@ -88,16 +89,15 @@ function RouteComponent() {
         <BackButton />
       </header>
 
-      <div className="flex w-full flex-col gap-4">
+      <div className="mb-16 flex w-full flex-col gap-2">
         {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
-
         {media === 'tv' && show.data && <ShowDetails show={show.data} />}
 
         {media === 'tv' && show.data && <ShowSeasons show={show.data} />}
 
-        <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
-
         <WatchProviders tmdbId={tmdbIdNumber} media={media as MediaType} />
+        <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
+        <Recommendations tmdbId={tmdbIdNumber} media={media as MediaType} />
       </div>
     </div>
   )

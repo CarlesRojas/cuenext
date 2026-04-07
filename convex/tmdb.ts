@@ -342,6 +342,37 @@ export const getMovieVideos = action({
   },
 })
 
+export const getMovieRecommendations = action({
+  args: { tmdbId: v.number(), page: v.optional(v.number()) },
+  handler: async (context, args) => {
+    const params: Record<string, string> = {}
+    if (args.page) params.page = String(args.page)
+
+    return fetchTmdbCached(
+      context,
+      paginated(tmdbMovieMinimalSchema),
+      `/movie/${args.tmdbId}/recommendations`,
+      params,
+      CACHE_DURATIONS.ONE_WEEK,
+    )
+  },
+})
+
+export const getTvRecommendations = action({
+  args: { tmdbId: v.number(), page: v.optional(v.number()) },
+  handler: async (context, args) => {
+    const params: Record<string, string> = {}
+    if (args.page) params.page = String(args.page)
+
+    return fetchTmdbCached(
+      context,
+      paginated(tmdbTvMinimalSchema),
+      `/tv/${args.tmdbId}/recommendations`,
+      params,
+      CACHE_DURATIONS.ONE_WEEK,
+    )
+  },
+})
 export const getTvVideos = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {

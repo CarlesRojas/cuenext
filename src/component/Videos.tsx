@@ -8,7 +8,6 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useWindowSize } from 'usehooks-ts'
 
 interface VideosProps {
   tmdbId: number
@@ -39,7 +38,9 @@ function VideoItem({ video }: VideoItemProps) {
     <button
       type="button"
       onClick={handleClick}
-      className="group relative flex w-64 flex-col overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-all duration-300 hover:scale-105 focus-visible:scale-105 lg:w-72"
+      className={cn(
+        'group relative flex w-64 flex-col overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-all duration-300 hover:scale-105 focus-visible:scale-105 lg:w-72',
+      )}
     >
       <div className="relative aspect-video w-64 lg:w-72">
         <img
@@ -80,9 +81,6 @@ function VideoItem({ video }: VideoItemProps) {
 }
 
 export function Videos({ tmdbId, media }: VideosProps) {
-  const { width = 0 } = useWindowSize()
-  const isMobile = width < 768
-
   const videos = useQuery({
     ...convexAction(media === 'movie' ? api.tmdb.getMovieVideos : api.tmdb.getTvVideos, { tmdbId }),
   })
@@ -104,7 +102,7 @@ export function Videos({ tmdbId, media }: VideosProps) {
     .slice(0, 15)
 
   return (
-    <Section title="Videos" className={cn(!isMobile && 'mt-8')}>
+    <Section title="Videos">
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
       ))}

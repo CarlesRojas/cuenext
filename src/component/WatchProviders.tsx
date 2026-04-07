@@ -30,7 +30,7 @@ function ProviderList({ providers, type }: ProviderListProps) {
   }
 
   return (
-    <div className="flex w-fit basis-auto flex-col gap-2">
+    <div className="flex w-fit basis-auto flex-col gap-2 rounded-2xl border border-neutral-500/40 bg-neutral-800 p-2 shadow-xl">
       <h4 className="text-sm font-medium opacity-80">{typeLabels[type]}</h4>
 
       <div className="flex flex-wrap gap-2">
@@ -81,7 +81,7 @@ export function WatchProviders({ tmdbId, media }: WatchProvidersProps) {
   return (
     <section className="screen-px pb-4 md:pb-8">
       <div className="flex flex-col gap-4">
-        <h2 className="page-width mx-[unset] text-lg leading-tight font-semibold opacity-80">
+        <h2 className="page-width mx-[unset] text-lg font-semibold opacity-80">
           Where to watch in {selectedCountry ? selectedCountry.name : 'your country'}
           {countryData && countryData.link && (
             <a
@@ -119,7 +119,7 @@ export function WatchProviders({ tmdbId, media }: WatchProvidersProps) {
         )}
 
         {!isLoading && selectedCountry && !countryData && (
-          <p className="page-width pointer-events-none mx-[unset] mb-4 font-semibold tracking-wide text-neutral-500">
+          <p className="page-width pointer-events-none mx-[unset] -mt-2 tracking-wide text-neutral-500">
             No streaming providers available in {selectedCountry.name}
           </p>
         )}
