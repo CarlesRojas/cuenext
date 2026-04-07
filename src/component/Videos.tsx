@@ -8,6 +8,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { isIOS } from 'react-device-detect'
 
 interface VideosProps {
   tmdbId: number
@@ -27,9 +28,25 @@ function VideoItem({ video }: VideoItemProps) {
   const handleImageError = () => {
     setHasError(true)
   }
+  console.log(isIOS)
 
   const handleClick = () => {
-    window.open(videoUrl, '_blank', 'noopener,noreferrer')
+    if (isIOS) {
+      // Try to open in YouTube app first
+      const youtubeAppUrl = `youtube://watch?v=${video.key}`
+
+      // Create a temporary link to try the YouTube app URL
+      const link = document.createElement('a')
+      link.href = youtubeAppUrl
+      link.click()
+
+      // Fallback to web URL after a short delay if the app doesn't open
+      setTimeout(() => {
+        window.open(videoUrl, '_blank', 'noopener,noreferrer')
+      }, 500)
+    } else {
+      window.open(videoUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   if (hasError) return null
@@ -73,7 +90,7 @@ function VideoItem({ video }: VideoItemProps) {
           }}
           className="absolute inset-x-0 bottom-0 line-clamp-2 w-full max-w-full bg-black/20 px-4 pt-8 pb-1 text-left text-sm font-medium text-nowrap text-ellipsis backdrop-blur-md"
         >
-          {video.name}
+          {isIOS ? 'iOS' : 'Not iOS'} {video.name}
         </h3>
       </div>
     </button>
