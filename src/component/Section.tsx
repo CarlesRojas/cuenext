@@ -58,7 +58,7 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
             >
               <CarouselPrevious className={cn('mouse:block z-10 hidden', !isMobile && 'left-aside ml-2')} />
 
-              <CarouselContent className={cn('z-0 -ml-4 pt-2 pb-8')}>
+              <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8')}>
                 {React.Children.map(
                   children,
                   (child, index) =>
