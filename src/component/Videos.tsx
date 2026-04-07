@@ -83,7 +83,7 @@ function VideoItem({ video }: VideoItemProps) {
           }}
           className="absolute inset-x-0 bottom-0 line-clamp-2 w-full max-w-full bg-black/20 px-4 pt-8 pb-1 text-left text-sm font-medium text-nowrap text-ellipsis backdrop-blur-md"
         >
-          {isIOS ? 'iOS' : 'Not iOS'} {video.name}
+          {video.name}
         </h3>
       </div>
     </button>
