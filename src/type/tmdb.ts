@@ -164,6 +164,24 @@ export const tmdbWatchProvidersSchema = z.object({
   ),
 })
 
+export const tmdbVideoSchema = z.object({
+  iso_639_1: z.string(),
+  iso_3166_1: z.string(),
+  name: z.string(),
+  key: z.string(),
+  site: z.string(),
+  size: z.number(),
+  type: z.string(),
+  official: z.boolean(),
+  published_at: z.string(),
+  id: z.string(),
+})
+
+export const tmdbVideosResponseSchema = z.object({
+  id: z.number(),
+  results: z.array(tmdbVideoSchema),
+})
+
 export type TmdbMovieMinimal = z.infer<typeof tmdbMovieMinimalSchema>
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
 export type TmdbTv = z.infer<typeof tmdbTvSchema>
@@ -173,3 +191,5 @@ export type TmdbEpisode = z.infer<typeof tmdbEpisodeSchema>
 export type TmdbSeason = z.infer<typeof tmdbSeasonSchema>
 export type TmdbProvider = z.infer<typeof tmdbProviderSchema>
 export type TmdbWatchProviders = z.infer<typeof tmdbWatchProvidersSchema>
+export type TmdbVideo = z.infer<typeof tmdbVideoSchema>
+export type TmdbVideosResponse = z.infer<typeof tmdbVideosResponseSchema>

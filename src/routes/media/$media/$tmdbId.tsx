@@ -3,6 +3,7 @@ import BackButton from '#/component/BackButton'
 import { MovieDetails } from '#/component/MovieDetails'
 import { ShowDetails } from '#/component/ShowDetails'
 import { ShowSeasons } from '#/component/ShowSeasons'
+import { Videos } from '#/component/Videos'
 import { WatchProviders } from '#/component/WatchProviders'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
@@ -89,9 +90,12 @@ function RouteComponent() {
 
       <div className="flex w-full flex-col gap-4">
         {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
+
         {media === 'tv' && show.data && <ShowDetails show={show.data} />}
 
         {media === 'tv' && show.data && <ShowSeasons show={show.data} />}
+
+        <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
 
         <WatchProviders tmdbId={tmdbIdNumber} media={media as MediaType} />
       </div>
