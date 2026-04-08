@@ -8,10 +8,10 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
-import { faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarDays, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -83,7 +83,18 @@ function App() {
           )}
 
           {tvSections && tvSections.waitingForEpisodes.length > 0 && (
-            <Section title="Waiting for episodes" defaultCollapsed>
+            <Section
+              title="Waiting for episodes"
+              defaultCollapsed
+              below={
+                <Button asChild>
+                  <Link to="/upcoming" search={{ media: 'tv' }}>
+                    <FontAwesomeIcon icon={faCalendarDays} className="size-4" />
+                    <span>View all Upcoming</span>
+                  </Link>
+                </Button>
+              }
+            >
               {tvSections.waitingForEpisodes.map(item => (
                 <PosterCard
                   key={item.id}

@@ -14,9 +14,17 @@ interface SectionProps {
   canCollapse?: boolean
   defaultCollapsed?: boolean
   className?: string
+  below?: ReactNode
 }
 
-export function Section({ title, children, canCollapse = true, defaultCollapsed = false, className }: SectionProps) {
+export function Section({
+  title,
+  children,
+  canCollapse = true,
+  defaultCollapsed = false,
+  className,
+  below,
+}: SectionProps) {
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
@@ -72,6 +80,8 @@ export function Section({ title, children, canCollapse = true, defaultCollapsed 
 
               <CarouselNext className={cn('mouse:block z-10 hidden')} />
             </Carousel>
+
+            {below && <div className={cn('-mt-4 px-4', !isMobile && 'pl-aside')}>{below}</div>}
           </motion.div>
         )}
       </AnimatePresence>
