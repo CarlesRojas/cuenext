@@ -116,35 +116,35 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Manage your library"
+      "label": "Track your shows and movies"
     },
     {
       "src": "screenshot/screenshot2.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Detailed book information"
+      "label": "Find where to watch"
     },
     {
       "src": "screenshot/screenshot3.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Stats about your finished books"
+      "label": "Never miss a release"
     },
     {
       "src": "screenshot/screenshot4.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Search an extensive library"
+      "label": "Discover new favorites"
     },
     {
       "src": "screenshot/screenshot5.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Light / Dark modes"
+      "label": "Keep track of your stats"
     }
   ]
 }
