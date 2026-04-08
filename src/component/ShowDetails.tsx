@@ -127,17 +127,15 @@ export function ShowDetails({ show }: ShowDetailsProps) {
             </Button>
           )}
 
-          {!isFollowedLoading && isFollowed && (
-            <Button
-              size="icon"
-              variant="favorite"
-              onClick={() => toggleFavorite(id, name)}
-              disabled={isFavoritedLoading}
-              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-            >
-              <FontAwesomeIcon icon={faHeart} className="size-5" />
-            </Button>
-          )}
+          <Button
+            size="icon"
+            variant="favorite"
+            onClick={() => toggleFavorite(id, name)}
+            disabled={isFavoritedLoading}
+            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
+          >
+            <FontAwesomeIcon icon={faHeart} className="size-5" />
+          </Button>
         </div>
       </section>
     </div>

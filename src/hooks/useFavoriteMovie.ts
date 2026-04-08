@@ -19,11 +19,16 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
   const unmarkAsFavorite = useDbMutation(api.favorites.unfavoriteItem)
 
   const favorite = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await markAsFavorite({ type: 'movie', tmdbId: id }),
+    mutationFn: async (args: Parameters<typeof markAsFavorite>[0]) => {
+      const result = await markAsFavorite(args)
+      return result
+    },
   })
 
   const unfavorite = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await unmarkAsFavorite({ type: 'movie', tmdbId: id }),
+    mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkAsFavorite>[0]) => {
+      await unmarkAsFavorite(args)
+    },
   })
 
   const toggleFavorite = async (id: number, title: string) => {
@@ -33,11 +38,36 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
     const mediaKey = `movie-${id}`
 
     if (isFavorited) {
-      await unfavorite.mutateAsync({ id })
-      showUndoToast(title, 'unfavorite', mediaKey, async () => await favorite.mutateAsync({ id }))
+      await unfavorite.mutateAsync({ type: 'movie', tmdbId: id })
+      showUndoToast(
+        title,
+        'unfavorite',
+        mediaKey,
+        async () =>
+          await favorite.mutateAsync({
+            type: 'movie',
+            tmdbId: id,
+            name: title,
+            poster: movie.poster_path ?? null,
+            backdrop: movie.backdrop_path ?? null,
+            releaseDate: new Date(movie.release_date).getTime(),
+          }),
+      )
     } else {
-      await favorite.mutateAsync({ id })
-      showUndoToast(title, 'favorite', mediaKey, async () => await unfavorite.mutateAsync({ id }))
+      const result = await favorite.mutateAsync({
+        type: 'movie',
+        tmdbId: id,
+        name: title,
+        poster: movie.poster_path ?? null,
+        backdrop: movie.backdrop_path ?? null,
+        releaseDate: new Date(movie.release_date).getTime(),
+      })
+      showUndoToast(
+        title,
+        'favorite',
+        mediaKey,
+        async () => await unfavorite.mutateAsync({ ...result, type: 'movie', tmdbId: id }),
+      )
     }
   }
 

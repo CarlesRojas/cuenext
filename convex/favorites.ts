@@ -85,9 +85,14 @@ export const favoriteItem = mutation({
   args: {
     tmdbId: v.number(),
     type: v.union(v.literal('movie'), v.literal('tv')),
+    name: v.string(),
+    poster: v.union(v.string(), v.null()),
+    backdrop: v.union(v.string(), v.null()),
+    releaseDate: v.number(),
   },
-  handler: async (context, args) => {
+  handler: async (context, { name, poster, backdrop, releaseDate, ...args }) => {
     const userId = await requireUser(context)
+    const now = Date.now()
 
     const existingFavorite = await context.db
       .query('favorite')
@@ -99,8 +104,29 @@ export const favoriteItem = mutation({
         userId,
         type: args.type,
         tmdbId: args.tmdbId,
-        favoritedAt: Date.now(),
+        favoritedAt: now,
       })
+
+    const followEntry = await context.db
+      .query('follow')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
+      .unique()
+
+    const wasNotFollowed = !followEntry
+
+    if (wasNotFollowed)
+      await context.db.insert('follow', {
+        userId,
+        type: args.type,
+        tmdbId: args.tmdbId,
+        name,
+        poster,
+        backdrop,
+        followedAt: now,
+        releaseDate,
+      })
+
+    return { wasNotFollowed }
   },
 })
 
@@ -108,6 +134,7 @@ export const unfavoriteItem = mutation({
   args: {
     tmdbId: v.number(),
     type: v.union(v.literal('movie'), v.literal('tv')),
+    wasNotFollowed: v.optional(v.boolean()),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -118,6 +145,15 @@ export const unfavoriteItem = mutation({
       .unique()
 
     if (existingFavorite) await context.db.delete(existingFavorite._id)
+
+    if (args.wasNotFollowed) {
+      const followEntry = await context.db
+        .query('follow')
+        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
+        .unique()
+
+      if (followEntry) await context.db.delete(followEntry._id)
+    }
   },
 })
 

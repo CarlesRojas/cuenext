@@ -128,17 +128,15 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             </Button>
           )}
 
-          {!isFollowedLoading && isFollowed && (
-            <Button
-              size="icon"
-              variant="favorite"
-              onClick={() => toggleFavorite(id, title)}
-              disabled={isFavoritedLoading}
-              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-            >
-              <FontAwesomeIcon icon={faHeart} className="size-5" />
-            </Button>
-          )}
+          <Button
+            size="icon"
+            variant="favorite"
+            onClick={() => toggleFavorite(id, title)}
+            disabled={isFavoritedLoading}
+            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
+          >
+            <FontAwesomeIcon icon={faHeart} className="size-5" />
+          </Button>
         </div>
       </section>
     </div>

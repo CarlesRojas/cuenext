@@ -19,11 +19,16 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
   const unmarkAsFavorite = useDbMutation(api.favorites.unfavoriteItem)
 
   const favorite = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await markAsFavorite({ type: 'tv', tmdbId: id }),
+    mutationFn: async (args: Parameters<typeof markAsFavorite>[0]) => {
+      const result = await markAsFavorite(args)
+      return result
+    },
   })
 
   const unfavorite = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await unmarkAsFavorite({ type: 'tv', tmdbId: id }),
+    mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkAsFavorite>[0]) => {
+      await unmarkAsFavorite(args)
+    },
   })
 
   const toggleFavorite = async (id: number, title: string) => {
@@ -33,11 +38,36 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
     const mediaKey = `tv-${id}`
 
     if (isFavorited) {
-      await unfavorite.mutateAsync({ id })
-      showUndoToast(title, 'unfavorite', mediaKey, async () => await favorite.mutateAsync({ id }))
+      await unfavorite.mutateAsync({ type: 'tv', tmdbId: id })
+      showUndoToast(
+        title,
+        'unfavorite',
+        mediaKey,
+        async () =>
+          await favorite.mutateAsync({
+            type: 'tv',
+            tmdbId: id,
+            name: title,
+            poster: episode.poster_path ?? null,
+            backdrop: episode.backdrop_path ?? null,
+            releaseDate: 0,
+          }),
+      )
     } else {
-      await favorite.mutateAsync({ id })
-      showUndoToast(title, 'favorite', mediaKey, async () => await unfavorite.mutateAsync({ id }))
+      const result = await favorite.mutateAsync({
+        type: 'tv',
+        tmdbId: id,
+        name: title,
+        poster: episode.poster_path ?? null,
+        backdrop: episode.backdrop_path ?? null,
+        releaseDate: 0,
+      })
+      showUndoToast(
+        title,
+        'favorite',
+        mediaKey,
+        async () => await unfavorite.mutateAsync({ ...result, type: 'tv', tmdbId: id }),
+      )
     }
   }
 
