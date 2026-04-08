@@ -6,7 +6,7 @@
 @theme {
   --font-montserrat: 'Montserrat', sans-serif;
 
-  --spacing-aside: calc(18rem + 0.75rem + 2rem);
+  --spacing-aside: calc(18rem + 0.75rem + 1rem);
   --spacing-header: calc(2.75rem + 0.75rem + 1rem);
 }
 

@@ -29,12 +29,26 @@ function ProviderList({ providers, type }: ProviderListProps) {
     ads: 'Free with Ads',
   }
 
+  const filteredProviders = providers.filter(provider => {
+    const currentName = provider.provider_name.toLowerCase()
+
+    const hasIncludedProvider = providers.some(otherProvider => {
+      if (otherProvider.provider_id === provider.provider_id) return false
+      const otherName = otherProvider.provider_name.toLowerCase()
+      return currentName.includes(otherName) && otherName.length < currentName.length
+    })
+
+    return !hasIncludedProvider
+  })
+
+  if (filteredProviders.length === 0) return null
+
   return (
     <div className="flex w-fit basis-auto flex-col gap-2 rounded-2xl border border-neutral-500/40 bg-neutral-800 p-2 shadow-xl">
       <h4 className="text-sm font-medium opacity-80">{typeLabels[type]}</h4>
 
       <div className="flex flex-wrap gap-2">
-        {providers.map(provider => (
+        {filteredProviders.map(provider => (
           <div
             key={provider.provider_id}
             className="flex items-center gap-2 overflow-hidden rounded-xl border border-neutral-500/30 bg-neutral-800"
