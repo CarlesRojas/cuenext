@@ -27,7 +27,7 @@ function formatWatchTime(minutes: number): string {
   const days = Math.floor(remainingHoursAfterMonths / 24)
   const hours = remainingHoursAfterMonths % 24
 
-  return `${years > 0 ? `${years}y • ` : ''}${months > 0 ? `${months}m • ` : ''}${days > 0 ? `${days}d • ` : ''}${hours > 0 ? `${hours}h` : ''}`.trim()
+  return `${years > 0 ? `${years}y ` : ''}${months > 0 ? `${months}m ` : ''}${days > 0 ? `${days}d ` : ''}${hours > 0 ? `${hours}h` : ''}`.trim()
 }
 
 function formatNumber(num?: number): string {

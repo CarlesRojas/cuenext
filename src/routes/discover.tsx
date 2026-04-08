@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/explore')({
+export const Route = createFileRoute('/discover')({
   component: RouteComponent,
   validateSearch: UrlParamsSchema,
 })
@@ -89,7 +89,7 @@ function RouteComponent() {
   return (
     <div className="screen-py flex w-full flex-col gap-2">
       <header className="screen-px mb-8">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Explore</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Discover</h1>
       </header>
 
       {!clerk.isSignedIn && (

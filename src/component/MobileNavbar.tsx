@@ -87,7 +87,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                 activeProps={{ className: 'text-sky-500' }}
                 inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                 className={cn(
-                  'relative m-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity duration-300 ease-in-out',
+                  'relative my-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity duration-300 ease-in-out first:ml-1.5 last-of-type:mr-1.5',
                   isExpanded && 'pointer-events-none opacity-0',
                 )}
               >

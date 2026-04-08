@@ -1,6 +1,7 @@
 {
-  "short_name": "CueNext",
+  "id": "cuenext",
   "name": "CueNext",
+  "short_name": "CueNext",
   "description": "Keep tabs on your movies and TV shows. Track what you watch, discover new favorites, and never miss an episode.",
   "icons": [
     {
@@ -33,9 +34,117 @@
   ],
   "orientation": "portrait",
   "start_url": ".",
+  "scope": ".",
+  "display_override": ["standalone", "fullscreen", "minimal-ui", "window-controls-overlay", "browser"],
   "display": "standalone",
   "theme_color": "#171717",
   "background_color": "#171717",
   "prefer_related_applications": false,
-  "categories": ["entertainment", "social", "utilities"]
+  "categories": ["entertainment", "social", "utilities"],
+  "iarc_rating_id": "",
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.tozelabs.tvshowtime"
+    },
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.michaldrabik.showly2"
+    },
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=tv.trakt.trakt"
+    },
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.daeeim.favorite_movies"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Watchlist",
+      "url": "/",
+      "description": "View your tracked shows and movies.",
+      "icons": [
+        {
+          "src": "shortcut/watchlist.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Upcoming",
+      "url": "/upcoming",
+      "description": "See what's coming up next.",
+      "icons": [
+        {
+          "src": "shortcut/upcoming.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Discover",
+      "url": "/discover",
+      "description": "Find new movies and TV shows.",
+      "icons": [
+        {
+          "src": "shortcut/discover.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "url": "/profile",
+      "description": "View your stats and profile.",
+      "icons": [
+        {
+          "src": "shortcut/profile.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Manage your library"
+    },
+    {
+      "src": "screenshot/screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Detailed book information"
+    },
+    {
+      "src": "screenshot/screenshot3.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Stats about your finished books"
+    },
+    {
+      "src": "screenshot/screenshot4.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Search an extensive library"
+    },
+    {
+      "src": "screenshot/screenshot5.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Light / Dark modes"
+    }
+  ]
 }

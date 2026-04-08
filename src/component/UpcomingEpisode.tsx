@@ -1,4 +1,5 @@
 import RowCard from '#/component/RowCard'
+import { useShowInfo } from '#/hooks/useShowInfo'
 import type { TmdbTv } from '#/type/tmdb'
 
 interface UpcomingEpisodeItem {
@@ -20,11 +21,14 @@ export default function UpcomingEpisode(props: UpcomingEpisodeItem) {
     day: 'numeric',
   })
 
+  const showInfo = useShowInfo(tmdbId)
+  const continuousEpisodeNumbers = showInfo?.continuousEpisodeNumbers || episode.number_of_seasons === 1
+
   let tag = ''
   const nextEpisode = episode.next_episode_to_air
   if (nextEpisode) {
     const { season_number, episode_number, name: episodeName } = nextEpisode
-    tag = `S${season_number}, E${episode_number}`
+    tag = continuousEpisodeNumbers ? `E${episode_number}` : `S${season_number}, E${episode_number}`
     if (episodeName) tag += ` • ${episodeName}`
   } else tag = 'New Episode'
 

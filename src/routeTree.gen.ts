@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
 import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmdbId'
@@ -32,9 +32,9 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ExploreRoute = ExploreRouteImport.update({
-  id: '/explore',
-  path: '/explore',
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,7 +55,7 @@ const MediaMediaTmdbIdRoute = MediaMediaTmdbIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/explore': typeof ExploreRoute
+  '/discover': typeof DiscoverRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
@@ -64,7 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/explore': typeof ExploreRoute
+  '/discover': typeof DiscoverRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
@@ -74,7 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/explore': typeof ExploreRoute
+  '/discover': typeof DiscoverRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
@@ -85,7 +85,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/explore'
+    | '/discover'
     | '/profile'
     | '/search'
     | '/upcoming'
@@ -94,7 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/explore'
+    | '/discover'
     | '/profile'
     | '/search'
     | '/upcoming'
@@ -103,7 +103,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/explore'
+    | '/discover'
     | '/profile'
     | '/search'
     | '/upcoming'
@@ -113,7 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ExploreRoute: typeof ExploreRoute
+  DiscoverRoute: typeof DiscoverRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   UpcomingRoute: typeof UpcomingRoute
@@ -144,11 +144,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/explore': {
-      id: '/explore'
-      path: '/explore'
-      fullPath: '/explore'
-      preLoaderRoute: typeof ExploreRouteImport
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -177,7 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ExploreRoute: ExploreRoute,
+  DiscoverRoute: DiscoverRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   UpcomingRoute: UpcomingRoute,
