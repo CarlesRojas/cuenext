@@ -27,6 +27,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
         name: episode.name,
         poster: episode.poster_path ?? null,
         backdrop: episode.backdrop_path ?? null,
+        releaseDate: 0,
       })
       await updateNextEpisode({ tmdbId: id })
     },

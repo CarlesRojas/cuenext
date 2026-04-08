@@ -31,8 +31,14 @@ export const checkMovieWatched = query({
 })
 
 export const markMovieWatched = mutation({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
+  args: {
+    tmdbId: v.number(),
+    name: v.string(),
+    poster: v.union(v.string(), v.null()),
+    backdrop: v.union(v.string(), v.null()),
+    releaseDate: v.number(),
+  },
+  handler: async (context, { name, poster, backdrop, ...args }) => {
     const userId = await requireUser(context)
     const now = Date.now()
 
@@ -41,12 +47,36 @@ export const markMovieWatched = mutation({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (!existing) await context.db.insert('movie', { userId, ...args, watchedAt: now })
+    if (!existing) await context.db.insert('movie', { userId, tmdbId: args.tmdbId, watchedAt: now })
+
+    const followEntry = await context.db
+      .query('follow')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'movie').eq('tmdbId', args.tmdbId))
+      .unique()
+
+    const wasNotFollowed = !followEntry
+
+    if (wasNotFollowed)
+      await context.db.insert('follow', {
+        userId,
+        type: 'movie' as const,
+        tmdbId: args.tmdbId,
+        name,
+        poster,
+        backdrop,
+        followedAt: now,
+        releaseDate: args.releaseDate,
+      })
+
+    return { wasNotFollowed }
   },
 })
 
 export const unmarkMovieWatched = mutation({
-  args: { tmdbId: v.number() },
+  args: {
+    tmdbId: v.number(),
+    wasNotFollowed: v.optional(v.boolean()),
+  },
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
@@ -55,7 +85,18 @@ export const unmarkMovieWatched = mutation({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (existing) await context.db.delete(existing._id)
+    if (!existing) return
+
+    await context.db.delete(existing._id)
+
+    if (args.wasNotFollowed) {
+      const followEntry = await context.db
+        .query('follow')
+        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'movie').eq('tmdbId', args.tmdbId))
+        .unique()
+
+      if (followEntry) await context.db.delete(followEntry._id)
+    }
   },
 })
 
@@ -119,6 +160,7 @@ export const markEpisodeWatched = mutation({
     showName: v.string(),
     showPoster: v.union(v.string(), v.null()),
     showBackdrop: v.union(v.string(), v.null()),
+    releaseDate: v.number(),
   },
   handler: async (context, { showName, showPoster, showBackdrop, ...args }) => {
     const userId = await requireUser(context)
@@ -169,6 +211,7 @@ export const markEpisodeWatched = mutation({
         poster: showPoster,
         backdrop: showBackdrop,
         followedAt: now,
+        releaseDate: args.releaseDate,
       })
 
     return { wasStopped, wasNotFollowed }
@@ -286,6 +329,7 @@ export const markMultipleEpisodesAsWatched = mutation({
     showName: v.string(),
     showPoster: v.union(v.string(), v.null()),
     showBackdrop: v.union(v.string(), v.null()),
+    releaseDate: v.number(),
   },
   handler: async (context, { showName, showPoster, showBackdrop, ...args }) => {
     const userId = await requireUser(context)
@@ -338,6 +382,7 @@ export const markMultipleEpisodesAsWatched = mutation({
         poster: showPoster,
         backdrop: showBackdrop,
         followedAt: now,
+        releaseDate: args.releaseDate,
       })
 
     return { wasStopped, wasNotFollowed }

@@ -22,7 +22,9 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
     ...movie,
     name: title,
     poster: poster_path,
+    backdrop: backdrop_path,
     tmdbId: id,
+    releaseDate: new Date(release_date).getTime(),
   })
 
   const runtimeText = runtime
@@ -115,7 +117,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
           </Button>
 
-          {!isFollowedLoading && isFollowed && (
+          {isReleased && (
             <Button
               variant={isWatched ? 'negative' : 'secondary'}
               onClick={() => onToggleWatch()}

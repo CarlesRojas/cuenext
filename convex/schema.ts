@@ -8,6 +8,7 @@ export default defineSchema({
     tmdbId: v.number(),
     name: v.string(),
     poster: v.union(v.string(), v.null()),
+    releaseDate: v.number(),
     backdrop: v.union(v.string(), v.null()),
     followedAt: v.number(),
   })

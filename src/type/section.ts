@@ -30,4 +30,5 @@ export type MovieSectionItem = {
   name: string
   poster?: string | null
   backdrop?: string | null
+  releaseDate: number
 }

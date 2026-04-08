@@ -6,7 +6,7 @@ export const tmdbMovieMinimalSchema = z.object({
   overview: z.string(),
   poster_path: z.string().nullable().optional(),
   backdrop_path: z.string().nullable().optional(),
-  release_date: z.string().optional(),
+  release_date: z.string(),
   vote_average: z.number().optional(),
 })
 

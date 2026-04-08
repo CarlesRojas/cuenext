@@ -18,14 +18,15 @@ export function useWatchMovie(movie: MovieSectionItem) {
   const unmarkMovieWatched = useDbMutation(api.watch.unmarkMovieWatched)
 
   const watch = useMutation({
-    mutationFn: async () => {
-      await markMovieWatched({ tmdbId: movie.tmdbId })
+    mutationFn: async (args: Parameters<typeof markMovieWatched>[0]) => {
+      const result = await markMovieWatched(args)
+      return result
     },
   })
 
   const unwatch = useMutation({
-    mutationFn: async () => {
-      await unmarkMovieWatched({ tmdbId: movie.tmdbId })
+    mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkMovieWatched>[0]) => {
+      await unmarkMovieWatched(args)
     },
   })
 
@@ -35,11 +36,40 @@ export function useWatchMovie(movie: MovieSectionItem) {
     const mediaKey = `movie-${movie.tmdbId}`
 
     if (isWatched) {
-      await unwatch.mutateAsync()
-      showUndoToast(movie.name, 'unwatch', mediaKey, async () => await watch.mutateAsync())
+      await unwatch.mutateAsync({ tmdbId: movie.tmdbId })
+
+      showUndoToast(
+        movie.name,
+        'unwatch',
+        mediaKey,
+        async () =>
+          await watch.mutateAsync({
+            tmdbId: movie.tmdbId,
+            name: movie.name,
+            poster: movie.poster ?? null,
+            backdrop: movie.backdrop ?? null,
+            releaseDate: movie.releaseDate,
+          }),
+      )
     } else {
-      await watch.mutateAsync()
-      showUndoToast(movie.name, 'watch', mediaKey, async () => await unwatch.mutateAsync())
+      const result = await watch.mutateAsync({
+        tmdbId: movie.tmdbId,
+        name: movie.name,
+        poster: movie.poster ?? null,
+        backdrop: movie.backdrop ?? null,
+        releaseDate: movie.releaseDate,
+      })
+
+      showUndoToast(
+        movie.name,
+        'watch',
+        mediaKey,
+        async () =>
+          await unwatch.mutateAsync({
+            ...result,
+            tmdbId: movie.tmdbId,
+          }),
+      )
     }
   }
 

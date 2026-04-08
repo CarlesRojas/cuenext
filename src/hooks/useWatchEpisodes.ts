@@ -32,6 +32,7 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
         showName,
         showPoster: showPoster ?? null,
         showBackdrop: showBackdrop ?? null,
+        releaseDate: 0,
       })
 
       await updateNextEpisode({ tmdbId: showId })

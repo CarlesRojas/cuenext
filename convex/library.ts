@@ -9,6 +9,7 @@ export const follow = mutation({
     name: v.string(),
     poster: v.union(v.string(), v.null()),
     backdrop: v.union(v.string(), v.null()),
+    releaseDate: v.number(),
   },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -29,6 +30,7 @@ export const follow = mutation({
       poster: args.poster,
       backdrop: args.backdrop,
       followedAt: now,
+      releaseDate: args.releaseDate,
     })
   },
 })

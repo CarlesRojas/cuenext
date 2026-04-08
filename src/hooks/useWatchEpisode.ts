@@ -28,11 +28,9 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
   })
 
   const unwatch = useMutation({
-    mutationFn: async ({
-      wasStopped,
-      wasNotFollowed,
-      ...args
-    }: { wasStopped?: boolean; wasNotFollowed?: boolean } & Parameters<typeof unmarkEpisodeWatched>[0]) => {
+    mutationFn: async (
+      args: { wasStopped?: boolean; wasNotFollowed?: boolean } & Parameters<typeof unmarkEpisodeWatched>[0],
+    ) => {
       await unmarkEpisodeWatched(args)
       await updateNextEpisode({ tmdbId: episode.showTmdbId })
     },
@@ -67,6 +65,7 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
             showName: episode.name,
             showPoster: episode.poster ?? null,
             showBackdrop: episode.backdrop ?? null,
+            releaseDate: 0,
           }),
       )
     } else {
@@ -77,6 +76,7 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
         showName: episode.name,
         showPoster: episode.poster ?? null,
         showBackdrop: episode.backdrop ?? null,
+        releaseDate: 0,
       })
 
       showUndoToast(

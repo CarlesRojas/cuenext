@@ -26,6 +26,7 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
         name: movie.title,
         poster: movie.poster_path ?? null,
         backdrop: movie.backdrop_path ?? null,
+        releaseDate: new Date(movie.release_date).getTime(),
       })
     },
   })
