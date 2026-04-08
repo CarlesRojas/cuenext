@@ -146,15 +146,5 @@
       "form_factor": "narrow",
       "label": "Keep track of your stats"
     }
-  ],
-  "share_target": {
-    "action": "The action you would like to perform when the user chooses to share content to your app. For example: share",
-    "method": "The method you would like to use to share content to your app. For example: GET",
-    "enctype": "The encoding type you would like to use to share content to your app. For example: application/x-www-form-urlencoded",
-    "params": {
-      "title": "The title of the content you would like to share",
-      "text": "The text of the content you would like to share",
-      "url": "The url of the content you would like to share"
-    }
-  }
+  ]
 }
