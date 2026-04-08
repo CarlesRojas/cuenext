@@ -51,7 +51,8 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
     ? watchedEpisodes.data.filter(we => we.seasonNumber === season_number - 1).length
     : null
   const numberOfAiredEpisodes = episodes ? episodes.filter(airedEpisodes).length : null
-  const areAllEpisodesWatched = episodes ? numberOfWatchedEpisodes === numberOfAiredEpisodes : false
+  const areAllEpisodesWatched =
+    episodes && !!numberOfAiredEpisodes ? numberOfWatchedEpisodes === numberOfAiredEpisodes : false
   const progressPercentage =
     numberOfWatchedEpisodes !== null && numberOfAiredEpisodes !== null && numberOfAiredEpisodes > 0
       ? (numberOfWatchedEpisodes / numberOfAiredEpisodes) * 100
@@ -145,8 +146,7 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
             <Button
               variant="watch"
               size="icon"
-              className="disabled:opacity-100"
-              disabled={isWatchEpisodesLoading || !episodes || episodes.length === 0}
+              disabled={!numberOfAiredEpisodes || isWatchEpisodesLoading || !episodes || episodes.length === 0}
               data-state={areAllEpisodesWatched ? 'on' : 'off'}
             >
               <FontAwesomeIcon icon={isWatchEpisodesLoading ? faSpinner : faEye} spin={isWatchEpisodesLoading} />
