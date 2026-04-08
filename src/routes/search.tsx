@@ -17,11 +17,11 @@ export const Route = createFileRoute('/search')({
 })
 
 function EpisodeWrapper(props: TmdbTvMinimal) {
-  return <FollowEpisode episode={props} variant="row" followButtonText="Follow" />
+  return <FollowEpisode episode={props} variant="row" followButtonText="Track" />
 }
 
 function MovieWrapper(props: TmdbMovieMinimal) {
-  return <FollowMovie movie={props} variant="row" followButtonText="Follow" />
+  return <FollowMovie movie={props} variant="row" followButtonText="Track" />
 }
 
 function RouteComponent() {

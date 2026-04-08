@@ -5,7 +5,7 @@ import { useFollowEpisode } from '#/hooks/useFollowEpisode'
 import { useStopEpisode } from '#/hooks/useStopEpisode'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
-import { faHeart, faMinus, faPlay, faPlus, faStop } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faHeart, faMinus, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -111,8 +111,8 @@ export function ShowDetails({ show }: ShowDetailsProps) {
             onClick={() => toggleFollow(id, name)}
             disabled={isFollowedLoading}
           >
-            <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
-            <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
+            <FontAwesomeIcon icon={isFollowed ? faMinus : faBookmark} className="size-4" />
+            <span>{isFollowed ? 'Untrack' : 'Track'}</span>
           </Button>
 
           {!isFollowedLoading && isFollowed && (

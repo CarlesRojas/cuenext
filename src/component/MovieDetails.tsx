@@ -5,7 +5,7 @@ import { useFollowMovie } from '#/hooks/useFollowMovie'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
 import { cn } from '#/lib/cn'
 import type { TmdbMovie } from '#/type/tmdb'
-import { faEye, faEyeSlash, faHeart, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faEye, faHeart, faMinus, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -113,18 +113,20 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             onClick={() => toggleFollow(id, title)}
             disabled={isFollowedLoading}
           >
-            <FontAwesomeIcon icon={isFollowed ? faMinus : faPlus} className="size-4" />
-            <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
+            <FontAwesomeIcon icon={isFollowed ? faMinus : faBookmark} className="size-4" />
+            <span>{isFollowed ? 'Untrack' : 'Track'}</span>
           </Button>
 
           {isReleased && (
             <Button
-              variant={isWatched ? 'negative' : 'secondary'}
+              variant="watch"
+              size="icon"
+              data-state={isWatched ? 'on' : 'off'}
+              title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
               onClick={() => onToggleWatch()}
               disabled={isWatchedLoading}
             >
-              <FontAwesomeIcon icon={isWatched ? faEyeSlash : faEye} className="size-4" />
-              <span>{isWatched ? 'Mark as Unwatched' : 'Mark as Watched'}</span>
+              <FontAwesomeIcon icon={isWatchedLoading ? faSpinner : faEye} className="size-4" />
             </Button>
           )}
 
@@ -135,7 +137,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             disabled={isFavoritedLoading}
             data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
           >
-            <FontAwesomeIcon icon={faHeart} className="size-5" />
+            <FontAwesomeIcon icon={isFavoritedLoading ? faSpinner : faHeart} className="size-5" />
           </Button>
         </div>
       </section>

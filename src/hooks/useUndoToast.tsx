@@ -1,5 +1,6 @@
 import { Button } from '#/component/ui/button'
 import {
+  faBookmark,
   faCheckCircle,
   faEye,
   faEyeSlash,
@@ -7,7 +8,6 @@ import {
   faHeartBroken,
   faMinus,
   faPlay,
-  faPlus,
   faStop,
   faUndo,
 } from '@fortawesome/free-solid-svg-icons'
@@ -53,14 +53,14 @@ export function ToastProvider({ children }: ToastProviderProps) {
 
     switch (actionType) {
       case 'follow':
-        icon = faPlus
+        icon = faBookmark
         iconClass = 'text-sky-500'
-        message = `Followed ${title}`
+        message = `Tracked ${title}`
         break
       case 'unfollow':
         icon = faMinus
         iconClass = 'text-red-400'
-        message = `Unfollowed ${title}`
+        message = `Untracked ${title}`
         break
       case 'watch':
         icon = faEye

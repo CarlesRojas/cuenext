@@ -3,7 +3,7 @@ import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
-import { faEye, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faEye, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -176,11 +176,11 @@ export function PosterCard(props: Props) {
             onToggleFollow()
           }}
           data-checked={!isFollowLoading && isFollowed}
-          title={isFollowed ? 'Unfollow' : 'Follow'}
+          title={isFollowed ? 'Untrack' : 'Track'}
           disabled={isFollowLoading}
         >
           {followButtonText && <span className="text-sm">{followButtonText}</span>}
-          <FontAwesomeIcon icon={isFollowLoading ? faSpinner : faPlus} spin={isFollowLoading} />
+          <FontAwesomeIcon icon={isFollowLoading ? faSpinner : faBookmark} spin={isFollowLoading} />
         </Button>
       )}
     </div>
