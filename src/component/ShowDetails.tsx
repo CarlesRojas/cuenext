@@ -115,6 +115,16 @@ export function ShowDetails({ show }: ShowDetailsProps) {
             <span>{isFollowed ? 'Untrack' : 'Track'}</span>
           </Button>
 
+          <Button
+            size="icon"
+            variant="favorite"
+            onClick={() => toggleFavorite(id, name)}
+            disabled={isFavoritedLoading}
+            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
+          >
+            <FontAwesomeIcon icon={faHeart} className="size-5" />
+          </Button>
+
           {!isFollowedLoading && isFollowed && (
             <Button
               variant={isStopped ? 'secondary' : 'negative'}
@@ -126,16 +136,6 @@ export function ShowDetails({ show }: ShowDetailsProps) {
               <span>{isStopped ? 'Resume Watching' : 'Stop Watching'}</span>
             </Button>
           )}
-
-          <Button
-            size="icon"
-            variant="favorite"
-            onClick={() => toggleFavorite(id, name)}
-            disabled={isFavoritedLoading}
-            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-          >
-            <FontAwesomeIcon icon={faHeart} className="size-5" />
-          </Button>
         </div>
       </section>
     </div>

@@ -58,7 +58,7 @@ function App() {
           {tvSectionsLoading &&
             ['Watch next', "Haven't started", 'Waiting for episodes', 'Stopped watching', 'Finished'].map(
               (title, i) => (
-                <Section title={title} key={i}>
+                <Section title={title} key={i} defaultCollapsed={!['Watch next', "Haven't started"].includes(title)}>
                   {Array.from({ length: 10 }).map((_, epispdeIndex) => (
                     <PosterCard key={epispdeIndex} isLoading />
                   ))}
@@ -107,7 +107,7 @@ function App() {
           )}
 
           {tvSections && tvSections.stoppedWatching.length > 0 && (
-            <Section title="Stopped watching">
+            <Section title="Stopped watching" defaultCollapsed>
               {tvSections.stoppedWatching.map(item => {
                 const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
                 if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
@@ -127,7 +127,7 @@ function App() {
           )}
 
           {tvSections && tvSections.finished.length > 0 && (
-            <Section title="Finished">
+            <Section title="Finished" defaultCollapsed>
               {tvSections.finished.map(item => (
                 <PosterCard
                   key={item.id}
