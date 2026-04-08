@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import isoCountry from 'i18n-iso-countries'
 import enLocale from 'i18n-iso-countries/langs/en.json'
+import { useLocalStorage } from 'usehooks-ts'
 
 isoCountry.registerLocale(enLocale)
 
@@ -64,9 +65,16 @@ interface Props {
 }
 
 export function useCountryDetection({ onDetected }: Props) {
+  const [cachedCountry, setCachedCountry] = useLocalStorage<Country | null>('CUENEXT_COUNTRY', null)
+
   return useQuery({
     queryKey: ['country-detection'],
     queryFn: async (): Promise<Country> => {
+      if (cachedCountry && cachedCountry.name) {
+        onDetected?.(cachedCountry)
+        return cachedCountry
+      }
+
       let countryCode: string | undefined = undefined
 
       try {
@@ -75,20 +83,23 @@ export function useCountryDetection({ onDetected }: Props) {
 
       countryCode = countryCode ?? detectUserCountry()
 
-      if (countryCode) console.log(countryCode, isoCountry.getName(countryCode.toUpperCase(), 'en'))
       const countryName = countryCode ? isoCountry.getName(countryCode.toUpperCase(), 'en') : undefined
 
-      if (!countryName)
-        return {
+      if (!countryName) {
+        const fallbackCountry = {
           code: 'ES' as isoCountry.Alpha2Code,
           name: 'Spain',
         }
+        setCachedCountry(fallbackCountry)
+        return fallbackCountry
+      }
 
       const country = {
         code: (countryCode ?? 'ES') as isoCountry.Alpha2Code,
         name: countryName,
       }
 
+      setCachedCountry(country)
       onDetected?.(country)
       return country
     },

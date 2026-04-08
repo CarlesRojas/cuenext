@@ -28,7 +28,6 @@ function VideoItem({ video }: VideoItemProps) {
   const handleImageError = () => {
     setHasError(true)
   }
-  console.log(isIOS)
 
   const handleClick = () => {
     if (isIOS) {
