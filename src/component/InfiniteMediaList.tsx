@@ -158,27 +158,33 @@ export function InfiniteMediaList<TItem>({
         return 8
       case 'this-month':
         return 9
+      case 'January':
+        return 10
+      case 'February':
+        return 11
+      case 'March':
+        return 12
+      case 'April':
+        return 13
+      case 'May':
+        return 14
+      case 'June':
+        return 15
+      case 'July':
+        return 16
+      case 'August':
+        return 17
+      case 'September':
+        return 18
+      case 'October':
+        return 19
+      case 'November':
+        return 20
+      case 'December':
+        return 21
       case 'later':
+      default:
         return 999
-      default: {
-        const monthNames = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ]
-
-        const monthIndex = monthNames.indexOf(groupKey)
-        return monthIndex !== -1 ? 10 + (11 - monthIndex) : 998
-      }
     }
   }
 
