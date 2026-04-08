@@ -15,6 +15,8 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
+import { Route as LegalTermsAndConditionsIndexRouteImport } from './routes/legal/terms-and-conditions/index'
+import { Route as LegalPrivacyPolicyIndexRouteImport } from './routes/legal/privacy-policy/index'
 import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmdbId'
 
 const UpcomingRoute = UpcomingRouteImport.update({
@@ -47,6 +49,17 @@ const SeeAllListRoute = SeeAllListRouteImport.update({
   path: '/see-all/$list',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalTermsAndConditionsIndexRoute =
+  LegalTermsAndConditionsIndexRouteImport.update({
+    id: '/legal/terms-and-conditions/',
+    path: '/legal/terms-and-conditions/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LegalPrivacyPolicyIndexRoute = LegalPrivacyPolicyIndexRouteImport.update({
+  id: '/legal/privacy-policy/',
+  path: '/legal/privacy-policy/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaMediaTmdbIdRoute = MediaMediaTmdbIdRouteImport.update({
   id: '/media/$media/$tmdbId',
   path: '/media/$media/$tmdbId',
@@ -61,6 +74,8 @@ export interface FileRoutesByFullPath {
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
+  '/legal/privacy-policy/': typeof LegalPrivacyPolicyIndexRoute
+  '/legal/terms-and-conditions/': typeof LegalTermsAndConditionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +85,8 @@ export interface FileRoutesByTo {
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
+  '/legal/privacy-policy': typeof LegalPrivacyPolicyIndexRoute
+  '/legal/terms-and-conditions': typeof LegalTermsAndConditionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +97,8 @@ export interface FileRoutesById {
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
+  '/legal/privacy-policy/': typeof LegalPrivacyPolicyIndexRoute
+  '/legal/terms-and-conditions/': typeof LegalTermsAndConditionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +110,8 @@ export interface FileRouteTypes {
     | '/upcoming'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
+    | '/legal/privacy-policy/'
+    | '/legal/terms-and-conditions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +121,8 @@ export interface FileRouteTypes {
     | '/upcoming'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
+    | '/legal/privacy-policy'
+    | '/legal/terms-and-conditions'
   id:
     | '__root__'
     | '/'
@@ -109,6 +132,8 @@ export interface FileRouteTypes {
     | '/upcoming'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
+    | '/legal/privacy-policy/'
+    | '/legal/terms-and-conditions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +144,8 @@ export interface RootRouteChildren {
   UpcomingRoute: typeof UpcomingRoute
   SeeAllListRoute: typeof SeeAllListRoute
   MediaMediaTmdbIdRoute: typeof MediaMediaTmdbIdRoute
+  LegalPrivacyPolicyIndexRoute: typeof LegalPrivacyPolicyIndexRoute
+  LegalTermsAndConditionsIndexRoute: typeof LegalTermsAndConditionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,6 +192,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeeAllListRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/terms-and-conditions/': {
+      id: '/legal/terms-and-conditions/'
+      path: '/legal/terms-and-conditions'
+      fullPath: '/legal/terms-and-conditions/'
+      preLoaderRoute: typeof LegalTermsAndConditionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy-policy/': {
+      id: '/legal/privacy-policy/'
+      path: '/legal/privacy-policy'
+      fullPath: '/legal/privacy-policy/'
+      preLoaderRoute: typeof LegalPrivacyPolicyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media/$media/$tmdbId': {
       id: '/media/$media/$tmdbId'
       path: '/media/$media/$tmdbId'
@@ -183,6 +224,8 @@ const rootRouteChildren: RootRouteChildren = {
   UpcomingRoute: UpcomingRoute,
   SeeAllListRoute: SeeAllListRoute,
   MediaMediaTmdbIdRoute: MediaMediaTmdbIdRoute,
+  LegalPrivacyPolicyIndexRoute: LegalPrivacyPolicyIndexRoute,
+  LegalTermsAndConditionsIndexRoute: LegalTermsAndConditionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
