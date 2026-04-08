@@ -3,6 +3,7 @@
   "name": "CueNext",
   "short_name": "CueNext",
   "description": "Keep tabs on your movies and TV shows. Track what you watch, discover new favorites, and never miss an episode.",
+  "full-descrption": "",
   "icons": [
     {
       "src": "favicon.ico",
