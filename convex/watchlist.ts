@@ -88,6 +88,7 @@ export const getMovieSections = query({
     const watchedMap = new Map(movies.map(m => [m.tmdbId, m.watchedAt]))
 
     const watchNext: MovieSectionItem[] = []
+    const unreleased: MovieSectionItem[] = []
     const finished: MovieSectionItem[] = []
 
     for (const follow of movieFollows) {
@@ -102,12 +103,14 @@ export const getMovieSections = query({
       }
 
       if (item.watchedAt) finished.push(item)
+      else if (item.releaseDate > Date.now()) unreleased.push(item)
       else watchNext.push(item)
     }
 
     watchNext.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
+    unreleased.sort((a, b) => (b.followedAt || 0) - (a.followedAt || 0))
     finished.sort((a, b) => (b.watchedAt || 0) - (a.watchedAt || 0))
 
-    return { watchNext, finished }
+    return { watchNext, unreleased, finished }
   },
 })

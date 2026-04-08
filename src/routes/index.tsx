@@ -85,12 +85,11 @@ function App() {
           {tvSections && tvSections.waitingForEpisodes.length > 0 && (
             <Section
               title="Waiting for episodes"
-              defaultCollapsed
               below={
-                <Button asChild>
+                <Button variant="secondary" asChild>
                   <Link to="/upcoming" search={{ media: 'tv' }}>
                     <FontAwesomeIcon icon={faCalendarDays} className="size-4" />
-                    <span>View all Upcoming</span>
+                    <span>View release dates</span>
                   </Link>
                 </Button>
               }
@@ -156,6 +155,30 @@ function App() {
             <Section title="Watch next">
               {movieSections.watchNext.map(item => (
                 <WatchMovie key={item.tmdbId} movie={item} />
+              ))}
+            </Section>
+          )}
+
+          {movieSections && movieSections.unreleased.length > 0 && (
+            <Section
+              title="Not released yet"
+              below={
+                <Button variant="secondary" asChild>
+                  <Link to="/upcoming" search={{ media: 'movie' }}>
+                    <FontAwesomeIcon icon={faCalendarDays} className="size-4" />
+                    <span>View release dates</span>
+                  </Link>
+                </Button>
+              }
+            >
+              {movieSections.unreleased.map(item => (
+                <PosterCard
+                  key={item.tmdbId}
+                  id={item.tmdbId}
+                  title={item.name}
+                  media="movie"
+                  imagePaths={[item.poster, item.backdrop]}
+                />
               ))}
             </Section>
           )}
