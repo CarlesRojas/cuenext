@@ -1,5 +1,6 @@
 import { api } from '#/../convex/_generated/api'
 import { Section } from '#/component/Section'
+import { useAppEnvironment } from '#/hooks/useAppEnvironment'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
 import type { TmdbVideo } from '#/type/tmdb'
@@ -8,6 +9,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { isIOS } from 'react-device-detect'
 
 interface VideosProps {
   tmdbId: number
@@ -28,16 +30,18 @@ function VideoItem({ video }: VideoItemProps) {
     setHasError(true)
   }
 
-  const handleClick = () => {
-    // if (isSafari || isMobileSafari) {
-    //   const youtubeAppUrl = `youtube://watch?v=${video.key}`
+  const isPWAShell = useAppEnvironment()
 
-    //   const link = document.createElement('a')
-    //   link.href = youtubeAppUrl
-    //   link.click()
-    // } else {
-    window.open(videoUrl, '_blank', 'noopener,noreferrer')
-    // }
+  const handleClick = () => {
+    if (!isPWAShell && isIOS) {
+      const youtubeAppUrl = `youtube://watch?v=${video.key}`
+
+      const link = document.createElement('a')
+      link.href = youtubeAppUrl
+      link.click()
+    } else {
+      window.open(videoUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   if (hasError) return null
@@ -89,6 +93,8 @@ function VideoItem({ video }: VideoItemProps) {
 }
 
 export function Videos({ tmdbId, media }: VideosProps) {
+  const isPWAShell = useAppEnvironment()
+
   const videos = useQuery({
     ...convexAction(media === 'movie' ? api.tmdb.getMovieVideos : api.tmdb.getTvVideos, { tmdbId }),
   })
@@ -111,6 +117,9 @@ export function Videos({ tmdbId, media }: VideosProps) {
 
   return (
     <Section title="Videos">
+      <p>IsPwaShell {isPWAShell ? 'Yes' : 'No'}</p>
+      <p>IsIOS {isIOS ? 'Yes' : 'No'}</p>
+
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
       ))}
