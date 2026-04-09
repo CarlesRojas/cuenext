@@ -4,6 +4,7 @@ import { MediaTypeSelector } from '#/component/MediaTypeSelector'
 import { Search } from '#/component/Search'
 import { Button } from '#/component/ui/button'
 import { User } from '#/component/User'
+import { useAppEnvironment } from '#/hooks/useAppEnvironment'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
@@ -12,6 +13,7 @@ import { Link, useLocation, useNavigate, useRouter } from '@tanstack/react-route
 import { motion } from 'motion/react'
 import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { isIOS } from 'react-device-detect'
 import { useDebounceCallback, useResizeObserver } from 'usehooks-ts'
 
 interface Props {
@@ -30,6 +32,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
   const router = useRouter()
   const navigate = useNavigate()
   const location = useLocation()
+  const isPwa = useAppEnvironment()
 
   const hideMediaTypeSelector = location.pathname.startsWith('/media')
 
@@ -65,7 +68,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
 
       <div
         ref={mobileTabsRef}
-        className="fixed right-0 bottom-0 left-0 z-50 flex gap-2 px-3 pb-3 md:hidden"
+        className={cn('fixed right-0 bottom-0 left-0 z-50 flex gap-2 px-3 pb-3 md:hidden', isPwa && isIOS && 'pb-5')}
         style={{ bottom: fullHeight - visualHeight }}
       >
         <LiquidGlass
