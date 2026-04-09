@@ -91,12 +91,14 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                 inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                 className={cn(
                   'relative my-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity duration-300 ease-in-out first:ml-1.5 last-of-type:mr-1.5',
+                  location.pathname === '/' && item.to === '/' && 'text-sky-500!',
+                  location.pathname === '/' && item.to !== '/' && 'text-white! hover:bg-neutral-400/10!',
                   isExpanded && 'pointer-events-none opacity-0',
                 )}
               >
                 {({ isActive }) => (
                   <>
-                    {isActive && (
+                    {(isActive || (location.pathname === '/' && item.to === '/')) && (
                       <motion.div
                         layoutId="nav-indicator"
                         className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"

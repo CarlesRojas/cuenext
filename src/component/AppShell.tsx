@@ -10,7 +10,7 @@ import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faCalendarDays, faCirclePlay, faCompass, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
-import { ClientOnly, Link } from '@tanstack/react-router'
+import { ClientOnly, Link, useLocation } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { useRef, useState } from 'react'
@@ -35,6 +35,7 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
   const searchParams = useSearchParams()
+  const location = useLocation()
 
   const { visualHeight, fullHeight } = useViewportHeight()
   const { width = 0 } = useWindowSize()
@@ -67,11 +68,15 @@ export default function AppShell({ children }: AppShellProps) {
                       search={searchParams}
                       activeProps={{ className: 'text-sky-500' }}
                       inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
-                      className="relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors"
+                      className={cn(
+                        'relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors',
+                        location.pathname === '/' && item.to === '/' && 'text-sky-500!',
+                        location.pathname === '/' && item.to !== '/' && 'text-white! hover:bg-neutral-400/10!',
+                      )}
                     >
                       {({ isActive }) => (
                         <>
-                          {isActive && (
+                          {(isActive || (location.pathname === '/' && item.to === '/')) && (
                             <motion.div
                               layoutId="nav-indicator"
                               className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
