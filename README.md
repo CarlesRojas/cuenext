@@ -29,3 +29,13 @@ pnpm serve
 ```bash
 pnpx convex dev
 ```
+
+## Build Android App
+
+Key name: cuenext_key_store
+First and Last names (eg: John Doe): Carles Rojas
+Organizational Unit (eg: Engineering Dept): Pinya
+Organization (eg: Company Name): Pinya
+Country (2 letter code): ES
+
+https://developer.chrome.com/docs/android/trusted-web-activity/quick-start/

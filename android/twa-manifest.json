@@ -1,0 +1,78 @@
+{
+  "packageId": "app.cuenext.pinya",
+  "host": "www.cuenext.app",
+  "name": "CueNext",
+  "launcherName": "CueNext",
+  "display": "standalone",
+  "themeColor": "#171717",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#171717",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://www.cuenext.app/maskableIcon512.png",
+  "maskableIconUrl": "https://www.cuenext.app/maskableIcon512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/Users/carles.rojas/Documents/Repos/cuenext/android/android.keystore",
+    "alias": "cuenext_key_store"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Watchlist",
+      "shortName": "Watchlist",
+      "url": "https://www.cuenext.app/",
+      "chosenIconUrl": "https://www.cuenext.app/shortcut/watchlist.png"
+    },
+    {
+      "name": "Upcoming",
+      "shortName": "Upcoming",
+      "url": "https://www.cuenext.app/upcoming",
+      "chosenIconUrl": "https://www.cuenext.app/shortcut/upcoming.png"
+    },
+    {
+      "name": "Discover",
+      "shortName": "Discover",
+      "url": "https://www.cuenext.app/discover",
+      "chosenIconUrl": "https://www.cuenext.app/shortcut/discover.png"
+    },
+    {
+      "name": "Profile",
+      "shortName": "Profile",
+      "url": "https://www.cuenext.app/profile",
+      "chosenIconUrl": "https://www.cuenext.app/shortcut/profile.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://www.cuenext.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://www.cuenext.app/",
+  "minSdkVersion": 21,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [
+    "standalone",
+    "fullscreen",
+    "minimal-ui",
+    "window-controls-overlay",
+    "browser"
+  ],
+  "appVersion": "1"
+}
