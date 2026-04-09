@@ -120,6 +120,12 @@ export function Videos({ tmdbId, media }: VideosProps) {
       <p>IsPwaShell {isPWAShell ? 'Yes' : 'No'}</p>
       <p>IsIOS {isIOS ? 'Yes' : 'No'}</p>
 
+      <a href={'https://www.youtube.com/watch?v=yC6RGfDD32Y'} target="_blank" rel="noopener noreferrer">
+        Link to website
+      </a>
+
+      <a href={'youtube://watch?v=yC6RGfDD32Y'}>Deeplink</a>
+
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
       ))}
