@@ -44,7 +44,7 @@ export const Route = createRootRouteWithContext<{
         name: 'viewport',
         content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
       },
-      { name: 'theme-color', content: '#171717' },
+      { name: 'theme-color', content: '#0a0a0a' },
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       {
         name: 'apple-mobile-web-app-status-bar-style',
