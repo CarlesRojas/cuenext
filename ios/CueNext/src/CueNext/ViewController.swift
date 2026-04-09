@@ -38,6 +38,11 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Set background color to match web app theme (#0a0a0a)
+        view.backgroundColor = UIColor(red: 10/255, green: 10/255, blue: 10/255, alpha: 1.0)
+        loadingView?.backgroundColor = UIColor(red: 10/255, green: 10/255, blue: 10/255, alpha: 1.0)
+        
         initWebView()
         initToolbarView()
         loadRootUrl()
