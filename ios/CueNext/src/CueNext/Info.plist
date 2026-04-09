@@ -2,12 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Capture Audio by user request</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Track current location by user request</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Capture Video by user request</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -30,17 +28,21 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string></string>
+			<string>com.cuenext.app</string>
 			<key>CFBundleURLSchemes</key>
-			<array />
+			<array>
+				<string>cuenext</string>
+			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -65,11 +67,35 @@
 			</array>
 		</dict>
 	</dict>
-	<key>UIBackgroundModes</key>
+	<key>UIApplicationShortcutItems</key>
 	<array>
-		<string>processing</string>
-		<string>remote-notification</string>
+		<dict>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Watchlist</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>https://www.cuenext.app/</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Upcoming</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>https://www.cuenext.app/upcoming</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Discover</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>https://www.cuenext.app/discover</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Profile</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>https://www.cuenext.app/profile</string>
+		</dict>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -99,39 +125,11 @@
 	<key>WKAppBoundDomains</key>
 	<array>
 		<string>www.cuenext.app</string>
-<string>account.google.com</string>
+		<string>account.google.com</string>
+		<string>accounts.dev</string>
+		<string>clerk.accounts.dev</string>
+		<string>clerk.cuenext.app</string>
+		<string>clerk.dev</string>
 	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	</array>
-	<key>UIApplicationShortcutItems</key>
-<array>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>https://www.cuenext.app/</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Watchlist</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>https://www.cuenext.app/upcoming</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Upcoming</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>https://www.cuenext.app/discover</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Discover</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>https://www.cuenext.app/profile</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Profile</string>
-		</dict></array>
 </dict>
 </plist>
