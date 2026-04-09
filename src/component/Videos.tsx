@@ -8,7 +8,6 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { isDesktop, isEmbedded, isIOS, isMobileSafari, isSafari } from 'react-device-detect'
 
 interface VideosProps {
   tmdbId: number
@@ -30,15 +29,15 @@ function VideoItem({ video }: VideoItemProps) {
   }
 
   const handleClick = () => {
-    if (isSafari || isMobileSafari) {
-      const youtubeAppUrl = `youtube://watch?v=${video.key}`
+    // if (isSafari || isMobileSafari) {
+    //   const youtubeAppUrl = `youtube://watch?v=${video.key}`
 
-      const link = document.createElement('a')
-      link.href = youtubeAppUrl
-      link.click()
-    } else {
-      window.open(videoUrl, '_blank', 'noopener,noreferrer')
-    }
+    //   const link = document.createElement('a')
+    //   link.href = youtubeAppUrl
+    //   link.click()
+    // } else {
+    window.open(videoUrl, '_blank', 'noopener,noreferrer')
+    // }
   }
 
   if (hasError) return null
@@ -112,11 +111,6 @@ export function Videos({ tmdbId, media }: VideosProps) {
 
   return (
     <Section title="Videos">
-      <p>IsIos: {isIOS ? 'Yes' : 'No'}</p>
-      <p>IsSafari: {isSafari ? 'Yes' : 'No'}</p>
-      <p>IsMobileSafari: {isMobileSafari ? 'Yes' : 'No'}</p>
-      <p>isEmbedded: {isEmbedded ? 'Yes' : 'No'}</p>
-      <p>isDesktop: {isDesktop ? 'Yes' : 'No'}</p>
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
       ))}
