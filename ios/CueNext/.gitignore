@@ -221,3 +221,4 @@ xcuserdata/
 #
 *.certSigningRequest
 *.cer
+*.mobileprovision
