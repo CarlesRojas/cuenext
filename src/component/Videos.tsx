@@ -1,6 +1,5 @@
 import { api } from '#/../convex/_generated/api'
 import { Section } from '#/component/Section'
-import { useAppEnvironment } from '#/hooks/useAppEnvironment'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
 import type { TmdbVideo } from '#/type/tmdb'
@@ -93,8 +92,6 @@ function VideoItem({ video }: VideoItemProps) {
 }
 
 export function Videos({ tmdbId, media }: VideosProps) {
-  const isPWAShell = useAppEnvironment()
-
   const videos = useQuery({
     ...convexAction(media === 'movie' ? api.tmdb.getMovieVideos : api.tmdb.getTvVideos, { tmdbId }),
   })
