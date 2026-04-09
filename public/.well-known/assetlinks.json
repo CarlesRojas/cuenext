@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.cuenext.pinya",
+      "sha256_cert_fingerprints": [
+        "E5:9F:82:0C:0C:65:E7:67:2A:93:2D:01:E6:7B:AB:BB:84:A1:B6:B6:9C:4F:3B:96:C7:D2:A7:D3:55:44:D6:7B"
+      ]
+    }
+  }
+]
