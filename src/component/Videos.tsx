@@ -30,10 +30,8 @@ function VideoItem({ video }: VideoItemProps) {
     setHasError(true)
   }
 
-  const isPWAShell = useAppEnvironment()
-
   const handleClick = () => {
-    if (!isPWAShell && isIOS) {
+    if (isIOS) {
       const youtubeAppUrl = `youtube://www.youtube.com/watch?v=${video.key}`
 
       const link = document.createElement('a')
@@ -47,8 +45,10 @@ function VideoItem({ video }: VideoItemProps) {
   if (hasError) return null
 
   return (
-    <button
-      type="button"
+    <a
+      href={videoUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       onClick={handleClick}
       className={cn(
         'group relative flex w-64 flex-col overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-all duration-300 hover:scale-105 focus-visible:scale-105 lg:w-72',
@@ -88,7 +88,7 @@ function VideoItem({ video }: VideoItemProps) {
           {video.name}
         </h3>
       </div>
-    </button>
+    </a>
   )
 }
 
@@ -117,22 +117,6 @@ export function Videos({ tmdbId, media }: VideosProps) {
 
   return (
     <Section title="Videos">
-      <p>IsPwaShell {isPWAShell ? 'Yes' : 'No'}</p>
-      <p>IsIOS {isIOS ? 'Yes' : 'No'}</p>
-
-      <a href={'https://www.youtube.com/watch?v=yC6RGfDD32Y'} target="_blank" rel="noopener noreferrer">
-        Link to website
-      </a>
-
-      <a href={'youtube://www.youtube.com/watch?v=yC6RGfDD32Y'}>Deeplink</a>
-
-      <a
-        href="https://www.youtube.com/watch?v=yC6RGfDD32Y"
-        onClick={() => (window.location.href = 'youtube://www.youtube.com/watch?v=yC6RGfDD32Y')}
-      >
-        Deeplink with fallback
-      </a>
-
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
       ))}
