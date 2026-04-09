@@ -34,7 +34,7 @@ function VideoItem({ video }: VideoItemProps) {
 
   const handleClick = () => {
     if (!isPWAShell && isIOS) {
-      const youtubeAppUrl = `youtube://watch?v=${video.key}`
+      const youtubeAppUrl = `youtube://www.youtube.com/watch?v=${video.key}`
 
       const link = document.createElement('a')
       link.href = youtubeAppUrl
@@ -124,7 +124,14 @@ export function Videos({ tmdbId, media }: VideosProps) {
         Link to website
       </a>
 
-      <a href={'youtube://watch?v=yC6RGfDD32Y'}>Deeplink</a>
+      <a href={'youtube://www.youtube.com/watch?v=yC6RGfDD32Y'}>Deeplink</a>
+
+      <a
+        href="https://www.youtube.com/watch?v=yC6RGfDD32Y"
+        onClick={() => (window.location.href = 'youtube://www.youtube.com/watch?v=yC6RGfDD32Y')}
+      >
+        Deeplink with fallback
+      </a>
 
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
