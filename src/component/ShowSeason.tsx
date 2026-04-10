@@ -26,7 +26,7 @@ interface Props {
   previousUnwatchedEpisodes?: TmdbEpisode[]
 }
 
-const airedEpisodes = (episode: TmdbEpisode) => {
+export const airedEpisodes = (episode: TmdbEpisode) => {
   if (!episode.air_date) return false
   const airDate = new Date(episode.air_date)
   const today = new Date()
@@ -238,7 +238,7 @@ export function ShowSeason({
             className="relative overflow-hidden"
           >
             <ul className="mt-4 flex w-full flex-col gap-2 p-2">
-              {episodes?.map(episode => (
+              {episodes?.map((episode, index) => (
                 <ShowEpisode
                   key={episode.id}
                   showId={showId}
@@ -247,6 +247,18 @@ export function ShowSeason({
                   showName={showName}
                   showPoster={showPoster}
                   showBackdrop={showBackdrop}
+                  previousUnwatchedEpisodes={[
+                    ...(previousUnwatchedEpisodes || []),
+                    ...episodes
+                      .slice(0, index)
+                      .filter(
+                        ep =>
+                          !seasonWatchedEpisodes?.some(
+                            we =>
+                              we.seasonNumber === ep.season_number - 1 && we.episodeNumber === ep.episode_number - 1,
+                          ),
+                      ),
+                  ]}
                 />
               ))}
             </ul>

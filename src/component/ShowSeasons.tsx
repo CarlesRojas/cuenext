@@ -40,7 +40,7 @@ export function ShowSeasons({ show }: Props) {
     .map(query => query.data)
     .filter((season): season is NonNullable<typeof season> => season != null)
 
-  const specials = seasons.find(season => season.season_number === 0)
+  // const specials = seasons.find(season => season.season_number === 0)
   const regularSeasons = seasons.filter(season => season.season_number !== 0)
 
   const allSeasonsLoaded = seasonQueries.every(query => !query.isPending)
@@ -57,7 +57,7 @@ export function ShowSeasons({ show }: Props) {
         )
     : null
 
-  if (regularSeasons.length <= 0 && !specials) return null
+  if (regularSeasons.length <= 0) return null
 
   const continuousEpisodeNumbers = showInfo?.continuousEpisodeNumbers || regularSeasons.length === 1
 
@@ -107,7 +107,7 @@ export function ShowSeasons({ show }: Props) {
           />
         ))}
 
-        {specials && (
+        {/* {specials && (
           <h2
             className={cn(
               'tracking mt-4 text-lg font-semibold opacity-80',
@@ -130,7 +130,7 @@ export function ShowSeasons({ show }: Props) {
             showBackdrop={show.backdrop_path}
             previousUnwatchedEpisodes={[]}
           />
-        )}
+        )} */}
       </div>
     </div>
   )

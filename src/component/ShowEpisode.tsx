@@ -1,8 +1,11 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
+import { airedEpisodes } from '#/component/ShowSeason'
 import { Button } from '#/component/ui/button'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
 import { useWatchEpisode } from '#/hooks/useWatchEpisode'
+import { useWatchEpisodes } from '#/hooks/useWatchEpisodes'
 import type { TmdbEpisode } from '#/type/tmdb'
-import { faEye, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faEye, faSpinner, faTimes, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -13,9 +16,18 @@ interface Props {
   showName: string
   showPoster?: string | null
   showBackdrop?: string | null
+  previousUnwatchedEpisodes?: TmdbEpisode[]
 }
 
-const ShowEpisode = ({ showId, episode, continuousEpisodeNumbers, showName, showPoster, showBackdrop }: Props) => {
+const ShowEpisode = ({
+  showId,
+  episode,
+  continuousEpisodeNumbers,
+  showName,
+  showPoster,
+  showBackdrop,
+  previousUnwatchedEpisodes,
+}: Props) => {
   const { id, season_number, runtime, still_path, name, air_date, episode_number } = episode
 
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({
@@ -27,6 +39,13 @@ const ShowEpisode = ({ showId, episode, continuousEpisodeNumbers, showName, show
     backdrop: showBackdrop,
   })
 
+  const { isWatchEpisodesLoading, watchMultipleEpisodes } = useWatchEpisodes({
+    showId,
+    showName,
+    showPoster,
+    showBackdrop,
+  })
+
   const [hasImage, setHasImage] = useState(true)
 
   const airDate = air_date ? new Date(air_date) : null
@@ -34,6 +53,21 @@ const ShowEpisode = ({ showId, episode, continuousEpisodeNumbers, showName, show
   const daysUntilAir = airDate ? Math.ceil((airDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null
 
   const episodeNumber = continuousEpisodeNumbers ? `E${episode_number}` : `S${season_number}, E${episode_number}`
+
+  const [isMarkPreviousEpisodesDialogOpen, setIsMarkPreviousEpisodesDialogOpen] = useState(false)
+
+  const toggleEpisodeWatched = async (includePrevious = false) => {
+    const previousEpisodesToToggle =
+      !isWatched && includePrevious && previousUnwatchedEpisodes ? previousUnwatchedEpisodes : []
+
+    const episodesToToggle = [...previousEpisodesToToggle, episode].filter(airedEpisodes).map(ep => ({
+      seasonNumber: ep.season_number - 1,
+      episodeNumber: ep.episode_number - 1,
+    }))
+
+    if (isWatched) onToggleWatch()
+    else watchMultipleEpisodes(episodesToToggle, showName)
+  }
 
   return (
     <div
@@ -83,7 +117,9 @@ const ShowEpisode = ({ showId, episode, continuousEpisodeNumbers, showName, show
             className="disabled:opacity-100"
             onClick={e => {
               e.preventDefault()
-              onToggleWatch()
+              if (isWatched || !previousUnwatchedEpisodes || previousUnwatchedEpisodes.length === 0)
+                toggleEpisodeWatched(false)
+              else setIsMarkPreviousEpisodesDialogOpen(true)
             }}
             data-state={isWatched ? 'on' : 'off'}
             title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
@@ -92,6 +128,37 @@ const ShowEpisode = ({ showId, episode, continuousEpisodeNumbers, showName, show
             {<FontAwesomeIcon icon={isWatchedLoading ? faSpinner : faEye} spin={isWatchedLoading} />}
           </Button>
         )}
+
+        <Dialog
+          open={isMarkPreviousEpisodesDialogOpen}
+          onOpenChange={open => setIsMarkPreviousEpisodesDialogOpen(open)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{`Do you want to mark all previous episodes as watched?`}</DialogTitle>
+            </DialogHeader>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button onClick={() => toggleEpisodeWatched(true)} disabled={isWatchEpisodesLoading}>
+                  <FontAwesomeIcon icon={faCheck} />
+                  <span>{'Yes'}</span>
+                </Button>
+              </DialogClose>
+
+              <DialogClose asChild>
+                <Button
+                  variant="secondary"
+                  onClick={() => toggleEpisodeWatched(false)}
+                  disabled={isWatchEpisodesLoading}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                  <span>{'No'}</span>
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {!hasAired && daysUntilAir !== null && (
           <div className="flex flex-col items-end justify-center">
