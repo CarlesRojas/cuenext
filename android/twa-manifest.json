@@ -67,12 +67,6 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "displayOverride": [
-    "standalone",
-    "fullscreen",
-    "minimal-ui",
-    "window-controls-overlay",
-    "browser"
-  ],
+  "displayOverride": ["standalone", "fullscreen", "minimal-ui", "window-controls-overlay", "browser"],
   "appVersion": "2"
 }
