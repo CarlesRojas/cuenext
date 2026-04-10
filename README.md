@@ -47,3 +47,7 @@ bubblewrap init --manifest=https://www.cuenext.app/manifest.json
 ```bash
 bubblewrap build
 ```
+
+```bash
+adb install app-release-signed.apk
+```
