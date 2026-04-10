@@ -299,6 +299,7 @@ export const upsertNextEpisode = mutation({
     seasonNumber: v.number(),
     episodeNumber: v.number(),
     seasonEpisodeCounts: v.array(v.number()),
+    seasonFirstEpisodeIndex: v.array(v.number()),
     seasonDataUpdatedAt: v.union(v.number(), v.null()),
     watchedPercentage: v.number(),
     numberOfSeasons: v.number(),

@@ -22,6 +22,7 @@ export const updateNextEpisode = action({
     const existingNextEpisode = await context.runQuery(api.watch.getNextEpisode, { tmdbId: args.tmdbId })
 
     let seasonEpisodeCounts: number[] = existingNextEpisode?.seasonEpisodeCounts ?? []
+    let seasonFirstEpisodeIndex: number[] = existingNextEpisode?.seasonFirstEpisodeIndex ?? []
     let status: 'ended' | 'ongoing' = existingNextEpisode?.status ?? 'ongoing'
     let numberOfSeasons = existingNextEpisode?.numberOfSeasons ?? 0
 
@@ -47,6 +48,10 @@ export const updateNextEpisode = action({
         seasonDetails => seasonDetails.episodes?.filter(airedEpisodes).length || 0,
       )
 
+      seasonFirstEpisodeIndex = allSeasonDetails.map(seasonDetails =>
+        seasonDetails.episodes && seasonDetails.episodes.length > 0 ? seasonDetails.episodes[0].episode_number - 1 : 0,
+      )
+
       status = showDetails.status?.toLowerCase() === 'ended' ? 'ended' : 'ongoing'
 
       numberOfSeasons = nonSpecialSeasons.length
@@ -67,9 +72,10 @@ export const updateNextEpisode = action({
       const episodeCount = seasonEpisodeCounts[seasonIndex]
 
       for (let episodeNumber = 0; episodeNumber < episodeCount; episodeNumber++) {
-        if (!watchedSet.has(`${seasonIndex}-${episodeNumber}`)) {
+        const displacement = seasonFirstEpisodeIndex[seasonIndex] || 0
+        if (!watchedSet.has(`${seasonIndex}-${episodeNumber + displacement}`)) {
           nextSeasonNumber = seasonIndex
-          nextEpisodeNumber = episodeNumber
+          nextEpisodeNumber = episodeNumber + displacement
           break found
         }
       }
@@ -84,6 +90,7 @@ export const updateNextEpisode = action({
       seasonNumber: nextSeasonNumber,
       episodeNumber: nextEpisodeNumber,
       seasonEpisodeCounts,
+      seasonFirstEpisodeIndex,
       seasonDataUpdatedAt: needsSeasonDataUpdate ? now : existingNextEpisode.seasonDataUpdatedAt,
       watchedPercentage,
       numberOfSeasons,
