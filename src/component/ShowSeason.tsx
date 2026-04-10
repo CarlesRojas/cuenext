@@ -1,15 +1,7 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import ShowEpisode from '#/component/ShowEpisode'
 import { Button } from '#/component/ui/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '#/component/ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
 import { useWatchEpisodes } from '#/hooks/useWatchEpisodes'
 import type { TmdbEpisode, TmdbSeason } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
@@ -66,6 +58,8 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
   })
 
   const [hasImage, setHasImage] = useState(true)
+  const [isUnwatchDialogOpen, setIsUnwatchDialogOpen] = useState(false)
+  const [isMarkPreviousEpisodesDialogOpen, setIsMarkPreviousEpisodesDialogOpen] = useState(true)
 
   const formatedAirDate = air_date
     ? new Date(air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -74,6 +68,20 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
   const [isCollapsed, setIsCollapsed] = useState(true)
 
   if (!season.episodes || season.episodes.length === 0) return null
+
+  const toggleEpisodesWatched = async () => {
+    if (!season.episodes) return
+
+    const episodesToToggle = season.episodes.filter(airedEpisodes).map(ep => ({
+      seasonNumber: season.season_number - 1,
+      episodeNumber: ep.episode_number - 1,
+    }))
+
+    const seasonTitle = `${season.name || `Season ${season.season_number}`}`
+
+    if (areAllEpisodesWatched) unwatchMultipleEpisodes(episodesToToggle, seasonTitle)
+    else watchMultipleEpisodes(episodesToToggle, seasonTitle)
+  }
 
   return (
     <section
@@ -141,48 +149,30 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
       )}
 
       <div className="absolute top-1 right-1 z-10">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="watch"
-              size="icon"
-              disabled={!numberOfAiredEpisodes || isWatchEpisodesLoading || !episodes || episodes.length === 0}
-              data-state={areAllEpisodesWatched ? 'on' : 'off'}
-            >
-              <FontAwesomeIcon icon={isWatchEpisodesLoading ? faSpinner : faEye} spin={isWatchEpisodesLoading} />
-            </Button>
-          </DialogTrigger>
+        <Button
+          variant="watch"
+          size="icon"
+          disabled={!numberOfAiredEpisodes || isWatchEpisodesLoading || !episodes || episodes.length === 0}
+          data-state={areAllEpisodesWatched ? 'on' : 'off'}
+          onClick={() => {
+            if (areAllEpisodesWatched) setIsUnwatchDialogOpen(true)
+            else toggleEpisodesWatched()
+          }}
+        >
+          <FontAwesomeIcon icon={isWatchEpisodesLoading ? faSpinner : faEye} spin={isWatchEpisodesLoading} />
+        </Button>
 
+        <Dialog open={isUnwatchDialogOpen} onOpenChange={open => setIsUnwatchDialogOpen(open)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
-                {areAllEpisodesWatched
-                  ? `Do you want to mark all ${name} episodes as unwatched?`
-                  : `Do you want to mark all ${name} episodes as watched?`}
-              </DialogTitle>
+              <DialogTitle>{`Do you want to mark all ${name} episodes as unwatched?`}</DialogTitle>
             </DialogHeader>
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button
-                  variant={areAllEpisodesWatched ? 'negative' : 'default'}
-                  onClick={async () => {
-                    if (!season.episodes) return
-
-                    const episodesToToggle = season.episodes.filter(airedEpisodes).map(ep => ({
-                      seasonNumber: season.season_number - 1,
-                      episodeNumber: ep.episode_number - 1,
-                    }))
-
-                    const seasonTitle = `${season.name || `Season ${season.season_number}`}`
-
-                    if (areAllEpisodesWatched) unwatchMultipleEpisodes(episodesToToggle, seasonTitle)
-                    else watchMultipleEpisodes(episodesToToggle, seasonTitle)
-                  }}
-                  disabled={isWatchEpisodesLoading}
-                >
+                <Button variant="negative" onClick={toggleEpisodesWatched} disabled={isWatchEpisodesLoading}>
                   <FontAwesomeIcon icon={faEye} />
-                  {areAllEpisodesWatched ? 'Mark all as Unwatched' : 'Mark all as Watched'}
+                  <span>{'Mark all as Unwatched'}</span>
                 </Button>
               </DialogClose>
 
