@@ -39,3 +39,11 @@ Organization (eg: Company Name): Pinya
 Country (2 letter code): ES
 
 https://developer.chrome.com/docs/android/trusted-web-activity/quick-start/
+
+```bash
+bubblewrap init --manifest=https://www.cuenext.app/manifest.json
+```
+
+```bash
+bubblewrap build
+```
