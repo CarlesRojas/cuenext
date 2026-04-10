@@ -49,7 +49,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   const scrollContainer = useRef<HTMLDivElement>(null)
   const [showHeader, setShowHeader] = useState(true)
-  const [sidebarExpanded, setSidebarExpanded] = useLocalStorage('CUENEXT_SIDEBAR_EXPANDED', false)
+  const [sidebarExpanded, setSidebarExpanded] = useLocalStorage('CUENEXT_SIDEBAR_EXPANDED', true)
 
   const onScroll = () => {
     setShowHeader(!scrollContainer.current || scrollContainer.current.scrollTop < 20)
