@@ -94,9 +94,10 @@ function RouteComponent() {
         {media === 'movie' && movie.data && <MovieDetails movie={movie.data} />}
         {media === 'tv' && show.data && <ShowDetails show={show.data} />}
 
+        <WatchProviders tmdbId={tmdbIdNumber} media={media as MediaType} />
+
         {media === 'tv' && show.data && <ShowSeasons show={show.data} />}
 
-        <WatchProviders tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Cast tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Recommendations tmdbId={tmdbIdNumber} media={media as MediaType} />
