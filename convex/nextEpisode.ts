@@ -13,7 +13,6 @@ const airedEpisodes = (episode: TmdbEpisode) => {
   return airDate <= today
 }
 
-// trigger deploy
 export const updateNextEpisode = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
