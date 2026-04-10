@@ -8,7 +8,13 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { faCalendarDays, faCirclePlay, faCompass, faSquareCaretLeft, faUser } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowRightFromBracket,
+  faCalendarDays,
+  faCirclePlay,
+  faCompass,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { LinkProps } from '@tanstack/react-router'
 import { ClientOnly, Link, useLocation } from '@tanstack/react-router'
@@ -81,11 +87,11 @@ export default function AppShell({ children }: AppShellProps) {
                   className="-mb-9.5 self-end"
                 >
                   <FontAwesomeIcon
-                    icon={faSquareCaretLeft}
+                    icon={faArrowRightFromBracket}
                     size="xl"
                     className={cn(
-                      'duration-slow size-4 opacity-70 transition-transform',
-                      !sidebarExpanded && 'rotate-180',
+                      'duration-slow size-5 max-h-5 max-w-5 rotate-180 opacity-70 transition-transform',
+                      !sidebarExpanded && 'rotate-0',
                     )}
                   />
                 </Button>
