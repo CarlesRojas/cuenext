@@ -9,9 +9,10 @@ import { motion } from 'motion/react'
 
 interface MediaTypeSelectorProps {
   isMobile?: boolean
+  isExpanded?: boolean
 }
 
-export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) {
+export function MediaTypeSelector({ isMobile = false, isExpanded = false }: MediaTypeSelectorProps) {
   const location = useLocation()
   const { media, ...params } = useSearchParams()
   const navigate = useNavigate()
@@ -22,21 +23,21 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
     <LiquidGlass
       className={cn(
         'relative w-fit rounded-full bg-neutral-800/40 transition-opacity duration-300',
-        !isMobile && 'w-full',
+        !isMobile && 'w-full rounded-[22px]',
         hide && 'pointer-events-none opacity-0',
       )}
     >
       <div
         className={cn(
-          'flex h-11 max-h-11 min-h-11 w-fit flex-row items-center rounded-full border border-neutral-700/50 bg-neutral-800/80 backdrop-blur-md',
-          !isMobile && 'w-full',
+          'box-content flex h-11 max-h-11 min-h-11 w-fit flex-row items-center rounded-full border border-neutral-700/50 bg-neutral-800/80 backdrop-blur-md',
+          !isMobile && 'h-21 max-h-21 min-h-21 w-full flex-col rounded-[22px]',
         )}
       >
         <Button
           variant="ghost"
           size="small"
           onClick={() => navigate({ to: '.', replace: true, search: { media: 'tv', ...params } })}
-          className={cn(media === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
+          className={cn('gap-0', media === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(100%-0.5rem)]')}
         >
           {media === 'tv' && (
             <motion.div
@@ -46,15 +47,30 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
             />
           )}
 
-          <FontAwesomeIcon icon={faTv} size="xl" className="z-60 -mx-1 h-4 max-h-4 min-h-4" />
-          <span className="z-60">Shows</span>
+          <FontAwesomeIcon
+            icon={faTv}
+            size="xl"
+            className={cn(
+              'duration-slow z-60 -mx-1 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4 pl-0 transition-[padding]',
+              !isExpanded && !isMobile && 'pl-3',
+            )}
+          />
+
+          <span
+            className={cn(
+              'duration-slow z-60 max-w-full overflow-hidden pl-3 text-nowrap opacity-100 transition-[max-width,opacity]',
+              !isExpanded && !isMobile && 'max-w-0 opacity-0',
+            )}
+          >
+            Shows
+          </span>
         </Button>
 
         <Button
           variant="ghost"
           size="small"
           onClick={() => navigate({ to: '.', replace: true, search: { media: 'movie', ...params } })}
-          className={cn(media === 'movie' && 'text-sky-500!', !isMobile && 'w-[calc(50%-0.5rem)]')}
+          className={cn('gap-0 md:mt-0!', media === 'movie' && 'text-sky-500!', !isMobile && 'w-[calc(100%-0.5rem)]')}
         >
           {media === 'movie' && (
             <motion.div
@@ -64,8 +80,23 @@ export function MediaTypeSelector({ isMobile = false }: MediaTypeSelectorProps) 
             />
           )}
 
-          <FontAwesomeIcon icon={faClapperboard} size="xl" className="z-60 -mx-1 h-4 max-h-4 min-h-4" />
-          <span className="z-60">Movies</span>
+          <FontAwesomeIcon
+            icon={faClapperboard}
+            size="xl"
+            className={cn(
+              'duration-slow z-60 -mx-1 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4 pl-0 transition-[padding]',
+              !isExpanded && !isMobile && 'pl-3',
+            )}
+          />
+
+          <span
+            className={cn(
+              'duration-slow z-60 max-w-full overflow-hidden pl-3 text-nowrap opacity-100 transition-[max-width,opacity]',
+              !isExpanded && !isMobile && 'max-w-0 opacity-0',
+            )}
+          >
+            Movies
+          </span>
         </Button>
       </div>
     </LiquidGlass>
