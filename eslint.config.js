@@ -15,6 +15,6 @@ export default [
     },
   },
   {
-    ignores: ['eslint.config.js', 'prettier.config.js', '.output/**', 'convex/_generated/**'],
+    ignores: ['eslint.config.js', 'prettier.config.js', '.output/**', 'convex/_generated/**', 'android/**', 'ios/**'],
   },
 ]
