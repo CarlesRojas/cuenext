@@ -38,7 +38,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
           size="small"
           onClick={() => navigate({ to: '.', replace: true, search: { media: 'tv', ...params } })}
           className={cn(
-            'justify-start gap-0 md:px-2.5',
+            'justify-start gap-0 md:px-2',
             media === 'tv' && 'text-sky-500!',
             !isMobile && 'w-[calc(100%-0.5rem)]',
           )}
@@ -51,7 +51,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
             />
           )}
 
-          <FontAwesomeIcon icon={faTv} size="xl" className="z-60 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4" />
+          <FontAwesomeIcon icon={faTv} size="xl" className="z-60 h-5 max-h-5 min-h-5 w-5 max-w-5 min-w-5" />
 
           <span
             className={cn(
@@ -68,7 +68,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
           size="small"
           onClick={() => navigate({ to: '.', replace: true, search: { media: 'movie', ...params } })}
           className={cn(
-            'justify-start gap-0 md:mt-0! md:px-2.5',
+            'justify-start gap-0 md:mt-0! md:px-2',
             media === 'movie' && 'text-sky-500!',
             !isMobile && 'w-[calc(100%-0.5rem)]',
           )}
@@ -81,7 +81,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
             />
           )}
 
-          <FontAwesomeIcon icon={faClapperboard} size="xl" className="z-60 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4" />
+          <FontAwesomeIcon icon={faClapperboard} size="xl" className="z-60 h-5 max-h-5 min-h-5 w-5 max-w-5 min-w-5" />
 
           <span
             className={cn(
