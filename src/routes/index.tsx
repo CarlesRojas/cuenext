@@ -74,7 +74,7 @@ function App() {
 
               <SignInButton mode="modal">
                 <Button asChild>
-                  <Link to="/discover" params={{ media: 'tv' }}>
+                  <Link to="/discover" search={{ media: 'tv' }}>
                     <FontAwesomeIcon icon={faCompass} size="lg" />
                     <span>Find TV Shows</span>
                   </Link>
@@ -176,7 +176,7 @@ function App() {
 
               <SignInButton mode="modal">
                 <Button asChild>
-                  <Link to="/discover" params={{ media: 'movie' }}>
+                  <Link to="/discover" search={{ media: 'movie' }}>
                     <FontAwesomeIcon icon={faCompass} size="lg" />
                     <span>Find Movies</span>
                   </Link>
