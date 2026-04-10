@@ -20,8 +20,8 @@
     "path": "/Users/carles.rojas/Documents/Repos/cuenext/android/android.keystore",
     "alias": "cuenext_key_store"
   },
-  "appVersionName": "2",
-  "appVersionCode": 2,
+  "appVersionName": "5",
+  "appVersionCode": 5,
   "shortcuts": [
     {
       "name": "Watchlist",
@@ -68,5 +68,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": ["standalone", "fullscreen", "minimal-ui", "window-controls-overlay", "browser"],
-  "appVersion": "2"
+  "appVersion": "5"
 }
