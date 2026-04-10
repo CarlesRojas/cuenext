@@ -4,6 +4,7 @@ import { ShowSeason } from '#/component/ShowSeason'
 import { useShowInfo } from '#/hooks/useShowInfo'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
+import { useClerk } from '@clerk/tanstack-react-start'
 import { convexAction, convexQuery } from '@convex-dev/react-query'
 import { useQueries, useQuery } from '@tanstack/react-query'
 
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export function ShowSeasons({ show }: Props) {
+  const clerk = useClerk()
+
   const seasonQueries = useQueries({
     queries: (show.seasons || []).map(season => ({
       ...convexAction(api.tmdb.getShowSeasonDetails, {
@@ -20,6 +23,11 @@ export function ShowSeasons({ show }: Props) {
       }),
       enabled: !!show.seasons?.length,
     })),
+  })
+
+  const watchedEpisodes = useQuery({
+    ...convexQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: show.id }),
+    enabled: clerk.isSignedIn,
   })
 
   const showInfo = useShowInfo(show.id)
@@ -73,7 +81,7 @@ export function ShowSeasons({ show }: Props) {
           <h2 className={cn('text-lg font-semibold opacity-80', completeNextEpisode && 'mt-4')}>All episodes</h2>
         )}
 
-        {regularSeasons.map(season => (
+        {regularSeasons.map((season, index) => (
           <ShowSeason
             key={season.id}
             showId={show.id}
@@ -82,6 +90,20 @@ export function ShowSeasons({ show }: Props) {
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
+            seasonWatchedEpisodes={watchedEpisodes.data?.filter(we => we.seasonNumber === season.season_number - 1)}
+            previousUnwatchedEpisodes={
+              watchedEpisodes.data
+                ? regularSeasons
+                    .slice(0, index)
+                    .flatMap(s => s.episodes || [])
+                    .filter(
+                      ep =>
+                        !watchedEpisodes.data.some(
+                          we => we.seasonNumber === ep.season_number - 1 && we.episodeNumber === ep.episode_number - 1,
+                        ),
+                    )
+                : undefined
+            }
           />
         ))}
 
@@ -106,6 +128,7 @@ export function ShowSeasons({ show }: Props) {
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
+            previousUnwatchedEpisodes={[]}
           />
         )}
       </div>

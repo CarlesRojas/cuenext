@@ -4,14 +4,15 @@ import { Button } from '#/component/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
 import { useWatchEpisodes } from '#/hooks/useWatchEpisodes'
 import type { TmdbEpisode, TmdbSeason } from '#/type/tmdb'
-import { useClerk } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { faEye, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faEye, faSpinner, faTimes, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
-import { api } from '../../convex/_generated/api'
+
+interface Episode {
+  seasonNumber: number
+  episodeNumber: number
+}
 
 interface Props {
   showId: number
@@ -21,6 +22,8 @@ interface Props {
   showName: string
   showPoster?: string | null
   showBackdrop?: string | null
+  seasonWatchedEpisodes?: Episode[]
+  previousUnwatchedEpisodes?: TmdbEpisode[]
 }
 
 const airedEpisodes = (episode: TmdbEpisode) => {
@@ -30,18 +33,19 @@ const airedEpisodes = (episode: TmdbEpisode) => {
   return airDate <= today
 }
 
-export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName, showPoster, showBackdrop }: Props) {
-  const clerk = useClerk()
-  const { id, name, air_date, poster_path, episodes, season_number } = season
+export function ShowSeason({
+  showId,
+  season,
+  continuousEpisodeNumbers,
+  showName,
+  showPoster,
+  showBackdrop,
+  seasonWatchedEpisodes,
+  previousUnwatchedEpisodes,
+}: Props) {
+  const { id, name, air_date, poster_path, episodes } = season
 
-  const watchedEpisodes = useQuery({
-    ...convexQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: showId }),
-    enabled: clerk.isSignedIn,
-  })
-
-  const numberOfWatchedEpisodes = watchedEpisodes.data
-    ? watchedEpisodes.data.filter(we => we.seasonNumber === season_number - 1).length
-    : null
+  const numberOfWatchedEpisodes = seasonWatchedEpisodes?.length || null
   const numberOfAiredEpisodes = episodes ? episodes.filter(airedEpisodes).length : null
   const areAllEpisodesWatched =
     episodes && !!numberOfAiredEpisodes ? numberOfWatchedEpisodes === numberOfAiredEpisodes : false
@@ -59,7 +63,7 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
 
   const [hasImage, setHasImage] = useState(true)
   const [isUnwatchDialogOpen, setIsUnwatchDialogOpen] = useState(false)
-  const [isMarkPreviousEpisodesDialogOpen, setIsMarkPreviousEpisodesDialogOpen] = useState(true)
+  const [isMarkPreviousEpisodesDialogOpen, setIsMarkPreviousEpisodesDialogOpen] = useState(false)
 
   const formatedAirDate = air_date
     ? new Date(air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -69,18 +73,21 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
 
   if (!season.episodes || season.episodes.length === 0) return null
 
-  const toggleEpisodesWatched = async () => {
+  const toggleEpisodesWatched = async (includePrevious = false) => {
     if (!season.episodes) return
 
-    const episodesToToggle = season.episodes.filter(airedEpisodes).map(ep => ({
-      seasonNumber: season.season_number - 1,
+    const previousEpisodesToToggle =
+      !areAllEpisodesWatched && includePrevious && previousUnwatchedEpisodes ? previousUnwatchedEpisodes : []
+
+    const episodesToToggle = [...previousEpisodesToToggle, ...season.episodes].filter(airedEpisodes).map(ep => ({
+      seasonNumber: ep.season_number - 1,
       episodeNumber: ep.episode_number - 1,
     }))
 
-    const seasonTitle = `${season.name || `Season ${season.season_number}`}`
+    const title = previousEpisodesToToggle.length > 0 ? showName : `${season.name || `Season ${season.season_number}`}`
 
-    if (areAllEpisodesWatched) unwatchMultipleEpisodes(episodesToToggle, seasonTitle)
-    else watchMultipleEpisodes(episodesToToggle, seasonTitle)
+    if (areAllEpisodesWatched) unwatchMultipleEpisodes(episodesToToggle, title)
+    else watchMultipleEpisodes(episodesToToggle, title)
   }
 
   return (
@@ -156,7 +163,9 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
           data-state={areAllEpisodesWatched ? 'on' : 'off'}
           onClick={() => {
             if (areAllEpisodesWatched) setIsUnwatchDialogOpen(true)
-            else toggleEpisodesWatched()
+            else if (previousUnwatchedEpisodes && previousUnwatchedEpisodes.length > 0)
+              setIsMarkPreviousEpisodesDialogOpen(true)
+            else toggleEpisodesWatched(false)
           }}
         >
           <FontAwesomeIcon icon={isWatchEpisodesLoading ? faSpinner : faEye} spin={isWatchEpisodesLoading} />
@@ -170,7 +179,11 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="negative" onClick={toggleEpisodesWatched} disabled={isWatchEpisodesLoading}>
+                <Button
+                  variant="negative"
+                  onClick={() => toggleEpisodesWatched(false)}
+                  disabled={isWatchEpisodesLoading}
+                >
                   <FontAwesomeIcon icon={faEye} />
                   <span>{'Mark all as Unwatched'}</span>
                 </Button>
@@ -178,6 +191,37 @@ export function ShowSeason({ showId, season, continuousEpisodeNumbers, showName,
 
               <DialogClose asChild>
                 <Button variant="secondary">Cancel</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isMarkPreviousEpisodesDialogOpen}
+          onOpenChange={open => setIsMarkPreviousEpisodesDialogOpen(open)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{`Do you want to mark all previous seasons as watched?`}</DialogTitle>
+            </DialogHeader>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button onClick={() => toggleEpisodesWatched(true)} disabled={isWatchEpisodesLoading}>
+                  <FontAwesomeIcon icon={faCheck} />
+                  <span>{'Yes'}</span>
+                </Button>
+              </DialogClose>
+
+              <DialogClose asChild>
+                <Button
+                  variant="secondary"
+                  onClick={() => toggleEpisodesWatched(false)}
+                  disabled={isWatchEpisodesLoading}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                  <span>{'No'}</span>
+                </Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>
