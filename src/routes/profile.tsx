@@ -123,7 +123,7 @@ function ProfilePage() {
         {!user && (
           <SignInButton mode="modal">
             <Button>
-              <FontAwesomeIcon icon={faSignIn} className="mr-2" />
+              <FontAwesomeIcon icon={faSignIn} size="lg" />
               <span>Sign in</span>
             </Button>
           </SignInButton>

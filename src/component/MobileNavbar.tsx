@@ -87,29 +87,23 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                 key={item.to}
                 to={item.to}
                 search={searchParams}
-                activeProps={{ className: 'text-sky-500' }}
-                inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                 className={cn(
                   'relative my-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity duration-300 ease-in-out first:ml-1.5 last-of-type:mr-1.5',
-                  location.pathname === '/' && item.to === '/' && 'text-sky-500!',
-                  location.pathname === '/' && item.to !== '/' && 'text-white! hover:bg-neutral-400/10!',
+                  location.pathname === item.to && 'text-sky-500!',
+                  location.pathname !== item.to && 'text-white! hover:bg-neutral-400/10!',
                   isExpanded && 'pointer-events-none opacity-0',
                 )}
               >
-                {({ isActive }) => (
-                  <>
-                    {(isActive || (location.pathname === '/' && item.to === '/')) && (
-                      <motion.div
-                        layoutId="nav-indicator"
-                        className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                      />
-                    )}
-
-                    <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
-                    <span className="z-60 line-clamp-1 text-[9px] leading-2 font-bold">{item.label}</span>
-                  </>
+                {location.pathname === item.to && (
+                  <motion.div
+                    layoutId="nav-indicator"
+                    className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
                 )}
+
+                <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
+                <span className="z-60 line-clamp-1 text-[9px] leading-2 font-bold">{item.label}</span>
               </Link>
             ))}
 

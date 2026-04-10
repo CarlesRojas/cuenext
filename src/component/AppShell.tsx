@@ -66,28 +66,22 @@ export default function AppShell({ children }: AppShellProps) {
                       key={item.to}
                       to={item.to}
                       search={searchParams}
-                      activeProps={{ className: 'text-sky-500' }}
-                      inactiveProps={{ className: 'text-white hover:bg-neutral-400/10' }}
                       className={cn(
                         'relative flex h-fit w-full items-center gap-3 rounded-full p-2.5 transition-colors',
-                        location.pathname === '/' && item.to === '/' && 'text-sky-500!',
-                        location.pathname === '/' && item.to !== '/' && 'text-white! hover:bg-neutral-400/10!',
+                        location.pathname === item.to && 'text-sky-500!',
+                        location.pathname !== item.to && 'text-white! hover:bg-neutral-400/10!',
                       )}
                     >
-                      {({ isActive }) => (
-                        <>
-                          {(isActive || (location.pathname === '/' && item.to === '/')) && (
-                            <motion.div
-                              layoutId="nav-indicator"
-                              className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
-                              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                            />
-                          )}
-
-                          <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
-                          <span className="z-60 font-semibold">{item.label}</span>
-                        </>
+                      {location.pathname === item.to && (
+                        <motion.div
+                          layoutId="nav-indicator"
+                          className="pointer-events-none absolute inset-0 z-50 rounded-full bg-neutral-400/30"
+                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        />
                       )}
+
+                      <FontAwesomeIcon icon={item.icon} size="xl" className="z-60 h-6 max-h-6 min-h-6" />
+                      <span className="z-60 font-semibold">{item.label}</span>
                     </Link>
                   ))}
                 </nav>

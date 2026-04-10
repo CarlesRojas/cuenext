@@ -8,7 +8,7 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
-import { faCalendarDays, faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarDays, faCompass, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -46,7 +46,7 @@ function App() {
 
           <SignInButton mode="modal">
             <Button>
-              <FontAwesomeIcon icon={faSignIn} className="mr-2" />
+              <FontAwesomeIcon icon={faSignIn} size="lg" />
               <span>Sign in</span>
             </Button>
           </SignInButton>
@@ -65,6 +65,23 @@ function App() {
                 </Section>
               ),
             )}
+
+          {tvSections && Object.values(tvSections).every(section => section.length === 0) && (
+            <div className="screen-px mb-8 flex flex-col gap-4">
+              <span className="font-semibold tracking-wide text-neutral-500">
+                Your tracked TV shows will appear here. Start by finding them here:
+              </span>
+
+              <SignInButton mode="modal">
+                <Button asChild>
+                  <Link to="/discover" params={{ media: 'tv' }}>
+                    <FontAwesomeIcon icon={faCompass} size="lg" />
+                    <span>Find TV Shows</span>
+                  </Link>
+                </Button>
+              </SignInButton>
+            </div>
+          )}
 
           {tvSections && tvSections.watchNext.length > 0 && (
             <Section title="Watch next">
@@ -150,6 +167,23 @@ function App() {
                 ))}
               </Section>
             ))}
+
+          {movieSections && Object.values(movieSections).every(section => section.length === 0) && (
+            <div className="screen-px mb-8 flex flex-col gap-4">
+              <span className="font-semibold tracking-wide text-neutral-500">
+                Your tracked movies will appear here. Start by finding them here:
+              </span>
+
+              <SignInButton mode="modal">
+                <Button asChild>
+                  <Link to="/discover" params={{ media: 'movie' }}>
+                    <FontAwesomeIcon icon={faCompass} size="lg" />
+                    <span>Find Movies</span>
+                  </Link>
+                </Button>
+              </SignInButton>
+            </div>
+          )}
 
           {movieSections && movieSections.watchNext.length > 0 && (
             <Section title="Watch next">
