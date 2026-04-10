@@ -37,7 +37,11 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
           variant="ghost"
           size="small"
           onClick={() => navigate({ to: '.', replace: true, search: { media: 'tv', ...params } })}
-          className={cn('gap-0', media === 'tv' && 'text-sky-500!', !isMobile && 'w-[calc(100%-0.5rem)]')}
+          className={cn(
+            'justify-start gap-0 md:px-2.5',
+            media === 'tv' && 'text-sky-500!',
+            !isMobile && 'w-[calc(100%-0.5rem)]',
+          )}
         >
           {media === 'tv' && (
             <motion.div
@@ -47,14 +51,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
             />
           )}
 
-          <FontAwesomeIcon
-            icon={faTv}
-            size="xl"
-            className={cn(
-              'duration-slow z-60 -mx-1 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4 pl-0 transition-[padding]',
-              !isExpanded && !isMobile && 'pl-3',
-            )}
-          />
+          <FontAwesomeIcon icon={faTv} size="xl" className="z-60 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4" />
 
           <span
             className={cn(
@@ -70,7 +67,11 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
           variant="ghost"
           size="small"
           onClick={() => navigate({ to: '.', replace: true, search: { media: 'movie', ...params } })}
-          className={cn('gap-0 md:mt-0!', media === 'movie' && 'text-sky-500!', !isMobile && 'w-[calc(100%-0.5rem)]')}
+          className={cn(
+            'justify-start gap-0 md:mt-0! md:px-2.5',
+            media === 'movie' && 'text-sky-500!',
+            !isMobile && 'w-[calc(100%-0.5rem)]',
+          )}
         >
           {media === 'movie' && (
             <motion.div
@@ -80,14 +81,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
             />
           )}
 
-          <FontAwesomeIcon
-            icon={faClapperboard}
-            size="xl"
-            className={cn(
-              'duration-slow z-60 -mx-1 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4 pl-0 transition-[padding]',
-              !isExpanded && !isMobile && 'pl-3',
-            )}
-          />
+          <FontAwesomeIcon icon={faClapperboard} size="xl" className="z-60 h-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4" />
 
           <span
             className={cn(
