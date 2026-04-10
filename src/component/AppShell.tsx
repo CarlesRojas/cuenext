@@ -14,7 +14,7 @@ import type { LinkProps } from '@tanstack/react-router'
 import { ClientOnly, Link, useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { useWindowSize } from 'usehooks-ts'
+import { useLocalStorage, useWindowSize } from 'usehooks-ts'
 
 type NavItem = {
   to: NonNullable<LinkProps['to']>
@@ -43,7 +43,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   const scrollContainer = useRef<HTMLDivElement>(null)
   const [showHeader, setShowHeader] = useState(true)
-  const [sidebarExpanded, setSidebarExpanded] = useState(true)
+  const [sidebarExpanded, setSidebarExpanded] = useLocalStorage('CUENEXT_SIDEBAR_EXPANDED', false)
 
   const onScroll = () => {
     setShowHeader(!scrollContainer.current || scrollContainer.current.scrollTop < 20)
