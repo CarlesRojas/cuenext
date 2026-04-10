@@ -78,7 +78,7 @@ export default function AppShell({ children }: AppShellProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setSidebarExpanded(!sidebarExpanded)}
-                  className="self-end"
+                  className="-mb-5.5 self-end"
                 >
                   <FontAwesomeIcon
                     icon={faSquareCaretLeft}
@@ -123,11 +123,11 @@ export default function AppShell({ children }: AppShellProps) {
 
                   <div
                     className={cn(
-                      'pointer-events-none absolute inset-0 top-0 z-50 h-11 w-full rounded-[22px] bg-neutral-400/30 transition-[top]',
-                      location.pathname === '/' && 'top-0',
-                      location.pathname === '/upcoming' && 'top-13',
-                      location.pathname === '/discover' && 'top-26',
-                      location.pathname === '/profile' && 'top-39',
+                      'pointer-events-none absolute inset-0 top-0 z-50 h-11 w-full rounded-[22px] bg-neutral-400/30 opacity-0 transition-[top,opacity]',
+                      location.pathname === '/' && 'top-0 opacity-100',
+                      location.pathname === '/upcoming' && 'top-13 opacity-100',
+                      location.pathname === '/discover' && 'top-26 opacity-100',
+                      location.pathname === '/profile' && 'top-39 opacity-100',
                     )}
                   />
                 </nav>

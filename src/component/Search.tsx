@@ -7,14 +7,14 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
 import { useLocation, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import z from 'zod'
 
 interface Props {
   isMobile?: boolean
   mobileTabsWidth?: number
-  isExpanded?: boolean
-  setIsExpanded?: (expanded: boolean) => void
+  isExpanded: boolean
+  setIsExpanded: (expanded: boolean) => void
 }
 
 export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, setIsExpanded }: Props) {
@@ -23,6 +23,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
   const location = useLocation()
 
   const formSchema = z.object({ query: z.string() })
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const form = useForm({
     defaultValues: { query: urlQuery ?? '' },
@@ -57,7 +58,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
             e.preventDefault()
             form.handleSubmit()
           }}
-          className="flex items-center gap-1 p-1.5"
+          className="relative flex w-full items-center justify-between px-1"
         >
           <form.Field
             name="query"
@@ -69,6 +70,11 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                   onChange={e => handleInputChange(field, e.target.value)}
                   onBlur={field.handleBlur}
                   onClear={field.state.value ? () => handleClear(field) : undefined}
+                  ref={inputRef}
+                  containerClassName={cn(
+                    'duration-slow w-full max-w-full px-0 opacity-100 transition-[max-width,opacity]',
+                    !isExpanded && 'max-w-0 opacity-0',
+                  )}
                 />
               )
             }}
@@ -77,7 +83,19 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
           <form.Subscribe
             selector={state => [state.canSubmit, state.values.query] as const}
             children={([canSubmit, query]) => (
-              <Button type="submit" size="icon" disabled={!canSubmit || !query.trim()}>
+              <Button
+                type={isExpanded ? 'submit' : 'button'}
+                size="iconSmall"
+                onClick={
+                  isExpanded
+                    ? undefined
+                    : () => {
+                        setIsExpanded(true)
+                        inputRef.current?.focus()
+                      }
+                }
+                disabled={isExpanded && (!canSubmit || !query.trim())}
+              >
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </Button>
             )}
@@ -144,7 +162,8 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
 
                 if (!location.pathname.startsWith('/search'))
                   navigate({ to: '/search', replace: false, search: { media } })
-                setIsExpanded?.(true)
+
+                setIsExpanded(true)
               }}
               disabled={isExpanded && (!canSubmit || !query.trim())}
               className="m-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12"
