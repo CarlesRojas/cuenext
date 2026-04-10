@@ -73,7 +73,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                   ref={inputRef}
                   containerClassName={cn(
                     'duration-slow w-full max-w-full px-0 opacity-100 transition-[max-width,opacity]',
-                    !isExpanded && 'max-w-0 opacity-0',
+                    !isExpanded && 'pointer-events-none max-w-0 opacity-0',
                   )}
                 />
               )
@@ -86,6 +86,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
               <Button
                 type={isExpanded ? 'submit' : 'button'}
                 size="iconSmall"
+                variant={isExpanded ? 'default' : 'ghost'}
                 onClick={
                   isExpanded
                     ? undefined

@@ -10,7 +10,7 @@
   --spacing-aside-collapsed: calc(5.75rem + 0.75rem + 1rem);
   --spacing-header: calc(2.75rem + 0.75rem + 1rem);
 
-  --transition-duration-slow: 2000ms;
+  --transition-duration-slow: 300ms;
 }
 
 @custom-variant mouse (@media (hover: hover) and (pointer: fine));

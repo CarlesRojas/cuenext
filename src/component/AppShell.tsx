@@ -72,13 +72,13 @@ export default function AppShell({ children }: AppShellProps) {
               sidebarExpanded ? 'rounded-3xl' : 'rounded-4xl',
             )}
           >
-            <div className="scroll-container flex h-full w-full flex-col items-start justify-between gap-8 p-3">
-              <div className="relative flex w-full flex-col gap-8">
+            <div className="scroll-container flex h-full w-full flex-col items-start justify-between gap-12 p-3">
+              <div className="relative flex w-full flex-col gap-12">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setSidebarExpanded(!sidebarExpanded)}
-                  className="-mb-5.5 self-end"
+                  className="-mb-9.5 self-end"
                 >
                   <FontAwesomeIcon
                     icon={faSquareCaretLeft}
@@ -131,8 +131,6 @@ export default function AppShell({ children }: AppShellProps) {
                     )}
                   />
                 </nav>
-
-                <div className="h-px max-h-px min-h-px w-full bg-neutral-500/50" />
 
                 <MediaTypeSelector isExpanded={sidebarExpanded} />
               </div>
