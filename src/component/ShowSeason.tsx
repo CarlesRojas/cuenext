@@ -135,7 +135,7 @@ export function ShowSeason({
 
             <div className="mt-3 h-1.5 w-full min-w-36 rounded-full bg-white/30">
               <div
-                className="h-full rounded-full bg-white transition-[width] duration-300"
+                className="duration-slow h-full rounded-full bg-white transition-[width]"
                 style={{ width: `${progressPercentage}%` }}
                 role="progressbar"
                 aria-valuenow={progressPercentage}

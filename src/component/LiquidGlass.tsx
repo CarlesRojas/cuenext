@@ -115,7 +115,7 @@ export function LiquidGlass({
     'liquid-glass relative overflow-hidden',
     inline ? 'inline-flex align-middle' : 'w-max',
     button &&
-      'origin-[top_center] cursor-pointer shadow-[0px_0px_1px_white] transition-all duration-300 ease-out hover:scale-105 hover:-rotate-1',
+      'duration-slow origin-[top_center] cursor-pointer shadow-[0px_0px_1px_white] transition-all ease-out hover:scale-105 hover:-rotate-1',
     className,
   )
 

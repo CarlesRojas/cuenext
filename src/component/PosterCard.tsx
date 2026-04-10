@@ -51,7 +51,7 @@ export function PosterCard(props: Props) {
         className={cn(
           'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl',
           'w-36 max-w-36 min-w-36 lg:w-40 lg:max-w-40 lg:min-w-40 xl:w-44 xl:max-w-44 xl:min-w-44',
-          'transition-opacity duration-300',
+          'duration-slow transition-opacity',
           props.className,
         )}
       />
@@ -94,7 +94,7 @@ export function PosterCard(props: Props) {
         to="/media/$media/$tmdbId"
         params={{ tmdbId: id.toString(), media }}
         search={searchParams}
-        className="relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
+        className="duration-slow relative flex h-full w-full flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform hover:scale-[1.07] focus-visible:scale-[1.07] disabled:pointer-events-none"
         disabled={isWatchLoading || isFollowLoading}
       >
         <ProgressiveImage
@@ -135,7 +135,7 @@ export function PosterCard(props: Props) {
             >
               <div className="mt-3 h-1.5 w-full rounded-full bg-white/30">
                 <div
-                  className="h-full rounded-full bg-white transition-[width] duration-300"
+                  className="duration-slow h-full rounded-full bg-white transition-[width]"
                   style={{ width: `${progressPercentage}%` }}
                   role="progressbar"
                   aria-valuenow={progressPercentage}

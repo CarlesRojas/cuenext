@@ -114,7 +114,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
     >
       <div
         className={cn(
-          'flex w-fit min-w-fit items-center overflow-hidden transition-all duration-300 ease-in-out',
+          'duration-slow flex w-fit min-w-fit items-center overflow-hidden transition-all ease-in-out',
           isExpanded && 'gap-1 pl-1.5',
         )}
       >
@@ -124,7 +124,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
             form.handleSubmit()
           }}
           className={cn(
-            'relative flex items-center transition-[width,opacity] duration-300 ease-in-out',
+            'duration-slow relative flex items-center transition-[width,opacity] ease-in-out',
             isExpanded ? 'opacity-100' : 'w-0 opacity-0',
           )}
           style={isExpanded ? { width: (mobileTabsWidth ?? 0) - 68 - 70 } : undefined}

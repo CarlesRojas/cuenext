@@ -46,7 +46,7 @@ export default function RowCard(props: Props) {
         className={cn(
           'relative flex animate-pulse gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl',
           'h-40 max-h-40 min-h-40 w-full',
-          'transition-opacity duration-300',
+          'duration-slow transition-opacity',
           props.className,
         )}
       />
@@ -91,7 +91,7 @@ export default function RowCard(props: Props) {
         to="/media/$media/$tmdbId"
         params={{ tmdbId: id.toString(), media }}
         search={searchParams}
-        className="relative grid h-full w-full grid-cols-[auto_1fr] grid-rows-1 gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform duration-300 hover:scale-[1.05] focus-visible:scale-[1.05] disabled:pointer-events-none"
+        className="duration-slow relative grid h-full w-full grid-cols-[auto_1fr] grid-rows-1 gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-transform hover:scale-[1.05] focus-visible:scale-[1.05] disabled:pointer-events-none"
         disabled={isFollowLoading}
       >
         {hasPosterImage ? (

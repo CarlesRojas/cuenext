@@ -22,7 +22,7 @@ export function MediaTypeSelector({ isMobile = false, isExpanded = false }: Medi
   return (
     <LiquidGlass
       className={cn(
-        'relative w-fit rounded-full bg-neutral-800/40 transition-opacity duration-300',
+        'duration-slow relative w-fit rounded-full bg-neutral-800/40 transition-opacity',
         !isMobile && 'w-full rounded-[22px]',
         hide && 'pointer-events-none opacity-0',
       )}

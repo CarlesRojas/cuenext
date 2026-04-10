@@ -76,7 +76,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
         >
           <div
             className={cn(
-              'relative flex items-center justify-center transition-[width] duration-300 ease-in-out',
+              'duration-slow relative flex items-center justify-center transition-[width] ease-in-out',
               isExpanded ? 'w-15' : '',
               mobileTabsWidth === undefined && 'grow',
             )}
@@ -88,7 +88,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                 to={item.to}
                 search={searchParams}
                 className={cn(
-                  'relative my-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity duration-300 ease-in-out first:ml-1.5 last-of-type:mr-1.5',
+                  'duration-slow relative my-1.5 flex h-fit w-1/4 flex-col items-center gap-1 rounded-full p-1.5 transition-opacity ease-in-out first:ml-1.5 last-of-type:mr-1.5',
                   location.pathname === item.to && 'text-sky-500!',
                   location.pathname !== item.to && 'text-white! hover:bg-neutral-400/10!',
                   isExpanded && 'pointer-events-none opacity-0',
@@ -120,7 +120,7 @@ const MobileNavbar = ({ showHeader, fullHeight, visualHeight }: Props) => {
                   }
                 }}
                 className={cn(
-                  'm-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12 opacity-0 transition-opacity duration-300 ease-in-out',
+                  'duration-slow m-1.5 size-12 max-h-12 min-h-12 max-w-12 min-w-12 opacity-0 transition-opacity ease-in-out',
                   isExpanded && 'pointer-events-auto opacity-100',
                 )}
               >

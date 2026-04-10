@@ -50,7 +50,7 @@ function VideoItem({ video }: VideoItemProps) {
       rel="noopener noreferrer"
       onClick={handleClick}
       className={cn(
-        'group relative flex w-64 flex-col overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-all duration-300 hover:scale-105 focus-visible:scale-105 lg:w-72',
+        'group duration-slow relative flex w-64 flex-col overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl transition-all hover:scale-105 focus-visible:scale-105 lg:w-72',
       )}
     >
       <div className="relative aspect-video w-64 lg:w-72">

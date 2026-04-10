@@ -67,7 +67,7 @@ function RouteComponent() {
     <div className="relative flex w-full flex-col">
       <header
         className={cn(
-          'screen-px screen-py pointer-events-none fixed top-0 right-0 left-0 z-40 mx-[unset] w-full pb-8 opacity-0 backdrop-blur-md transition-opacity duration-200',
+          'screen-px screen-py pointer-events-none fixed top-0 right-0 left-0 z-40 mx-[unset] w-full pb-8 opacity-0 backdrop-blur-md transition-[opacity,padding]',
           isMobile && '-top-14',
           showHeader && 'pointer-events-auto opacity-100',
         )}
@@ -86,7 +86,7 @@ function RouteComponent() {
         </div>
       </header>
 
-      <header className="md:left-aside sidebar-collapsed:md:left-aside-collapsed duration-slow fixed top-4 left-4 z-50 w-fit rounded-full transition-[padding] md:top-8">
+      <header className="md:left-aside sidebar-collapsed:md:left-aside-collapsed duration-slow fixed top-4 left-4 z-50 w-fit rounded-full transition-[left] md:top-8">
         <BackButton />
       </header>
 

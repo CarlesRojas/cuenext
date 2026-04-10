@@ -68,8 +68,7 @@ export function Section({
               <CarouselPrevious
                 className={cn(
                   'mouse:block z-10 hidden',
-                  !isMobile &&
-                    'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[padding]',
+                  !isMobile && 'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[left]',
                 )}
               />
 
