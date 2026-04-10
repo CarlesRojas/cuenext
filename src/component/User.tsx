@@ -22,7 +22,8 @@ export function User({ isMobile, isExpanded }: UserProps) {
               : isExpanded
                 ? {
                     rootBox: 'w-full! max-w-full! overflow-hidden!',
-                    userButtonTrigger: '!w-full !shadow-none !rounded-full hover:!bg-neutral-400/10',
+                    userButtonTrigger:
+                      '!w-full !shadow-none !rounded-full hover:!bg-neutral-400/10 focus-visible:!bg-neutral-400/10',
                     userButtonBox: '!w-full !flex-row-reverse !justify-end !gap-0 p-1!',
                     avatarBox: '!size-9',
                     userButtonOuterIdentifier:
@@ -30,7 +31,8 @@ export function User({ isMobile, isExpanded }: UserProps) {
                   }
                 : {
                     rootBox: 'w-full! max-w-full! overflow-hidden!',
-                    userButtonTrigger: '!w-full !shadow-none !rounded-full hover:!bg-neutral-400/10',
+                    userButtonTrigger:
+                      '!w-full !shadow-none !rounded-full hover:!bg-neutral-400/10 focus-visible:!bg-neutral-400/10',
                     userButtonBox:
                       '!w-full !flex-row-reverse !justify-end !gap-0 p-1! transition-[gap]! duration-slow!',
                     avatarBox: '!size-9',

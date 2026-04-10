@@ -107,7 +107,8 @@ export default function AppShell({ children }: AppShellProps) {
                       className={cn(
                         'duration-slow relative flex h-fit w-full rounded-[22px] p-2.5 transition-[color,width]',
                         location.pathname === item.to && 'text-sky-500!',
-                        location.pathname !== item.to && 'text-white! hover:bg-neutral-400/10!',
+                        location.pathname !== item.to &&
+                          'text-white! hover:bg-neutral-400/10! focus-visible:bg-neutral-400/10!',
                       )}
                     >
                       <FontAwesomeIcon

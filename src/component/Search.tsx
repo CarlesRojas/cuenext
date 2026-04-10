@@ -69,12 +69,13 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                   value={field.state.value}
                   onChange={e => handleInputChange(field, e.target.value)}
                   onBlur={field.handleBlur}
-                  onClear={field.state.value ? () => handleClear(field) : undefined}
+                  onClear={isExpanded && field.state.value ? () => handleClear(field) : undefined}
                   ref={inputRef}
                   containerClassName={cn(
                     'duration-slow w-full max-w-full px-0 opacity-100 transition-[max-width,opacity]',
                     !isExpanded && 'pointer-events-none max-w-0 opacity-0',
                   )}
+                  disabled={!isExpanded}
                 />
               )
             }}
@@ -90,9 +91,14 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                 onClick={
                   isExpanded
                     ? undefined
-                    : () => {
+                    : e => {
+                        e.preventDefault()
+                        e.stopPropagation()
                         setIsExpanded(true)
-                        inputRef.current?.focus()
+
+                        setTimeout(() => {
+                          inputRef.current?.focus()
+                        }, 100)
                       }
                 }
                 disabled={isExpanded && (!canSubmit || !query.trim())}
