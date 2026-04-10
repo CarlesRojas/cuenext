@@ -86,7 +86,7 @@ function RouteComponent() {
         </div>
       </header>
 
-      <header className="md:left-aside fixed top-4 left-4 z-50 w-fit rounded-full md:top-8">
+      <header className="md:left-aside sidebar-collapsed:md:left-aside-collapsed duration-slow fixed top-4 left-4 z-50 w-fit rounded-full transition-[padding] md:top-8">
         <BackButton />
       </header>
 

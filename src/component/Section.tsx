@@ -35,7 +35,11 @@ export function Section({
       <Button
         variant="link"
         size="link"
-        className={cn('px-4', !isMobile && 'pl-aside', !canCollapse && 'pointer-events-none!')}
+        className={cn(
+          'px-4',
+          !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
+          !canCollapse && 'pointer-events-none!',
+        )}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <h2 className="text-lg font-semibold opacity-80">{title}</h2>
@@ -62,9 +66,19 @@ export function Section({
           >
             <Carousel
               opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
-              className={cn('w-full px-4', !isMobile && 'pl-aside w-dvw px-8')}
+              className={cn(
+                'w-full px-4',
+                !isMobile &&
+                  'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow w-dvw px-8 transition-[padding]',
+              )}
             >
-              <CarouselPrevious className={cn('mouse:block z-10 hidden', !isMobile && 'left-aside ml-2')} />
+              <CarouselPrevious
+                className={cn(
+                  'mouse:block z-10 hidden',
+                  !isMobile &&
+                    'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[padding]',
+                )}
+              />
 
               <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8')}>
                 {React.Children.map(
@@ -81,7 +95,16 @@ export function Section({
               <CarouselNext className={cn('mouse:block z-10 hidden')} />
             </Carousel>
 
-            {below && <div className={cn('-mt-4 px-4', !isMobile && 'pl-aside')}>{below}</div>}
+            {below && (
+              <div
+                className={cn(
+                  '-mt-4 px-4',
+                  !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
+                )}
+              >
+                {below}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
