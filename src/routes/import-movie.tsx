@@ -122,11 +122,8 @@ function ImportPage() {
         setProgress(prev => ({ ...prev, current: prev.current + 1 }))
 
         if (result.status === 'fulfilled') {
-          if (result.value.success) {
-            results.success++
-          } else {
-            results.errors.push(result.value.error)
-          }
+          if (result.value.success) results.success++
+          else if (result.value.error) results.errors.push(result.value.error)
         } else {
           results.errors.push({
             movie: 'Unknown',
