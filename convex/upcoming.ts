@@ -35,7 +35,8 @@ export const getUpcomingTvWatchlist = query({
 
       if (!nextEp) continue
 
-      const isFinished = nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1 && nextEp.status === 'ended'
+      const isFinished =
+        nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1 && ['ended', 'canceled'].includes(nextEp.status)
       if (isFinished) continue
 
       tvUpcoming.push({

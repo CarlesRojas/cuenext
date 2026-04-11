@@ -53,7 +53,7 @@ export const getTvSections = query({
 
       const noMoreEpisodes = nextEp.seasonNumber === -1 && nextEp.episodeNumber === -1
 
-      if (noMoreEpisodes && nextEp.status === 'ended') finished.push(item)
+      if (noMoreEpisodes && ['ended', 'canceled'].includes(nextEp.status)) finished.push(item)
       else if (isStopped) stoppedWatching.push(item)
       else if (noMoreEpisodes) waitingForEpisodes.push(item)
       else if (nextEp.seasonNumber === 0 && nextEp.episodeNumber === 0) haventStarted.push(item)

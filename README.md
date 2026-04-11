@@ -51,3 +51,9 @@ bubblewrap build
 ```bash
 adb install app-release-signed.apk
 ```
+
+# TODO
+
+- [ ] Section Carousel does not adapt when the screen resizes
+- [ ] In upcoming, instead of separating in these week days, do the next 7 days
+- [ ] The height of the sidebar animates when returning to the tab

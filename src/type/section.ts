@@ -17,7 +17,7 @@ export type TvSectionItem = {
   numberOfSeasons: number
   followedAt?: number
   watchedPercentage: number
-  status: 'ended' | 'ongoing'
+  status: string
   name: string
   poster?: string | null
   backdrop?: string | null

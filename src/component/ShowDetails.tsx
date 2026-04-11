@@ -94,7 +94,8 @@ export function ShowDetails({ show }: ShowDetailsProps) {
               <p
                 className={cn(
                   'w-fit rounded-full border border-green-500/30 bg-green-500/10 px-2 py-px text-sm leading-6 font-medium tracking-wide text-green-400/70 capitalize backdrop-blur-md',
-                  status.toLowerCase() === 'ended' && 'border-red-500/30 bg-red-500/10 text-red-400/70',
+                  ['ended', 'canceled'].includes(status.toLowerCase()) &&
+                    'border-red-500/30 bg-red-500/10 text-red-400/70',
                 )}
               >
                 {status}
