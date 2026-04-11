@@ -10,9 +10,29 @@ export const getMovieStats = action({
   handler: async context => {
     await requireUser(context)
 
+    const fetchFollowedMovies = async () => {
+      const allFollows: number[] = []
+      let continueCursor: string | null = null
+      let isDone = false
+
+      while (!isDone) {
+        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowed, {
+          type: 'movie',
+          paginationOpts: { numItems: 1000, cursor: continueCursor },
+        })
+
+        continueCursor = result.continueCursor
+        isDone = result.isDone
+
+        allFollows.push(...result.page)
+      }
+
+      return allFollows
+    }
+
     const movies: { tmdbId: number }[] = await context.runQuery(api.watch.getWatchedMovies)
 
-    const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'movie' })
+    const follows: number[] = await fetchFollowedMovies()
 
     const cachedMovieInfos = await context.runQuery(api.movieInfo.getMovieInfo, {
       tmdbIds: movies.map(m => m.tmdbId),
@@ -126,8 +146,28 @@ export const getShowStats = action({
       return allCachedEpisodeInfos
     }
 
+    const fetchFollowedShows = async () => {
+      const allFollows: number[] = []
+      let continueCursor: string | null = null
+      let isDone = false
+
+      while (!isDone) {
+        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowed, {
+          type: 'tv',
+          paginationOpts: { numItems: 1000, cursor: continueCursor },
+        })
+
+        continueCursor = result.continueCursor
+        isDone = result.isDone
+
+        allFollows.push(...result.page)
+      }
+
+      return allFollows
+    }
+
     const episodes: Episode[] = await fetchWatchedEpisodes()
-    const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'tv' })
+    const follows: number[] = await fetchFollowedShows()
 
     const episodeKeys = episodes.map(ep => ({
       showTmdbId: ep.showTmdbId,

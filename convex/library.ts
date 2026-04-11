@@ -1,3 +1,5 @@
+import type { PaginationResult } from 'convex/server'
+import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { requireUser } from './requireUser'
@@ -54,15 +56,21 @@ export const unfollow = mutation({
 })
 
 export const listFollowed = query({
-  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
+  args: {
+    type: v.union(v.literal('movie'), v.literal('tv')),
+    paginationOpts: paginationOptsValidator,
+  },
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    const follows = await context.db
+    const result = await context.db
       .query('follow')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', args.type))
-      .collect()
+      .paginate(args.paginationOpts)
 
-    return follows.map(f => f.tmdbId)
+    return {
+      ...result,
+      page: result.page.map(f => f.tmdbId),
+    } as PaginationResult<number>
   },
 })
