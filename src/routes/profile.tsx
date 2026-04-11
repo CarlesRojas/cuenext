@@ -5,8 +5,8 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
-import { convexAction, convexQuery } from '@convex-dev/react-query'
-import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { convexQuery } from '@convex-dev/react-query'
+import { faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -74,15 +74,15 @@ function ProfilePage() {
   const clerk = useClerk()
   const { user } = useUser()
 
-  const { data: showStats } = useQuery({
-    ...convexAction(api.stats.getShowStats),
-    enabled: !!user && media === 'tv',
-  })
+  // const { data: showStats } = useQuery({
+  //   ...convexAction(api.stats.getShowStats),
+  //   enabled: !!user && media === 'tv',
+  // })
 
-  const { data: movieStats } = useQuery({
-    ...convexAction(api.stats.getMovieStats),
-    enabled: !!user && media === 'movie',
-  })
+  // const { data: movieStats } = useQuery({
+  //   ...convexAction(api.stats.getMovieStats),
+  //   enabled: !!user && media === 'movie',
+  // })
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections),
@@ -132,7 +132,7 @@ function ProfilePage() {
 
       <section className="screen-px mb-8">
         <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {user && media === 'tv' && (
+          {/* {user && media === 'tv' && (
             <>
               <StatCard
                 className="col-span-2"
@@ -157,9 +157,9 @@ function ProfilePage() {
                 name="Followed Shows"
               />
             </>
-          )}
+          )} */}
 
-          {user && media === 'movie' && (
+          {/* {user && media === 'movie' && (
             <>
               <StatCard
                 className="col-span-2"
@@ -184,7 +184,7 @@ function ProfilePage() {
                 name="Followed Movies"
               />
             </>
-          )}
+          )} */}
 
           {!user && (
             <>

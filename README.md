@@ -54,6 +54,5 @@ adb install app-release-signed.apk
 
 # TODO
 
-- [ ] The height of the sidebar animates when returning to the tab
 - [ ] Allow users to sign in to TMDB to keep info synked and to be able to rate and review
-- [ ] Fix stats, they don't work with large datasets
+- [ ] Reduce stats calls to tmdb

@@ -36,16 +36,46 @@ export const getMovieStats = action({
   },
 })
 
+interface Episode {
+  _id: string
+  showTmdbId: number
+  seasonNumber: number
+  episodeNumber: number
+  watchedAt: number
+}
+
+interface EpisodeBatch {
+  episodes: Episode[]
+  nextCursor: string | null
+  hasMore: boolean
+}
+
 export const getShowStats = action({
   args: {},
   handler: async context => {
     await requireUser(context)
 
-    const episodes: {
-      showTmdbId: number
-      seasonNumber: number
-      episodeNumber: number
-    }[] = await context.runQuery(api.watch.getWatchedEpisodes)
+    const fetchAllEpisodes = async () => {
+      const allEpisodes: Episode[] = []
+      let cursor: string | null = null
+      let hasMore = true
+
+      while (hasMore) {
+        const batch: EpisodeBatch = await context.runQuery(api.watch.getWatchedEpisodes, {
+          cursor: cursor || undefined,
+        })
+
+        if (batch.episodes.length === 0) break
+
+        allEpisodes.push(...batch.episodes)
+        cursor = batch.nextCursor
+        hasMore = batch.hasMore
+      }
+
+      return allEpisodes
+    }
+
+    const episodes: Episode[] = await fetchAllEpisodes()
     const episodesWatchedCount: number = episodes.length
 
     const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'tv' })
@@ -65,12 +95,12 @@ export const getShowStats = action({
         const seasonDetails = await fetchTmdbCached(
           context,
           tmdbSeasonSchema,
-          `/tv/${season.showTmdbId}/season/${season.seasonNumber}`,
+          `/tv/${season.showTmdbId}/season/${season.seasonNumber + 1}`,
         )
         return { season, seasonDetails }
       } catch (error) {
         console.error(
-          `Failed to fetch season details for show ${season.showTmdbId} season ${season.seasonNumber}:`,
+          `Failed to fetch season details for show ${season.showTmdbId} season ${season.seasonNumber + 1}:`,
           error,
         )
         return { season, seasonDetails: null }

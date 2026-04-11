@@ -102,16 +102,36 @@ export const unmarkMovieWatched = mutation({
 })
 
 export const getWatchedEpisodes = query({
-  args: {},
-  handler: async context => {
+  args: {
+    cursor: v.optional(v.string()),
+  },
+  handler: async (context, { cursor }) => {
     const userId = await requireUser(context)
 
-    const episodes = await context.db
-      .query('episode')
-      .withIndex('by_user', q => q.eq('userId', userId))
-      .collect()
+    const episodes = cursor
+      ? await context.db
+          .query('episode')
+          .withIndex('by_user', q => q.eq('userId', userId))
+          .order('asc')
+          .filter(q => q.gt(q.field('_id'), cursor))
+          .take(1000)
+      : await context.db
+          .query('episode')
+          .withIndex('by_user', q => q.eq('userId', userId))
+          .order('asc')
+          .take(1000)
 
-    return episodes
+    const result: {
+      episodes: typeof episodes
+      nextCursor: string | null
+      hasMore: boolean
+    } = {
+      episodes,
+      nextCursor: episodes.length > 0 ? episodes[episodes.length - 1]._id : null,
+      hasMore: episodes.length === 1000,
+    }
+
+    return result
   },
 })
 
