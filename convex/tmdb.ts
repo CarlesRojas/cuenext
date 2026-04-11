@@ -128,10 +128,21 @@ export const getDiscoverMovies = action({
     if (args.without_watch_providers) params.without_watch_providers = args.without_watch_providers
     if (args.year) params.year = String(args.year)
 
-    return fetchTmdbCached(context, paginated(tmdbMovieSchema), '/discover/movie', {
+    const results = await fetchTmdbCached(context, paginated(tmdbMovieSchema), '/discover/movie', {
       page: String(args.page || 1),
       ...params,
     })
+
+    await context.runMutation(api.movieInfo.saveMovieInfo, {
+      movies: results.results
+        .map((movie: TmdbMovie) => {
+          const runtime = movie.runtime
+          return runtime ? { tmdbId: movie.id, runtime } : null
+        })
+        .filter(movie => movie !== null),
+    })
+
+    return results
   },
 })
 
@@ -295,7 +306,15 @@ export const searchTv = action({
 export const getMovieDetails = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
-    return fetchTmdbCached(context, tmdbMovieSchema, `/movie/${args.tmdbId}`)
+    const result = await fetchTmdbCached(context, tmdbMovieSchema, `/movie/${args.tmdbId}`)
+
+    const runtime = result.runtime
+    if (runtime)
+      await context.runMutation(api.movieInfo.saveMovieInfo, {
+        movies: [{ tmdbId: result.id, runtime }],
+      })
+
+    return result
   },
 })
 
@@ -501,6 +520,12 @@ export const getUpcomingMovies = action({
       try {
         const movieDetails = await fetchTmdbCached(context, tmdbMovieSchema, `/movie/${movie.tmdbId}`)
 
+        const runtime = movieDetails.runtime
+        if (runtime)
+          await context.runMutation(api.movieInfo.saveMovieInfo, {
+            movies: [{ tmdbId: movieDetails.id, runtime }],
+          })
+
         const airDateString = movieDetails.release_date
         if (!airDateString) continue
 
@@ -548,9 +573,20 @@ export const getTrendingMovies = action({
     const timeWindow = args.time_window || 'week'
     const page = args.page || 1
 
-    return fetchTmdbCached(context, paginated(tmdbMovieSchema), `/trending/movie/${timeWindow}`, {
+    const results = await fetchTmdbCached(context, paginated(tmdbMovieSchema), `/trending/movie/${timeWindow}`, {
       page: String(page),
     })
+
+    await context.runMutation(api.movieInfo.saveMovieInfo, {
+      movies: results.results
+        .map((movie: TmdbMovie) => {
+          const runtime = movie.runtime
+          return runtime ? { tmdbId: movie.id, runtime } : null
+        })
+        .filter(movie => movie !== null),
+    })
+
+    return results
   },
 })
 

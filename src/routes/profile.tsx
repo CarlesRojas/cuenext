@@ -5,8 +5,8 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { convexAction, convexQuery } from '@convex-dev/react-query'
+import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -79,10 +79,10 @@ function ProfilePage() {
   //   enabled: !!user && media === 'tv',
   // })
 
-  // const { data: movieStats } = useQuery({
-  //   ...convexAction(api.stats.getMovieStats),
-  //   enabled: !!user && media === 'movie',
-  // })
+  const { data: movieStats } = useQuery({
+    ...convexAction(api.stats.getMovieStats),
+    enabled: !!user && media === 'movie',
+  })
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections),
@@ -159,7 +159,7 @@ function ProfilePage() {
             </>
           )} */}
 
-          {/* {user && media === 'movie' && (
+          {user && media === 'movie' && (
             <>
               <StatCard
                 className="col-span-2"
@@ -184,7 +184,7 @@ function ProfilePage() {
                 name="Followed Movies"
               />
             </>
-          )} */}
+          )}
 
           {!user && (
             <>

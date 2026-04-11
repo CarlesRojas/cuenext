@@ -10,28 +10,69 @@ export const getMovieStats = action({
     await requireUser(context)
 
     const movies: { tmdbId: number }[] = await context.runQuery(api.watch.getWatchedMovies)
-    const moviesWatchedCount = movies.length
 
     const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'movie' })
-    const followedMoviesCount = follows.length
 
-    const movieRuntimePromises = movies.map(async movie => {
-      try {
-        const movieDetails = await fetchTmdbCached(context, tmdbMovieSchema, `/movie/${movie.tmdbId}`)
-        return movieDetails.runtime || 0
-      } catch (error) {
-        console.error('Failed to fetch movie runtime for tmdbId:', movie.tmdbId, error)
-        return 0
-      }
+    const cachedMovieInfos = await context.runQuery(api.movieInfo.getMovieInfo, {
+      tmdbIds: movies.map(m => m.tmdbId),
     })
 
-    const movieRuntimes = await Promise.all(movieRuntimePromises)
-    const movieTimeMinutes = movieRuntimes.reduce((sum: number, runtime: number) => sum + runtime, 0)
+    const cachedRuntimes: Map<number, number> = new Map(cachedMovieInfos.map(info => [info.tmdbId, info.runtime]))
+    const missingMovies = movies.filter(movie => !cachedRuntimes.has(movie.tmdbId))
+
+    let newMovieRuntimes: Array<{ tmdbId: number; runtime: number }> = []
+
+    if (missingMovies.length > 0) {
+      // Batch processing to respect TMDB rate limits (40 requests/second)
+      // Process 10 requests per batch with 300ms delay = ~33 requests/second
+      const BATCH_SIZE = 10
+      const BATCH_DELAY_MS = 300
+      const batches = []
+
+      for (let i = 0; i < missingMovies.length; i += BATCH_SIZE) {
+        batches.push(missingMovies.slice(i, i + BATCH_SIZE))
+      }
+
+      const tmdbResults: Array<{ tmdbId: number; runtime: number | null }> = []
+
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex]
+        console.log(`Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} movies)`)
+
+        const batchPromises = batch.map(async movie => {
+          try {
+            const movieDetails = await fetchTmdbCached(context, tmdbMovieSchema, `/movie/${movie.tmdbId}`)
+            const runtime = movieDetails.runtime || null
+            return { tmdbId: movie.tmdbId, runtime }
+          } catch (error) {
+            console.error('Failed to fetch runtime for movie:', movie.tmdbId, error)
+            return { tmdbId: movie.tmdbId, runtime: null }
+          }
+        })
+
+        const batchResults = await Promise.all(batchPromises)
+        tmdbResults.push(...batchResults)
+
+        if (batchIndex < batches.length - 1) await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS))
+      }
+
+      newMovieRuntimes = tmdbResults.filter(result => result.runtime !== null) as Array<{
+        tmdbId: number
+        runtime: number
+      }>
+
+      if (newMovieRuntimes.length > 0)
+        await context.runMutation(api.movieInfo.saveMovieInfo, { movies: newMovieRuntimes })
+    }
+
+    newMovieRuntimes.forEach(item => cachedRuntimes.set(item.tmdbId, item.runtime))
+
+    const sumOfRuntimes = Array.from(cachedRuntimes.values()).reduce((sum, runtime) => sum + runtime, 0)
 
     return {
-      moviesWatchedCount,
-      followedMoviesCount,
-      movieTimeMinutes,
+      moviesWatchedCount: movies.length,
+      followedMoviesCount: follows.length,
+      movieTimeMinutes: sumOfRuntimes,
     }
   },
 })

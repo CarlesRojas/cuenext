@@ -77,4 +77,10 @@ export default defineSchema({
     continuousEpisodeNumbers: v.boolean(),
     updatedAt: v.number(),
   }).index('by_tmdbId', ['tmdbId']),
+
+  movieInfo: defineTable({
+    tmdbId: v.number(),
+    runtime: v.number(), // in minutes
+    updatedAt: v.number(),
+  }).index('by_tmdbId', ['tmdbId']),
 })
