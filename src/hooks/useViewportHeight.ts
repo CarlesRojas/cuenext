@@ -35,7 +35,7 @@ export function useViewportHeight(): ViewportInfo {
 
   useEffect(() => {
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateViewportInternal)
+      window.visualViewport.addEventListener('resize', updateViewportInternal, { passive: true })
       return () => {
         window.visualViewport?.removeEventListener('resize', updateViewportInternal)
       }
@@ -45,7 +45,7 @@ export function useViewportHeight(): ViewportInfo {
     return () => {
       window.removeEventListener('resize', updateViewportInternal)
     }
-  }, [])
+  }, [updateViewportInternal])
 
   return viewport
 }
