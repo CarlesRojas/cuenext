@@ -119,16 +119,6 @@ function ImportPage() {
 
           const releaseDate = foundShow.first_air_date ? new Date(foundShow.first_air_date).getTime() : 0
 
-          await followShowMutation.mutateAsync({
-            type: 'tv' as const,
-            tmdbId: foundShow.id,
-            name: foundShow.name,
-            poster: foundShow.poster_path ?? null,
-            backdrop: foundShow.backdrop_path ?? null,
-            releaseDate,
-            followedAt: createdAtTimestamp,
-          })
-
           let episodesProcessed = 0
           let episodesWatched = 0
           const episodesToWatch = []
@@ -140,7 +130,6 @@ function ImportPage() {
               episodesProcessed++
 
               if (!episode.watched_at) continue
-              if (episode.special) continue
 
               if (episode.id.tvdb) {
                 episodesToLookup.push({
@@ -149,9 +138,33 @@ function ImportPage() {
                   externalId: episode.id.tvdb,
                   watchedAt: episode.watched_at,
                 })
+              } else {
+                episodesNotFound.push({
+                  show: showData.title,
+                  episode: `S${season.number}E${episode.number}`,
+                  externalIds: { tvdb: episode.id.tvdb, imdb: episode.id.imdb },
+                })
               }
             }
           }
+
+          if (episodesToLookup.length === 0 && ['watch_later', 'stopped'].includes(showData.status))
+            return {
+              success: true,
+              episodesProcessed: 0,
+              episodesWatched: 0,
+              episodesNotFound: [],
+            }
+
+          await followShowMutation.mutateAsync({
+            type: 'tv' as const,
+            tmdbId: foundShow.id,
+            name: foundShow.name,
+            poster: foundShow.poster_path ?? null,
+            backdrop: foundShow.backdrop_path ?? null,
+            releaseDate,
+            followedAt: createdAtTimestamp,
+          })
 
           const EPISODE_BATCH_SIZE = 10
           const tmdbEpisodeMap = new Map()
@@ -398,11 +411,9 @@ function ImportPage() {
                 <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-yellow-500/5 p-4">
                   {result.episodesNotFound.map((episode, index) => (
                     <div key={index} className="text-sm">
-                      <span className="font-medium text-yellow-300">
-                        {episode.show} - {episode.episode}:
-                      </span>{' '}
-                      <span className="text-yellow-400">
-                        TVDB: {episode.externalIds.tvdb || 'N/A'}, IMDB: {episode.externalIds.imdb || 'N/A'}
+                      <span className="font-medium text-yellow-300 select-all">
+                        {episode.show} - {episode.episode}: TVDB: {episode.externalIds.tvdb || 'N/A'}, IMDB:{' '}
+                        {episode.externalIds.imdb || 'N/A'}
                       </span>
                     </div>
                   ))}
@@ -416,8 +427,9 @@ function ImportPage() {
                 <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-red-500/5 p-4">
                   {result.errors.map((error, index) => (
                     <div key={index} className="text-sm">
-                      <span className="font-medium text-red-300">{error.show}:</span>{' '}
-                      <span className="text-red-400">{error.error}</span>
+                      <span className="font-medium text-red-300 select-all">
+                        {error.show}: {error.error}
+                      </span>
                     </div>
                   ))}
                 </div>
