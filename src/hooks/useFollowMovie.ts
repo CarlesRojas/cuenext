@@ -2,40 +2,16 @@ import { api } from '#/../convex/_generated/api'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbMovieMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
+import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useConvex, useMutation as useDbMutation } from 'convex/react'
-import type { PaginationResult } from 'convex/server'
+import { useMutation as useDbMutation } from 'convex/react'
 
 export function useFollowMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
-  const convex = useConvex()
   const { showUndoToast } = useUndoToast()
 
-  const {
-    data: followedMedia,
-    isFetching: isFollowedLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['followed-movie'],
-    queryFn: async () => {
-      const allFollows: number[] = []
-      let continueCursor: string | null = null
-      let isDone = false
-
-      while (!isDone) {
-        const result: PaginationResult<number> = await convex.query(api.library.listFollowed, {
-          type: 'movie',
-          paginationOpts: { numItems: 100, cursor: continueCursor },
-        })
-
-        continueCursor = result.continueCursor
-        isDone = result.isDone
-
-        allFollows.push(...result.page)
-      }
-
-      return allFollows
-    },
+  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
+    ...convexQuery(api.library.listFollowed, { type: 'movie' }),
     enabled: clerk.isSignedIn,
   })
 
@@ -52,14 +28,12 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
         backdrop: movie.backdrop_path ?? null,
         releaseDate: new Date(movie.release_date).getTime(),
       })
-      await refetch()
     },
   })
 
   const unfollow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'movie', tmdbId: id })
-      await refetch()
     },
   })
 

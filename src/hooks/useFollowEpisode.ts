@@ -2,40 +2,16 @@ import { api } from '#/../convex/_generated/api'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbTvMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
+import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useAction, useConvex, useMutation as useDbMutation } from 'convex/react'
-import type { PaginationResult } from 'convex/server'
+import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 export function useFollowEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
-  const convex = useConvex()
   const { showUndoToast } = useUndoToast()
 
-  const {
-    data: followedMedia,
-    isFetching: isFollowedLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['followed-tv'],
-    queryFn: async () => {
-      const allFollows: number[] = []
-      let continueCursor: string | null = null
-      let isDone = false
-
-      while (!isDone) {
-        const result: PaginationResult<number> = await convex.query(api.library.listFollowed, {
-          type: 'tv',
-          paginationOpts: { numItems: 1000, cursor: continueCursor },
-        })
-
-        continueCursor = result.continueCursor
-        isDone = result.isDone
-
-        allFollows.push(...result.page)
-      }
-
-      return allFollows
-    },
+  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
+    ...convexQuery(api.library.listFollowed, { type: 'tv' }),
     enabled: clerk.isSignedIn,
   })
 
@@ -54,7 +30,6 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
         releaseDate: 0,
       })
       await updateNextEpisode({ tmdbId: id })
-      await refetch()
     },
   })
 
@@ -62,7 +37,6 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'tv', tmdbId: id })
       await updateNextEpisode({ tmdbId: id })
-      await refetch()
     },
   })
 

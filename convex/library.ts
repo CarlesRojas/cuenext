@@ -56,6 +56,20 @@ export const unfollow = mutation({
 })
 
 export const listFollowed = query({
+  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const follows = await context.db
+      .query('follow')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', args.type))
+      .collect()
+
+    return follows.map(f => f.tmdbId)
+  },
+})
+
+export const listFollowedPaginated = query({
   args: {
     type: v.union(v.literal('movie'), v.literal('tv')),
     paginationOpts: paginationOptsValidator,
