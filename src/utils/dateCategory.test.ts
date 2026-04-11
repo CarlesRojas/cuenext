@@ -289,7 +289,7 @@ describe('getGroupOrder', () => {
         { date: '2024-04-20', day: 'Saturday' }, // Saturday
       ]
 
-      days.forEach(({ date, day }) => {
+      days.forEach(({ date }) => {
         const currentDate = new Date(date)
 
         const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
