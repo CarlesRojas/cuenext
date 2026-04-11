@@ -37,17 +37,18 @@ export const markMovieWatched = mutation({
     poster: v.union(v.string(), v.null()),
     backdrop: v.union(v.string(), v.null()),
     releaseDate: v.number(),
+    watchedAt: v.optional(v.number()),
   },
-  handler: async (context, { name, poster, backdrop, ...args }) => {
+  handler: async (context, { name, poster, backdrop, watchedAt, ...args }) => {
     const userId = await requireUser(context)
-    const now = Date.now()
+    const watchTimestamp = watchedAt ?? Date.now()
 
     const existing = await context.db
       .query('movie')
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (!existing) await context.db.insert('movie', { userId, tmdbId: args.tmdbId, watchedAt: now })
+    if (!existing) await context.db.insert('movie', { userId, tmdbId: args.tmdbId, watchedAt: watchTimestamp })
 
     const followEntry = await context.db
       .query('follow')
@@ -64,7 +65,7 @@ export const markMovieWatched = mutation({
         name,
         poster,
         backdrop,
-        followedAt: now,
+        followedAt: watchTimestamp,
         releaseDate: args.releaseDate,
       })
 
