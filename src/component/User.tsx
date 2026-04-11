@@ -1,4 +1,5 @@
 import { Button } from '#/component/ui/button'
+import { cn } from '#/lib/cn'
 import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import { faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -45,9 +46,16 @@ export function User({ isMobile, isExpanded }: UserProps) {
 
       <Unauthenticated>
         <SignInButton mode="modal">
-          <Button size={isMobile ? 'default' : isExpanded ? 'icon' : 'full'}>
-            <FontAwesomeIcon icon={faSignIn} size="xl" className="h-5 max-h-5 min-h-5" />
-            {(isMobile || !isExpanded) && <span>Sign In</span>}
+          <Button size={isMobile ? 'default' : 'full'} className="gap-0">
+            <FontAwesomeIcon icon={faSignIn} size="xl" className="h-5 max-h-5 min-h-5 w-5 max-w-5 min-w-5" />
+            <span
+              className={cn(
+                'duration-slow max-w-full overflow-hidden pl-3 text-nowrap opacity-100 transition-[max-width,opacity,padding]',
+                !isExpanded && !isMobile && 'max-w-0 pl-0 opacity-0',
+              )}
+            >
+              Sign In
+            </span>
           </Button>
         </SignInButton>
       </Unauthenticated>
