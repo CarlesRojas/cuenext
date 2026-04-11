@@ -35,6 +35,7 @@ function ImportPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [importing, setImporting] = useState(false)
+  const [progress, setProgress] = useState({ current: 0, total: 0 })
 
   const followMovie = useDbMutation(api.library.follow)
   const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
@@ -54,6 +55,7 @@ function ImportPage() {
 
   const importMutation = async (moviesData: MovieData[]) => {
     setImporting(true)
+    setProgress({ current: 0, total: moviesData.length })
     const results: ImportResult = {
       processed: 0,
       success: 0,
@@ -62,6 +64,7 @@ function ImportPage() {
 
     for (const movieData of moviesData) {
       results.processed++
+      setProgress(prev => ({ ...prev, current: prev.current + 1 }))
 
       try {
         const createdAtTimestamp = new Date(movieData.created_at).getTime()
@@ -108,6 +111,7 @@ function ImportPage() {
     }
 
     setImporting(false)
+    setProgress({ current: 0, total: 0 })
     return results
   }
 
@@ -160,7 +164,7 @@ function ImportPage() {
         <p className="mt-4 text-neutral-400">Upload a JSON file to import your movie watchlist</p>
       </div>
 
-      <div className="mx-auto w-full max-w-4xl rounded-lg border border-white/10 bg-white/5 p-6">
+      <div className="mx-auto w-full max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
         <div className="mb-6">
           <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
             <FontAwesomeIcon icon={faFileImport} />
@@ -194,19 +198,39 @@ function ImportPage() {
             <FontAwesomeIcon icon={importing ? faSpinner : faFileImport} spin={importing} />
             {importing ? 'Importing...' : 'Import Movies'}
           </Button>
+
+          {importing && progress.total > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-neutral-400">
+                <span>Progress</span>
+                <span>
+                  {progress.current} / {progress.total}
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-blue-500 transition-all duration-300 ease-out"
+                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                />
+              </div>
+              <div className="text-xs text-neutral-500">
+                {Math.round((progress.current / progress.total) * 100)}% complete
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {result && (
-        <div className="mx-auto w-full max-w-4xl rounded-lg border border-white/10 bg-white/5 p-6">
+        <div className="mx-auto w-full max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="mb-4 text-xl font-semibold text-white">Import Results</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="rounded-lg bg-green-500/10 p-4">
+              <div className="rounded-2xl bg-green-500/10 p-4">
                 <div className="text-2xl font-bold text-green-500">{result.success}</div>
                 <div className="text-sm text-green-400">Successful</div>
               </div>
-              <div className="rounded-lg bg-red-500/10 p-4">
+              <div className="rounded-2xl bg-red-500/10 p-4">
                 <div className="text-2xl font-bold text-red-500">{result.errors.length}</div>
                 <div className="text-sm text-red-400">Errors</div>
               </div>
