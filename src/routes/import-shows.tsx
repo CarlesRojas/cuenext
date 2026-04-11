@@ -134,6 +134,7 @@ function ImportPage() {
           const episodesToWatch = []
           const episodesNotFound = []
 
+          const episodesToLookup = []
           for (const season of showData.seasons) {
             for (const episode of season.episodes) {
               episodesProcessed++
@@ -141,27 +142,59 @@ function ImportPage() {
               if (!episode.watched_at) continue
               if (episode.special) continue
 
-              let tmdbEpisode = null
-              if (episode.id.tvdb) tmdbEpisode = await findEpisodeByExternalId({ externalId: episode.id.tvdb })
-
-              if (!tmdbEpisode) {
-                episodesNotFound.push({
-                  show: showData.title,
-                  episode: `S${season.number}E${episode.number}`,
-                  externalIds: episode.id,
+              if (episode.id.tvdb) {
+                episodesToLookup.push({
+                  originalEpisode: episode,
+                  seasonNumber: season.number,
+                  externalId: episode.id.tvdb,
+                  watchedAt: episode.watched_at,
                 })
-                continue
               }
-
-              console.log(`${foundShow.name}:  ${tmdbEpisode.season_number} ${tmdbEpisode.episode_number}`)
-              episodesToWatch.push({
-                seasonNumber: tmdbEpisode.season_number - 1,
-                episodeNumber: tmdbEpisode.episode_number - 1,
-                watchedAt: new Date(episode.watched_at).getTime(),
-              })
-
-              episodesWatched++
             }
+          }
+
+          const EPISODE_BATCH_SIZE = 10
+          const tmdbEpisodeMap = new Map()
+
+          for (let j = 0; j < episodesToLookup.length; j += EPISODE_BATCH_SIZE) {
+            const episodeBatch = episodesToLookup.slice(j, j + EPISODE_BATCH_SIZE)
+
+            const episodeBatchPromises = episodeBatch.map(async episodeData => {
+              try {
+                const tmdbEpisode = await findEpisodeByExternalId({ externalId: episodeData.externalId })
+                return { episodeData, tmdbEpisode }
+              } catch (error) {
+                return { episodeData, tmdbEpisode: null, error }
+              }
+            })
+
+            const batchResults = await Promise.allSettled(episodeBatchPromises)
+
+            for (const batchResult of batchResults) {
+              if (batchResult.status === 'fulfilled') {
+                const { episodeData, tmdbEpisode } = batchResult.value
+                tmdbEpisodeMap.set(episodeData.externalId, { tmdbEpisode, episodeData })
+              }
+            }
+          }
+
+          for (const [_, { tmdbEpisode, episodeData }] of tmdbEpisodeMap) {
+            if (!tmdbEpisode) {
+              episodesNotFound.push({
+                show: showData.title,
+                episode: `S${episodeData.seasonNumber}E${episodeData.originalEpisode.number}`,
+                externalIds: episodeData.originalEpisode.id,
+              })
+              continue
+            }
+
+            episodesToWatch.push({
+              seasonNumber: tmdbEpisode.season_number - 1,
+              episodeNumber: tmdbEpisode.episode_number - 1,
+              watchedAt: new Date(episodeData.watchedAt).getTime(),
+            })
+
+            episodesWatched++
           }
 
           if (episodesToWatch.length > 0) {
