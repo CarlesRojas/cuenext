@@ -62,51 +62,77 @@ function ImportPage() {
       errors: [],
     }
 
-    for (const movieData of moviesData) {
-      results.processed++
-      setProgress(prev => ({ ...prev, current: prev.current + 1 }))
+    const BATCH_SIZE = 10
 
-      try {
-        const createdAtTimestamp = new Date(movieData.created_at).getTime()
+    for (let i = 0; i < moviesData.length; i += BATCH_SIZE) {
+      const batch = moviesData.slice(i, i + BATCH_SIZE)
 
-        const foundMovie = await findMovieByExternalId({ externalId: movieData.id.imdb })
+      const batchPromises = batch.map(async movieData => {
+        try {
+          const createdAtTimestamp = new Date(movieData.created_at).getTime()
 
-        if (!foundMovie) {
-          results.errors.push({
-            movie: movieData.title,
-            error: `No TMDB movie found for IMDB ID: ${movieData.id.imdb}`,
-          })
-          continue
+          const foundMovie = await findMovieByExternalId({ externalId: movieData.id.imdb })
+
+          if (!foundMovie) {
+            return {
+              success: false,
+              error: { movie: movieData.title, error: `No TMDB movie found for IMDB ID: ${movieData.id.imdb}` },
+            }
+          }
+
+          const releaseDate = foundMovie.release_date ? new Date(foundMovie.release_date).getTime() : 0
+
+          if (movieData.is_watched) {
+            await markWatchedMutation.mutateAsync({
+              tmdbId: foundMovie.id,
+              name: foundMovie.title,
+              poster: foundMovie.poster_path ?? null,
+              backdrop: foundMovie.backdrop_path ?? null,
+              releaseDate,
+              watchedAt: createdAtTimestamp,
+            })
+          } else {
+            await followMovieMutation.mutateAsync({
+              type: 'movie' as const,
+              tmdbId: foundMovie.id,
+              name: foundMovie.title,
+              poster: foundMovie.poster_path ?? null,
+              backdrop: foundMovie.backdrop_path ?? null,
+              releaseDate,
+              followedAt: createdAtTimestamp,
+            })
+          }
+
+          return { success: true }
+        } catch (error) {
+          return {
+            success: false,
+            error: {
+              movie: movieData.title,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+          }
         }
+      })
 
-        const releaseDate = foundMovie.release_date ? new Date(foundMovie.release_date).getTime() : 0
+      const batchResults = await Promise.allSettled(batchPromises)
 
-        if (movieData.is_watched)
-          await markWatchedMutation.mutateAsync({
-            tmdbId: foundMovie.id,
-            name: foundMovie.title,
-            poster: foundMovie.poster_path ?? null,
-            backdrop: foundMovie.backdrop_path ?? null,
-            releaseDate,
-            watchedAt: createdAtTimestamp,
+      for (const result of batchResults) {
+        results.processed++
+        setProgress(prev => ({ ...prev, current: prev.current + 1 }))
+
+        if (result.status === 'fulfilled') {
+          if (result.value.success) {
+            results.success++
+          } else {
+            results.errors.push(result.value.error)
+          }
+        } else {
+          results.errors.push({
+            movie: 'Unknown',
+            error: 'Promise rejected: ' + (result.reason instanceof Error ? result.reason.message : 'Unknown error'),
           })
-        else
-          await followMovieMutation.mutateAsync({
-            type: 'movie' as const,
-            tmdbId: foundMovie.id,
-            name: foundMovie.title,
-            poster: foundMovie.poster_path ?? null,
-            backdrop: foundMovie.backdrop_path ?? null,
-            releaseDate,
-            followedAt: createdAtTimestamp,
-          })
-
-        results.success++
-      } catch (error) {
-        results.errors.push({
-          movie: movieData.title,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
+        }
       }
     }
 
