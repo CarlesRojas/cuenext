@@ -64,7 +64,11 @@ export function Section({
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="group relative w-full overflow-hidden px-4"
           >
-            <Carousel opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }} className="w-full">
+            <Carousel
+              key={`${Math.floor(width / 200)}-${isMobile}`}
+              opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
+              className="w-full"
+            >
               <CarouselPrevious
                 className={cn(
                   'mouse:block z-10 hidden',

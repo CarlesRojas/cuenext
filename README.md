@@ -54,6 +54,6 @@ adb install app-release-signed.apk
 
 # TODO
 
-- [ ] Section Carousel does not adapt when the screen resizes
 - [ ] In upcoming, instead of separating in these week days, do the next 7 days
 - [ ] The height of the sidebar animates when returning to the tab
+- [ ] Allow users to sign in to TMDB to keep info synked and to be able to rate and review
