@@ -419,7 +419,27 @@ export const getTvCredits = action({
 export const getShowSeasonDetails = action({
   args: { tmdbId: v.number(), seasonNumber: v.number() },
   handler: async (context, args) => {
-    return fetchTmdbCached(context, tmdbSeasonSchema, `/tv/${args.tmdbId}/season/${args.seasonNumber}`)
+    const seasonDetails = await fetchTmdbCached(
+      context,
+      tmdbSeasonSchema,
+      `/tv/${args.tmdbId}/season/${args.seasonNumber}`,
+    )
+
+    if (args.seasonNumber > 0 && seasonDetails.episodes && Array.isArray(seasonDetails.episodes)) {
+      const episodeRuntimes = seasonDetails.episodes
+        .filter(episode => !!episode.runtime && episode.runtime > 0)
+        .map(episode => ({
+          showTmdbId: args.tmdbId,
+          seasonNumber: args.seasonNumber - 1,
+          episodeNumber: episode.episode_number - 1,
+          runtime: episode.runtime!,
+        }))
+
+      if (episodeRuntimes.length > 0)
+        await context.runMutation(api.episodeInfo.saveEpisodeInfo, { episodes: episodeRuntimes })
+    }
+
+    return seasonDetails
   },
 })
 

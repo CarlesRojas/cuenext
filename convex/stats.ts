@@ -1,4 +1,4 @@
-import { tmdbMovieSchema, tmdbSeasonSchema } from '../src/type/tmdb'
+import { tmdbMovieSchema } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
 import { requireUser } from './requireUser'
@@ -117,58 +117,91 @@ export const getShowStats = action({
     }
 
     const episodes: Episode[] = await fetchAllEpisodes()
-    const episodesWatchedCount: number = episodes.length
-
     const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'tv' })
-    const followedShowsCount = follows.length
 
-    const uniqueSeasons = new Map<string, { showTmdbId: number; seasonNumber: number }>()
+    const episodeKeys = episodes.map(ep => ({
+      showTmdbId: ep.showTmdbId,
+      seasonNumber: ep.seasonNumber,
+      episodeNumber: ep.episodeNumber,
+    }))
 
-    for (const episode of episodes) {
-      const seasonKey = `${episode.showTmdbId}-${episode.seasonNumber}`
+    const cachedEpisodeInfos = await context.runQuery(api.episodeInfo.getEpisodeInfo, { episodes: episodeKeys })
 
-      if (!uniqueSeasons.has(seasonKey))
-        uniqueSeasons.set(seasonKey, { showTmdbId: episode.showTmdbId, seasonNumber: episode.seasonNumber })
-    }
+    const cachedEpisodeRuntimes: Map<string, number> = new Map(
+      cachedEpisodeInfos.map(info => [`${info.showTmdbId}-${info.seasonNumber}-${info.episodeNumber}`, info.runtime]),
+    )
 
-    const seasonDetailsPromises = Array.from(uniqueSeasons.values()).map(async season => {
-      try {
-        const seasonDetails = await fetchTmdbCached(
-          context,
-          tmdbSeasonSchema,
-          `/tv/${season.showTmdbId}/season/${season.seasonNumber + 1}`,
-        )
-        return { season, seasonDetails }
-      } catch (error) {
-        console.error(
-          `Failed to fetch season details for show ${season.showTmdbId} season ${season.seasonNumber + 1}:`,
-          error,
-        )
-        return { season, seasonDetails: null }
-      }
+    const missingEpisodes = episodes.filter(episode => {
+      const key = `${episode.showTmdbId}-${episode.seasonNumber}-${episode.episodeNumber}`
+      return !cachedEpisodeRuntimes.has(key)
     })
 
-    const seasonDataList = await Promise.all(seasonDetailsPromises)
-
-    let showTimeMinutes = 0
-
-    for (const episode of episodes) {
+    const uniqueSeasons = new Map<string, { showTmdbId: number; seasonNumber: number }>()
+    for (const episode of missingEpisodes) {
       const seasonKey = `${episode.showTmdbId}-${episode.seasonNumber}`
-      const seasonData = seasonDataList.find(
-        data => `${data.season.showTmdbId}-${data.season.seasonNumber}` === seasonKey,
-      )
-
-      const episodeDetails = seasonData?.seasonDetails?.episodes?.find(
-        ep => ep.episode_number === episode.episodeNumber,
-      )
-
-      showTimeMinutes += episodeDetails?.runtime ?? 30
+      if (!uniqueSeasons.has(seasonKey)) {
+        uniqueSeasons.set(seasonKey, {
+          showTmdbId: episode.showTmdbId,
+          seasonNumber: episode.seasonNumber,
+        })
+      }
     }
 
+    if (uniqueSeasons.size > 0) {
+      // Batch processing to respect TMDB rate limits (40 requests/second)
+      // Process 10 requests per batch with 300ms delay = ~33 requests/second
+      const BATCH_SIZE = 10
+      const BATCH_DELAY_MS = 300
+      const seasonBatches = []
+
+      const seasonsArray = Array.from(uniqueSeasons.values())
+      for (let i = 0; i < seasonsArray.length; i += BATCH_SIZE)
+        seasonBatches.push(seasonsArray.slice(i, i + BATCH_SIZE))
+
+      for (let batchIndex = 0; batchIndex < seasonBatches.length; batchIndex++) {
+        const batch = seasonBatches[batchIndex]
+        console.log(`Processing season batch ${batchIndex + 1}/${seasonBatches.length} (${batch.length} seasons)`)
+
+        const seasonPromises = batch.map(async season => {
+          try {
+            const seasonDetails = await context.runAction(api.tmdb.getShowSeasonDetails, {
+              tmdbId: season.showTmdbId,
+              seasonNumber: season.seasonNumber + 1,
+            })
+            return { season, seasonDetails }
+          } catch (error) {
+            console.error(
+              `Failed to fetch season details for show ${season.showTmdbId} season ${season.seasonNumber + 1}:`,
+              error,
+            )
+            return { season, seasonDetails: null }
+          }
+        })
+
+        const seasonResults = await Promise.all(seasonPromises)
+
+        seasonResults.forEach(({ season, seasonDetails }) => {
+          if (seasonDetails?.episodes) {
+            seasonDetails.episodes.forEach(ep => {
+              if (ep.runtime && ep.runtime > 0)
+                cachedEpisodeRuntimes.set(
+                  `${season.showTmdbId}-${season.seasonNumber}-${ep.episode_number}`,
+                  ep.runtime,
+                )
+            })
+          }
+        })
+
+        if (batchIndex < seasonBatches.length - 1) await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS))
+      }
+    }
+
+    const sumOfRuntimes = Array.from(cachedEpisodeRuntimes.values()).reduce((sum, runtime) => sum + runtime, 0)
+
     return {
-      episodesWatchedCount,
-      followedShowsCount,
-      showTimeMinutes,
+      episodesWatchedCount: episodes.length,
+      followedShowsCount: follows.length,
+      showTimeMinutes: sumOfRuntimes,
     }
   },
 })

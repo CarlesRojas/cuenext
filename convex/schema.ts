@@ -78,6 +78,14 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index('by_tmdbId', ['tmdbId']),
 
+  episodeInfo: defineTable({
+    showTmdbId: v.number(),
+    seasonNumber: v.number(),
+    episodeNumber: v.number(),
+    runtime: v.number(), // in minutes
+    updatedAt: v.number(),
+  }).index('by_showTmdbId_season_episode', ['showTmdbId', 'seasonNumber', 'episodeNumber']),
+
   movieInfo: defineTable({
     tmdbId: v.number(),
     runtime: v.number(), // in minutes
