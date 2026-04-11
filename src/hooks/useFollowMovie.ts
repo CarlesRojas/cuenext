@@ -11,7 +11,11 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
   const convex = useConvex()
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
+  const {
+    data: followedMedia,
+    isFetching: isFollowedLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['followed-movie'],
     queryFn: async () => {
       const allFollows: number[] = []
@@ -48,12 +52,14 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
         backdrop: movie.backdrop_path ?? null,
         releaseDate: new Date(movie.release_date).getTime(),
       })
+      await refetch()
     },
   })
 
   const unfollow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'movie', tmdbId: id })
+      await refetch()
     },
   })
 

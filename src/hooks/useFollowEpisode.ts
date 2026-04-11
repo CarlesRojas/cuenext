@@ -11,7 +11,11 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
   const convex = useConvex()
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
+  const {
+    data: followedMedia,
+    isFetching: isFollowedLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['followed-tv'],
     queryFn: async () => {
       const allFollows: number[] = []
@@ -50,6 +54,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
         releaseDate: 0,
       })
       await updateNextEpisode({ tmdbId: id })
+      await refetch()
     },
   })
 
@@ -57,6 +62,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'tv', tmdbId: id })
       await updateNextEpisode({ tmdbId: id })
+      await refetch()
     },
   })
 
