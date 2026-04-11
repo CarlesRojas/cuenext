@@ -33,7 +33,7 @@ function formatWatchTime(minutes: number): string {
 function formatNumber(num?: number): string {
   return (
     num?.toLocaleString('en-US', {
-      notation: 'compact',
+      notation: 'standard',
       maximumFractionDigits: 1,
     }) ?? '-'
   )
