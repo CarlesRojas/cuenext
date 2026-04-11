@@ -9,7 +9,7 @@ import { useAction, useMutation as useDbMutation } from 'convex/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-export const Route = createFileRoute('/import-movie')({
+export const Route = createFileRoute('/import-movies')({
   component: ImportPage,
 })
 
