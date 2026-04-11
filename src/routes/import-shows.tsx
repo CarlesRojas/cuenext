@@ -58,7 +58,7 @@ function ImportPage() {
 
   const followShow = useDbMutation(api.library.follow)
   const setStopped = useDbMutation(api.stopped.setStopped)
-  const markEpisodeWatched = useDbMutation(api.watch.markEpisodeWatched)
+  const markMultipleEpisodesAsWatched = useDbMutation(api.watch.markMultipleEpisodesAsWatched)
   const findByExternalId = useAction(api.tmdb.findShowByExternalId)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
@@ -74,9 +74,9 @@ function ImportPage() {
     },
   })
 
-  const markEpisodeWatchedMutation = useMutation({
-    mutationFn: async (args: Parameters<typeof markEpisodeWatched>[0]) => {
-      return await markEpisodeWatched(args)
+  const markMultipleEpisodesWatchedMutation = useMutation({
+    mutationFn: async (args: Parameters<typeof markMultipleEpisodesAsWatched>[0]) => {
+      return await markMultipleEpisodesAsWatched(args)
     },
   })
 
@@ -132,6 +132,7 @@ function ImportPage() {
 
           let episodesProcessed = 0
           let episodesWatched = 0
+          const episodesToWatch = []
 
           for (const season of showData.seasons) {
             for (const episode of season.episodes) {
@@ -142,20 +143,26 @@ function ImportPage() {
                   ? new Date(episode.watched_at).getTime()
                   : createdAtTimestamp
 
-                await markEpisodeWatchedMutation.mutateAsync({
-                  showTmdbId: foundShow.id,
+                episodesToWatch.push({
                   seasonNumber: season.number - 1,
                   episodeNumber: episode.number - 1,
-                  showName: foundShow.name,
-                  showPoster: foundShow.poster_path ?? null,
-                  showBackdrop: foundShow.backdrop_path ?? null,
-                  releaseDate: 0,
                   watchedAt: watchedAtTimestamp,
                 })
 
                 episodesWatched++
               }
             }
+          }
+
+          if (episodesToWatch.length > 0) {
+            await markMultipleEpisodesWatchedMutation.mutateAsync({
+              showTmdbId: foundShow.id,
+              episodes: episodesToWatch,
+              showName: foundShow.name,
+              showPoster: foundShow.poster_path ?? null,
+              showBackdrop: foundShow.backdrop_path ?? null,
+              releaseDate: 0,
+            })
           }
 
           await updateNextEpisode({ tmdbId: foundShow.id })

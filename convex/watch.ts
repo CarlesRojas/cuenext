@@ -327,6 +327,7 @@ export const markMultipleEpisodesAsWatched = mutation({
       v.object({
         seasonNumber: v.number(),
         episodeNumber: v.number(),
+        watchedAt: v.optional(v.number()),
       }),
     ),
     showName: v.string(),
@@ -356,7 +357,7 @@ export const markMultipleEpisodesAsWatched = mutation({
           showTmdbId: args.showTmdbId,
           seasonNumber: episode.seasonNumber,
           episodeNumber: episode.episodeNumber,
-          watchedAt: now,
+          watchedAt: episode.watchedAt ?? now,
         })
     }
 
@@ -384,7 +385,7 @@ export const markMultipleEpisodesAsWatched = mutation({
         name: showName,
         poster: showPoster,
         backdrop: showBackdrop,
-        followedAt: now,
+        followedAt: args.episodes[0]?.watchedAt ?? now,
         releaseDate: args.releaseDate,
       })
 
