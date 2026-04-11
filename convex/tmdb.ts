@@ -585,7 +585,7 @@ export const findMovieByExternalId = action({
       findResponseSchema,
       `/find/${args.externalId}`,
       params,
-      CACHE_DURATIONS.ONE_WEEK,
+      CACHE_DURATIONS.ONE_MONTH,
     )
 
     return results.movie_results.length > 0 ? results.movie_results[0] : null
@@ -608,7 +608,7 @@ export const findShowByExternalId = action({
       findResponseSchema,
       `/find/${args.externalId}`,
       params,
-      CACHE_DURATIONS.ONE_WEEK,
+      CACHE_DURATIONS.ONE_MONTH,
     )
 
     return results.tv_results.length > 0 ? results.tv_results[0] : null
@@ -631,7 +631,7 @@ export const findEpisodeByExternalId = action({
       findResponseSchema,
       `/find/${args.externalId}`,
       params,
-      CACHE_DURATIONS.ONE_WEEK,
+      CACHE_DURATIONS.ONE_MONTH,
     )
 
     return results.tv_episode_results && results.tv_episode_results.length > 0 ? results.tv_episode_results[0] : null

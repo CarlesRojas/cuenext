@@ -47,6 +47,7 @@ type ImportResult = {
   errors: Array<{ show: string; error: string }>
   episodesProcessed: number
   episodesWatched: number
+  episodesNotFound: Array<{ show: string; episode: string; externalIds: { tvdb?: number; imdb?: string } }>
 }
 
 function ImportPage() {
@@ -60,6 +61,7 @@ function ImportPage() {
   const setStopped = useDbMutation(api.stopped.setStopped)
   const markMultipleEpisodesAsWatched = useDbMutation(api.watch.markMultipleEpisodesAsWatched)
   const findByExternalId = useAction(api.tmdb.findShowByExternalId)
+  const findEpisodeByExternalId = useAction(api.tmdb.findEpisodeByExternalId)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
   const followShowMutation = useMutation({
@@ -89,6 +91,7 @@ function ImportPage() {
       errors: [],
       episodesProcessed: 0,
       episodesWatched: 0,
+      episodesNotFound: [],
     }
 
     const BATCH_SIZE = 5
@@ -112,7 +115,7 @@ function ImportPage() {
               },
             }
 
-          const nextEpisodeInfo = await updateNextEpisode({ tmdbId: foundShow.id })
+          //   const nextEpisodeInfo = await updateNextEpisode({ tmdbId: foundShow.id })
 
           const releaseDate = foundShow.first_air_date ? new Date(foundShow.first_air_date).getTime() : 0
 
@@ -129,22 +132,31 @@ function ImportPage() {
           let episodesProcessed = 0
           let episodesWatched = 0
           const episodesToWatch = []
+          const episodesNotFound = []
 
           for (const season of showData.seasons) {
-            const displacement =
-              nextEpisodeInfo.seasonFirstEpisodeIndex.length > 0
-                ? (nextEpisodeInfo.seasonFirstEpisodeIndex[season.number - 1] ?? 0)
-                : 0
-
             for (const episode of season.episodes) {
               episodesProcessed++
-              if (episode.special) continue
 
               if (!episode.watched_at) continue
+              if (episode.special) continue
 
+              let tmdbEpisode = null
+              if (episode.id.tvdb) tmdbEpisode = await findEpisodeByExternalId({ externalId: episode.id.tvdb })
+
+              if (!tmdbEpisode) {
+                episodesNotFound.push({
+                  show: showData.title,
+                  episode: `S${season.number}E${episode.number}`,
+                  externalIds: episode.id,
+                })
+                continue
+              }
+
+              console.log(`${foundShow.name}:  ${tmdbEpisode.season_number} ${tmdbEpisode.episode_number}`)
               episodesToWatch.push({
-                seasonNumber: season.number - 1,
-                episodeNumber: episode.number - 1 + displacement,
+                seasonNumber: tmdbEpisode.season_number - 1,
+                episodeNumber: tmdbEpisode.episode_number - 1,
                 watchedAt: new Date(episode.watched_at).getTime(),
               })
 
@@ -172,6 +184,7 @@ function ImportPage() {
             success: true,
             episodesProcessed,
             episodesWatched,
+            episodesNotFound,
           }
         } catch (error) {
           return {
@@ -196,6 +209,7 @@ function ImportPage() {
 
             if (batchResult.value.episodesProcessed) results.episodesProcessed += batchResult.value.episodesProcessed
             if (batchResult.value.episodesWatched) results.episodesWatched += batchResult.value.episodesWatched
+            if (batchResult.value.episodesNotFound) results.episodesNotFound.push(...batchResult.value.episodesNotFound)
           } else if (batchResult.value.error) results.errors.push(batchResult.value.error)
         } else {
           results.errors.push({
@@ -344,6 +358,24 @@ function ImportPage() {
                 <div className="text-sm text-purple-400">Total Episodes</div>
               </div>
             </div>
+
+            {result.episodesNotFound.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="font-semibold text-yellow-400">Episodes Not Found in TMDB:</h3>
+                <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-yellow-500/5 p-4">
+                  {result.episodesNotFound.map((episode, index) => (
+                    <div key={index} className="text-sm">
+                      <span className="font-medium text-yellow-300">
+                        {episode.show} - {episode.episode}:
+                      </span>{' '}
+                      <span className="text-yellow-400">
+                        TVDB: {episode.externalIds.tvdb || 'N/A'}, IMDB: {episode.externalIds.imdb || 'N/A'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {result.errors.length > 0 && (
               <div className="space-y-2">

@@ -15,6 +15,7 @@ export const CACHE_DURATIONS = {
   ONE_DAY: 24 * 60 * 60 * 1000,
   THREE_DAYS: 3 * 24 * 60 * 60 * 1000,
   ONE_WEEK: 7 * 24 * 60 * 60 * 1000,
+  ONE_MONTH: 30 * 24 * 60 * 60 * 1000,
   MIDNIGHT: 'MIDNIGHT' as const, // Special value that expires at start of next day
 } as const
 
