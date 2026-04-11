@@ -67,7 +67,7 @@ export default function AppShell({ children }: AppShellProps) {
       {!isMobile && (
         <aside
           className={cn(
-            'duration-slow fixed top-0 left-0 z-50 hidden overflow-hidden p-3 transition-all ease-in-out md:block',
+            'duration-slow fixed top-0 left-0 z-50 hidden overflow-hidden p-3 transition-[width] ease-in-out md:block',
             sidebarExpanded ? 'w-72 max-w-72 min-w-72' : 'w-23 max-w-23 min-w-23',
           )}
           style={{ height: visualHeight }}
