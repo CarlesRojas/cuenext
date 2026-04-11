@@ -39,6 +39,7 @@ export const listStopped = query({
   handler: async context => {
     const userId = await requireUser(context)
 
+    // TODO: Consider pagination if users have many stopped shows
     const stoppedItems = await context.db
       .query('stopped')
       .withIndex('by_user', q => q.eq('userId', userId))

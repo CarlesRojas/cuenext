@@ -6,11 +6,13 @@ export const getUpcomingTvWatchlist = query({
   handler: async context => {
     const userId = await requireUser(context)
 
+    // TODO: Consider pagination if users follow many TV shows
     const tvFollows = await context.db
       .query('follow')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
       .collect()
 
+    // TODO: Consider pagination if users have many stopped shows
     const stoppedShows = await context.db
       .query('stopped')
       .withIndex('by_user', q => q.eq('userId', userId))
@@ -57,11 +59,13 @@ export const getUpcomingMoviesWatchlist = query({
   handler: async context => {
     const userId = await requireUser(context)
 
+    // TODO: Consider pagination if users follow many movies
     const movieFollows = await context.db
       .query('follow')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
       .collect()
 
+    // TODO: Consider pagination if users have many watched movies
     const watchedMovies = await context.db
       .query('movie')
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId))
