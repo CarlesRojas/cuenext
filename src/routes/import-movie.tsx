@@ -117,17 +117,19 @@ function ImportPage() {
 
       const batchResults = await Promise.allSettled(batchPromises)
 
-      for (const result of batchResults) {
+      for (const batchResult of batchResults) {
         results.processed++
         setProgress(prev => ({ ...prev, current: prev.current + 1 }))
 
-        if (result.status === 'fulfilled') {
-          if (result.value.success) results.success++
-          else if (result.value.error) results.errors.push(result.value.error)
+        if (batchResult.status === 'fulfilled') {
+          if (batchResult.value.success) results.success++
+          else if (batchResult.value.error) results.errors.push(batchResult.value.error)
         } else {
           results.errors.push({
             movie: 'Unknown',
-            error: 'Promise rejected: ' + (result.reason instanceof Error ? result.reason.message : 'Unknown error'),
+            error:
+              'Promise rejected: ' +
+              (batchResult.reason instanceof Error ? batchResult.reason.message : 'Unknown error'),
           })
         }
       }
