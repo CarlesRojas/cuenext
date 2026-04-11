@@ -93,7 +93,7 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
   //   a.name.localeCompare(b.name),
   // )
 
-  const hasBeenReleased = !releaseDate || new Date(releaseDate) <= new Date()
+  const hasBeenReleased = releaseDate && new Date(releaseDate) <= new Date()
 
   return (
     <section className="screen-px pb-4 md:pb-8">
@@ -137,7 +137,7 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
 
         {!isLoading && selectedCountry && !countryData && (
           <p className="page-width pointer-events-none mx-[unset] -mt-2 tracking-wide text-neutral-500">
-            {hasBeenReleased
+            {!hasBeenReleased
               ? releaseDate
                 ? `This ${media === 'tv' ? 'show' : 'movie'} will release on ${new Date(releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`
                 : 'Not released yet'
