@@ -60,6 +60,7 @@ function ImportPage() {
   const setStopped = useDbMutation(api.stopped.setStopped)
   const markEpisodeWatched = useDbMutation(api.watch.markEpisodeWatched)
   const findByExternalId = useAction(api.tmdb.findShowByExternalId)
+  const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
   const followShowMutation = useMutation({
     mutationFn: async (args: Parameters<typeof followShow>[0]) => {
@@ -156,6 +157,8 @@ function ImportPage() {
               }
             }
           }
+
+          await updateNextEpisode({ tmdbId: foundShow.id })
 
           return {
             success: true,
