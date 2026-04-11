@@ -101,16 +101,18 @@ function ImportPage() {
           const createdAtTimestamp = new Date(showData.created_at).getTime()
 
           let foundShow = null
-          if (showData.id.imdb) foundShow = await findByExternalId({ externalId: showData.id.imdb })
+          if (showData.id.tvdb) foundShow = await findByExternalId({ externalId: showData.id.tvdb })
 
           if (!foundShow)
             return {
               success: false,
               error: {
                 show: showData.title,
-                error: `No TMDB show found for IMDB ID: ${showData.id.imdb}`,
+                error: `No TMDB show found for TVDB ID: ${showData.id.tvdb}`,
               },
             }
+
+          const nextEpisodeInfo = await updateNextEpisode({ tmdbId: foundShow.id })
 
           const releaseDate = foundShow.first_air_date ? new Date(foundShow.first_air_date).getTime() : 0
 
@@ -124,33 +126,32 @@ function ImportPage() {
             followedAt: createdAtTimestamp,
           })
 
-          if (showData.status === 'stopped') {
-            await setStoppedMutation.mutateAsync({
-              tmdbId: foundShow.id,
-            })
-          }
+          if (['watch_later', 'stopped'].includes(showData.status))
+            await setStoppedMutation.mutateAsync({ tmdbId: foundShow.id })
 
           let episodesProcessed = 0
           let episodesWatched = 0
           const episodesToWatch = []
 
           for (const season of showData.seasons) {
+            const displacement =
+              nextEpisodeInfo.seasonFirstEpisodeIndex.length > 0
+                ? (nextEpisodeInfo.seasonFirstEpisodeIndex[season.number - 1] ?? 0)
+                : 0
+
             for (const episode of season.episodes) {
               episodesProcessed++
+              if (episode.special) continue
 
-              if (episode.is_watched) {
-                const watchedAtTimestamp = episode.watched_at
-                  ? new Date(episode.watched_at).getTime()
-                  : createdAtTimestamp
+              if (!episode.watched_at) continue
 
-                episodesToWatch.push({
-                  seasonNumber: season.number - 1,
-                  episodeNumber: episode.number - 1,
-                  watchedAt: watchedAtTimestamp,
-                })
+              episodesToWatch.push({
+                seasonNumber: season.number - 1,
+                episodeNumber: episode.number - 1 + displacement,
+                watchedAt: new Date(episode.watched_at).getTime(),
+              })
 
-                episodesWatched++
-              }
+              episodesWatched++
             }
           }
 
@@ -268,8 +269,8 @@ function ImportPage() {
             Show Import
           </h2>
           <p className="mt-2 text-sm text-neutral-400">
-            Upload a JSON file with show data. Each show should include: uuid, id (with tvdb/imdb), title, status,
-            seasons with episodes.
+            Upload a JSON file with show data. Each show should include: uuid, id with tvdb, title, status, seasons with
+            episodes.
           </p>
         </div>
 

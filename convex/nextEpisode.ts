@@ -81,7 +81,18 @@ export const updateNextEpisode = action({
       }
     }
 
-    const updateData = {
+    const updateData: {
+      showTmdbId: number
+      lastWatchedAt: number | null
+      seasonNumber: number
+      episodeNumber: number
+      seasonEpisodeCounts: number[]
+      seasonFirstEpisodeIndex: number[]
+      seasonDataUpdatedAt: number | null
+      watchedPercentage: number
+      numberOfSeasons: number
+      status: 'ended' | 'ongoing'
+    } = {
       showTmdbId: args.tmdbId,
       lastWatchedAt:
         watchedEpisodesWithoutSpecials.length > 0
@@ -98,5 +109,7 @@ export const updateNextEpisode = action({
     }
 
     await context.runMutation(api.watch.upsertNextEpisode, updateData)
+
+    return updateData
   },
 })

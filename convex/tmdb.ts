@@ -595,10 +595,10 @@ export const findMovieByExternalId = action({
 
 export const findShowByExternalId = action({
   args: {
-    externalId: v.string(),
+    externalId: v.number(),
   },
   handler: async (context, args) => {
-    const params = { external_source: 'imdb_id' }
+    const params = { external_source: 'tvdb_id' }
 
     const findResponseSchema = z.object({
       movie_results: z.array(tmdbMovieMinimalSchema),
