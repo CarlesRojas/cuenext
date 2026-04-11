@@ -126,9 +126,6 @@ function ImportPage() {
             followedAt: createdAtTimestamp,
           })
 
-          if (['watch_later', 'stopped'].includes(showData.status))
-            await setStoppedMutation.mutateAsync({ tmdbId: foundShow.id })
-
           let episodesProcessed = 0
           let episodesWatched = 0
           const episodesToWatch = []
@@ -167,6 +164,9 @@ function ImportPage() {
           }
 
           await updateNextEpisode({ tmdbId: foundShow.id })
+
+          if (['watch_later', 'stopped'].includes(showData.status))
+            await setStoppedMutation.mutateAsync({ tmdbId: foundShow.id })
 
           return {
             success: true,
