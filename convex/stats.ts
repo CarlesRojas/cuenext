@@ -196,12 +196,17 @@ export const getShowStats = action({
       }
     }
 
-    const sumOfRuntimes = Array.from(cachedEpisodeRuntimes.values()).reduce((sum, runtime) => sum + runtime, 0)
+    let showTimeMinutes = 0
+    for (const episode of episodes) {
+      const key = `${episode.showTmdbId}-${episode.seasonNumber}-${episode.episodeNumber}`
+      const runtime = cachedEpisodeRuntimes.get(key) ?? 30
+      showTimeMinutes += runtime
+    }
 
     return {
       episodesWatchedCount: episodes.length,
       followedShowsCount: follows.length,
-      showTimeMinutes: sumOfRuntimes,
+      showTimeMinutes,
     }
   },
 })

@@ -74,10 +74,10 @@ function ProfilePage() {
   const clerk = useClerk()
   const { user } = useUser()
 
-  // const { data: showStats } = useQuery({
-  //   ...convexAction(api.stats.getShowStats),
-  //   enabled: !!user && media === 'tv',
-  // })
+  const { data: showStats } = useQuery({
+    ...convexAction(api.stats.getShowStats),
+    enabled: !!user && media === 'tv',
+  })
 
   const { data: movieStats } = useQuery({
     ...convexAction(api.stats.getMovieStats),
@@ -132,7 +132,7 @@ function ProfilePage() {
 
       <section className="screen-px mb-8">
         <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {/* {user && media === 'tv' && (
+          {user && media === 'tv' && (
             <>
               <StatCard
                 className="col-span-2"
@@ -157,7 +157,7 @@ function ProfilePage() {
                 name="Followed Shows"
               />
             </>
-          )} */}
+          )}
 
           {user && media === 'movie' && (
             <>
