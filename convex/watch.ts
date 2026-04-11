@@ -162,10 +162,11 @@ export const markEpisodeWatched = mutation({
     showPoster: v.union(v.string(), v.null()),
     showBackdrop: v.union(v.string(), v.null()),
     releaseDate: v.number(),
+    watchedAt: v.optional(v.number()),
   },
-  handler: async (context, { showName, showPoster, showBackdrop, ...args }) => {
+  handler: async (context, { showName, showPoster, showBackdrop, watchedAt, ...args }) => {
     const userId = await requireUser(context)
-    const now = Date.now()
+    const watchTimestamp = watchedAt ?? Date.now()
 
     const existing = await context.db
       .query('episode')
@@ -181,7 +182,7 @@ export const markEpisodeWatched = mutation({
     if (!existing)
       await context.db.insert('episode', {
         userId,
-        watchedAt: now,
+        watchedAt: watchTimestamp,
         showTmdbId: args.showTmdbId,
         seasonNumber: args.seasonNumber,
         episodeNumber: args.episodeNumber,
@@ -211,7 +212,7 @@ export const markEpisodeWatched = mutation({
         name: showName,
         poster: showPoster,
         backdrop: showBackdrop,
-        followedAt: now,
+        followedAt: watchTimestamp,
         releaseDate: args.releaseDate,
       })
 

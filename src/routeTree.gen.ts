@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ImportShowsRouteImport } from './routes/import-shows'
 import { Route as ImportMoviesRouteImport } from './routes/import-movies'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
@@ -33,6 +34,11 @@ const SearchRoute = SearchRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportShowsRoute = ImportShowsRouteImport.update({
+  id: '/import-shows',
+  path: '/import-shows',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImportMoviesRoute = ImportMoviesRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/import-movies': typeof ImportMoviesRoute
+  '/import-shows': typeof ImportShowsRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/import-movies': typeof ImportMoviesRoute
+  '/import-shows': typeof ImportShowsRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/import-movies': typeof ImportMoviesRoute
+  '/import-shows': typeof ImportShowsRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/upcoming': typeof UpcomingRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/import-movies'
+    | '/import-shows'
     | '/profile'
     | '/search'
     | '/upcoming'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/import-movies'
+    | '/import-shows'
     | '/profile'
     | '/search'
     | '/upcoming'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/import-movies'
+    | '/import-shows'
     | '/profile'
     | '/search'
     | '/upcoming'
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscoverRoute: typeof DiscoverRoute
   ImportMoviesRoute: typeof ImportMoviesRoute
+  ImportShowsRoute: typeof ImportShowsRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   UpcomingRoute: typeof UpcomingRoute
@@ -182,6 +195,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import-shows': {
+      id: '/import-shows'
+      path: '/import-shows'
+      fullPath: '/import-shows'
+      preLoaderRoute: typeof ImportShowsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/import-movies': {
@@ -240,6 +260,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscoverRoute: DiscoverRoute,
   ImportMoviesRoute: ImportMoviesRoute,
+  ImportShowsRoute: ImportShowsRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   UpcomingRoute: UpcomingRoute,

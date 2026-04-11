@@ -9,26 +9,44 @@ import { useAction, useMutation as useDbMutation } from 'convex/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-export const Route = createFileRoute('/import-movies')({
+export const Route = createFileRoute('/import-shows')({
   component: ImportPage,
 })
 
-type MovieData = {
+type EpisodeData = {
+  id: {
+    tvdb: number
+    imdb: string
+  }
+  number: number
+  special: boolean
+  is_watched: boolean
+  watched_at?: string
+}
+
+type SeasonData = {
+  number: number
+  episodes: EpisodeData[]
+}
+
+type ShowData = {
   uuid: string
   id: {
-    tvdb?: number
+    tvdb: number
     imdb: string
   }
   created_at: string
-  watched_at?: string
   title: string
-  is_watched: boolean
+  status: string
+  seasons: SeasonData[]
 }
 
 type ImportResult = {
   processed: number
   success: number
-  errors: Array<{ movie: string; error: string }>
+  errors: Array<{ show: string; error: string }>
+  episodesProcessed: number
+  episodesWatched: number
 }
 
 function ImportPage() {
@@ -38,79 +56,117 @@ function ImportPage() {
   const [importing, setImporting] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
 
-  const findMovieByExternalId = useAction(api.tmdb.findMovieByExternalId)
-  const followMovie = useDbMutation(api.library.follow)
-  const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
+  const followShow = useDbMutation(api.library.follow)
+  const setStopped = useDbMutation(api.stopped.setStopped)
+  const markEpisodeWatched = useDbMutation(api.watch.markEpisodeWatched)
+  const findByExternalId = useAction(api.tmdb.findShowByExternalId)
 
-  const followMovieMutation = useMutation({
-    mutationFn: async (args: Parameters<typeof followMovie>[0]) => {
-      return await followMovie(args)
+  const followShowMutation = useMutation({
+    mutationFn: async (args: Parameters<typeof followShow>[0]) => {
+      return await followShow(args)
     },
   })
 
-  const markWatchedMutation = useMutation({
-    mutationFn: async (args: Parameters<typeof markMovieWatched>[0]) => {
-      return await markMovieWatched(args)
+  const setStoppedMutation = useMutation({
+    mutationFn: async (args: Parameters<typeof setStopped>[0]) => {
+      return await setStopped(args)
     },
   })
 
-  const importMutation = async (moviesData: MovieData[]) => {
+  const markEpisodeWatchedMutation = useMutation({
+    mutationFn: async (args: Parameters<typeof markEpisodeWatched>[0]) => {
+      return await markEpisodeWatched(args)
+    },
+  })
+
+  const importMutation = async (showsData: ShowData[]) => {
     setImporting(true)
-    setProgress({ current: 0, total: moviesData.length })
+    setProgress({ current: 0, total: showsData.length })
     const results: ImportResult = {
       processed: 0,
       success: 0,
       errors: [],
+      episodesProcessed: 0,
+      episodesWatched: 0,
     }
 
-    const BATCH_SIZE = 10
+    const BATCH_SIZE = 5
 
-    for (let i = 0; i < moviesData.length; i += BATCH_SIZE) {
-      const batch = moviesData.slice(i, i + BATCH_SIZE)
+    for (let i = 0; i < showsData.length; i += BATCH_SIZE) {
+      const batch = showsData.slice(i, i + BATCH_SIZE)
 
-      const batchPromises = batch.map(async movieData => {
+      const batchPromises = batch.map(async showData => {
         try {
-          const watchedAtTimestamp = movieData.watched_at ? new Date(movieData.watched_at).getTime() : null
-          const createdAtTimestamp = new Date(movieData.created_at).getTime()
+          const createdAtTimestamp = new Date(showData.created_at).getTime()
 
-          const foundMovie = await findMovieByExternalId({ externalId: movieData.id.imdb })
+          let foundShow = null
+          if (showData.id.imdb) foundShow = await findByExternalId({ externalId: showData.id.imdb })
 
-          if (!foundMovie) {
+          if (!foundShow)
             return {
               success: false,
-              error: { movie: movieData.title, error: `No TMDB movie found for IMDB ID: ${movieData.id.imdb}` },
+              error: {
+                show: showData.title,
+                error: `No TMDB show found for IMDB ID: ${showData.id.imdb}`,
+              },
+            }
+
+          const releaseDate = foundShow.first_air_date ? new Date(foundShow.first_air_date).getTime() : 0
+
+          await followShowMutation.mutateAsync({
+            type: 'tv' as const,
+            tmdbId: foundShow.id,
+            name: foundShow.name,
+            poster: foundShow.poster_path ?? null,
+            backdrop: foundShow.backdrop_path ?? null,
+            releaseDate,
+            followedAt: createdAtTimestamp,
+          })
+
+          if (showData.status === 'stopped') {
+            await setStoppedMutation.mutateAsync({
+              tmdbId: foundShow.id,
+            })
+          }
+
+          let episodesProcessed = 0
+          let episodesWatched = 0
+
+          for (const season of showData.seasons) {
+            for (const episode of season.episodes) {
+              episodesProcessed++
+
+              if (episode.is_watched) {
+                const watchedAtTimestamp = episode.watched_at
+                  ? new Date(episode.watched_at).getTime()
+                  : createdAtTimestamp
+
+                await markEpisodeWatchedMutation.mutateAsync({
+                  showTmdbId: foundShow.id,
+                  seasonNumber: season.number - 1,
+                  episodeNumber: episode.number - 1,
+                  showName: foundShow.name,
+                  showPoster: foundShow.poster_path ?? null,
+                  showBackdrop: foundShow.backdrop_path ?? null,
+                  releaseDate: 0,
+                  watchedAt: watchedAtTimestamp,
+                })
+
+                episodesWatched++
+              }
             }
           }
 
-          const releaseDate = foundMovie.release_date ? new Date(foundMovie.release_date).getTime() : 0
-
-          if (watchedAtTimestamp) {
-            await markWatchedMutation.mutateAsync({
-              tmdbId: foundMovie.id,
-              name: foundMovie.title,
-              poster: foundMovie.poster_path ?? null,
-              backdrop: foundMovie.backdrop_path ?? null,
-              releaseDate,
-              watchedAt: watchedAtTimestamp,
-            })
-          } else {
-            await followMovieMutation.mutateAsync({
-              type: 'movie' as const,
-              tmdbId: foundMovie.id,
-              name: foundMovie.title,
-              poster: foundMovie.poster_path ?? null,
-              backdrop: foundMovie.backdrop_path ?? null,
-              releaseDate,
-              followedAt: createdAtTimestamp,
-            })
+          return {
+            success: true,
+            episodesProcessed,
+            episodesWatched,
           }
-
-          return { success: true }
         } catch (error) {
           return {
             success: false,
             error: {
-              movie: movieData.title,
+              show: showData.title,
               error: error instanceof Error ? error.message : 'Unknown error',
             },
           }
@@ -124,11 +180,15 @@ function ImportPage() {
         setProgress(prev => ({ ...prev, current: prev.current + 1 }))
 
         if (batchResult.status === 'fulfilled') {
-          if (batchResult.value.success) results.success++
-          else if (batchResult.value.error) results.errors.push(batchResult.value.error)
+          if (batchResult.value.success) {
+            results.success++
+
+            if (batchResult.value.episodesProcessed) results.episodesProcessed += batchResult.value.episodesProcessed
+            if (batchResult.value.episodesWatched) results.episodesWatched += batchResult.value.episodesWatched
+          } else if (batchResult.value.error) results.errors.push(batchResult.value.error)
         } else {
           results.errors.push({
-            movie: 'Unknown',
+            show: 'Unknown',
             error:
               'Promise rejected: ' +
               (batchResult.reason instanceof Error ? batchResult.reason.message : 'Unknown error'),
@@ -153,19 +213,19 @@ function ImportPage() {
       const parsedData = JSON.parse(fileContent)
 
       if (!Array.isArray(parsedData)) {
-        toast.error('JSON file must contain an array of movies')
+        toast.error('JSON file must contain an array of shows')
         return
       }
 
       if (parsedData.length > 0) {
         const firstItem = parsedData[0]
-        if (!firstItem.uuid || !firstItem.id?.imdb || !firstItem.title || firstItem.is_watched === undefined) {
-          toast.error('Invalid movie format. Please check the required fields.')
+        if (!firstItem.uuid || !firstItem.id || !firstItem.title || !firstItem.seasons) {
+          toast.error('Invalid show format. Please check the required fields.')
           return
         }
       }
 
-      const importResult = await importMutation(parsedData as MovieData[])
+      const importResult = await importMutation(parsedData as ShowData[])
       setResult(importResult)
     } catch (error) {
       if (error instanceof SyntaxError) toast.error('Invalid JSON format')
@@ -177,8 +237,8 @@ function ImportPage() {
     return (
       <div className="screen-py screen-px flex w-full flex-col items-center gap-8">
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Import Movies</h1>
-          <p className="mt-4 text-neutral-400">Please sign in to import your movie data.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Import Shows</h1>
+          <p className="mt-4 text-neutral-400">Please sign in to import your show data.</p>
         </div>
       </div>
     )
@@ -187,19 +247,19 @@ function ImportPage() {
   return (
     <div className="screen-py screen-px flex w-full flex-col gap-8">
       <div className="text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Import Movies</h1>
-        <p className="mt-4 text-neutral-400">Upload a JSON file to import your movie watchlist</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Import Shows</h1>
+        <p className="mt-4 text-neutral-400">Upload a JSON file to import your show watchlist</p>
       </div>
 
       <div className="mx-auto w-full max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
         <div className="mb-6">
           <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
             <FontAwesomeIcon icon={faFileImport} />
-            Movie Import
+            Show Import
           </h2>
           <p className="mt-2 text-sm text-neutral-400">
-            Upload a JSON file with movie data. Each movie should include: uuid, id (with imdb), title, is_watched, and
-            created_at.
+            Upload a JSON file with show data. Each show should include: uuid, id (with tvdb/imdb), title, status,
+            seasons with episodes.
           </p>
         </div>
 
@@ -223,7 +283,7 @@ function ImportPage() {
 
           <Button onClick={handleImport} disabled={!selectedFile || importing}>
             <FontAwesomeIcon icon={importing ? faSpinner : faFileImport} spin={importing} />
-            {importing ? 'Importing...' : 'Import Movies'}
+            {importing ? 'Importing...' : 'Import Shows'}
           </Button>
 
           {importing && progress.total > 0 && (
@@ -255,11 +315,22 @@ function ImportPage() {
             <div className="grid grid-cols-2 gap-4 text-center">
               <div className="rounded-2xl bg-green-500/10 p-4">
                 <div className="text-2xl font-bold text-green-500">{result.success}</div>
-                <div className="text-sm text-green-400">Successful</div>
+                <div className="text-sm text-green-400">Shows Followed</div>
               </div>
               <div className="rounded-2xl bg-red-500/10 p-4">
                 <div className="text-2xl font-bold text-red-500">{result.errors.length}</div>
                 <div className="text-sm text-red-400">Errors</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="rounded-2xl bg-blue-500/10 p-4">
+                <div className="text-2xl font-bold text-blue-500">{result.episodesWatched}</div>
+                <div className="text-sm text-blue-400">Episodes Watched</div>
+              </div>
+              <div className="rounded-2xl bg-purple-500/10 p-4">
+                <div className="text-2xl font-bold text-purple-500">{result.episodesProcessed}</div>
+                <div className="text-sm text-purple-400">Total Episodes</div>
               </div>
             </div>
 
@@ -269,7 +340,7 @@ function ImportPage() {
                 <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-red-500/5 p-4">
                   {result.errors.map((error, index) => (
                     <div key={index} className="text-sm">
-                      <span className="font-medium text-red-300">{error.movie}:</span>{' '}
+                      <span className="font-medium text-red-300">{error.show}:</span>{' '}
                       <span className="text-red-400">{error.error}</span>
                     </div>
                   ))}
