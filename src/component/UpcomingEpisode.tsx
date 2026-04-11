@@ -28,8 +28,11 @@ export default function UpcomingEpisode(props: UpcomingEpisodeItem) {
   const nextEpisode = episode.next_episode_to_air
   if (nextEpisode) {
     const { season_number, episode_number, name: episodeName } = nextEpisode
+
+    const cleanEpisodeName = episodeName.toLowerCase().includes('episode') ? null : episodeName
+
     tag = continuousEpisodeNumbers ? `E${episode_number}` : `S${season_number}, E${episode_number}`
-    if (episodeName) tag += ` • ${episodeName}`
+    if (cleanEpisodeName) tag += ` • ${cleanEpisodeName}`
   } else tag = 'New Episode'
 
   const daysUntilAir = Math.ceil((new Date(airDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
