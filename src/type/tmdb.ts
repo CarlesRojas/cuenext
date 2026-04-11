@@ -107,7 +107,7 @@ export const tmdbPersonSchema = z.object({
   media_type: z.literal('person').optional(),
 })
 
-export const tmdbEpisodeSchema = z.object({
+export const tmdbEpisodeMinimalSchema = z.object({
   id: z.number(),
   name: z.string(),
   overview: z.string(),
@@ -115,9 +115,12 @@ export const tmdbEpisodeSchema = z.object({
   episode_number: z.number(),
   season_number: z.number(),
   show_id: z.number().optional(),
+  still_path: z.string().nullable().optional(),
+})
+
+export const tmdbEpisodeSchema = tmdbEpisodeMinimalSchema.extend({
   production_code: z.string().optional(),
   runtime: z.number().nullable().optional(),
-  still_path: z.string().nullable().optional(),
   vote_average: z.number().optional(),
   vote_count: z.number().optional(),
 })

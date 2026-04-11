@@ -4,6 +4,7 @@ import type { TmdbMovie, TmdbTv } from '../src/type/tmdb'
 import {
   paginated,
   tmdbCreditsSchema,
+  tmdbEpisodeMinimalSchema,
   tmdbMovieMinimalSchema,
   tmdbMovieSchema,
   tmdbSeasonSchema,
@@ -577,8 +578,6 @@ export const findMovieByExternalId = action({
 
     const findResponseSchema = z.object({
       movie_results: z.array(tmdbMovieMinimalSchema),
-      tv_results: z.array(tmdbTvMinimalSchema),
-      person_results: z.array(z.any()),
     })
 
     const results = await fetchTmdbCached(
@@ -601,9 +600,7 @@ export const findShowByExternalId = action({
     const params = { external_source: 'tvdb_id' }
 
     const findResponseSchema = z.object({
-      movie_results: z.array(tmdbMovieMinimalSchema),
       tv_results: z.array(tmdbTvMinimalSchema),
-      person_results: z.array(z.any()),
     })
 
     const results = await fetchTmdbCached(
@@ -615,5 +612,28 @@ export const findShowByExternalId = action({
     )
 
     return results.tv_results.length > 0 ? results.tv_results[0] : null
+  },
+})
+
+export const findEpisodeByExternalId = action({
+  args: {
+    externalId: v.number(),
+  },
+  handler: async (context, args) => {
+    const params = { external_source: 'tvdb_id' }
+
+    const findResponseSchema = z.object({
+      tv_episode_results: z.array(tmdbEpisodeMinimalSchema).optional(),
+    })
+
+    const results = await fetchTmdbCached(
+      context,
+      findResponseSchema,
+      `/find/${args.externalId}`,
+      params,
+      CACHE_DURATIONS.ONE_WEEK,
+    )
+
+    return results.tv_episode_results && results.tv_episode_results.length > 0 ? results.tv_episode_results[0] : null
   },
 })
