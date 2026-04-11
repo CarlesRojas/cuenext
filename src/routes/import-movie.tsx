@@ -1,6 +1,5 @@
 import { api } from '#/../convex/_generated/api'
 import { Button } from '#/component/ui/button'
-import { Textarea } from '#/component/ui/textarea'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { faFileImport, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -33,8 +32,9 @@ type ImportResult = {
 
 function ImportPage() {
   const clerk = useClerk()
-  const [jsonData, setJsonData] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
+  const [importing, setImporting] = useState(false)
 
   const followMovie = useDbMutation(api.library.follow)
   const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
@@ -52,85 +52,90 @@ function ImportPage() {
     },
   })
 
-  const importMutation = useMutation({
-    mutationFn: async (moviesData: MovieData[]) => {
-      const results: ImportResult = {
-        processed: 0,
-        success: 0,
-        errors: [],
-      }
+  const importMutation = async (moviesData: MovieData[]) => {
+    setImporting(true)
+    const results: ImportResult = {
+      processed: 0,
+      success: 0,
+      errors: [],
+    }
 
-      for (const movieData of moviesData) {
-        results.processed++
+    for (const movieData of moviesData) {
+      results.processed++
 
-        try {
-          const createdAtTimestamp = new Date(movieData.created_at).getTime()
+      try {
+        const createdAtTimestamp = new Date(movieData.created_at).getTime()
 
-          const foundMovie = await findMovieByExternalId({ externalId: movieData.id.imdb })
+        const foundMovie = await findMovieByExternalId({ externalId: movieData.id.imdb })
 
-          if (!foundMovie) {
-            results.errors.push({
-              movie: movieData.title,
-              error: `No TMDB movie found for IMDB ID: ${movieData.id.imdb}`,
-            })
-            continue
-          }
-
-          const releaseDate = foundMovie.release_date ? new Date(foundMovie.release_date).getTime() : 0
-
-          if (movieData.is_watched)
-            await markWatchedMutation.mutateAsync({
-              tmdbId: foundMovie.id,
-              name: foundMovie.title,
-              poster: foundMovie.poster_path ?? null,
-              backdrop: foundMovie.backdrop_path ?? null,
-              releaseDate,
-              watchedAt: createdAtTimestamp,
-            })
-          else
-            await followMovieMutation.mutateAsync({
-              type: 'movie' as const,
-              tmdbId: foundMovie.id,
-              name: foundMovie.title,
-              poster: foundMovie.poster_path ?? null,
-              backdrop: foundMovie.backdrop_path ?? null,
-              releaseDate,
-              followedAt: createdAtTimestamp,
-            })
-
-          results.success++
-        } catch (error) {
+        if (!foundMovie) {
           results.errors.push({
             movie: movieData.title,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: `No TMDB movie found for IMDB ID: ${movieData.id.imdb}`,
           })
+          continue
         }
-      }
 
-      return results
-    },
-    onError: error => {
-      toast.error('Import failed', {
-        description: error.message,
-      })
-    },
-  })
+        const releaseDate = foundMovie.release_date ? new Date(foundMovie.release_date).getTime() : 0
+
+        if (movieData.is_watched)
+          await markWatchedMutation.mutateAsync({
+            tmdbId: foundMovie.id,
+            name: foundMovie.title,
+            poster: foundMovie.poster_path ?? null,
+            backdrop: foundMovie.backdrop_path ?? null,
+            releaseDate,
+            watchedAt: createdAtTimestamp,
+          })
+        else
+          await followMovieMutation.mutateAsync({
+            type: 'movie' as const,
+            tmdbId: foundMovie.id,
+            name: foundMovie.title,
+            poster: foundMovie.poster_path ?? null,
+            backdrop: foundMovie.backdrop_path ?? null,
+            releaseDate,
+            followedAt: createdAtTimestamp,
+          })
+
+        results.success++
+      } catch (error) {
+        results.errors.push({
+          movie: movieData.title,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      }
+    }
+
+    setImporting(false)
+    return results
+  }
 
   const handleImport = async () => {
-    if (!jsonData.trim()) {
-      toast.error('Please paste your JSON data')
+    if (!selectedFile) {
+      toast.error('Please select a JSON file')
       return
     }
 
     try {
-      const parsedData = JSON.parse(jsonData)
+      const fileContent = await selectedFile.text()
+      const parsedData = JSON.parse(fileContent)
 
       if (!Array.isArray(parsedData)) {
-        toast.error('JSON data must be an array of movies')
+        toast.error('JSON file must contain an array of movies')
         return
       }
 
-      await importMutation.mutateAsync(parsedData as MovieData[])
+      if (parsedData.length > 0) {
+        const firstItem = parsedData[0]
+        if (!firstItem.uuid || !firstItem.id?.imdb || !firstItem.title || firstItem.is_watched === undefined) {
+          toast.error('Invalid movie format. Please check the required fields.')
+          return
+        }
+      }
+
+      const importResult = await importMutation(parsedData as MovieData[])
+      setResult(importResult)
     } catch (error) {
       if (error instanceof SyntaxError) toast.error('Invalid JSON format')
       else toast.error('Import failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
@@ -152,7 +157,7 @@ function ImportPage() {
     <div className="screen-py screen-px flex w-full flex-col gap-8">
       <div className="text-center">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Import Movies</h1>
-        <p className="mt-4 text-neutral-400">Import your movie watchlist from JSON format</p>
+        <p className="mt-4 text-neutral-400">Upload a JSON file to import your movie watchlist</p>
       </div>
 
       <div className="mx-auto w-full max-w-4xl rounded-lg border border-white/10 bg-white/5 p-6">
@@ -161,31 +166,33 @@ function ImportPage() {
             <FontAwesomeIcon icon={faFileImport} />
             Movie Import
           </h2>
+          <p className="mt-2 text-sm text-neutral-400">
+            Upload a JSON file with movie data. Each movie should include: uuid, id (with imdb), title, is_watched, and
+            created_at.
+          </p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">JSON Data:</label>
-            <Textarea
-              placeholder={`[\n  {\n    "uuid": "978899c4-5194-4568-b922-0bd2874c4c1a",\n    "id": {\n      "tvdb": 169,\n      "imdb": "tt0133093"\n    },\n    "created_at": "2024-09-13T10:49:58Z",\n    "title": "The Matrix",\n    "is_watched": false\n  },\n  ...\n]`}
-              value={jsonData}
-              onChange={e => setJsonData(e.target.value)}
-              className="min-h-75 font-mono text-sm"
+            <label className="text-sm font-medium">JSON File:</label>
+
+            <input
+              type="file"
+              accept=".json"
+              onChange={e => setSelectedFile(e.target.files?.[0] || null)}
+              className="w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-white/40 focus:ring-2 focus:ring-white/20 focus:outline-none"
             />
+
+            {selectedFile && (
+              <div className="text-sm text-neutral-400">
+                Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+              </div>
+            )}
           </div>
 
-          <Button onClick={handleImport} disabled={importMutation.isPending || !jsonData.trim()} className="w-full">
-            {importMutation.isPending ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                Importing...
-              </>
-            ) : (
-              <>
-                <FontAwesomeIcon icon={faFileImport} />
-                Import Movies
-              </>
-            )}
+          <Button onClick={handleImport} disabled={!selectedFile || importing}>
+            <FontAwesomeIcon icon={importing ? faSpinner : faFileImport} spin={importing} />
+            {importing ? 'Importing...' : 'Import Movies'}
           </Button>
         </div>
       </div>
