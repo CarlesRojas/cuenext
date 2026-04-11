@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+import { paginationOptsValidator } from 'convex/server'
 import { requireUser } from './requireUser'
 
 export const getWatchedMovies = query({
@@ -103,35 +104,16 @@ export const unmarkMovieWatched = mutation({
 
 export const getWatchedEpisodes = query({
   args: {
-    cursor: v.optional(v.string()),
+    paginationOpts: paginationOptsValidator,
   },
-  handler: async (context, { cursor }) => {
+  handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    const episodes = cursor
-      ? await context.db
-          .query('episode')
-          .withIndex('by_user', q => q.eq('userId', userId))
-          .order('asc')
-          .filter(q => q.gt(q.field('_id'), cursor))
-          .take(1000)
-      : await context.db
-          .query('episode')
-          .withIndex('by_user', q => q.eq('userId', userId))
-          .order('asc')
-          .take(1000)
-
-    const result: {
-      episodes: typeof episodes
-      nextCursor: string | null
-      hasMore: boolean
-    } = {
-      episodes,
-      nextCursor: episodes.length > 0 ? episodes[episodes.length - 1]._id : null,
-      hasMore: episodes.length === 1000,
-    }
-
-    return result
+    return await context.db
+      .query('episode')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .order('asc')
+      .paginate(args.paginationOpts)
   },
 })
 

@@ -1,3 +1,4 @@
+import type { PaginationResult } from 'convex/server'
 import { tmdbMovieSchema } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
@@ -85,38 +86,47 @@ interface Episode {
   watchedAt: number
 }
 
-interface EpisodeBatch {
-  episodes: Episode[]
-  nextCursor: string | null
-  hasMore: boolean
-}
-
 export const getShowStats = action({
   args: {},
   handler: async context => {
     await requireUser(context)
 
-    const fetchAllEpisodes = async () => {
+    const fetchWatchedEpisodes = async () => {
       const allEpisodes: Episode[] = []
-      let cursor: string | null = null
-      let hasMore = true
+      let continueCursor: string | null = null
+      let isDone = false
 
-      while (hasMore) {
-        const batch: EpisodeBatch = await context.runQuery(api.watch.getWatchedEpisodes, {
-          cursor: cursor || undefined,
+      while (!isDone) {
+        const result: PaginationResult<Episode> = await context.runQuery(api.watch.getWatchedEpisodes, {
+          paginationOpts: { numItems: 1000, cursor: continueCursor },
         })
 
-        if (batch.episodes.length === 0) break
+        continueCursor = result.continueCursor
+        isDone = result.isDone
 
-        allEpisodes.push(...batch.episodes)
-        cursor = batch.nextCursor
-        hasMore = batch.hasMore
+        allEpisodes.push(...result.page)
       }
 
       return allEpisodes
     }
 
-    const episodes: Episode[] = await fetchAllEpisodes()
+    const fetchCachedRuntimes = async (
+      episodeKeys: Array<{ showTmdbId: number; seasonNumber: number; episodeNumber: number }>,
+    ) => {
+      const allCachedEpisodeInfos: any[] = []
+      const BATCH_SIZE = 1000
+
+      for (let i = 0; i < episodeKeys.length; i += BATCH_SIZE) {
+        const batch = episodeKeys.slice(i, i + BATCH_SIZE)
+
+        const cachedBatch = await context.runQuery(api.episodeInfo.getEpisodeInfo, { episodes: batch })
+        allCachedEpisodeInfos.push(...cachedBatch)
+      }
+
+      return allCachedEpisodeInfos
+    }
+
+    const episodes: Episode[] = await fetchWatchedEpisodes()
     const follows: number[] = await context.runQuery(api.library.listFollowed, { type: 'tv' })
 
     const episodeKeys = episodes.map(ep => ({
@@ -125,7 +135,7 @@ export const getShowStats = action({
       episodeNumber: ep.episodeNumber,
     }))
 
-    const cachedEpisodeInfos = await context.runQuery(api.episodeInfo.getEpisodeInfo, { episodes: episodeKeys })
+    const cachedEpisodeInfos = await fetchCachedRuntimes(episodeKeys)
 
     const cachedEpisodeRuntimes: Map<string, number> = new Map(
       cachedEpisodeInfos.map(info => [`${info.showTmdbId}-${info.seasonNumber}-${info.episodeNumber}`, info.runtime]),
@@ -160,7 +170,6 @@ export const getShowStats = action({
 
       for (let batchIndex = 0; batchIndex < seasonBatches.length; batchIndex++) {
         const batch = seasonBatches[batchIndex]
-        console.log(`Processing season batch ${batchIndex + 1}/${seasonBatches.length} (${batch.length} seasons)`)
 
         const seasonPromises = batch.map(async season => {
           try {
@@ -170,10 +179,6 @@ export const getShowStats = action({
             })
             return { season, seasonDetails }
           } catch (error) {
-            console.error(
-              `Failed to fetch season details for show ${season.showTmdbId} season ${season.seasonNumber + 1}:`,
-              error,
-            )
             return { season, seasonDetails: null }
           }
         })
@@ -199,7 +204,7 @@ export const getShowStats = action({
     let showTimeMinutes = 0
     for (const episode of episodes) {
       const key = `${episode.showTmdbId}-${episode.seasonNumber}-${episode.episodeNumber}`
-      const runtime = cachedEpisodeRuntimes.get(key) ?? 30
+      const runtime = cachedEpisodeRuntimes.get(key) ?? 0
       showTimeMinutes += runtime
     }
 
