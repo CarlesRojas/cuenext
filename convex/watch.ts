@@ -1,19 +1,19 @@
+import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { paginationOptsValidator } from 'convex/server'
 import { requireUser } from './requireUser'
 
 export const getWatchedMovies = query({
-  args: {},
-  handler: async context => {
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    const movies = await context.db
+    return await context.db
       .query('movie')
       .withIndex('by_user', q => q.eq('userId', userId))
-      .collect()
-
-    return movies
+      .paginate(args.paginationOpts)
   },
 })
 

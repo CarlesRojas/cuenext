@@ -10,6 +10,25 @@ export const getMovieStats = action({
   handler: async context => {
     await requireUser(context)
 
+    const fetchWatchedMovies = async () => {
+      const allMovies: { tmdbId: number }[] = []
+      let continueCursor: string | null = null
+      let isDone = false
+
+      while (!isDone) {
+        const result: PaginationResult<{ tmdbId: number }> = await context.runQuery(api.watch.getWatchedMovies, {
+          paginationOpts: { numItems: 1000, cursor: continueCursor },
+        })
+
+        continueCursor = result.continueCursor
+        isDone = result.isDone
+
+        allMovies.push(...result.page)
+      }
+
+      return allMovies
+    }
+
     const fetchFollowedMovies = async () => {
       const allFollows: number[] = []
       let continueCursor: string | null = null
@@ -30,13 +49,25 @@ export const getMovieStats = action({
       return allFollows
     }
 
-    const movies: { tmdbId: number }[] = await context.runQuery(api.watch.getWatchedMovies)
+    const fetchCachedMovieRuntimes = async (tmdbIds: number[]) => {
+      const allCachedMovieInfos: any[] = []
+      const BATCH_SIZE = 1000
+
+      for (let i = 0; i < tmdbIds.length; i += BATCH_SIZE) {
+        const batch = tmdbIds.slice(i, i + BATCH_SIZE)
+
+        const cachedBatch = await context.runQuery(api.movieInfo.getMovieInfo, { tmdbIds: batch })
+        allCachedMovieInfos.push(...cachedBatch)
+      }
+
+      return allCachedMovieInfos
+    }
+
+    const movies: { tmdbId: number }[] = await fetchWatchedMovies()
 
     const follows: number[] = await fetchFollowedMovies()
 
-    const cachedMovieInfos = await context.runQuery(api.movieInfo.getMovieInfo, {
-      tmdbIds: movies.map(m => m.tmdbId),
-    })
+    const cachedMovieInfos = await fetchCachedMovieRuntimes(movies.map(m => m.tmdbId))
 
     const cachedRuntimes: Map<number, number> = new Map(cachedMovieInfos.map(info => [info.tmdbId, info.runtime]))
     const missingMovies = movies.filter(movie => !cachedRuntimes.has(movie.tmdbId))
