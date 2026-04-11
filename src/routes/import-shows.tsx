@@ -380,38 +380,38 @@ function ImportPage() {
       </div>
 
       {result && (
-        <div className="mx-auto w-full max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="mb-4 text-xl font-semibold text-white">Import Results</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="rounded-2xl bg-green-500/10 p-4">
-                <div className="text-2xl font-bold text-green-500">{result.success}</div>
-                <div className="text-sm text-green-400">Shows Followed</div>
+        <div className="mx-auto w-full max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6 select-all!">
+          <h2 className="mb-4 text-xl font-semibold text-white select-all!">Import Results</h2>
+          <div className="space-y-4 select-all!">
+            <div className="grid grid-cols-2 gap-4 text-center select-all!">
+              <div className="rounded-2xl bg-green-500/10 p-4 select-all!">
+                <div className="text-2xl font-bold text-green-500 select-all!">{result.success}</div>
+                <div className="text-sm text-green-400 select-all!">Shows Followed</div>
               </div>
-              <div className="rounded-2xl bg-red-500/10 p-4">
-                <div className="text-2xl font-bold text-red-500">{result.errors.length}</div>
-                <div className="text-sm text-red-400">Errors</div>
+              <div className="rounded-2xl bg-red-500/10 p-4 select-all!">
+                <div className="text-2xl font-bold text-red-500 select-all!">{result.errors.length}</div>
+                <div className="text-sm text-red-400 select-all!">Errors</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="rounded-2xl bg-blue-500/10 p-4">
-                <div className="text-2xl font-bold text-blue-500">{result.episodesWatched}</div>
-                <div className="text-sm text-blue-400">Episodes Watched</div>
+            <div className="grid grid-cols-2 gap-4 text-center select-all!">
+              <div className="rounded-2xl bg-blue-500/10 p-4 select-all!">
+                <div className="text-2xl font-bold text-blue-500 select-all!">{result.episodesWatched}</div>
+                <div className="text-sm text-blue-400 select-all!">Episodes Watched</div>
               </div>
-              <div className="rounded-2xl bg-purple-500/10 p-4">
-                <div className="text-2xl font-bold text-purple-500">{result.episodesProcessed}</div>
-                <div className="text-sm text-purple-400">Total Episodes</div>
+              <div className="rounded-2xl bg-purple-500/10 p-4 select-all!">
+                <div className="text-2xl font-bold text-purple-500 select-all!">{result.episodesProcessed}</div>
+                <div className="text-sm text-purple-400 select-all!">Total Episodes</div>
               </div>
             </div>
 
             {result.episodesNotFound.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-yellow-400">Episodes Not Found in TMDB:</h3>
-                <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-yellow-500/5 p-4">
+              <div className="space-y-2 select-all!">
+                <h3 className="font-semibold text-yellow-400 select-all!">Episodes Not Found in TMDB:</h3>
+                <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-yellow-500/5 p-4 select-all!">
                   {result.episodesNotFound.map((episode, index) => (
-                    <div key={index} className="text-sm">
-                      <span className="font-medium text-yellow-300 select-all">
+                    <div key={index} className="text-sm select-all!">
+                      <span className="font-medium text-yellow-300 select-all!">
                         {episode.show} - {episode.episode}: TVDB: {episode.externalIds.tvdb || 'N/A'}, IMDB:{' '}
                         {episode.externalIds.imdb || 'N/A'}
                       </span>
@@ -422,12 +422,12 @@ function ImportPage() {
             )}
 
             {result.errors.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-red-400">Errors:</h3>
-                <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-red-500/5 p-4">
+              <div className="space-y-2 select-all!">
+                <h3 className="font-semibold text-red-400 select-all!">Errors:</h3>
+                <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg bg-red-500/5 p-4 select-all!">
                   {result.errors.map((error, index) => (
-                    <div key={index} className="text-sm">
-                      <span className="font-medium text-red-300 select-all">
+                    <div key={index} className="text-sm select-all!">
+                      <span className="font-medium text-red-300 select-all!">
                         {error.show}: {error.error}
                       </span>
                     </div>
