@@ -8,7 +8,6 @@ export const getFavoriteMovies = query({
   handler: async context => {
     const userId = await requireUser(context)
 
-    // TODO: Consider pagination if users have many favorite movies
     const favoriteItems = await context.db
       .query('favorite')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
@@ -16,7 +15,6 @@ export const getFavoriteMovies = query({
 
     const favoriteMovieFollows = []
 
-    // TODO: Consider pagination if users follow many movies
     const allMovieFollows = await context.db
       .query('follow')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
@@ -46,7 +44,6 @@ export const getFavoriteShows = query({
   handler: async context => {
     const userId = await requireUser(context)
 
-    // TODO: Consider pagination if users have many favorite shows
     const favoriteItems = await context.db
       .query('favorite')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
@@ -54,7 +51,6 @@ export const getFavoriteShows = query({
 
     const favoriteShowFollows = []
 
-    // TODO: Consider pagination if users follow many TV shows
     const allTvFollows = await context.db
       .query('follow')
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))

@@ -122,7 +122,6 @@ export const getWatchedEpisodesForShow = query({
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    // TODO: Consider pagination for shows with many episodes/seasons
     const episodes = await context.db
       .query('episode')
       .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
