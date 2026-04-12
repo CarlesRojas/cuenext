@@ -20,6 +20,7 @@ import type * as showInfo from "../showInfo.js";
 import type * as stats from "../stats.js";
 import type * as stopped from "../stopped.js";
 import type * as tmdb from "../tmdb.js";
+import type * as tmdbAccount from "../tmdbAccount.js";
 import type * as tmdbAuth from "../tmdbAuth.js";
 import type * as tmdbCache from "../tmdbCache.js";
 import type * as upcoming from "../upcoming.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   stats: typeof stats;
   stopped: typeof stopped;
   tmdb: typeof tmdb;
+  tmdbAccount: typeof tmdbAccount;
   tmdbAuth: typeof tmdbAuth;
   tmdbCache: typeof tmdbCache;
   upcoming: typeof upcoming;
