@@ -11,41 +11,19 @@ import {
 import { TMDB_AUTH_ERROR, TMDB_AUTH_SUCCESS } from '#/constant'
 import { faExternalLink, faLink, faSpinner, faUnlink, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useNavigate } from '@tanstack/react-router'
-import { useAction, useMutation, useQuery } from 'convex/react'
-import { useEffect, useState } from 'react'
+import { useAction, useMutation as useDbMutation, useQuery as useDbQuery } from 'convex/react'
+import { useState } from 'react'
 import { api } from '../../convex/_generated/api'
 
 const LinkWithTmdb = () => {
-  const navigate = useNavigate()
-
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLinking, setIsLinking] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const tmdbLink = useQuery(api.tmdbAuth.getTmdbAccountLink)
+  const tmdbLink = useDbQuery(api.tmdbAuth.getTmdbAccountLink)
   const createRequestToken = useAction(api.tmdbAuth.createRequestToken)
   const linkAccount = useAction(api.tmdbAuth.linkTmdbAccount)
-  const unlinkAccount = useMutation(api.tmdbAuth.unlinkTmdbAccount)
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const approved = urlParams.get('approved')
-    const requestToken = urlParams.get('request_token')
-    const tmdbError = urlParams.get('tmdb_error')
-
-    if (tmdbError) {
-      setError('Authentication failed. Please try again.')
-      navigate({ to: '.', search: old => ({ ...old, tmdb_error: undefined }), replace: true })
-    } else if (!!approved && requestToken) {
-      handleLinkAccount(requestToken)
-      navigate({
-        to: '.',
-        search: old => ({ ...old, approved: undefined, request_token: undefined, tmdb_error: undefined }),
-        replace: true,
-      })
-    }
-  }, [])
+  const unlinkAccount = useDbMutation(api.tmdbAuth.unlinkTmdbAccount)
 
   const handleStartLinking = async () => {
     try {
@@ -54,97 +32,33 @@ const LinkWithTmdb = () => {
 
       const { requestToken, authUrl } = await createRequestToken()
 
-      // Store the request token for later use
-      localStorage.setItem('tmdb_request_token', requestToken)
-
-      // Open TMDB authentication in a new tab
       window.open(authUrl, '_blank')
 
-      // Listen for the callback
-      const handleCallback = (event: MessageEvent) => {
+      const handleCallback = async (event: MessageEvent) => {
         if (event.origin !== window.location.origin) return
 
         if (event.data.type === TMDB_AUTH_SUCCESS) {
-          window.removeEventListener('message', handleCallback)
-          handleLinkAccount()
-        } else if (event.data.type === TMDB_AUTH_ERROR) {
-          window.removeEventListener('message', handleCallback)
-          setError('Authentication failed. Please try again.')
-          setIsLinking(false)
-        }
+          await linkAccount({ requestToken })
+          setError(null)
+          setIsModalOpen(false)
+        } else if (event.data.type === TMDB_AUTH_ERROR) setError('Authentication failed. Please try again.')
+
+        setIsLinking(false)
+        window.removeEventListener('message', handleCallback)
       }
 
       window.addEventListener('message', handleCallback)
-
-      // Fallback: check periodically if user comes back
-      const checkInterval = setInterval(() => {
-        if (document.hasFocus() && localStorage.getItem('tmdb_request_token')) {
-          clearInterval(checkInterval)
-          window.removeEventListener('message', handleCallback)
-          handleLinkAccount()
-        }
-      }, 1000)
-
-      // Clean up after 5 minutes
-      setTimeout(() => {
-        clearInterval(checkInterval)
-        window.removeEventListener('message', handleCallback)
-        if (isLinking) {
-          setIsLinking(false)
-          setError('Authentication timeout. Please try again.')
-        }
-      }, 300000)
     } catch (err) {
-      console.error('Failed to start TMDB linking:', err)
       setError('Failed to start authentication. Please try again.')
       setIsLinking(false)
     }
   }
 
-  const handleLinkAccount = async (tokenFromUrl?: string) => {
-    try {
-      const requestToken = tokenFromUrl || localStorage.getItem('tmdb_request_token')
-      if (!requestToken) {
-        throw new Error('No request token found')
-      }
-
-      await linkAccount({ requestToken })
-
-      localStorage.removeItem('tmdb_request_token')
-      setIsLinking(false)
-      setIsModalOpen(false)
-      setError(null)
-    } catch (err) {
-      console.error('Failed to link TMDB account:', err)
-      setError('Failed to link account. Please try again.')
-      setIsLinking(false)
-      localStorage.removeItem('tmdb_request_token')
-    }
-  }
-
-  const handleUnlink = async () => {
-    try {
-      setIsLinking(true)
-      setError(null)
-
-      await unlinkAccount()
-
-      setIsLinking(false)
-      setIsModalOpen(false)
-    } catch (err) {
-      console.error('Failed to unlink TMDB account:', err)
-      setError('Failed to unlink account. Please try again.')
-      setIsLinking(false)
-    }
-  }
-
   const handleCloseModal = (open: boolean) => {
-    if (open) {
-      setIsModalOpen(true)
-    } else if (!isLinking) {
-      setIsModalOpen(false)
+    setIsModalOpen(open)
+    if (!open) {
       setError(null)
-      localStorage.removeItem('tmdb_request_token')
+      setIsLinking(false)
     }
   }
 
@@ -216,7 +130,7 @@ const LinkWithTmdb = () => {
           <DialogFooter>
             {tmdbLink && (
               <DialogClose asChild>
-                <Button variant="negative" onClick={handleUnlink} disabled={isLinking}>
+                <Button variant="negative" onClick={async () => await unlinkAccount()} disabled={isLinking}>
                   <FontAwesomeIcon icon={isLinking ? faSpinner : faUnlink} spin={isLinking} />
                   <span>Unlink Account</span>
                 </Button>
@@ -224,18 +138,14 @@ const LinkWithTmdb = () => {
             )}
 
             {!tmdbLink && (
-              <DialogClose asChild>
-                <Button onClick={handleStartLinking} disabled={isLinking}>
-                  <FontAwesomeIcon icon={isLinking ? faSpinner : faExternalLink} spin={isLinking} />
-                  <span>{isLinking ? 'Connecting...' : 'Connect with TMDB'}</span>
-                </Button>
-              </DialogClose>
+              <Button onClick={handleStartLinking} disabled={isLinking}>
+                <FontAwesomeIcon icon={isLinking ? faSpinner : faExternalLink} spin={isLinking} />
+                <span>{isLinking ? 'Connecting...' : 'Connect with TMDB'}</span>
+              </Button>
             )}
 
             <DialogClose asChild>
-              <Button variant="secondary" disabled={isLinking}>
-                Cancel
-              </Button>
+              <Button variant="secondary">Cancel</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
