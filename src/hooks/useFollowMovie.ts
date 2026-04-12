@@ -10,8 +10,8 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
-    ...convexQuery(api.library.listFollowed, { type: 'movie' }),
+  const { data: isFollowed, isFetching: isFollowedLoading } = useQuery({
+    ...convexQuery(api.library.checkIsFollowed, { type: 'movie', tmdbId: movie.id }),
     enabled: clerk.isSignedIn,
   })
 
@@ -40,10 +40,9 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
   const toggleFollow = async (id: number, title: string) => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
-    const isFollowing = Array.isArray(followedMedia) && followedMedia.includes(id)
     const mediaKey = `movie-${id}`
 
-    if (isFollowing) {
+    if (isFollowed) {
       await unfollow.mutateAsync({ id })
       showUndoToast(title, 'unfollow', mediaKey, async () => await follow.mutateAsync({ id }))
     } else {
@@ -52,7 +51,6 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
     }
   }
 
-  const isFollowed = Array.isArray(followedMedia) && followedMedia.includes(movie.id)
   const isLoading = isFollowedLoading || follow.isPending || unfollow.isPending
 
   return {

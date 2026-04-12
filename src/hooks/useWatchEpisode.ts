@@ -10,8 +10,12 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: watchedEpisodes, isFetching: isWatchedLoading } = useQuery({
-    ...convexQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: episode.showTmdbId }),
+  const { data: isWatched, isFetching: isWatchedLoading } = useQuery({
+    ...convexQuery(api.watch.checkEpisodeWatched, {
+      showTmdbId: episode.showTmdbId,
+      seasonNumber: episode.seasonNumber,
+      episodeNumber: episode.episodeNumber,
+    }),
     enabled: clerk.isSignedIn,
   })
 
@@ -38,10 +42,6 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
 
   const onToggleWatch = async () => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
-
-    const isWatched =
-      Array.isArray(watchedEpisodes) &&
-      watchedEpisodes.some(e => e.seasonNumber === episode.seasonNumber && e.episodeNumber === episode.episodeNumber)
 
     const title = `S${episode.seasonNumber + 1} E${episode.episodeNumber + 1} of ${episode.name}`
     const mediaKey = `tv-${episode.showTmdbId}`
@@ -94,9 +94,6 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
     }
   }
 
-  const isWatched =
-    Array.isArray(watchedEpisodes) &&
-    watchedEpisodes.some(e => e.seasonNumber === episode.seasonNumber && e.episodeNumber === episode.episodeNumber)
   const isLoading = isWatchedLoading || watch.isPending || unwatch.isPending
 
   return {

@@ -69,6 +69,20 @@ export const listFollowed = query({
   },
 })
 
+export const checkIsFollowed = query({
+  args: { type: v.union(v.literal('movie'), v.literal('tv')), tmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const existing = await context.db
+      .query('follow')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
+      .unique()
+
+    return !!existing
+  },
+})
+
 export const listFollowedPaginated = query({
   args: {
     type: v.union(v.literal('movie'), v.literal('tv')),

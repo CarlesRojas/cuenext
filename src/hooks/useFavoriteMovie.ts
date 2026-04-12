@@ -10,8 +10,8 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: favoriteMedia, isFetching: isFavoriteLoading } = useQuery({
-    ...convexQuery(api.favorites.listFavorites, { type: 'movie' }),
+  const { data: isFavorited, isFetching: isFavoriteLoading } = useQuery({
+    ...convexQuery(api.favorites.checkIsFavorite, { type: 'movie', tmdbId: movie.id }),
     enabled: clerk.isSignedIn,
   })
 
@@ -34,7 +34,6 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
   const toggleFavorite = async (id: number, title: string) => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
-    const isFavorited = Array.isArray(favoriteMedia) && favoriteMedia.includes(id)
     const mediaKey = `movie-${id}`
 
     if (isFavorited) {
@@ -71,7 +70,6 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
     }
   }
 
-  const isFavorited = Array.isArray(favoriteMedia) && favoriteMedia.includes(movie.id)
   const isLoading = isFavoriteLoading || favorite.isPending || unfavorite.isPending
 
   return {

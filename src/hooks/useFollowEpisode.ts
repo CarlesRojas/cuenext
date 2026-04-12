@@ -10,8 +10,8 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: followedMedia, isFetching: isFollowedLoading } = useQuery({
-    ...convexQuery(api.library.listFollowed, { type: 'tv' }),
+  const { data: isFollowed, isFetching: isFollowedLoading } = useQuery({
+    ...convexQuery(api.library.checkIsFollowed, { type: 'tv', tmdbId: episode.id }),
     enabled: clerk.isSignedIn,
   })
 
@@ -43,10 +43,9 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
   const toggleFollow = async (id: number, title: string) => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
-    const isFollowing = Array.isArray(followedMedia) && followedMedia.includes(id)
     const mediaKey = `tv-${id}`
 
-    if (isFollowing) {
+    if (isFollowed) {
       await unfollow.mutateAsync({ id })
       showUndoToast(title, 'unfollow', mediaKey, async () => await follow.mutateAsync({ id }))
     } else {
@@ -55,7 +54,6 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
     }
   }
 
-  const isFollowed = Array.isArray(followedMedia) && followedMedia.includes(episode.id)
   const isLoading = isFollowedLoading || follow.isPending || unfollow.isPending
 
   return {

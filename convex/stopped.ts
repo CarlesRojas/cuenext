@@ -48,3 +48,17 @@ export const listStopped = query({
     return stoppedItems.map(f => f.tmdbId)
   },
 })
+
+export const checkIsStopped = query({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const existing = await context.db
+      .query('stopped')
+      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
+      .unique()
+
+    return !!existing
+  },
+})

@@ -10,8 +10,8 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: favoriteMedia, isFetching: isFavoriteLoading } = useQuery({
-    ...convexQuery(api.favorites.listFavorites, { type: 'tv' }),
+  const { data: isFavorited, isFetching: isFavoriteLoading } = useQuery({
+    ...convexQuery(api.favorites.checkIsFavorite, { type: 'tv', tmdbId: episode.id }),
     enabled: clerk.isSignedIn,
   })
 
@@ -34,7 +34,6 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
   const toggleFavorite = async (id: number, title: string) => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
-    const isFavorited = Array.isArray(favoriteMedia) && favoriteMedia.includes(id)
     const mediaKey = `tv-${id}`
 
     if (isFavorited) {
@@ -71,7 +70,6 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
     }
   }
 
-  const isFavorited = Array.isArray(favoriteMedia) && favoriteMedia.includes(episode.id)
   const isLoading = isFavoriteLoading || favorite.isPending || unfavorite.isPending
 
   return {

@@ -10,8 +10,8 @@ export function useStopEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: stoppedMedia, isFetching: isStoppedLoading } = useQuery({
-    ...convexQuery(api.stopped.listStopped),
+  const { data: isStopped, isFetching: isStoppedLoading } = useQuery({
+    ...convexQuery(api.stopped.checkIsStopped, { tmdbId: episode.id }),
     enabled: clerk.isSignedIn,
   })
 
@@ -29,7 +29,6 @@ export function useStopEpisode(episode: TmdbTvMinimal) {
   const toggleStopped = async (id: number, title: string) => {
     if (!clerk.isSignedIn) return clerk.openSignIn({ forceRedirectUrl: window.location.href })
 
-    const isStopped = Array.isArray(stoppedMedia) && stoppedMedia.includes(id)
     const mediaKey = `tv-${id}`
 
     if (isStopped) {
@@ -41,7 +40,6 @@ export function useStopEpisode(episode: TmdbTvMinimal) {
     }
   }
 
-  const isStopped = Array.isArray(stoppedMedia) && stoppedMedia.includes(episode.id)
   const isLoading = isStoppedLoading || stopItem.isPending || unstopItem.isPending
 
   return {
