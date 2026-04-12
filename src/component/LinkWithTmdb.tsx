@@ -79,6 +79,13 @@ const LinkWithTmdb = () => {
             This will sync your watchlist and favorites both ways.
           </p>
         )}
+
+        {!tmdbLink && isIOS && (
+          <p className="pointer-events-none font-semibold tracking-wide text-neutral-500">
+            You can only link your account from the web version. Please visit the site from a desktop browser to link
+            your TMDB account.
+          </p>
+        )}
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
