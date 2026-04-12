@@ -1,7 +1,7 @@
 import { api } from '#/../convex/_generated/api'
 import ShowEpisode from '#/component/ShowEpisode'
 import { ShowSeason } from '#/component/ShowSeason'
-import { useShowInfo } from '#/hooks/useShowInfo'
+import useShowInfo from '#/hooks/useShowInfo'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
@@ -30,7 +30,7 @@ export function ShowSeasons({ show }: Props) {
     enabled: clerk.isSignedIn,
   })
 
-  const showInfo = useShowInfo(show.id)
+  const showInfo = useShowInfo({ showId: show.id })
 
   const nextEpisode = useQuery({
     ...convexQuery(api.watch.getNextEpisode, { tmdbId: show.id }),
@@ -59,7 +59,7 @@ export function ShowSeasons({ show }: Props) {
 
   if (regularSeasons.length <= 0) return null
 
-  const continuousEpisodeNumbers = showInfo?.continuousEpisodeNumbers || regularSeasons.length === 1
+  const continuousEpisodeNumbers = showInfo.data?.continuousEpisodeNumbers || regularSeasons.length === 1
 
   return (
     <div className="screen-px pb-4 md:pb-8">

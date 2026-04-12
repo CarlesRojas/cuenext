@@ -1,5 +1,5 @@
 import { PosterCard } from '#/component/PosterCard'
-import { useShowInfo } from '#/hooks/useShowInfo'
+import useShowInfo from '#/hooks/useShowInfo'
 import { useWatchEpisode } from '#/hooks/useWatchEpisode'
 
 import type { TvSectionItem } from '#/type/section'
@@ -11,8 +11,8 @@ interface Props {
 export default function WatchEpisode({ episode }: Props) {
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({ ...episode })
 
-  const showInfo = useShowInfo(episode.showTmdbId)
-  const continuousEpisodeNumbers = showInfo?.continuousEpisodeNumbers || episode.numberOfSeasons === 1
+  const showInfo = useShowInfo({ showId: episode.showTmdbId })
+  const continuousEpisodeNumbers = showInfo.data?.continuousEpisodeNumbers || episode.numberOfSeasons === 1
 
   return (
     <PosterCard

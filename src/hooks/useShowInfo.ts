@@ -1,52 +1,31 @@
-import { api } from '#/../convex/_generated/api'
-import { convexAction, convexQuery } from '@convex-dev/react-query'
-import { useQueries, useQuery } from '@tanstack/react-query'
-import { useMutation as useDbMutation } from 'convex/react'
-import { useEffect, useState } from 'react'
+import { processBatched } from '#/utils/processBatched'
+import { useQuery } from '@tanstack/react-query'
+import { useAction, useConvex, useMutation as useDbMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api'
 
-export function useShowInfo(showId: number) {
-  const { data: existingShowInfo, isFetching: showInfoLoading } = useQuery(
-    convexQuery(api.showInfo.getShowInfo, { tmdbId: showId }),
-  )
+interface Props {
+  showId: number
+}
 
-  const showInfoMissing = !showInfoLoading && !existingShowInfo
+const useShowInfo = ({ showId }: Props) => {
+  const convex = useConvex()
 
-  const { data: show, isPending: showLoading } = useQuery({
-    ...convexAction(api.tmdb.getShowDetails, { tmdbId: showId }),
-    enabled: showInfoMissing,
-  })
-
-  const seasonQueries = useQueries({
-    queries: (show?.seasons || []).map(season => ({
-      ...convexAction(api.tmdb.getShowSeasonDetails, {
-        tmdbId: showId,
-        seasonNumber: season.season_number,
-      }),
-      enabled: showInfoMissing && !!show?.seasons?.length,
-    })),
-  })
-
+  const getShowDetails = useAction(api.tmdb.getShowDetails)
+  const getShowSeasonDetails = useAction(api.tmdb.getShowSeasonDetails)
   const saveShowInfo = useDbMutation(api.showInfo.saveShowInfo)
 
-  const [showInfo, setShowInfo] = useState<{
-    continuousEpisodeNumbers?: boolean
-  }>({})
+  const result = useQuery({
+    queryKey: ['showInformation', showId],
+    queryFn: async () => {
+      const currentShowInfo = await convex.query(api.showInfo.getShowInfo, { tmdbId: showId })
+      if (currentShowInfo) return { continuousEpisodeNumbers: currentShowInfo.continuousEpisodeNumbers }
 
-  const isLoading =
-    showInfoLoading || showLoading || (!existingShowInfo && seasonQueries.some(query => query.isPending))
+      const showDetails = await getShowDetails({ tmdbId: showId })
+      if (!showDetails.seasons || showDetails.seasons.length === 0) return { continuousEpisodeNumbers: false }
 
-  useEffect(() => {
-    if (!showInfoMissing && existingShowInfo) {
-      setShowInfo(existingShowInfo)
-      return
-    }
-
-    if (isLoading) return
-
-    const calculateResetWithSeason = async () => {
-      const seasons = seasonQueries
-        .map(query => query.data)
-        .filter((season): season is NonNullable<typeof season> => season != null)
+      const seasons = await processBatched(showDetails.seasons, season =>
+        getShowSeasonDetails({ tmdbId: showId, seasonNumber: season.season_number }),
+      )
 
       const regularSeasons = seasons.filter(season => season.season_number !== 0)
 
@@ -56,12 +35,13 @@ export function useShowInfo(showId: number) {
         return episodes.some(episode => episode.episode_number > episodes.length)
       })
 
-      await saveShowInfo({ tmdbId: showId, continuousEpisodeNumbers })
-      setShowInfo({ continuousEpisodeNumbers })
-    }
+      await saveShowInfo({ continuousEpisodeNumbers, tmdbId: showId })
 
-    calculateResetWithSeason()
-  }, [showInfoMissing, existingShowInfo, isLoading])
+      return { continuousEpisodeNumbers }
+    },
+  })
 
-  return isLoading ? undefined : showInfo
+  return result
 }
+
+export default useShowInfo
