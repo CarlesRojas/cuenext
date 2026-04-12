@@ -13,6 +13,7 @@ import { faExternalLink, faLink, faSpinner, faUnlink, faUser } from '@fortawesom
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAction, useMutation as useDbMutation, useQuery as useDbQuery } from 'convex/react'
 import { useState } from 'react'
+import { isIOS } from 'react-device-detect'
 import { api } from '../../convex/_generated/api'
 
 const LinkWithTmdb = () => {
@@ -80,13 +81,24 @@ const LinkWithTmdb = () => {
         )}
       </div>
 
+      {isIOS && (
+        <Button variant={'secondary'} asChild>
+          <a href="https://www.cuenext.app/profile" target="_blank" rel="noopener noreferrer">
+            <FontAwesomeIcon icon={faExternalLink} />
+            <span>{'Open the web to link your TMDB account'}</span>
+          </a>
+        </Button>
+      )}
+
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogTrigger asChild>
-          <Button variant={'secondary'}>
-            <FontAwesomeIcon icon={tmdbLink ? faUser : faLink} />
-            <span>{tmdbLink ? 'Manage' : 'Link your TMDB account'}</span>
-          </Button>
-        </DialogTrigger>
+        {!isIOS && (
+          <DialogTrigger asChild>
+            <Button variant={'secondary'}>
+              <FontAwesomeIcon icon={tmdbLink ? faUser : faLink} />
+              <span>{tmdbLink ? 'Manage' : 'Link your TMDB account'}</span>
+            </Button>
+          </DialogTrigger>
+        )}
 
         <DialogContent>
           <DialogHeader>
