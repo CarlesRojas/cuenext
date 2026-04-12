@@ -68,7 +68,9 @@ const LinkWithTmdb = () => {
         <h2 className="text-lg font-semibold opacity-80">TMDB Account</h2>
 
         <p className="pointer-events-none font-semibold tracking-wide text-neutral-500">
-          {tmdbLink ? `Connected as ${tmdbLink.tmdbUsername}` : 'Link your TMDB account to sync watchlists and ratings'}
+          {tmdbLink
+            ? `Connected as ${tmdbLink.tmdbUsername}`
+            : 'Link your TMDB account to sync your watchlist and to be able to rate and review movies and shows.'}
         </p>
       </div>
 
