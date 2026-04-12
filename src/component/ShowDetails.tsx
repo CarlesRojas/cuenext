@@ -8,6 +8,7 @@ import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
 import { faBookmark, faHeart, faMinus, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ShowMore } from '@re-dev/react-truncate'
 import { useState } from 'react'
 
 interface ShowDetailsProps {
@@ -107,7 +108,17 @@ export function ShowDetails({ show }: ShowDetailsProps) {
 
         <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} />
 
-        {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
+        {overview && (
+          <div className="max-w-3xl">
+            <ShowMore
+              lines={3}
+              anchorClass="text-sky-500/80 leading-relaxed font-medium tracking-wide"
+              className="leading-relaxed font-medium tracking-wide text-white/60"
+            >
+              {overview}
+            </ShowMore>
+          </div>
+        )}
 
         <div className="flex max-w-3xl flex-wrap gap-2">
           <Button

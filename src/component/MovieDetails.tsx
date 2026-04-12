@@ -8,6 +8,7 @@ import { cn } from '#/lib/cn'
 import type { TmdbMovie } from '#/type/tmdb'
 import { faBookmark, faEye, faHeart, faMinus, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ShowMore } from '@re-dev/react-truncate'
 import { useState } from 'react'
 
 interface MovieDetailsProps {
@@ -108,7 +109,17 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
 
         <StarRating voteAverage={movie.vote_average} voteCount={movie.vote_count} />
 
-        {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
+        {overview && (
+          <div className="max-w-3xl">
+            <ShowMore
+              lines={3}
+              anchorClass="text-sky-500/80 leading-relaxed font-medium tracking-wide"
+              className="leading-relaxed font-medium tracking-wide text-white/60"
+            >
+              {overview}
+            </ShowMore>
+          </div>
+        )}
 
         <div className="flex max-w-3xl flex-wrap gap-2">
           <Button

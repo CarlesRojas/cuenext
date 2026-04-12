@@ -51,6 +51,7 @@ const buttonVariants = cva(
         small: 'm-1 h-9 w-fit gap-1 px-4',
         link: 'w-fit gap-2',
         input: 'size-8',
+        showMore: 'mx-1 h-fit w-fit px-2',
       },
     },
     defaultVariants: {
