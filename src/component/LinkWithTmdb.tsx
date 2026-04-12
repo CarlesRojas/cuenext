@@ -72,6 +72,12 @@ const LinkWithTmdb = () => {
             ? `Connected as ${tmdbLink.tmdbUsername}`
             : 'Link your TMDB account to sync your watchlist and to be able to rate and review movies and shows.'}
         </p>
+
+        {!tmdbLink && (
+          <p className="pointer-events-none font-semibold tracking-wide text-neutral-500">
+            This will sync your watchlist and favorites both ways.
+          </p>
+        )}
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
