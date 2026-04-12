@@ -1,5 +1,6 @@
 import { getAllPages } from '#/utils/getAllPages'
 import { processBatched } from '#/utils/processBatched'
+import { useClerk } from '@clerk/tanstack-react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useAction, useConvex, useMutation as useDbMutation, useQuery as useDbQuery } from 'convex/react'
 import { useEffect } from 'react'
@@ -8,6 +9,7 @@ import { api } from '../../convex/_generated/api'
 
 const useSyncWithTmdb = () => {
   const convex = useConvex()
+  const { isSignedIn } = useClerk()
 
   const [lastSyncAt, setLastSyncAt] = useLocalStorage<string | null>('CUENEXT_LAST_SYNC_WITH_TMDB_AT', null)
 
@@ -129,6 +131,8 @@ const useSyncWithTmdb = () => {
   })
 
   useEffect(() => {
+    if (!isSignedIn) return
+
     const aDayAgo = new Date()
     aDayAgo.setHours(aDayAgo.getHours() - 24)
     const lastSyncDate = lastSyncAt ? new Date(lastSyncAt) : null
@@ -136,7 +140,7 @@ const useSyncWithTmdb = () => {
     if (!tmdbLink || (lastSyncDate && lastSyncDate > aDayAgo)) return
 
     syncWithTmdb.mutate()
-  }, [tmdbLink, lastSyncAt])
+  }, [tmdbLink, lastSyncAt, isSignedIn])
 
   return syncWithTmdb
 }
