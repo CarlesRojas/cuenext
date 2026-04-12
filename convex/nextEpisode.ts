@@ -52,7 +52,6 @@ export const updateNextEpisode = action({
         seasonDetails.episodes && seasonDetails.episodes.length > 0 ? seasonDetails.episodes[0].episode_number - 1 : 0,
       )
 
-      console.log(showDetails.status)
       status = showDetails.status?.toLowerCase() || 'ongoing'
 
       numberOfSeasons = nonSpecialSeasons.length

@@ -1,11 +1,14 @@
+import { getAllPages } from '#/utils/getAllPages'
+import { processBatched } from '#/utils/processBatched'
 import { useMutation } from '@tanstack/react-query'
-import { useAction, useMutation as useDbMutation, useQuery as useDbQuery } from 'convex/react'
+import { useAction, useConvex, useMutation as useDbMutation, useQuery as useDbQuery } from 'convex/react'
 import { useEffect } from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 import { api } from '../../convex/_generated/api'
-import { processBatched } from '../utils/processBatched'
 
 const useSyncWithTmdb = () => {
+  const convex = useConvex()
+
   const [lastSyncAt, setLastSyncAt] = useLocalStorage<string | null>('CUENEXT_LAST_SYNC_WITH_TMDB_AT', null)
 
   const tmdbLink = useDbQuery(api.tmdbAuth.getTmdbAccountLink)
@@ -41,7 +44,17 @@ const useSyncWithTmdb = () => {
         ],
       })
 
-      await processBatched(tvWatchlist, item => updateNextEpisode({ tmdbId: item.id }))
+      const currentFollowedTv = await getAllPages(args => convex.query(api.library.listFollowed, args), {
+        type: 'tv' as const,
+      })
+      const currentFollowedMovie = await getAllPages(args => convex.query(api.library.listFollowed, args), {
+        type: 'movie' as const,
+      })
+
+      // Only update next episode for shows that are actually followed
+      const followedTvFromWatchlist = tvWatchlist.filter(item => currentFollowedTv.includes(item.id))
+
+      await processBatched(followedTvFromWatchlist, item => updateNextEpisode({ tmdbId: item.id }))
     },
     onSuccess: () => {
       setLastSyncAt(new Date().toISOString())

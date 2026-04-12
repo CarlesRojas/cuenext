@@ -1,5 +1,5 @@
-import type { PaginationResult } from 'convex/server'
 import { tmdbMovieSchema } from '../src/type/tmdb'
+import { getAllPages } from '../src/utils/getAllPages'
 import { processBatched } from '../src/utils/processBatched'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
@@ -10,45 +10,6 @@ export const getMovieStats = action({
   args: {},
   handler: async context => {
     await requireUser(context)
-
-    const fetchWatchedMovies = async () => {
-      const allMovies: { tmdbId: number }[] = []
-      let continueCursor: string | null = null
-      let isDone = false
-
-      while (!isDone) {
-        const result: PaginationResult<{ tmdbId: number }> = await context.runQuery(api.watch.getWatchedMovies, {
-          paginationOpts: { numItems: 1000, cursor: continueCursor },
-        })
-
-        continueCursor = result.continueCursor
-        isDone = result.isDone
-
-        allMovies.push(...result.page)
-      }
-
-      return allMovies
-    }
-
-    const fetchFollowedMovies = async () => {
-      const allFollows: number[] = []
-      let continueCursor: string | null = null
-      let isDone = false
-
-      while (!isDone) {
-        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowed, {
-          type: 'movie',
-          paginationOpts: { numItems: 1000, cursor: continueCursor },
-        })
-
-        continueCursor = result.continueCursor
-        isDone = result.isDone
-
-        allFollows.push(...result.page)
-      }
-
-      return allFollows
-    }
 
     const fetchCachedMovieRuntimes = async (tmdbIds: number[]) => {
       const allCachedMovieInfos: any[] = []
@@ -64,9 +25,13 @@ export const getMovieStats = action({
       return allCachedMovieInfos
     }
 
-    const movies: { tmdbId: number }[] = await fetchWatchedMovies()
-
-    const follows: number[] = await fetchFollowedMovies()
+    const movies: { tmdbId: number }[] = await getAllPages(
+      args => context.runQuery(api.watch.getWatchedMovies, args),
+      {},
+    )
+    const follows: number[] = await getAllPages(args => context.runQuery(api.library.listFollowed, args), {
+      type: 'movie' as const,
+    })
 
     const cachedMovieInfos = await fetchCachedMovieRuntimes(movies.map(m => m.tmdbId))
 
@@ -121,25 +86,6 @@ export const getShowStats = action({
   handler: async context => {
     await requireUser(context)
 
-    const fetchWatchedEpisodes = async () => {
-      const allEpisodes: Episode[] = []
-      let continueCursor: string | null = null
-      let isDone = false
-
-      while (!isDone) {
-        const result: PaginationResult<Episode> = await context.runQuery(api.watch.getWatchedEpisodes, {
-          paginationOpts: { numItems: 1000, cursor: continueCursor },
-        })
-
-        continueCursor = result.continueCursor
-        isDone = result.isDone
-
-        allEpisodes.push(...result.page)
-      }
-
-      return allEpisodes
-    }
-
     const fetchCachedRuntimes = async (
       episodeKeys: Array<{ showTmdbId: number; seasonNumber: number; episodeNumber: number }>,
     ) => {
@@ -156,28 +102,10 @@ export const getShowStats = action({
       return allCachedEpisodeInfos
     }
 
-    const fetchFollowedShows = async () => {
-      const allFollows: number[] = []
-      let continueCursor: string | null = null
-      let isDone = false
-
-      while (!isDone) {
-        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowed, {
-          type: 'tv',
-          paginationOpts: { numItems: 1000, cursor: continueCursor },
-        })
-
-        continueCursor = result.continueCursor
-        isDone = result.isDone
-
-        allFollows.push(...result.page)
-      }
-
-      return allFollows
-    }
-
-    const episodes: Episode[] = await fetchWatchedEpisodes()
-    const follows: number[] = await fetchFollowedShows()
+    const episodes: Episode[] = await getAllPages(args => context.runQuery(api.watch.getWatchedEpisodes, args), {})
+    const follows: number[] = await getAllPages(args => context.runQuery(api.library.listFollowed, args), {
+      type: 'tv' as const,
+    })
 
     const episodeKeys = episodes.map(ep => ({
       showTmdbId: ep.showTmdbId,
