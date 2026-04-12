@@ -1,3 +1,5 @@
+import { v } from 'convex/values'
+import { z } from 'zod'
 import type {
   TmdbFavoritesMoviesResponse,
   TmdbFavoritesTvResponse,
@@ -12,8 +14,15 @@ import {
 } from '../src/type/tmdbAccount'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
+import { postTmdb } from './lib/tmdbClient'
 import { requireUser } from './requireUser'
 import { fetchTmdbCached } from './tmdbCache'
+
+const tmdbWatchlistResponseSchema = z.object({
+  success: z.boolean(),
+  status_code: z.number(),
+  status_message: z.string(),
+})
 
 export const getTvWatchlist = action({
   args: {},
@@ -124,5 +133,23 @@ export const getMovieFavorites = action({
     } while (currentPage <= totalPages)
 
     return allResults
+  },
+})
+
+export const addToWatchlist = action({
+  args: {
+    media: v.union(v.literal('movie'), v.literal('tv')),
+    tmdbId: v.number(),
+  },
+  handler: async (context, args) => {
+    await requireUser(context)
+    const accountLink = await context.runQuery(api.tmdbAuth.getTmdbAccountLink)
+    if (!accountLink) throw new Error('TMDB account not linked')
+
+    await postTmdb(tmdbWatchlistResponseSchema, `/account/${accountLink.tmdbAccountId}/watchlist`, {
+      media_type: args.media,
+      media_id: args.tmdbId,
+      watchlist: true,
+    })
   },
 })

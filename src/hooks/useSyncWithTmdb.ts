@@ -12,20 +12,42 @@ const useSyncWithTmdb = () => {
   const [lastSyncAt, setLastSyncAt] = useLocalStorage<string | null>('CUENEXT_LAST_SYNC_WITH_TMDB_AT', null)
 
   const tmdbLink = useDbQuery(api.tmdbAuth.getTmdbAccountLink)
+
   const getTvWatchlist = useAction(api.tmdbAccount.getTvWatchlist)
   const getMovieWatchlist = useAction(api.tmdbAccount.getMovieWatchlist)
+  const addToWatchlist = useAction(api.tmdbAccount.addToWatchlist)
   const followMultiple = useDbMutation(api.library.followMultiple)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
   const syncWithTmdb = useMutation({
     mutationFn: async () => {
-      console.log('Sync')
-      const tvWatchlist = await getTvWatchlist()
-      const movieWatchlist = await getMovieWatchlist()
+      // #############################################
+      //   FOLLOWS
+      // #############################################
+
+      const tmdbShowFollows = await getTvWatchlist()
+      const tmdbMovieFollows = await getMovieWatchlist()
+
+      const cuenextShowFollows = await getAllPages(args => convex.query(api.library.listFollowed, args), {
+        type: 'tv' as const,
+      })
+      const cuenextMovieFollows = await getAllPages(args => convex.query(api.library.listFollowed, args), {
+        type: 'movie' as const,
+      })
+
+      const showFollowsMissingInCuenext = tmdbShowFollows.filter(item => !cuenextShowFollows.includes(item.id))
+      const movieFollowsMissingInCuenext = tmdbMovieFollows.filter(item => !cuenextMovieFollows.includes(item.id))
+
+      const showFollowsMissingInTmdb = cuenextShowFollows.filter(
+        item => !tmdbShowFollows.find(tmdbItem => tmdbItem.id === item),
+      )
+      const movieFollowsMissingInTmdb = cuenextMovieFollows.filter(
+        item => !tmdbMovieFollows.find(tmdbItem => tmdbItem.id === item),
+      )
 
       await followMultiple({
         items: [
-          ...tvWatchlist.map(item => ({
+          ...showFollowsMissingInCuenext.map(item => ({
             type: 'tv' as const,
             tmdbId: item.id,
             name: item.name,
@@ -33,7 +55,7 @@ const useSyncWithTmdb = () => {
             backdrop: item.backdrop_path ?? null,
             releaseDate: 0,
           })),
-          ...movieWatchlist.map(item => ({
+          ...movieFollowsMissingInCuenext.map(item => ({
             type: 'movie' as const,
             tmdbId: item.id,
             name: item.title,
@@ -44,17 +66,13 @@ const useSyncWithTmdb = () => {
         ],
       })
 
-      const currentFollowedTv = await getAllPages(args => convex.query(api.library.listFollowed, args), {
-        type: 'tv' as const,
-      })
-      const currentFollowedMovie = await getAllPages(args => convex.query(api.library.listFollowed, args), {
-        type: 'movie' as const,
-      })
+      await processBatched(showFollowsMissingInCuenext, item => updateNextEpisode({ tmdbId: item.id }))
+      await processBatched(showFollowsMissingInTmdb, tmdbId => addToWatchlist({ media: 'tv', tmdbId }))
+      await processBatched(movieFollowsMissingInTmdb, tmdbId => addToWatchlist({ media: 'movie', tmdbId }))
 
-      // Only update next episode for shows that are actually followed
-      const followedTvFromWatchlist = tvWatchlist.filter(item => currentFollowedTv.includes(item.id))
-
-      await processBatched(followedTvFromWatchlist, item => updateNextEpisode({ tmdbId: item.id }))
+      // #############################################
+      //   FAVORITES
+      // #############################################
     },
     onSuccess: () => {
       setLastSyncAt(new Date().toISOString())
