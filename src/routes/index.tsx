@@ -4,6 +4,7 @@ import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import WatchEpisode from '#/component/WatchEpisode'
 import WatchMovie from '#/component/WatchMovie'
+import useCheckForNewEpisodes from '#/hooks/useCheckForNewEpisodes'
 import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
@@ -31,6 +32,8 @@ function App() {
     ...convexQuery(api.watchlist.getMovieSections, {}),
     enabled: media === 'movie' && clerk.isSignedIn,
   })
+
+  useCheckForNewEpisodes({ waitingForEpisodes: tvSections?.waitingForEpisodes })
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">

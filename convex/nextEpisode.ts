@@ -14,7 +14,7 @@ const airedEpisodes = (episode: TmdbEpisode) => {
 }
 
 export const updateNextEpisode = action({
-  args: { tmdbId: v.number() },
+  args: { tmdbId: v.number(), forceFetch: v.optional(v.boolean()) },
   handler: async (context, args) => {
     const now = Date.now()
     const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000
@@ -29,7 +29,8 @@ export const updateNextEpisode = action({
     const needsSeasonDataUpdate =
       !existingNextEpisode ||
       !existingNextEpisode.seasonDataUpdatedAt ||
-      existingNextEpisode.seasonDataUpdatedAt < oneWeekAgo
+      existingNextEpisode.seasonDataUpdatedAt < oneWeekAgo ||
+      !!args.forceFetch
 
     if (needsSeasonDataUpdate) {
       const showDetails = await fetchTmdbCached(context, tmdbTvSchema, `/tv/${args.tmdbId}`)
