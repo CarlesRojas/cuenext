@@ -22,11 +22,13 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
   const markEpisodeWatched = useDbMutation(api.watch.markEpisodeWatched)
   const unmarkEpisodeWatched = useDbMutation(api.watch.unmarkEpisodeWatched)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
+  const tmdbWatchlist = useAction(api.tmdbAccount.addToWatchlist)
 
   const watch = useMutation({
     mutationFn: async (args: Parameters<typeof markEpisodeWatched>[0]) => {
       const result = await markEpisodeWatched(args)
       await updateNextEpisode({ tmdbId: args.showTmdbId })
+      await tmdbWatchlist({ media: 'tv', tmdbId: args.showTmdbId, add: true })
       return result
     },
   })
@@ -37,6 +39,7 @@ export function useWatchEpisode(episode: TvSectionItemMinimal) {
     ) => {
       await unmarkEpisodeWatched(args)
       await updateNextEpisode({ tmdbId: episode.showTmdbId })
+      if (args.wasNotFollowed) await tmdbWatchlist({ media: 'tv', tmdbId: episode.showTmdbId, add: false })
     },
   })
 

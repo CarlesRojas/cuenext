@@ -23,6 +23,7 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
   const markEpisodesWatched = useDbMutation(api.watch.markMultipleEpisodesAsWatched)
   const unmarkEpisodesWatched = useDbMutation(api.watch.unmarkMultipleEpisodesAsWatched)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
+  const tmdbWatchlist = useAction(api.tmdbAccount.addToWatchlist)
 
   const watchEpisodes = useMutation({
     mutationFn: async ({ episodes }: { episodes: EpisodeIdentifier[] }) => {
@@ -36,6 +37,8 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
       })
 
       await updateNextEpisode({ tmdbId: showId })
+      await tmdbWatchlist({ media: 'tv', tmdbId: showId, add: true })
+
       return result
     },
   })
@@ -58,6 +61,7 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
       })
 
       await updateNextEpisode({ tmdbId: showId })
+      if (wasNotFollowed) await tmdbWatchlist({ media: 'tv', tmdbId: showId, add: false })
     },
   })
 
