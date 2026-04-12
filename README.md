@@ -54,4 +54,4 @@ adb install app-release-signed.apk
 
 # TODO
 
-- [ ] Allow users to sign in to TMDB to keep info synked and to be able to rate and review
+- [ ] Add ratings and reviews

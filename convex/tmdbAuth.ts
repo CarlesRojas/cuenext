@@ -84,20 +84,24 @@ export const linkTmdbAccount = action({
 
 export const getTmdbAccountLink = query({
   handler: async context => {
-    const userId = await requireUser(context)
+    try {
+      const userId = await requireUser(context)
 
-    const link = await context.db
-      .query('tmdbAccountLink')
-      .withIndex('by_user', q => q.eq('userId', userId))
-      .first()
+      const link = await context.db
+        .query('tmdbAccountLink')
+        .withIndex('by_user', q => q.eq('userId', userId))
+        .first()
 
-    return link
-      ? {
-          tmdbAccountId: link.tmdbAccountId,
-          tmdbUsername: link.tmdbUsername,
-          linkedAt: link.linkedAt,
-        }
-      : null
+      return link
+        ? {
+            tmdbAccountId: link.tmdbAccountId,
+            tmdbUsername: link.tmdbUsername,
+            linkedAt: link.linkedAt,
+          }
+        : null
+    } catch {
+      return null
+    }
   },
 })
 
