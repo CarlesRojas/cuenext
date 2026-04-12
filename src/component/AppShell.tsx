@@ -5,6 +5,7 @@ import { Search } from '#/component/Search'
 import { Button } from '#/component/ui/button'
 import { User } from '#/component/User'
 import useSearchParams from '#/hooks/useSearchParams'
+import useSyncWithTmdb from '#/hooks/useSyncWithTmdb'
 import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
@@ -42,6 +43,7 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const searchParams = useSearchParams()
   const location = useLocation()
+  useSyncWithTmdb()
 
   const { visualHeight, fullHeight } = useViewportHeight()
   const { width = 0 } = useWindowSize()
