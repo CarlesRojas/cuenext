@@ -4,7 +4,7 @@ import type { TmdbMovieMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useMutation as useDbMutation } from 'convex/react'
+import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 export function useFavoriteMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
@@ -17,10 +17,12 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
 
   const markAsFavorite = useDbMutation(api.favorites.favoriteItem)
   const unmarkAsFavorite = useDbMutation(api.favorites.unfavoriteItem)
+  const tmdbFavorites = useAction(api.tmdbAccount.addToFavorites)
 
   const favorite = useMutation({
     mutationFn: async (args: Parameters<typeof markAsFavorite>[0]) => {
       const result = await markAsFavorite(args)
+      await tmdbFavorites({ media: 'movie', tmdbId: args.tmdbId, add: true })
       return result
     },
   })
@@ -28,6 +30,7 @@ export function useFavoriteMovie(movie: TmdbMovieMinimal) {
   const unfavorite = useMutation({
     mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkAsFavorite>[0]) => {
       await unmarkAsFavorite(args)
+      await tmdbFavorites({ media: 'movie', tmdbId: args.tmdbId, add: false })
     },
   })
 

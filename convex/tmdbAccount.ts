@@ -145,7 +145,7 @@ export const addToWatchlist = action({
   handler: async (context, args) => {
     await requireUser(context)
     const accountLink = await context.runQuery(api.tmdbAuth.getTmdbAccountLink)
-    if (!accountLink) throw new Error('TMDB account not linked')
+    if (!accountLink) return
 
     await postTmdb(tmdbWatchlistResponseSchema, `/account/${accountLink.tmdbAccountId}/watchlist`, {
       media_type: args.media,
@@ -164,7 +164,7 @@ export const addToFavorites = action({
   handler: async (context, args) => {
     await requireUser(context)
     const accountLink = await context.runQuery(api.tmdbAuth.getTmdbAccountLink)
-    if (!accountLink) throw new Error('TMDB account not linked')
+    if (!accountLink) return
 
     await postTmdb(tmdbWatchlistResponseSchema, `/account/${accountLink.tmdbAccountId}/favorite`, {
       media_type: args.media,

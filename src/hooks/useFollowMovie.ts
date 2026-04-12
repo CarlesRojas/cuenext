@@ -4,7 +4,7 @@ import type { TmdbMovieMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useMutation as useDbMutation } from 'convex/react'
+import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 export function useFollowMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
@@ -17,6 +17,7 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
 
   const markAsFollowed = useDbMutation(api.library.follow)
   const unmarkAsFollowed = useDbMutation(api.library.unfollow)
+  const tmdbWatchlist = useAction(api.tmdbAccount.addToWatchlist)
 
   const follow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
@@ -28,12 +29,16 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
         backdrop: movie.backdrop_path ?? null,
         releaseDate: new Date(movie.release_date).getTime(),
       })
+
+      await tmdbWatchlist({ media: 'movie', tmdbId: id, add: true })
     },
   })
 
   const unfollow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'movie', tmdbId: id })
+
+      await tmdbWatchlist({ media: 'movie', tmdbId: id, add: false })
     },
   })
 

@@ -18,6 +18,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
   const markAsFollowed = useDbMutation(api.library.follow)
   const unmarkAsFollowed = useDbMutation(api.library.unfollow)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
+  const tmdbWatchlist = useAction(api.tmdbAccount.addToWatchlist)
 
   const follow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
@@ -30,6 +31,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
         releaseDate: 0,
       })
       await updateNextEpisode({ tmdbId: id })
+      await tmdbWatchlist({ media: 'tv', tmdbId: id, add: true })
     },
   })
 
@@ -37,6 +39,7 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'tv', tmdbId: id })
       await updateNextEpisode({ tmdbId: id })
+      await tmdbWatchlist({ media: 'tv', tmdbId: id, add: false })
     },
   })
 
