@@ -96,6 +96,8 @@ export default defineSchema({
     userId: v.string(),
     tmdbAccountId: v.number(),
     tmdbUsername: v.string(),
+    tmdbAvatarPath: v.union(v.string(), v.null()),
+    includeAdult: v.boolean(),
     sessionId: v.string(),
     linkedAt: v.number(),
   }).index('by_user', ['userId']),

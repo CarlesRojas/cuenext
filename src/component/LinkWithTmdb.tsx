@@ -36,6 +36,7 @@ const LinkWithTmdb = () => {
 
       const handleCallback = async (event: MessageEvent) => {
         if (event.origin !== window.location.origin) return
+        window.removeEventListener('message', handleCallback)
 
         if (event.data.type === TMDB_AUTH_SUCCESS) {
           await linkAccount({ requestToken })
@@ -44,7 +45,6 @@ const LinkWithTmdb = () => {
         } else if (event.data.type === TMDB_AUTH_ERROR) setError('Authentication failed. Please try again.')
 
         setIsLinking(false)
-        window.removeEventListener('message', handleCallback)
       }
 
       window.addEventListener('message', handleCallback)

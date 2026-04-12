@@ -76,6 +76,8 @@ export const linkTmdbAccount = action({
       accountId: accountData.id,
       username: accountData.username,
       sessionId: sessionData.session_id,
+      includeAdult: accountData.include_adult,
+      tmdbAvatarPath: accountData.avatar.tmdb.avatar_path,
     })
   },
 })
@@ -104,8 +106,10 @@ export const setTmdbLinkedAccount = mutation({
     accountId: v.number(),
     username: v.string(),
     sessionId: v.string(),
+    includeAdult: v.boolean(),
+    tmdbAvatarPath: v.union(v.string(), v.null()),
   },
-  handler: async (context, { accountId, username, sessionId }) => {
+  handler: async (context, { accountId, username, sessionId, includeAdult, tmdbAvatarPath }) => {
     const userId = await requireUser(context)
 
     await context.db.insert('tmdbAccountLink', {
@@ -113,6 +117,8 @@ export const setTmdbLinkedAccount = mutation({
       tmdbAccountId: accountId,
       tmdbUsername: username,
       sessionId: sessionId,
+      includeAdult: includeAdult,
+      tmdbAvatarPath: tmdbAvatarPath,
       linkedAt: Date.now(),
     })
   },
