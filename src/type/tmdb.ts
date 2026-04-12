@@ -145,6 +145,25 @@ export function paginated<T extends z.ZodTypeAny>(itemSchema: T) {
   })
 }
 
+export const tmdbReviewAuthorDetailsSchema = z.object({
+  name: z.string(),
+  username: z.string(),
+  avatar_path: z.string().nullable().optional(),
+  rating: z.number().nullable().optional(),
+})
+
+export const tmdbReviewSchema = z.object({
+  id: z.string(),
+  author: z.string(),
+  author_details: tmdbReviewAuthorDetailsSchema,
+  content: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  url: z.string(),
+})
+
+export const tmdbReviewsResponseSchema = paginated(tmdbReviewSchema)
+
 export const tmdbProviderSchema = z.object({
   logo_path: z.string(),
   provider_id: z.number(),
@@ -234,3 +253,6 @@ export type TmdbVideosResponse = z.infer<typeof tmdbVideosResponseSchema>
 export type TmdbCastMember = z.infer<typeof tmdbCastMemberSchema>
 export type TmdbCrewMember = z.infer<typeof tmdbCrewMemberSchema>
 export type TmdbCredits = z.infer<typeof tmdbCreditsSchema>
+export type TmdbReview = z.infer<typeof tmdbReviewSchema>
+export type TmdbReviewAuthorDetails = z.infer<typeof tmdbReviewAuthorDetailsSchema>
+export type TmdbReviewsResponse = z.infer<typeof tmdbReviewsResponseSchema>

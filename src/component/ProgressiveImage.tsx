@@ -11,6 +11,7 @@ interface Props extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src' | 
   onNoImage?: () => void
   minSize?: ImageSize
   maxSize?: ImageSize
+  customBaseUrl?: string
 }
 
 export function ProgressiveImage({
@@ -18,6 +19,7 @@ export function ProgressiveImage({
   onNoImage,
   minSize = 'w92',
   maxSize = 'original',
+  customBaseUrl,
   className,
   ...imgProps
 }: Props) {
@@ -32,8 +34,8 @@ export function ProgressiveImage({
   const smallSizes = IMAGE_SIZES.slice(startIndex, endIndex - 1)
   const bigSizes = IMAGE_SIZES.slice(endIndex - 1)
 
-  const smallImageUrls = paths.flatMap(path => getTmdbImageUrls(path, smallSizes))
-  const largeImageUrls = paths.flatMap(path => getTmdbImageUrls(path, bigSizes))
+  const smallImageUrls = paths.flatMap(path => getTmdbImageUrls(path, smallSizes, customBaseUrl))
+  const largeImageUrls = paths.flatMap(path => getTmdbImageUrls(path, bigSizes, customBaseUrl))
 
   const smallImage = useImageFallback(smallImageUrls)
   const largeImage = useImageFallback(largeImageUrls)

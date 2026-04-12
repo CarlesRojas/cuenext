@@ -7,6 +7,7 @@ import {
   tmdbEpisodeMinimalSchema,
   tmdbMovieMinimalSchema,
   tmdbMovieSchema,
+  tmdbReviewsResponseSchema,
   tmdbSeasonSchema,
   tmdbTvMinimalSchema,
   tmdbTvSchema,
@@ -692,5 +693,43 @@ export const findEpisodeByExternalId = action({
     )
 
     return results.tv_episode_results && results.tv_episode_results.length > 0 ? results.tv_episode_results[0] : null
+  },
+})
+
+export const getMovieReviews = action({
+  args: {
+    tmdbId: v.number(),
+    page: v.optional(v.number()),
+  },
+  handler: async (context, args) => {
+    const params: Record<string, string> = {}
+    if (args.page) params.page = String(args.page)
+
+    return fetchTmdbCached(
+      context,
+      tmdbReviewsResponseSchema,
+      `/movie/${args.tmdbId}/reviews`,
+      params,
+      CACHE_DURATIONS.ONE_DAY,
+    )
+  },
+})
+
+export const getTvReviews = action({
+  args: {
+    tmdbId: v.number(),
+    page: v.optional(v.number()),
+  },
+  handler: async (context, args) => {
+    const params: Record<string, string> = {}
+    if (args.page) params.page = String(args.page)
+
+    return fetchTmdbCached(
+      context,
+      tmdbReviewsResponseSchema,
+      `/tv/${args.tmdbId}/reviews`,
+      params,
+      CACHE_DURATIONS.ONE_DAY,
+    )
   },
 })
