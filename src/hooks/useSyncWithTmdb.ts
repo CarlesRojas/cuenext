@@ -74,8 +74,8 @@ const useSyncWithTmdb = () => {
       })
 
       await processBatched(showFollowsMissingInCuenext, item => updateNextEpisode({ tmdbId: item.id }))
-      await processBatched(showFollowsMissingInTmdb, tmdbId => addToWatchlist({ media: 'tv', tmdbId }))
-      await processBatched(movieFollowsMissingInTmdb, tmdbId => addToWatchlist({ media: 'movie', tmdbId }))
+      await processBatched(showFollowsMissingInTmdb, tmdbId => addToWatchlist({ media: 'tv', tmdbId, add: true }))
+      await processBatched(movieFollowsMissingInTmdb, tmdbId => addToWatchlist({ media: 'movie', tmdbId, add: true }))
 
       // #############################################
       //   FAVORITES
@@ -122,8 +122,8 @@ const useSyncWithTmdb = () => {
         ],
       })
 
-      await processBatched(showFavoritesMissingInTmdb, tmdbId => addToFavorites({ media: 'tv', tmdbId }))
-      await processBatched(movieFavoritesMissingInTmdb, tmdbId => addToFavorites({ media: 'movie', tmdbId }))
+      await processBatched(showFavoritesMissingInTmdb, tmdbId => addToFavorites({ media: 'tv', tmdbId, add: true }))
+      await processBatched(movieFavoritesMissingInTmdb, tmdbId => addToFavorites({ media: 'movie', tmdbId, add: true }))
     },
     onSuccess: () => {
       setLastSyncAt(new Date().toISOString())

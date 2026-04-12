@@ -140,6 +140,7 @@ export const addToWatchlist = action({
   args: {
     media: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
+    add: v.boolean(),
   },
   handler: async (context, args) => {
     await requireUser(context)
@@ -149,7 +150,7 @@ export const addToWatchlist = action({
     await postTmdb(tmdbWatchlistResponseSchema, `/account/${accountLink.tmdbAccountId}/watchlist`, {
       media_type: args.media,
       media_id: args.tmdbId,
-      watchlist: true,
+      watchlist: args.add,
     })
   },
 })
@@ -158,6 +159,7 @@ export const addToFavorites = action({
   args: {
     media: v.union(v.literal('movie'), v.literal('tv')),
     tmdbId: v.number(),
+    add: v.boolean(),
   },
   handler: async (context, args) => {
     await requireUser(context)
@@ -167,7 +169,7 @@ export const addToFavorites = action({
     await postTmdb(tmdbWatchlistResponseSchema, `/account/${accountLink.tmdbAccountId}/favorite`, {
       media_type: args.media,
       media_id: args.tmdbId,
-      favorite: true,
+      favorite: args.add,
     })
   },
 })
