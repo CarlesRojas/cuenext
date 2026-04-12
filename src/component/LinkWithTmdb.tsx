@@ -81,15 +81,6 @@ const LinkWithTmdb = () => {
         )}
       </div>
 
-      {isIOS && (
-        <Button variant={'secondary'} asChild>
-          <a href="https://www.cuenext.app/profile" target="_blank" rel="noopener noreferrer">
-            <FontAwesomeIcon icon={faExternalLink} />
-            <span>{'Open the web to link your TMDB account'}</span>
-          </a>
-        </Button>
-      )}
-
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         {!isIOS && (
           <DialogTrigger asChild>
