@@ -1,4 +1,5 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
+import { StarRating } from '#/component/StarRating'
 import { Button } from '#/component/ui/button'
 import { useFavoriteMovie } from '#/hooks/useFavoriteMovie'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
@@ -104,6 +105,8 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             </p>
           </div>
         )}
+
+        <StarRating voteAverage={movie.vote_average} voteCount={movie.vote_count} />
 
         {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
 

@@ -8,6 +8,7 @@ export const tmdbMovieMinimalSchema = z.object({
   backdrop_path: z.string().nullable().optional(),
   release_date: z.string(),
   vote_average: z.number().optional(),
+  vote_count: z.number().optional(),
 })
 
 export const tmdbMovieSchema = tmdbMovieMinimalSchema.extend({
@@ -41,7 +42,6 @@ export const tmdbMovieSchema = tmdbMovieMinimalSchema.extend({
   status: z.string().optional(),
   tagline: z.string().nullable().optional(),
   video: z.boolean().optional(),
-  vote_count: z.number().optional(),
   media_type: z.literal('movie').optional(),
 })
 
@@ -52,6 +52,8 @@ export const tmdbTvMinimalSchema = z.object({
   poster_path: z.string().nullable().optional(),
   backdrop_path: z.string().nullable().optional(),
   first_air_date: z.string().optional(),
+  vote_average: z.number().optional(),
+  vote_count: z.number().optional(),
 })
 
 export const tmdbTvSchema = tmdbTvMinimalSchema.extend({
@@ -96,8 +98,6 @@ export const tmdbTvSchema = tmdbTvMinimalSchema.extend({
     )
     .optional(),
   tagline: z.string().nullable().optional(),
-  vote_average: z.number().optional(),
-  vote_count: z.number().optional(),
 })
 
 export const tmdbPersonSchema = z.object({
