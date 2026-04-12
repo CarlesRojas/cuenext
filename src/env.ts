@@ -14,6 +14,7 @@ export const env = createEnv({
   client: {
     VITE_CLERK_PUBLISHABLE_KEY: z.string().min(1),
     VITE_CONVEX_URL: z.url(),
+    VITE_DEPLOYMENT_URL: z.url().optional(),
   },
 
   runtimeEnvStrict: {
@@ -26,6 +27,7 @@ export const env = createEnv({
 
     VITE_CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
     VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
+    VITE_DEPLOYMENT_URL: import.meta.env.VITE_DEPLOYMENT_URL,
   },
 
   emptyStringAsUndefined: true,

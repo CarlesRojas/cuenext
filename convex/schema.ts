@@ -91,4 +91,12 @@ export default defineSchema({
     runtime: v.number(), // in minutes
     updatedAt: v.number(),
   }).index('by_tmdbId', ['tmdbId']),
+
+  tmdbAccountLink: defineTable({
+    userId: v.string(),
+    tmdbAccountId: v.number(),
+    tmdbUsername: v.string(),
+    sessionId: v.string(),
+    linkedAt: v.number(),
+  }).index('by_user', ['userId']),
 })

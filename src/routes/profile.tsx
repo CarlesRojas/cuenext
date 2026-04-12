@@ -1,3 +1,4 @@
+import LinkWithTmdb from '#/component/LinkWithTmdb'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
@@ -108,8 +109,8 @@ function ProfilePage() {
   const isLoadingMovies = movieSectionsLoading || favoriteMoviesLoading
 
   return (
-    <div className="screen-py flex w-full flex-col gap-2">
-      <header className="screen-px mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="screen-py flex w-full flex-col gap-8">
+      <header className="screen-px flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Profile</h1>
 
@@ -130,7 +131,7 @@ function ProfilePage() {
         )}
       </header>
 
-      <section className="screen-px mb-8">
+      <section className="screen-px">
         <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
           {user && media === 'tv' && (
             <>
@@ -308,6 +309,8 @@ function ProfilePage() {
           </>
         )}
       </div>
+
+      <LinkWithTmdb />
     </div>
   )
 }

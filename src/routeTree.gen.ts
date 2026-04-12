@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
+import { Route as TmdbCallbackRouteImport } from './routes/tmdb-callback'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ImportShowsRouteImport } from './routes/import-shows'
@@ -24,6 +25,11 @@ import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmd
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
   path: '/upcoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TmdbCallbackRoute = TmdbCallbackRouteImport.update({
+  id: '/tmdb-callback',
+  path: '/tmdb-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/import-shows': typeof ImportShowsRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/tmdb-callback': typeof TmdbCallbackRoute
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/import-shows': typeof ImportShowsRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/tmdb-callback': typeof TmdbCallbackRoute
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/import-shows': typeof ImportShowsRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/tmdb-callback': typeof TmdbCallbackRoute
   '/upcoming': typeof UpcomingRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/import-shows'
     | '/profile'
     | '/search'
+    | '/tmdb-callback'
     | '/upcoming'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/import-shows'
     | '/profile'
     | '/search'
+    | '/tmdb-callback'
     | '/upcoming'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/import-shows'
     | '/profile'
     | '/search'
+    | '/tmdb-callback'
     | '/upcoming'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   ImportShowsRoute: typeof ImportShowsRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
+  TmdbCallbackRoute: typeof TmdbCallbackRoute
   UpcomingRoute: typeof UpcomingRoute
   SeeAllListRoute: typeof SeeAllListRoute
   MediaMediaTmdbIdRoute: typeof MediaMediaTmdbIdRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/upcoming'
       fullPath: '/upcoming'
       preLoaderRoute: typeof UpcomingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tmdb-callback': {
+      id: '/tmdb-callback'
+      path: '/tmdb-callback'
+      fullPath: '/tmdb-callback'
+      preLoaderRoute: typeof TmdbCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImportShowsRoute: ImportShowsRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
+  TmdbCallbackRoute: TmdbCallbackRoute,
   UpcomingRoute: UpcomingRoute,
   SeeAllListRoute: SeeAllListRoute,
   MediaMediaTmdbIdRoute: MediaMediaTmdbIdRoute,
