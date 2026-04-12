@@ -1,3 +1,5 @@
+import type { PaginationResult } from 'convex/server'
+import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import type { MovieSectionItem, TvSectionItem } from '../src/type/section'
 import { mutation, query } from './_generated/server'
@@ -157,6 +159,26 @@ export const unfavoriteItem = mutation({
   },
 })
 
+export const listFavorited = query({
+  args: {
+    type: v.union(v.literal('movie'), v.literal('tv')),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    const result = await context.db
+      .query('favorite')
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', args.type))
+      .paginate(args.paginationOpts)
+
+    return {
+      ...result,
+      page: result.page.map(f => f.tmdbId),
+    } as PaginationResult<number>
+  },
+})
+
 export const checkIsFavorite = query({
   args: { type: v.union(v.literal('movie'), v.literal('tv')), tmdbId: v.number() },
   handler: async (context, args) => {
@@ -168,5 +190,55 @@ export const checkIsFavorite = query({
       .unique()
 
     return !!existing
+  },
+})
+
+export const favoriteMultiple = mutation({
+  args: {
+    items: v.array(
+      v.object({
+        tmdbId: v.number(),
+        type: v.union(v.literal('movie'), v.literal('tv')),
+        name: v.string(),
+        poster: v.union(v.string(), v.null()),
+        backdrop: v.union(v.string(), v.null()),
+        releaseDate: v.number(),
+      }),
+    ),
+  },
+  handler: async (context, args) => {
+    const userId = await requireUser(context)
+
+    for (const item of args.items) {
+      const existingFavorite = await context.db
+        .query('favorite')
+        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', item.type).eq('tmdbId', item.tmdbId))
+        .unique()
+
+      if (!existingFavorite)
+        await context.db.insert('favorite', {
+          userId,
+          type: item.type,
+          tmdbId: item.tmdbId,
+          favoritedAt: Date.now(),
+        })
+
+      const followEntry = await context.db
+        .query('follow')
+        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', item.type).eq('tmdbId', item.tmdbId))
+        .unique()
+
+      if (!followEntry)
+        await context.db.insert('follow', {
+          userId,
+          type: item.type,
+          tmdbId: item.tmdbId,
+          name: item.name,
+          poster: item.poster,
+          backdrop: item.backdrop,
+          followedAt: Date.now(),
+          releaseDate: item.releaseDate,
+        })
+    }
   },
 })

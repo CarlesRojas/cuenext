@@ -19,6 +19,11 @@ const useSyncWithTmdb = () => {
   const followMultiple = useDbMutation(api.library.followMultiple)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
+  const getTvFavorites = useAction(api.tmdbAccount.getTvFavorites)
+  const getMovieFavorites = useAction(api.tmdbAccount.getMovieFavorites)
+  const addToFavorites = useAction(api.tmdbAccount.addToFavorites)
+  const favoriteMultiple = useDbMutation(api.favorites.favoriteMultiple)
+
   const syncWithTmdb = useMutation({
     mutationFn: async () => {
       // #############################################
@@ -73,6 +78,50 @@ const useSyncWithTmdb = () => {
       // #############################################
       //   FAVORITES
       // #############################################
+
+      const tmdbShowFavorites = await getTvFavorites()
+      const tmdbMovieFavorites = await getMovieFavorites()
+
+      const cuenextShowFavorites = await getAllPages(args => convex.query(api.favorites.listFavorited, args), {
+        type: 'tv' as const,
+      })
+      const cuenextMovieFavorites = await getAllPages(args => convex.query(api.favorites.listFavorited, args), {
+        type: 'movie' as const,
+      })
+
+      const showFavoritesMissingInCuenext = tmdbShowFavorites.filter(item => !cuenextShowFavorites.includes(item.id))
+      const movieFavoritesMissingInCuenext = tmdbMovieFavorites.filter(item => !cuenextMovieFavorites.includes(item.id))
+
+      const showFavoritesMissingInTmdb = cuenextShowFavorites.filter(
+        item => !tmdbShowFavorites.find(tmdbItem => tmdbItem.id === item),
+      )
+      const movieFavoritesMissingInTmdb = cuenextMovieFavorites.filter(
+        item => !tmdbMovieFavorites.find(tmdbItem => tmdbItem.id === item),
+      )
+
+      await favoriteMultiple({
+        items: [
+          ...showFavoritesMissingInCuenext.map(item => ({
+            type: 'tv' as const,
+            tmdbId: item.id,
+            name: item.name,
+            poster: item.poster_path ?? null,
+            backdrop: item.backdrop_path ?? null,
+            releaseDate: 0,
+          })),
+          ...movieFavoritesMissingInCuenext.map(item => ({
+            type: 'movie' as const,
+            tmdbId: item.id,
+            name: item.title,
+            poster: item.poster_path ?? null,
+            backdrop: item.backdrop_path ?? null,
+            releaseDate: new Date(item.release_date).getTime(),
+          })),
+        ],
+      })
+
+      await processBatched(showFavoritesMissingInTmdb, tmdbId => addToFavorites({ media: 'tv', tmdbId }))
+      await processBatched(movieFavoritesMissingInTmdb, tmdbId => addToFavorites({ media: 'movie', tmdbId }))
     },
     onSuccess: () => {
       setLastSyncAt(new Date().toISOString())

@@ -153,3 +153,21 @@ export const addToWatchlist = action({
     })
   },
 })
+
+export const addToFavorites = action({
+  args: {
+    media: v.union(v.literal('movie'), v.literal('tv')),
+    tmdbId: v.number(),
+  },
+  handler: async (context, args) => {
+    await requireUser(context)
+    const accountLink = await context.runQuery(api.tmdbAuth.getTmdbAccountLink)
+    if (!accountLink) throw new Error('TMDB account not linked')
+
+    await postTmdb(tmdbWatchlistResponseSchema, `/account/${accountLink.tmdbAccountId}/favorite`, {
+      media_type: args.media,
+      media_id: args.tmdbId,
+      favorite: true,
+    })
+  },
+})
