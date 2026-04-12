@@ -34,21 +34,6 @@ export const setUnstopped = mutation({
   },
 })
 
-export const listStopped = query({
-  args: {},
-  handler: async context => {
-    const userId = await requireUser(context)
-
-    // TODO: Consider pagination if users have many stopped shows
-    const stoppedItems = await context.db
-      .query('stopped')
-      .withIndex('by_user', q => q.eq('userId', userId))
-      .collect()
-
-    return stoppedItems.map(f => f.tmdbId)
-  },
-})
-
 export const checkIsStopped = query({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {

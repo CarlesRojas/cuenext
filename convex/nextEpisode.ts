@@ -58,7 +58,7 @@ export const updateNextEpisode = action({
       numberOfSeasons = nonSpecialSeasons.length
     }
 
-    const watchedEpisodes = await context.runQuery(api.watch.getWatchedShowEpisodes, { showTmdbId: args.tmdbId })
+    const watchedEpisodes = await context.runQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: args.tmdbId })
     const watchedEpisodesWithoutSpecials = watchedEpisodes.filter(ep => ep.seasonNumber >= 0)
 
     const totalEpisodes = seasonEpisodeCounts.reduce((sum, count) => sum + count, 0)

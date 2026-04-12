@@ -127,7 +127,6 @@ export const cleanupExpiredCache = mutation({
   handler: async context => {
     const now = Date.now()
 
-    // TODO: Consider pagination
     const expiredEntries = await context.db
       .query('tmdbCache')
       .filter(q => q.lt(q.field('expiresAt'), now))

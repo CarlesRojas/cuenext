@@ -161,21 +161,6 @@ export const unfavoriteItem = mutation({
   },
 })
 
-export const listFavorites = query({
-  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    // TODO: Consider pagination if users have many favorites
-    const favorites = await context.db
-      .query('favorite')
-      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', args.type))
-      .collect()
-
-    return favorites.map(f => f.tmdbId)
-  },
-})
-
 export const checkIsFavorite = query({
   args: { type: v.union(v.literal('movie'), v.literal('tv')), tmdbId: v.number() },
   handler: async (context, args) => {

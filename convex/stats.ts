@@ -35,7 +35,7 @@ export const getMovieStats = action({
       let isDone = false
 
       while (!isDone) {
-        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowedPaginated, {
+        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowed, {
           type: 'movie',
           paginationOpts: { numItems: 1000, cursor: continueCursor },
         })
@@ -183,7 +183,7 @@ export const getShowStats = action({
       let isDone = false
 
       while (!isDone) {
-        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowedPaginated, {
+        const result: PaginationResult<number> = await context.runQuery(api.library.listFollowed, {
           type: 'tv',
           paginationOpts: { numItems: 1000, cursor: continueCursor },
         })
