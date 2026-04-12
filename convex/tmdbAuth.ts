@@ -35,7 +35,7 @@ const AccountResponse = z.object({
 
 export const createRequestToken = action({
   handler: async context => {
-    const userId = await requireUser(context)
+    await requireUser(context)
 
     const data = await fetchTmdb(RequestTokenResponse, '/authentication/token/new')
 
@@ -58,7 +58,7 @@ export const linkTmdbAccount = action({
     requestToken: v.string(),
   },
   handler: async (context, { requestToken }) => {
-    const userId = await requireUser(context)
+    await requireUser(context)
 
     const existingLink = await context.runQuery(api.tmdbAuth.getTmdbAccountLink)
 
