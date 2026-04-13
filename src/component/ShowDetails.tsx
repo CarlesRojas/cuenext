@@ -1,6 +1,7 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { StarRating } from '#/component/StarRating'
 import { Button } from '#/component/ui/button'
+import { ShowMore } from '#/component/ui/show-more'
 import { useFavoriteEpisode } from '#/hooks/useFavoriteEpisode'
 import { useFollowEpisode } from '#/hooks/useFollowEpisode'
 import { useStopEpisode } from '#/hooks/useStopEpisode'
@@ -107,7 +108,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
 
         <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} />
 
-        {overview && <p className="max-w-3xl leading-relaxed font-medium tracking-wide text-white/60">{overview}</p>}
+        {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
 
         <div className="flex w-full max-w-3xl flex-wrap gap-2">
           <Button

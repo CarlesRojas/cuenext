@@ -2,11 +2,11 @@ import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { StarRating } from '#/component/StarRating'
 import { Button } from '#/component/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogFooter } from '#/component/ui/dialog'
+import { ShowMore } from '#/component/ui/show-more'
 import { cn } from '#/lib/cn'
 import type { TmdbReview } from '#/type/tmdb'
 import { faTimes, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ShowMore } from '@re-dev/react-truncate'
 import { useState } from 'react'
 
 interface Props {
@@ -29,7 +29,7 @@ const ReviewCard = ({ review, inDialog = false }: Props) => {
   return (
     <div
       className={cn(
-        'relative flex h-full flex-col gap-3 rounded-[36px] border border-neutral-500/40 bg-neutral-800 p-4 shadow-xl',
+        'relative flex h-full flex-col gap-3 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-4 shadow-xl',
         inDialog && 'rounded-0 h-fit border-0 bg-transparent p-0 shadow-none lg:p-0',
       )}
     >
@@ -68,26 +68,7 @@ const ReviewCard = ({ review, inDialog = false }: Props) => {
         </div>
       </div>
 
-      {!inDialog && (
-        <ShowMore
-          lines={4}
-          className="prose leading-snug font-medium tracking-wide text-ellipsis text-white/60"
-          more={
-            <>
-              ...
-              <Button
-                variant="link"
-                className="h-fit px-2 py-0 font-medium tracking-wide text-sky-500/80"
-                onClick={() => setIsDialogOpen(true)}
-              >
-                {'Expand'}
-              </Button>
-            </>
-          }
-        >
-          {content}
-        </ShowMore>
-      )}
+      {!inDialog && <ShowMore lines={4} onClick={() => setIsDialogOpen(true)} text={content} />}
 
       {inDialog && (
         <p className="scroll-container max-h-[50dvh] overflow-x-hidden p-0 px-4.5 tracking-wide text-white/70 select-all">

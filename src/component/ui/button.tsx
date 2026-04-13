@@ -42,6 +42,10 @@ const buttonVariants = cva(
           'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/20 data-[state=on]:text-sky-500',
           'data-[state=on]:hover:bg-sky-500/40 data-[state=on]:focus-visible:bg-sky-500/40',
         ],
+
+        showMore: [
+          'font-medium tracking-wide text-neutral-500/70 hover:text-neutral-400/90 focus-visible:text-neutral-400/90',
+        ],
       },
       size: {
         default: 'h-11 w-fit gap-2 px-4 py-2.5',
@@ -51,7 +55,7 @@ const buttonVariants = cva(
         small: 'm-1 h-9 w-fit gap-1 px-4',
         link: 'w-fit gap-2',
         input: 'size-8',
-        showMore: 'mx-1 h-fit w-fit px-2',
+        showMore: 'h-fit w-fit p-0',
       },
     },
     defaultVariants: {
