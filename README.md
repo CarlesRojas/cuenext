@@ -54,4 +54,4 @@ adb install app-release-signed.apk
 
 # TODO
 
-- [ ] Add ratings and reviews
+- [ ] Let users rate and review
