@@ -48,7 +48,7 @@ function RouteComponent() {
       const scrollY = scrollContainer.scrollTop
 
       // Same as the padding-top on ShowDetails and MovieDetails components
-      let multiplier = 0.2
+      let multiplier = 0.28
       if (width >= 1280) multiplier = 0.35
       else if (width >= 1024) multiplier = 0.3
       else if (width >= 768) multiplier = 0.25

@@ -48,7 +48,10 @@ export function ShowDetails({ show }: ShowDetailsProps) {
     <div className="flex h-fit w-full flex-col gap-8">
       {hasImage && (
         <section
-          className="absolute inset-0 aspect-video max-h-[50dvh] min-h-[30dvh] max-w-dvw min-w-dvw overflow-hidden"
+          className={cn(
+            'absolute inset-0 max-h-[40dvh] min-h-[40dvh] max-w-dvw min-w-dvw overflow-hidden',
+            'md:aspect-video md:max-h-[50dvh] md:min-h-[30dvh]',
+          )}
           style={{ maskImage: 'linear-gradient(to bottom, black 30%, transparent)' }}
         >
           <ProgressiveImage
@@ -71,7 +74,8 @@ export function ShowDetails({ show }: ShowDetailsProps) {
       {/* If these paddings change, change them in the onScroll function in src/routes/media/$media/$tmdbId.tsx */}
       <section
         className={cn(
-          'screen-px screen-py z-10 flex flex-col gap-3 pt-[20dvh] transition-[padding] md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
+          'screen-px screen-py z-10 flex flex-col gap-3 pt-[28dvh] transition-[padding]',
+          'md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
           !hasImage && 'pt-23!',
         )}
       >
