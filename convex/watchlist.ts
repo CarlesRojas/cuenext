@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import type { MovieSectionItem, TvSectionItem } from '../src/type/section'
 import { api } from './_generated/api'
-import { action, query } from './_generated/server'
+import { query } from './_generated/server'
 import { requireUser } from './requireUser'
 
 export const getTvSections = query({
@@ -117,7 +117,7 @@ export const getMovieSections = query({
   },
 })
 
-export const getTvSectionPaginated = action({
+export const getTvSectionPaginated = query({
   args: {
     section: v.union(
       v.literal('next'),
@@ -126,10 +126,13 @@ export const getTvSectionPaginated = action({
       v.literal('finished'),
       v.literal('waiting'),
     ),
-    page: v.optional(v.number()),
-    pageSize: v.optional(v.number()),
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+      id: v.number(),
+    }),
   },
-  handler: async (context, { section, page = 1, pageSize = 10 }) => {
+  handler: async (context, { section, paginationOpts }) => {
     const sections = await context.runQuery(api.watchlist.getTvSections)
 
     let sectionItems: TvSectionItem[]
@@ -153,28 +156,29 @@ export const getTvSectionPaginated = action({
         sectionItems = []
     }
 
-    const totalResults = sectionItems.length
-    const totalPages = Math.ceil(totalResults / pageSize)
-    const startIndex = (page - 1) * pageSize
-    const endIndex = Math.min(startIndex + pageSize, totalResults)
+    // Convert to paginated format for convex
+    const startIndex = paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0
+    const endIndex = startIndex + paginationOpts.numItems
     const results = sectionItems.slice(startIndex, endIndex)
 
     return {
-      page,
-      results,
-      total_pages: totalPages,
-      total_results: totalResults,
+      page: results,
+      isDone: endIndex >= sectionItems.length,
+      continueCursor: endIndex >= sectionItems.length ? sectionItems.length.toString() : endIndex.toString(),
     }
   },
 })
 
-export const getMovieSectionPaginated = action({
+export const getMovieSectionPaginated = query({
   args: {
     section: v.union(v.literal('next'), v.literal('waiting'), v.literal('finished')),
-    page: v.optional(v.number()),
-    pageSize: v.optional(v.number()),
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+      id: v.number(),
+    }),
   },
-  handler: async (context, { section, page = 1, pageSize = 20 }) => {
+  handler: async (context, { section, paginationOpts }) => {
     const sections = await context.runQuery(api.watchlist.getMovieSections)
 
     let sectionItems: MovieSectionItem[]
@@ -192,17 +196,15 @@ export const getMovieSectionPaginated = action({
         sectionItems = []
     }
 
-    const totalResults = sectionItems.length
-    const totalPages = Math.ceil(totalResults / pageSize)
-    const startIndex = (page - 1) * pageSize
-    const endIndex = Math.min(startIndex + pageSize, totalResults)
+    // Convert to paginated format for convex
+    const startIndex = paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0
+    const endIndex = startIndex + paginationOpts.numItems
     const results = sectionItems.slice(startIndex, endIndex)
 
     return {
-      page,
-      results,
-      total_pages: totalPages,
-      total_results: totalResults,
+      page: results,
+      isDone: endIndex >= sectionItems.length,
+      continueCursor: endIndex >= sectionItems.length ? sectionItems.length.toString() : endIndex.toString(),
     }
   },
 })

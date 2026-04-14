@@ -1,5 +1,5 @@
 import BackButton from '#/component/BackButton'
-import { InfiniteMediaList } from '#/component/InfiniteMediaList'
+import { InfiniteList } from '#/component/InfiniteList'
 import RowCard from '#/component/RowCard'
 import useSearchParams from '#/hooks/useSearchParams'
 import useShowInfo from '#/hooks/useShowInfo'
@@ -38,7 +38,7 @@ export const Route = createFileRoute('/list/$list')({
 function EpisodeWrapper({ episode, showWatch }: { episode: TvSectionItem; showWatch: boolean }) {
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode(episode)
 
-  const { name, poster, backdrop, numberOfSeasons, watchedPercentage, lastWatchedAt } = episode
+  const { name, poster, backdrop, numberOfSeasons, lastWatchedAt } = episode
   const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
 
   const lastWatchedAtDate = lastWatchedAt ? new Date(lastWatchedAt) : null
@@ -157,22 +157,22 @@ function RouteComponent() {
       <div className="screen-px relative w-full">
         <div className="page-width relative w-full">
           {media === 'tv' && (
-            <InfiniteMediaList
-              action={api.watchlist.getTvSectionPaginated}
-              actionKey={`tv-${list}`}
-              params={{ section: list, pageSize: 10 }}
+            <InfiniteList
+              query={api.watchlist.getTvSectionPaginated}
+              args={{ section: list }}
               Component={ListWithWatch.includes(list as List) ? WatchEpisodeWrapper : EmptyEpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
+              getKey={(item: TvSectionItem) => item.showTmdbId.toString()}
             />
           )}
 
           {media === 'movie' && (
-            <InfiniteMediaList
-              action={api.watchlist.getMovieSectionPaginated}
-              actionKey={`movie-${list}`}
-              params={{ section: list, pageSize: 10 }}
+            <InfiniteList
+              query={api.watchlist.getMovieSectionPaginated}
+              args={{ section: list }}
               Component={ListWithWatch.includes(list as List) ? WatchMovieWrapper : EmptyMovieWrapper}
               LoadingComponent={<RowCard isLoading />}
+              getKey={(item: MovieSectionItem) => item.tmdbId.toString()}
             />
           )}
         </div>
