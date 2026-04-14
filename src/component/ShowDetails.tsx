@@ -27,7 +27,6 @@ export function ShowDetails({ show }: ShowDetailsProps) {
     status,
     seasons: seasonsWithSpecials,
     genres,
-    tagline,
   } = show
 
   const { isFollowed, isFollowedLoading, toggleFollow } = useFollowEpisode(show)

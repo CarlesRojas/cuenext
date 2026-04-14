@@ -16,7 +16,7 @@ interface MovieDetailsProps {
 }
 
 export function MovieDetails({ movie }: MovieDetailsProps) {
-  const { id, title, poster_path, backdrop_path, release_date, runtime, overview, status, genres, tagline } = movie
+  const { id, title, poster_path, backdrop_path, release_date, runtime, overview, status, genres } = movie
 
   const { isFollowed, isFollowedLoading, toggleFollow } = useFollowMovie(movie)
   const { isFavorited, isFavoritedLoading, toggleFavorite } = useFavoriteMovie(movie)
