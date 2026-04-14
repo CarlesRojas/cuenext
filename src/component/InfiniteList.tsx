@@ -25,7 +25,6 @@ export function InfiniteList<TItem>({
   LoadingComponent,
   className,
   emptyMessage = 'No results',
-  showTotalResults = true,
   getKey,
 }: InfiniteListProps<TItem>) {
   const { results, status, isLoading, loadMore } = usePaginatedQuery(query, args, { initialNumItems: 10 })
@@ -47,22 +46,14 @@ export function InfiniteList<TItem>({
     return <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">{emptyMessage}</p>
 
   return (
-    <>
-      {showTotalResults && (
-        <p className="pointer-events-none mb-4 font-semibold tracking-wide text-neutral-500">
-          {`Showing ${results.length.toLocaleString()} results`}
-        </p>
-      )}
+    <div className={cn('flex flex-col gap-4', className)}>
+      {results.map((item, index) => (
+        <Component key={getKey(item, index)} {...item} />
+      ))}
 
-      <div className={cn('flex flex-col gap-4', className)}>
-        {results.map((item, index) => (
-          <Component key={getKey(item, index)} {...item} />
-        ))}
-
-        <div ref={ref} className="flex justify-center">
-          {canLoadMore && LoadingComponent}
-        </div>
+      <div ref={ref} className="flex justify-center">
+        {canLoadMore && LoadingComponent}
       </div>
-    </>
+    </div>
   )
 }
