@@ -40,6 +40,8 @@ interface LoadedProps extends CommonProps {
   isFollowed?: boolean
   onToggleFollow?: () => void
   isFollowLoading?: boolean
+
+  progressPercentage?: number
 }
 
 type Props = LoadingProps | LoadedProps
@@ -84,6 +86,8 @@ export default function RowCard(props: Props) {
     isFollowed = false,
     onToggleFollow,
     isFollowLoading = false,
+
+    progressPercentage,
   } = props
 
   const posterPaths = [posterPath]
@@ -170,8 +174,14 @@ export default function RowCard(props: Props) {
           </div>
         )}
 
-        <div className="flex flex-col justify-between p-3 lg:p-4">
-          <div className={cn('flex justify-between gap-3', showFollow && onToggleFollow && 'pr-24')}>
+        <div className="relative flex flex-col justify-between p-3 lg:p-4">
+          <div
+            className={cn(
+              'flex justify-between gap-3',
+              showFollow && onToggleFollow && 'pr-24',
+              showWatch && onToggleWatch && 'pr-22',
+            )}
+          >
             <div className="flex flex-col">
               <h2 className="line-clamp-1 text-lg leading-6 font-semibold">{title}</h2>
               {subtitle && <p className="line-clamp-1 text-sm text-neutral-400">{subtitle}</p>}
@@ -180,7 +190,29 @@ export default function RowCard(props: Props) {
             {rightContent}
           </div>
 
-          <p className="line-clamp-4 text-sm leading-snug text-neutral-400">{overview}</p>
+          <p
+            className={cn(
+              'line-clamp-4 text-sm leading-snug text-neutral-400',
+              progressPercentage !== undefined && 'mb-4',
+            )}
+          >
+            {overview}
+          </p>
+
+          {progressPercentage !== undefined && (
+            <div className="absolute inset-x-0 bottom-0 -mb-px flex h-11 min-h-11 w-full items-center justify-center px-3.5">
+              <div className="mt-3 h-1.5 w-full rounded-full bg-white/30">
+                <div
+                  className="duration-slow h-full rounded-full bg-white transition-[width]"
+                  style={{ width: `${progressPercentage}%` }}
+                  role="progressbar"
+                  aria-valuenow={progressPercentage}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </Link>
 

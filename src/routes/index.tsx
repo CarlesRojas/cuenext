@@ -19,6 +19,8 @@ export const Route = createFileRoute('/')({
   validateSearch: UrlParamsSchema,
 })
 
+const MAX_SECTION_ITEMS = 12
+
 function App() {
   const clerk = useClerk()
   const { media } = useSearchParams()
@@ -88,11 +90,11 @@ function App() {
 
           {tvSections && tvSections.watchNext.length > 0 && (
             <Section title="Watch next">
-              {tvSections.watchNext.slice(0, 15).map(item => (
+              {tvSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
 
-              {tvSections.watchNext.length > 15 && (
+              {tvSections.watchNext.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'tv' }}>
@@ -107,11 +109,11 @@ function App() {
 
           {tvSections && tvSections.haventStarted.length > 0 && (
             <Section title="Haven't started">
-              {tvSections.haventStarted.slice(0, 15).map(item => (
+              {tvSections.haventStarted.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
 
-              {tvSections.haventStarted.length > 15 && (
+              {tvSections.haventStarted.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'unstarted' }} search={{ media: 'tv' }}>
@@ -136,7 +138,7 @@ function App() {
                 </Button>
               }
             >
-              {tvSections.waitingForEpisodes.slice(0, 15).map(item => (
+              {tvSections.waitingForEpisodes.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.id}
                   id={item.showTmdbId}
@@ -146,7 +148,7 @@ function App() {
                 />
               ))}
 
-              {tvSections.waitingForEpisodes.length > 15 && (
+              {tvSections.waitingForEpisodes.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'tv' }}>
@@ -161,7 +163,7 @@ function App() {
 
           {tvSections && tvSections.stoppedWatching.length > 0 && (
             <Section title="Stopped watching" defaultCollapsed>
-              {tvSections.stoppedWatching.slice(0, 15).map(item => {
+              {tvSections.stoppedWatching.slice(0, MAX_SECTION_ITEMS).map(item => {
                 const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
                 if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
 
@@ -177,7 +179,7 @@ function App() {
                 )
               })}
 
-              {tvSections.stoppedWatching.length > 15 && (
+              {tvSections.stoppedWatching.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'stopped' }} search={{ media: 'tv' }}>
@@ -192,7 +194,7 @@ function App() {
 
           {tvSections && tvSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
-              {tvSections.finished.slice(0, 15).map(item => (
+              {tvSections.finished.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.id}
                   id={item.showTmdbId}
@@ -202,7 +204,7 @@ function App() {
                 />
               ))}
 
-              {tvSections.finished.length > 15 && (
+              {tvSections.finished.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'tv' }}>
@@ -245,11 +247,11 @@ function App() {
 
           {movieSections && movieSections.watchNext.length > 0 && (
             <Section title="Watch next">
-              {movieSections.watchNext.slice(0, 15).map(item => (
+              {movieSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchMovie key={item.tmdbId} movie={item} />
               ))}
 
-              {movieSections.watchNext.length > 15 && (
+              {movieSections.watchNext.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'movie' }}>
@@ -274,7 +276,7 @@ function App() {
                 </Button>
               }
             >
-              {movieSections.unreleased.slice(0, 15).map(item => (
+              {movieSections.unreleased.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.tmdbId}
                   id={item.tmdbId}
@@ -284,7 +286,7 @@ function App() {
                 />
               ))}
 
-              {movieSections.unreleased.length > 15 && (
+              {movieSections.unreleased.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'movie' }}>
@@ -299,7 +301,7 @@ function App() {
 
           {movieSections && movieSections.finished.length > 0 && (
             <Section title="Finished">
-              {movieSections.finished.slice(0, 15).map(item => (
+              {movieSections.finished.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.tmdbId}
                   id={item.tmdbId}
@@ -309,7 +311,7 @@ function App() {
                 />
               ))}
 
-              {movieSections.finished.length > 15 && (
+              {movieSections.finished.length > MAX_SECTION_ITEMS && (
                 <div className="flex h-full w-fit items-center justify-center">
                   <Button asChild>
                     <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'movie' }}>

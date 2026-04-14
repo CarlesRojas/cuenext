@@ -23,6 +23,7 @@ export enum List {
 }
 
 const ListWithWatch = [List.WATCH_NEXT, List.HAVENT_STARTED, List.STOPPED_WATCHING]
+const ListWithProgress = [List.WATCH_NEXT, List.STOPPED_WATCHING]
 
 export const Route = createFileRoute('/list/$list')({
   component: RouteComponent,
@@ -35,10 +36,18 @@ export const Route = createFileRoute('/list/$list')({
   },
 })
 
-function EpisodeWrapper({ episode, showWatch }: { episode: TvSectionItem; showWatch: boolean }) {
+function EpisodeWrapper({
+  episode,
+  showWatch,
+  showProgress,
+}: {
+  episode: TvSectionItem
+  showWatch: boolean
+  showProgress: boolean
+}) {
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode(episode)
 
-  const { name, poster, backdrop, numberOfSeasons, lastWatchedAt } = episode
+  const { name, poster, backdrop, numberOfSeasons, lastWatchedAt, watchedPercentage } = episode
   const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
 
   const lastWatchedAtDate = lastWatchedAt ? new Date(lastWatchedAt) : null
@@ -58,8 +67,7 @@ function EpisodeWrapper({ episode, showWatch }: { episode: TvSectionItem; showWa
       title={name}
       posterPath={poster}
       backdropPath={backdrop}
-      subtitle={[lastWatchedText, seasonsText].filter(Boolean).join(' • ')}
-      overview={''}
+      overview={[seasonsText, lastWatchedText].filter(Boolean).join(' • ')}
       showWatch={showWatch}
       isWatched={isWatched}
       onToggleWatch={onToggleWatch}
@@ -69,16 +77,21 @@ function EpisodeWrapper({ episode, showWatch }: { episode: TvSectionItem; showWa
           ? `E${episode.episodeNumber + 1}`
           : `S${episode.seasonNumber + 1}, E${episode.episodeNumber + 1}`
       }
+      progressPercentage={showProgress ? watchedPercentage : undefined}
     />
   )
 }
 
 function WatchEpisodeWrapper(episode: TvSectionItem) {
-  return EpisodeWrapper({ episode, showWatch: true })
+  return EpisodeWrapper({ episode, showWatch: true, showProgress: false })
+}
+
+function WatchWithProgressEpisodeWrapper(episode: TvSectionItem) {
+  return EpisodeWrapper({ episode, showWatch: true, showProgress: true })
 }
 
 function EmptyEpisodeWrapper(episode: TvSectionItem) {
-  return EpisodeWrapper({ episode, showWatch: false })
+  return EpisodeWrapper({ episode, showWatch: false, showProgress: false })
 }
 
 function MovieWrapper({ movie, showWatch }: { movie: MovieSectionItem; showWatch: boolean }) {
@@ -99,8 +112,7 @@ function MovieWrapper({ movie, showWatch }: { movie: MovieSectionItem; showWatch
       title={name}
       posterPath={poster}
       backdropPath={backdrop}
-      subtitle={formattedReleaseDate}
-      overview={''}
+      overview={`${formattedReleaseDate ? `Release date: ${formattedReleaseDate}` : 'Release date unknown'}`}
       showWatch={showWatch}
       isWatched={isWatched}
       onToggleWatch={onToggleWatch}
@@ -160,7 +172,13 @@ function RouteComponent() {
             <InfiniteList
               query={api.watchlist.getTvSectionPaginated}
               args={{ section: list }}
-              Component={ListWithWatch.includes(list as List) ? WatchEpisodeWrapper : EmptyEpisodeWrapper}
+              Component={
+                ListWithWatch.includes(list as List)
+                  ? ListWithProgress.includes(list as List)
+                    ? WatchWithProgressEpisodeWrapper
+                    : WatchEpisodeWrapper
+                  : EmptyEpisodeWrapper
+              }
               LoadingComponent={<RowCard isLoading />}
               getKey={(item: TvSectionItem) => item.showTmdbId.toString()}
             />

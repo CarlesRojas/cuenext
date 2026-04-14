@@ -66,7 +66,6 @@ export function PosterCard(props: Props) {
     media,
     imagePaths,
     number,
-    progressPercentage,
 
     watchButtonText,
     showWatch = false,
@@ -79,6 +78,8 @@ export function PosterCard(props: Props) {
     isFollowed = false,
     onToggleFollow,
     isFollowLoading = false,
+
+    progressPercentage,
   } = props
 
   return (
@@ -125,7 +126,7 @@ export function PosterCard(props: Props) {
           </>
         )}
 
-        {progressPercentage && (
+        {progressPercentage !== undefined && (
           <>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/50 via-transparent to-transparent" />
 
