@@ -14,6 +14,7 @@
 }
 
 @custom-variant mouse (@media (hover: hover) and (pointer: fine));
+@custom-variant touch (@media (hover: none) or (pointer: coarse));
 @custom-variant sidebar-collapsed (html[data-sidebar-collapsed] &);
 
 @layer components {

@@ -132,8 +132,23 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-visible" data-slot="carousel-content">
-      <div className={cn('flex', orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col', className)} {...props} />
+    <div
+      ref={carouselRef}
+      className={cn(
+        'overflow-visible',
+        'touch:touch-pan-x touch:overscroll-behavior-x-contain touch:overscroll-behavior-y-none touch:will-change-transform',
+      )}
+      data-slot="carousel-content"
+    >
+      <div
+        className={cn(
+          'flex',
+          orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col',
+          orientation === 'horizontal' && 'touch:scroll-smooth touch:scroll-snap-type-x-mandatory',
+          className,
+        )}
+        {...props}
+      />
     </div>
   )
 }
@@ -146,7 +161,12 @@ function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"
-      className={cn('min-w-0 shrink-0 grow-0 basis-full', orientation === 'horizontal' ? 'pl-4' : 'pt-4', className)}
+      className={cn(
+        'min-w-0 shrink-0 grow-0 basis-full',
+        orientation === 'horizontal' ? 'pl-4' : 'pt-4',
+        'touch:scroll-snap-align-start',
+        className,
+      )}
       {...props}
     />
   )
