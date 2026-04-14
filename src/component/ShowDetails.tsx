@@ -87,7 +87,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
           </p>
         </div>
 
-        <div className="flex w-full max-w-3xl items-start justify-between gap-2">
+        <div className="mb-2 flex w-full max-w-3xl items-start justify-between gap-2">
           <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} />
 
           <div className="flex w-fit flex-row-reverse flex-wrap gap-2">
