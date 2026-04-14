@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
+import { useDebounceCallback } from 'usehooks-ts'
 import z from 'zod'
 
 interface Props {
@@ -25,19 +26,24 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
   const formSchema = z.object({ query: z.string() })
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const performSearch = (query: string) => {
+    console.log('search')
+    const sanitizedQuery = encodeURIComponent(query.trim())
+
+    navigate({
+      to: '/search',
+      replace: location.pathname === '/search',
+      search: { query: sanitizedQuery, media },
+    })
+  }
+
   const form = useForm({
     defaultValues: { query: urlQuery ?? '' },
     validators: { onSubmit: formSchema },
-    onSubmit: async ({ value: { query } }) => {
-      const sanitizedQuery = encodeURIComponent(query.trim())
-      if (sanitizedQuery)
-        navigate({
-          to: '/search',
-          replace: location.pathname === '/search',
-          search: { query: sanitizedQuery, media },
-        })
-    },
+    onSubmit: async ({ value: { query } }) => performSearch(query),
   })
+
+  const debouncedSearch = useDebounceCallback(performSearch, 500)
 
   useEffect(() => form.setFieldValue('query', urlQuery ?? ''), [location.pathname, form])
 
@@ -48,6 +54,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
 
   const handleInputChange = (field: any, value: string) => {
     field.handleChange(value)
+    debouncedSearch(value)
   }
 
   if (!isMobile) {
