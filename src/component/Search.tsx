@@ -27,7 +27,6 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
   const inputRef = useRef<HTMLInputElement>(null)
 
   const performSearch = (query: string) => {
-    console.log('search')
     const sanitizedQuery = encodeURIComponent(query.trim())
 
     navigate({

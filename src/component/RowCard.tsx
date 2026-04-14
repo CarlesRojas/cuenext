@@ -3,7 +3,7 @@ import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
-import { faBookmark, faClapperboard, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faClapperboard, faEye, faSpinner, faTv } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
@@ -28,6 +28,13 @@ interface LoadedProps extends CommonProps {
   overview: string
 
   rightContent?: ReactNode
+
+  showWatch?: boolean
+  watchButtonText?: string
+  isWatched?: boolean
+  onToggleWatch?: () => void
+  isWatchLoading?: boolean
+
   showFollow?: boolean
   followButtonText?: string
   isFollowed?: boolean
@@ -65,6 +72,13 @@ export default function RowCard(props: Props) {
     overview,
 
     rightContent,
+
+    watchButtonText,
+    showWatch = false,
+    isWatched = false,
+    onToggleWatch,
+    isWatchLoading = false,
+
     followButtonText,
     showFollow = false,
     isFollowed = false,
@@ -169,6 +183,24 @@ export default function RowCard(props: Props) {
           <p className="line-clamp-4 text-sm leading-snug text-neutral-400">{overview}</p>
         </div>
       </Link>
+
+      {showWatch && onToggleWatch && (
+        <Button
+          variant="frost"
+          size={watchButtonText ? 'small' : 'iconSmall'}
+          className="absolute top-1 right-1 z-10 gap-2 px-2 pl-3 disabled:opacity-100"
+          onClick={e => {
+            e.preventDefault()
+            onToggleWatch()
+          }}
+          data-checked={!isWatchLoading && isWatched}
+          title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
+          disabled={isWatchLoading}
+        >
+          {watchButtonText && <span className="text-sm">{watchButtonText}</span>}
+          {<FontAwesomeIcon icon={isWatchLoading ? faSpinner : faEye} spin={isWatchLoading} />}
+        </Button>
+      )}
 
       {showFollow && onToggleFollow && (
         <Button

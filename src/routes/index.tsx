@@ -9,7 +9,7 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
-import { faCalendarDays, faCompass, faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { faArrowRight, faCalendarDays, faCompass, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -88,17 +88,39 @@ function App() {
 
           {tvSections && tvSections.watchNext.length > 0 && (
             <Section title="Watch next">
-              {tvSections.watchNext.map(item => (
+              {tvSections.watchNext.slice(0, 15).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
+
+              {tvSections.watchNext.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'tv' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
 
           {tvSections && tvSections.haventStarted.length > 0 && (
             <Section title="Haven't started">
-              {tvSections.haventStarted.map(item => (
+              {tvSections.haventStarted.slice(0, 15).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
+
+              {tvSections.haventStarted.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'unstarted' }} search={{ media: 'tv' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
 
@@ -114,7 +136,7 @@ function App() {
                 </Button>
               }
             >
-              {tvSections.waitingForEpisodes.map(item => (
+              {tvSections.waitingForEpisodes.slice(0, 15).map(item => (
                 <PosterCard
                   key={item.id}
                   id={item.showTmdbId}
@@ -123,12 +145,23 @@ function App() {
                   imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
+
+              {tvSections.waitingForEpisodes.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'tv' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
 
           {tvSections && tvSections.stoppedWatching.length > 0 && (
             <Section title="Stopped watching" defaultCollapsed>
-              {tvSections.stoppedWatching.map(item => {
+              {tvSections.stoppedWatching.slice(0, 15).map(item => {
                 const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
                 if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
 
@@ -143,12 +176,23 @@ function App() {
                   />
                 )
               })}
+
+              {tvSections.stoppedWatching.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'stopped' }} search={{ media: 'tv' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
 
           {tvSections && tvSections.finished.length > 0 && (
             <Section title="Finished" defaultCollapsed>
-              {tvSections.finished.map(item => (
+              {tvSections.finished.slice(0, 15).map(item => (
                 <PosterCard
                   key={item.id}
                   id={item.showTmdbId}
@@ -157,6 +201,17 @@ function App() {
                   imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
+
+              {tvSections.finished.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'tv' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
         </div>
@@ -190,9 +245,20 @@ function App() {
 
           {movieSections && movieSections.watchNext.length > 0 && (
             <Section title="Watch next">
-              {movieSections.watchNext.map(item => (
+              {movieSections.watchNext.slice(0, 15).map(item => (
                 <WatchMovie key={item.tmdbId} movie={item} />
               ))}
+
+              {movieSections.watchNext.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'movie' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
 
@@ -208,7 +274,7 @@ function App() {
                 </Button>
               }
             >
-              {movieSections.unreleased.map(item => (
+              {movieSections.unreleased.slice(0, 15).map(item => (
                 <PosterCard
                   key={item.tmdbId}
                   id={item.tmdbId}
@@ -217,12 +283,23 @@ function App() {
                   imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
+
+              {movieSections.unreleased.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'movie' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
 
           {movieSections && movieSections.finished.length > 0 && (
             <Section title="Finished">
-              {movieSections.finished.map(item => (
+              {movieSections.finished.slice(0, 15).map(item => (
                 <PosterCard
                   key={item.tmdbId}
                   id={item.tmdbId}
@@ -231,6 +308,17 @@ function App() {
                   imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
+
+              {movieSections.finished.length > 15 && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'movie' }}>
+                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                      <span>View all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </Section>
           )}
         </div>

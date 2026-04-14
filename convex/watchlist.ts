@@ -1,5 +1,7 @@
+import { v } from 'convex/values'
 import type { MovieSectionItem, TvSectionItem } from '../src/type/section'
-import { query } from './_generated/server'
+import { api } from './_generated/api'
+import { action, query } from './_generated/server'
 import { requireUser } from './requireUser'
 
 export const getTvSections = query({
@@ -112,5 +114,95 @@ export const getMovieSections = query({
     finished.sort((a, b) => (b.watchedAt || 0) - (a.watchedAt || 0))
 
     return { watchNext, unreleased, finished }
+  },
+})
+
+export const getTvSectionPaginated = action({
+  args: {
+    section: v.union(
+      v.literal('next'),
+      v.literal('unstarted'),
+      v.literal('stopped'),
+      v.literal('finished'),
+      v.literal('waiting'),
+    ),
+    page: v.optional(v.number()),
+    pageSize: v.optional(v.number()),
+  },
+  handler: async (context, { section, page = 1, pageSize = 10 }) => {
+    const sections = await context.runQuery(api.watchlist.getTvSections)
+
+    let sectionItems: TvSectionItem[]
+    switch (section) {
+      case 'next':
+        sectionItems = sections.watchNext
+        break
+      case 'unstarted':
+        sectionItems = sections.haventStarted
+        break
+      case 'stopped':
+        sectionItems = sections.stoppedWatching
+        break
+      case 'finished':
+        sectionItems = sections.finished
+        break
+      case 'waiting':
+        sectionItems = sections.waitingForEpisodes
+        break
+      default:
+        sectionItems = []
+    }
+
+    const totalResults = sectionItems.length
+    const totalPages = Math.ceil(totalResults / pageSize)
+    const startIndex = (page - 1) * pageSize
+    const endIndex = Math.min(startIndex + pageSize, totalResults)
+    const results = sectionItems.slice(startIndex, endIndex)
+
+    return {
+      page,
+      results,
+      total_pages: totalPages,
+      total_results: totalResults,
+    }
+  },
+})
+
+export const getMovieSectionPaginated = action({
+  args: {
+    section: v.union(v.literal('next'), v.literal('waiting'), v.literal('finished')),
+    page: v.optional(v.number()),
+    pageSize: v.optional(v.number()),
+  },
+  handler: async (context, { section, page = 1, pageSize = 20 }) => {
+    const sections = await context.runQuery(api.watchlist.getMovieSections)
+
+    let sectionItems: MovieSectionItem[]
+    switch (section) {
+      case 'next':
+        sectionItems = sections.watchNext
+        break
+      case 'waiting':
+        sectionItems = sections.unreleased
+        break
+      case 'finished':
+        sectionItems = sections.finished
+        break
+      default:
+        sectionItems = []
+    }
+
+    const totalResults = sectionItems.length
+    const totalPages = Math.ceil(totalResults / pageSize)
+    const startIndex = (page - 1) * pageSize
+    const endIndex = Math.min(startIndex + pageSize, totalResults)
+    const results = sectionItems.slice(startIndex, endIndex)
+
+    return {
+      page,
+      results,
+      total_pages: totalPages,
+      total_results: totalResults,
+    }
   },
 })

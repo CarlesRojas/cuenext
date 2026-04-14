@@ -18,6 +18,7 @@ import { Route as ImportMoviesRouteImport } from './routes/import-movies'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
+import { Route as ListListRouteImport } from './routes/list/$list'
 import { Route as LegalTermsAndConditionsIndexRouteImport } from './routes/legal/terms-and-conditions/index'
 import { Route as LegalPrivacyPolicyIndexRouteImport } from './routes/legal/privacy-policy/index'
 import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmdbId'
@@ -67,6 +68,11 @@ const SeeAllListRoute = SeeAllListRouteImport.update({
   path: '/see-all/$list',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListListRoute = ListListRouteImport.update({
+  id: '/list/$list',
+  path: '/list/$list',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalTermsAndConditionsIndexRoute =
   LegalTermsAndConditionsIndexRouteImport.update({
     id: '/legal/terms-and-conditions/',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/tmdb-callback': typeof TmdbCallbackRoute
   '/upcoming': typeof UpcomingRoute
+  '/list/$list': typeof ListListRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
   '/legal/privacy-policy/': typeof LegalPrivacyPolicyIndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/tmdb-callback': typeof TmdbCallbackRoute
   '/upcoming': typeof UpcomingRoute
+  '/list/$list': typeof ListListRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
   '/legal/privacy-policy': typeof LegalPrivacyPolicyIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/tmdb-callback': typeof TmdbCallbackRoute
   '/upcoming': typeof UpcomingRoute
+  '/list/$list': typeof ListListRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
   '/legal/privacy-policy/': typeof LegalPrivacyPolicyIndexRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/tmdb-callback'
     | '/upcoming'
+    | '/list/$list'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
     | '/legal/privacy-policy/'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/tmdb-callback'
     | '/upcoming'
+    | '/list/$list'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
     | '/legal/privacy-policy'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/tmdb-callback'
     | '/upcoming'
+    | '/list/$list'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
     | '/legal/privacy-policy/'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   TmdbCallbackRoute: typeof TmdbCallbackRoute
   UpcomingRoute: typeof UpcomingRoute
+  ListListRoute: typeof ListListRoute
   SeeAllListRoute: typeof SeeAllListRoute
   MediaMediaTmdbIdRoute: typeof MediaMediaTmdbIdRoute
   LegalPrivacyPolicyIndexRoute: typeof LegalPrivacyPolicyIndexRoute
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeeAllListRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/list/$list': {
+      id: '/list/$list'
+      path: '/list/$list'
+      fullPath: '/list/$list'
+      preLoaderRoute: typeof ListListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/terms-and-conditions/': {
       id: '/legal/terms-and-conditions/'
       path: '/legal/terms-and-conditions'
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   TmdbCallbackRoute: TmdbCallbackRoute,
   UpcomingRoute: UpcomingRoute,
+  ListListRoute: ListListRoute,
   SeeAllListRoute: SeeAllListRoute,
   MediaMediaTmdbIdRoute: MediaMediaTmdbIdRoute,
   LegalPrivacyPolicyIndexRoute: LegalPrivacyPolicyIndexRoute,
