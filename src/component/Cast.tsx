@@ -58,14 +58,16 @@ function CastCard({ member }: CastCardProps) {
               paths={profilePaths}
               alt={member.name}
               className="absolute inset-0 -z-10 h-full w-full rounded-full object-cover object-top opacity-50 blur-sm"
-              maxSize="w185"
+              minSize="w154"
+              maxSize="w154"
             />
 
             <ProgressiveImage
               paths={profilePaths}
               alt={member.name}
               className="h-full w-full rounded-full object-cover object-top"
-              maxSize="w185"
+              minSize="w154"
+              maxSize="w154"
             />
           </>
         ) : (

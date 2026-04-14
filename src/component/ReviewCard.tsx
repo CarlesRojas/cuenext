@@ -41,14 +41,16 @@ const ReviewCard = ({ review, inDialog = false }: Props) => {
                 paths={[avatar_path]}
                 alt={name}
                 className="absolute inset-0 -z-10 h-full w-full rounded-full object-cover object-center opacity-50 blur-md"
-                maxSize="w185"
+                minSize="w92"
+                maxSize="w92"
               />
 
               <ProgressiveImage
                 paths={[avatar_path]}
                 alt={name}
                 className="h-full w-full rounded-full object-cover object-center"
-                maxSize="w185"
+                minSize="w92"
+                maxSize="w92"
               />
             </>
           ) : (

@@ -58,8 +58,8 @@ function ProviderList({ providers, type }: ProviderListProps) {
               paths={[provider.logo_path]}
               alt={provider.provider_name}
               className="aspect-square size-12 scale-[1.05] object-cover"
-              minSize="w342"
-              maxSize="w342"
+              minSize="w154"
+              maxSize="w154"
               loading="lazy"
               title={provider.provider_name}
             />
