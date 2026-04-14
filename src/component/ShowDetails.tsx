@@ -74,19 +74,76 @@ export function ShowDetails({ show }: ShowDetailsProps) {
       {/* If these paddings change, change them in the onScroll function in src/routes/media/$media/$tmdbId.tsx */}
       <section
         className={cn(
-          'screen-px screen-py z-10 flex flex-col gap-3 pt-[28dvh] transition-[padding]',
+          'screen-px screen-py z-10 flex flex-col gap-1 pt-[28dvh] transition-[padding]',
           'md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
           !hasImage && 'pt-23!',
         )}
       >
-        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{name}</h1>
+        <div className="flex w-full flex-col gap-1">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{name}</h1>
 
-        <p className="leading-snug font-medium tracking-wide text-white/60">
-          {[formattedReleaseDate, seasonsText].filter(Boolean).join(' • ')}
-        </p>
+          <p className="leading-snug font-medium tracking-wide text-white/60">
+            {[formattedReleaseDate, seasonsText].filter(Boolean).join(' • ')}
+          </p>
+        </div>
+
+        <div className="flex w-full max-w-3xl items-start justify-between gap-2">
+          <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} />
+
+          <div className="flex w-fit flex-row-reverse flex-wrap gap-2">
+            <DropdownMenu>
+              {isFollowed && (
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="secondary">
+                    <FontAwesomeIcon icon={faEllipsis} className="size-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+              )}
+
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => toggleFollow(id, name)}
+                  disabled={isFollowedLoading}
+                >
+                  <FontAwesomeIcon icon={faBookmark} className="size-4" />
+                  <span>{'Untrack'}</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => toggleStopped(id, name)}
+                  disabled={isStoppedLoading}
+                  variant={isStopped ? 'default' : 'destructive'}
+                >
+                  <FontAwesomeIcon icon={isStopped ? faPlay : faStop} className="size-5" />
+                  <span>{isStopped ? 'Resume Watching' : 'Stop Watching'}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {!isFollowed && (
+              <Button variant="default" onClick={() => toggleFollow(id, name)} disabled={isFollowedLoading}>
+                <FontAwesomeIcon icon={faBookmark} className="size-4" />
+                <span>{'Track'}</span>
+              </Button>
+            )}
+
+            <Button
+              size="icon"
+              variant="favorite"
+              onClick={() => toggleFavorite(id, name)}
+              disabled={isFavoritedLoading}
+              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
+            >
+              <FontAwesomeIcon icon={faHeart} className="size-5" />
+            </Button>
+          </div>
+        </div>
+
+        {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
 
         {(genres || status) && (
-          <div className="flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1">
             {status && (
               <p
                 className={cn(
@@ -108,59 +165,6 @@ export function ShowDetails({ show }: ShowDetailsProps) {
             ))}
           </div>
         )}
-
-        <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} />
-
-        {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
-
-        <div className="flex w-full max-w-3xl flex-row-reverse flex-wrap gap-2">
-          <DropdownMenu>
-            {isFollowed && (
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="secondary">
-                  <FontAwesomeIcon icon={faEllipsis} className="size-5" />
-                </Button>
-              </DropdownMenuTrigger>
-            )}
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => toggleFollow(id, name)}
-                disabled={isFollowedLoading}
-              >
-                <FontAwesomeIcon icon={faBookmark} className="size-4" />
-                <span>{'Untrack'}</span>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => toggleStopped(id, name)}
-                disabled={isStoppedLoading}
-                variant={isStopped ? 'default' : 'destructive'}
-              >
-                <FontAwesomeIcon icon={isStopped ? faPlay : faStop} className="size-5" />
-                <span>{isStopped ? 'Resume Watching' : 'Stop Watching'}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {!isFollowed && (
-            <Button variant="default" onClick={() => toggleFollow(id, name)} disabled={isFollowedLoading}>
-              <FontAwesomeIcon icon={faBookmark} className="size-4" />
-              <span>{'Track'}</span>
-            </Button>
-          )}
-
-          <Button
-            size="icon"
-            variant="favorite"
-            onClick={() => toggleFavorite(id, name)}
-            disabled={isFavoritedLoading}
-            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-          >
-            <FontAwesomeIcon icon={faHeart} className="size-5" />
-          </Button>
-        </div>
       </section>
     </div>
   )

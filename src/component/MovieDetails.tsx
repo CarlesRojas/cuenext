@@ -79,19 +79,80 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
       {/* If these paddings change, change them in the onScroll function in src/routes/media/$media/$tmdbId.tsx */}
       <section
         className={cn(
-          'screen-px screen-py z-10 flex flex-col gap-3 pt-[28dvh] transition-[padding]',
+          'screen-px screen-py z-10 flex flex-col gap-1 pt-[28dvh] transition-[padding]',
           'md:pt-[25dvh] lg:pt-[30dvh] xl:pt-[35dvh]',
           !hasImage && 'pt-23!',
         )}
       >
-        <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{title}</h1>
+        <div className="flex w-full flex-col gap-1">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{title}</h1>
 
-        <p className="leading-snug font-medium tracking-wide text-white/60">
-          {[formattedReleaseDate, runtimeText].filter(Boolean).join(' • ')}
-        </p>
+          <p className="leading-snug font-medium tracking-wide text-white/60">
+            {[formattedReleaseDate, runtimeText].filter(Boolean).join(' • ')}
+          </p>
+        </div>
+
+        <div className="flex w-full max-w-3xl items-start justify-between gap-2">
+          <StarRating voteAverage={movie.vote_average} voteCount={movie.vote_count} />
+
+          <div className="flex w-fit flex-row-reverse flex-wrap gap-2">
+            <DropdownMenu>
+              {isFollowed && (
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="secondary">
+                    <FontAwesomeIcon icon={faEllipsis} className="size-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+              )}
+
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => toggleFollow(id, title)}
+                  disabled={isFollowedLoading}
+                >
+                  <FontAwesomeIcon icon={faBookmark} className="size-4" />
+                  <span>{'Untrack'}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {!isFollowed && (
+              <Button variant="default" onClick={() => toggleFollow(id, title)} disabled={isFollowedLoading}>
+                <FontAwesomeIcon icon={faBookmark} className="size-4" />
+                <span>{'Track'}</span>
+              </Button>
+            )}
+
+            <Button
+              size="icon"
+              variant="favorite"
+              onClick={() => toggleFavorite(id, title)}
+              disabled={isFavoritedLoading}
+              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
+            >
+              <FontAwesomeIcon icon={isFavoritedLoading ? faSpinner : faHeart} className="size-5" />
+            </Button>
+
+            {isReleased && (
+              <Button
+                variant="watch"
+                size="icon"
+                data-state={isWatched ? 'on' : 'off'}
+                title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
+                onClick={() => onToggleWatch()}
+                disabled={isWatchedLoading}
+              >
+                <FontAwesomeIcon icon={isWatchedLoading ? faSpinner : faEye} className="size-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
 
         {(genres || status) && (
-          <div className="flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1">
             <p
               className={cn(
                 'w-fit rounded-full bg-green-500/10 px-2 text-xs leading-6 font-medium tracking-wide text-green-400/80 capitalize backdrop-blur-md',
@@ -111,63 +172,6 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
             ))}
           </div>
         )}
-
-        <StarRating voteAverage={movie.vote_average} voteCount={movie.vote_count} />
-
-        {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
-
-        <div className="flex w-full max-w-3xl flex-row-reverse flex-wrap gap-2">
-          <DropdownMenu>
-            {isFollowed && (
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="secondary">
-                  <FontAwesomeIcon icon={faEllipsis} className="size-5" />
-                </Button>
-              </DropdownMenuTrigger>
-            )}
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => toggleFollow(id, title)}
-                disabled={isFollowedLoading}
-              >
-                <FontAwesomeIcon icon={faBookmark} className="size-4" />
-                <span>{'Untrack'}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {!isFollowed && (
-            <Button variant="default" onClick={() => toggleFollow(id, title)} disabled={isFollowedLoading}>
-              <FontAwesomeIcon icon={faBookmark} className="size-4" />
-              <span>{'Track'}</span>
-            </Button>
-          )}
-
-          <Button
-            size="icon"
-            variant="favorite"
-            onClick={() => toggleFavorite(id, title)}
-            disabled={isFavoritedLoading}
-            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-          >
-            <FontAwesomeIcon icon={isFavoritedLoading ? faSpinner : faHeart} className="size-5" />
-          </Button>
-
-          {isReleased && (
-            <Button
-              variant="watch"
-              size="icon"
-              data-state={isWatched ? 'on' : 'off'}
-              title={isWatched ? 'Mark Unwatched' : 'Mark Watched'}
-              onClick={() => onToggleWatch()}
-              disabled={isWatchedLoading}
-            >
-              <FontAwesomeIcon icon={isWatchedLoading ? faSpinner : faEye} className="size-4" />
-            </Button>
-          )}
-        </div>
       </section>
     </div>
   )
