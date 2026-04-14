@@ -81,32 +81,31 @@ export function ShowDetails({ show }: ShowDetailsProps) {
       >
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{name}</h1>
 
-        <p className="leading-snug font-medium tracking-wide">
-          {[formattedReleaseDate, seasonsText, tagline].filter(Boolean).join(' • ')}
+        <p className="leading-snug font-medium tracking-wide text-white/60">
+          {[formattedReleaseDate, seasonsText].filter(Boolean).join(' • ')}
         </p>
 
         {(genres || status) && (
-          <div className="flex flex-wrap gap-2">
-            {genres?.map(genre => (
-              <p
-                key={genre.id}
-                className="w-fit rounded-full border border-neutral-500/40 bg-white/10 px-2 py-px text-sm leading-6 font-medium tracking-wide backdrop-blur-md"
-              >
-                {genre.name}
-              </p>
-            ))}
-
+          <div className="flex flex-wrap gap-1">
             {status && (
               <p
                 className={cn(
-                  'w-fit rounded-full border border-green-500/30 bg-green-500/10 px-2 py-px text-sm leading-6 font-medium tracking-wide text-green-400/70 capitalize backdrop-blur-md',
-                  ['ended', 'canceled'].includes(status.toLowerCase()) &&
-                    'border-red-500/30 bg-red-500/10 text-red-400/70',
+                  'w-fit rounded-full bg-green-500/10 px-2 text-xs leading-6 font-medium tracking-wide text-green-400/80 capitalize backdrop-blur-md',
+                  ['ended', 'canceled'].includes(status.toLowerCase()) && 'bg-red-500/10 text-red-400/80',
                 )}
               >
                 {status}
               </p>
             )}
+
+            {genres?.map(genre => (
+              <p
+                key={genre.id}
+                className="w-fit rounded-full bg-white/10 px-2 text-xs leading-6 font-medium tracking-wide text-white/80 backdrop-blur-md"
+              >
+                {genre.name}
+              </p>
+            ))}
           </div>
         )}
 
