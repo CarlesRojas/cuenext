@@ -24,7 +24,7 @@ export function StarRating({ voteAverage, voteCount, showOutOfTen, className = '
         {showOutOfTen && <span className="text-xs leading-3 text-nowrap text-white opacity-40">/ 10</span>}
 
         {voteCount && (
-          <span className="text-sm leading-3 font-medium tracking-wide text-nowrap opacity-40">
+          <span className="ml-1 text-sm leading-3 font-medium tracking-wide text-nowrap opacity-40">
             {voteCount.toLocaleString(undefined, { notation: 'compact' })}
           </span>
         )}

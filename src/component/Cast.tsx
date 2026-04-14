@@ -50,14 +50,14 @@ function CastCard({ member }: CastCardProps) {
   const profilePaths = member.profile_path ? [member.profile_path] : []
 
   return (
-    <div className="group flex w-32 flex-col gap-2 pt-4">
+    <div className="group flex w-32 flex-col gap-2 pt-1">
       <div className="relative h-38 w-32 rounded-full border border-neutral-500/40 bg-neutral-800 shadow-xl">
         {profilePaths.length > 0 ? (
           <>
             <ProgressiveImage
               paths={profilePaths}
               alt={member.name}
-              className="absolute inset-0 -z-10 h-full w-full rounded-full object-cover object-top opacity-50 blur-md"
+              className="absolute inset-0 -z-10 h-full w-full rounded-full object-cover object-top opacity-50 blur-sm"
               maxSize="w185"
             />
 
@@ -85,7 +85,7 @@ function CastCard({ member }: CastCardProps) {
 
 function CastCardSkeleton() {
   return (
-    <div className="group flex w-32 flex-col gap-2 pt-4">
+    <div className="group flex w-32 flex-col gap-2 pt-1">
       <div className="relative h-38 w-32 animate-pulse rounded-full border border-neutral-500/40 bg-neutral-800 shadow-xl" />
 
       <div className="flex w-full flex-col items-center justify-center gap-0.5 text-center">

@@ -96,8 +96,8 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
   const hasBeenReleased = releaseDate && new Date(releaseDate) <= new Date()
 
   return (
-    <section className="screen-px pb-4 md:pb-8">
-      <div className="flex flex-col gap-4">
+    <section className="screen-px pb-8">
+      <div className="flex flex-col gap-3">
         <h2 className="page-width mx-[unset] text-lg font-semibold opacity-80">
           Where to watch in {selectedCountry ? selectedCountry.name : 'your country'}
           {countryData && countryData.link && (
