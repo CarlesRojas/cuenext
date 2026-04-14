@@ -17,14 +17,14 @@ export function StarRating({ voteAverage, voteCount, showOutOfTen, className = '
       <FontAwesomeIcon className="size-4.5 max-h-4.5 min-h-4.5 max-w-4.5 min-w-4.5 text-sky-500" icon={faStar} />
 
       <div className="flex items-baseline gap-1">
-        <span className="mt-0.5 items-baseline text-lg leading-4 font-extrabold tracking-wide text-sky-500">
+        <span className="mt-0.5 items-baseline text-lg leading-4 font-extrabold tracking-wide text-nowrap text-sky-500">
           {voteAverage.toLocaleString(undefined, { notation: 'compact' })}
         </span>
 
-        {showOutOfTen && <span className="text-xs leading-3 text-white opacity-40">/ 10</span>}
+        {showOutOfTen && <span className="text-xs leading-3 text-nowrap text-white opacity-40">/ 10</span>}
 
         {voteCount && (
-          <span className="text-sm leading-3 font-medium tracking-wide opacity-40">
+          <span className="text-sm leading-3 font-medium tracking-wide text-nowrap opacity-40">
             {voteCount.toLocaleString(undefined, { notation: 'compact' })}
           </span>
         )}
