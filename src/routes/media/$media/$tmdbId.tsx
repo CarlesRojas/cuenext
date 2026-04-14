@@ -68,7 +68,7 @@ function RouteComponent() {
     <div className="relative flex w-full flex-col">
       <header
         className={cn(
-          'screen-px screen-py pointer-events-none fixed top-0 right-0 left-0 z-40 mx-[unset] w-full pb-8 opacity-0 backdrop-blur-md transition-[opacity,padding]',
+          'screen-px screen-py pointer-events-none fixed top-0 right-0 left-0 z-40 w-full pb-8 opacity-0 backdrop-blur-md transition-[opacity,padding]',
           isMobile && '-top-14',
           showHeader && 'pointer-events-auto opacity-100',
         )}

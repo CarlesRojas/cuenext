@@ -63,7 +63,7 @@ export function ShowSeasons({ show }: Props) {
 
   return (
     <div className="screen-px pb-8">
-      <div className="page-width mx-[unset] flex flex-col gap-3">
+      <div className="page-width flex flex-col gap-3">
         {completeNextEpisode && <h2 className="text-lg font-semibold opacity-80">Next Episode</h2>}
 
         {completeNextEpisode && (

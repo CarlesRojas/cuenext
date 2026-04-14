@@ -98,7 +98,7 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
   return (
     <section className="screen-px pb-8">
       <div className="flex flex-col gap-3">
-        <h2 className="page-width mx-[unset] text-lg font-semibold opacity-80">
+        <h2 className="page-width text-lg font-semibold opacity-80">
           Where to watch in {selectedCountry ? selectedCountry.name : 'your country'}
           {countryData && countryData.link && (
             <a
@@ -112,7 +112,7 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
           )}
         </h2>
 
-        {/* <div className="page-width mx-[unset] gap-2">
+        {/* <div className="page-width  gap-2">
           <NativeSelect
             value={selectedCountry?.code ?? ''}
             onChange={e => setSelectedCountry(availableCountries.find(c => c.code === e.target.value) ?? null)}
@@ -136,7 +136,7 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
         )}
 
         {!isLoading && selectedCountry && !countryData && (
-          <p className="page-width pointer-events-none mx-[unset] -mt-2 tracking-wide text-neutral-500">
+          <p className="page-width pointer-events-none -mt-2 tracking-wide text-neutral-500">
             {!hasBeenReleased
               ? releaseDate
                 ? `This ${media === 'tv' ? 'show' : 'movie'} will release on ${new Date(releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`

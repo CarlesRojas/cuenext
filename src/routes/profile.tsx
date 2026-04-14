@@ -132,7 +132,7 @@ function ProfilePage() {
       </header>
 
       <section className="screen-px">
-        <div className="page-width text- mx-[unset] grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="page-width text- grid grid-cols-2 gap-4 lg:grid-cols-4">
           {user && media === 'tv' && (
             <>
               <StatCard

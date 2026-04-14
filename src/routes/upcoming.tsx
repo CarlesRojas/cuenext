@@ -43,7 +43,7 @@ function UpcomingPage() {
 
       <div className="screen-px">
         {clerk.isSignedIn && (
-          <div className="page-width mx-[unset]">
+          <div className="page-width">
             {media === 'movie' && (
               <InfiniteMediaList
                 action={api.tmdb.getUpcomingMovies}

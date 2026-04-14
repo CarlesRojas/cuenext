@@ -30,7 +30,7 @@
   }
 
   .page-width {
-    @apply mx-auto w-full max-w-3xl;
+    @apply w-full max-w-3xl;
   }
 }
 
