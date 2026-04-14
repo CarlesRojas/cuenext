@@ -140,7 +140,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
           </div>
         </div>
 
-        {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
+        {overview && <ShowMore lines={2} text={overview} containerClassName="max-w-3xl" />}
 
         {(genres || status) && (
           <div className="mt-2 flex flex-wrap gap-1">
