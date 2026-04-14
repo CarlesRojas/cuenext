@@ -1,13 +1,14 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { StarRating } from '#/component/StarRating'
 import { Button } from '#/component/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '#/component/ui/dropdown-menu'
 import { ShowMore } from '#/component/ui/show-more'
 import { useFavoriteMovie } from '#/hooks/useFavoriteMovie'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
 import { cn } from '#/lib/cn'
 import type { TmdbMovie } from '#/type/tmdb'
-import { faBookmark, faEye, faHeart, faMinus, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faEllipsis, faEye, faHeart, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -115,14 +116,43 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
 
         {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
 
-        <div className="flex max-w-3xl flex-wrap gap-2">
+        <div className="flex w-full max-w-3xl flex-row-reverse flex-wrap gap-2">
+          <DropdownMenu>
+            {isFollowed && (
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="secondary">
+                  <FontAwesomeIcon icon={faEllipsis} className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+            )}
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => toggleFollow(id, title)}
+                disabled={isFollowedLoading}
+              >
+                <FontAwesomeIcon icon={faBookmark} className="size-4" />
+                <span>{'Untrack'}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {!isFollowed && (
+            <Button variant="default" onClick={() => toggleFollow(id, title)} disabled={isFollowedLoading}>
+              <FontAwesomeIcon icon={faBookmark} className="size-4" />
+              <span>{'Track'}</span>
+            </Button>
+          )}
+
           <Button
-            variant={isFollowed ? 'negative' : 'default'}
-            onClick={() => toggleFollow(id, title)}
-            disabled={isFollowedLoading}
+            size="icon"
+            variant="favorite"
+            onClick={() => toggleFavorite(id, title)}
+            disabled={isFavoritedLoading}
+            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
           >
-            <FontAwesomeIcon icon={isFollowed ? faMinus : faBookmark} className="size-4" />
-            <span>{isFollowed ? 'Untrack' : 'Track'}</span>
+            <FontAwesomeIcon icon={isFavoritedLoading ? faSpinner : faHeart} className="size-5" />
           </Button>
 
           {isReleased && (
@@ -137,16 +167,6 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
               <FontAwesomeIcon icon={isWatchedLoading ? faSpinner : faEye} className="size-4" />
             </Button>
           )}
-
-          <Button
-            size="icon"
-            variant="favorite"
-            onClick={() => toggleFavorite(id, title)}
-            disabled={isFavoritedLoading}
-            data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-          >
-            <FontAwesomeIcon icon={isFavoritedLoading ? faSpinner : faHeart} className="size-5" />
-          </Button>
         </div>
       </section>
     </div>

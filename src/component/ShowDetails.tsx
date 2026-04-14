@@ -1,13 +1,14 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { StarRating } from '#/component/StarRating'
 import { Button } from '#/component/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '#/component/ui/dropdown-menu'
 import { ShowMore } from '#/component/ui/show-more'
 import { useFavoriteEpisode } from '#/hooks/useFavoriteEpisode'
 import { useFollowEpisode } from '#/hooks/useFollowEpisode'
 import { useStopEpisode } from '#/hooks/useStopEpisode'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
-import { faBookmark, faHeart, faMinus, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faEllipsis, faHeart, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -112,15 +113,43 @@ export function ShowDetails({ show }: ShowDetailsProps) {
 
         {overview && <ShowMore lines={3} text={overview} containerClassName="max-w-3xl" />}
 
-        <div className="flex w-full max-w-3xl flex-wrap gap-2">
-          <Button
-            variant={isFollowed ? 'negative' : 'default'}
-            onClick={() => toggleFollow(id, name)}
-            disabled={isFollowedLoading}
-          >
-            <FontAwesomeIcon icon={isFollowed ? faMinus : faBookmark} className="size-4" />
-            <span>{isFollowed ? 'Untrack' : 'Track'}</span>
-          </Button>
+        <div className="flex w-full max-w-3xl flex-row-reverse flex-wrap gap-2">
+          <DropdownMenu>
+            {isFollowed && (
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="secondary">
+                  <FontAwesomeIcon icon={faEllipsis} className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+            )}
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => toggleFollow(id, name)}
+                disabled={isFollowedLoading}
+              >
+                <FontAwesomeIcon icon={faBookmark} className="size-4" />
+                <span>{'Untrack'}</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => toggleStopped(id, name)}
+                disabled={isStoppedLoading}
+                variant={isStopped ? 'default' : 'destructive'}
+              >
+                <FontAwesomeIcon icon={isStopped ? faPlay : faStop} className="size-5" />
+                <span>{isStopped ? 'Resume Watching' : 'Stop Watching'}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {!isFollowed && (
+            <Button variant="default" onClick={() => toggleFollow(id, name)} disabled={isFollowedLoading}>
+              <FontAwesomeIcon icon={faBookmark} className="size-4" />
+              <span>{'Track'}</span>
+            </Button>
+          )}
 
           <Button
             size="icon"
@@ -131,18 +160,6 @@ export function ShowDetails({ show }: ShowDetailsProps) {
           >
             <FontAwesomeIcon icon={faHeart} className="size-5" />
           </Button>
-
-          {!isFollowedLoading && isFollowed && (
-            <Button
-              variant={isStopped ? 'secondary' : 'negative'}
-              onClick={() => toggleStopped(id, name)}
-              disabled={isStoppedLoading}
-              data-state={!isStoppedLoading && isStopped ? 'on' : 'off'}
-            >
-              <FontAwesomeIcon icon={isStopped ? faPlay : faStop} className="size-5" />
-              <span>{isStopped ? 'Resume Watching' : 'Stop Watching'}</span>
-            </Button>
-          )}
         </div>
       </section>
     </div>
