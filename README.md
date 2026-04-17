@@ -54,4 +54,5 @@ adb install app-release-signed.apk
 
 # TODO
 
-- [ ] Let users rate and review
+- [ ] Remember sections that are closed with localstorage
+- [ ] Fix overflow on user menu option on desktop
