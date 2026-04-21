@@ -3,9 +3,9 @@ import { api } from './_generated/api'
 
 const crons = cronJobs()
 
-crons.weekly(
-  'payment reminder',
-  { dayOfWeek: 'sunday', hourUTC: 0, minuteUTC: 0 }, // Every week on Sunday at  0:00am PST
+crons.daily(
+  'cleanup expired cache',
+  { hourUTC: 2, minuteUTC: 0 }, // Every day at 2:00 AM UTC
   api.tmdbCache.cleanupExpiredCache,
   {},
 )

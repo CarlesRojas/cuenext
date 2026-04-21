@@ -123,17 +123,29 @@ export const deleteCachedData = mutation({
 })
 
 export const cleanupExpiredCache = mutation({
-  args: {},
-  handler: async context => {
+  args: { batchSize: v.optional(v.number()) },
+  handler: async (context, { batchSize = 100 }) => {
     const now = Date.now()
+    let totalDeleted = 0
 
-    const expiredEntries = await context.db
-      .query('tmdbCache')
-      .filter(q => q.lt(q.field('expiresAt'), now))
-      .collect()
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      const expiredEntries = await context.db
+        .query('tmdbCache')
+        .filter(q => q.lt(q.field('expiresAt'), now))
+        .take(batchSize)
 
-    for (const entry of expiredEntries) await context.db.delete(entry._id)
+      if (expiredEntries.length === 0) break
 
-    return { deletedCount: expiredEntries.length }
+      for (const entry of expiredEntries) {
+        await context.db.delete(entry._id)
+      }
+
+      totalDeleted += expiredEntries.length
+
+      if (expiredEntries.length < batchSize) break
+    }
+
+    return { deletedCount: totalDeleted }
   },
 })
