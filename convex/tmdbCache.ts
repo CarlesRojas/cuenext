@@ -132,7 +132,7 @@ export const cleanupExpiredCache = mutation({
     while (true) {
       const expiredEntries = await context.db
         .query('tmdbCache')
-        .filter(q => q.lt(q.field('expiresAt'), now))
+        .withIndex('by_expiresAt', q => q.lt('expiresAt', now))
         .take(batchSize)
 
       if (expiredEntries.length === 0) break

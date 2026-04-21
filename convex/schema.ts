@@ -70,7 +70,9 @@ export default defineSchema({
     data: v.any(),
     createdAt: v.number(),
     expiresAt: v.number(),
-  }).index('by_endpoint', ['endpoint']),
+  })
+    .index('by_endpoint', ['endpoint'])
+    .index('by_expiresAt', ['expiresAt']),
 
   showInfo: defineTable({
     tmdbId: v.number(),
