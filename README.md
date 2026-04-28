@@ -56,3 +56,5 @@ adb install app-release-signed.apk
 
 - [ ] Remember sections that are closed with localstorage
 - [ ] Fix overflow on user menu option on desktop
+
+Test remote change
