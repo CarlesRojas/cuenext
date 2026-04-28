@@ -311,6 +311,7 @@ function ProfilePage() {
         )}
       </div>
 
+      {/* TODO remove after review */}
       {!isIOS && <LinkWithTmdb />}
     </div>
   )
