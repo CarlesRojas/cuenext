@@ -10,7 +10,7 @@ function TermsAndConditions() {
     <main
       suppressHydrationWarning
       className={cn(
-        'prose prose-neutral dark:prose-invert relative mx-auto mb-20 h-fit w-full max-w-5xl p-6',
+        'prose prose-neutral dark:prose-invert relative mx-auto mb-20 h-fit w-full max-w-5xl screen-px screen-py',
         isIOS && 'mb-24',
       )}
     >
