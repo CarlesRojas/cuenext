@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import { isIOS } from 'react-device-detect'
 import { api } from '../../convex/_generated/api'
 
 function formatWatchTime(minutes: number): string {
@@ -310,7 +311,7 @@ function ProfilePage() {
         )}
       </div>
 
-      <LinkWithTmdb />
+      {!isIOS && <LinkWithTmdb />}
     </div>
   )
 }
