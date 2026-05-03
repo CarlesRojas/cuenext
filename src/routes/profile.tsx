@@ -1,4 +1,3 @@
-import LinkWithTmdb from '#/component/LinkWithTmdb'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
@@ -12,7 +11,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { isIOS } from 'react-device-detect'
 import { api } from '../../convex/_generated/api'
 
 function formatWatchTime(minutes: number): string {
@@ -312,7 +310,8 @@ function ProfilePage() {
       </div>
 
       {/* TODO remove after review */}
-      {!isIOS && <LinkWithTmdb />}
+      {/* TODO fix tmdb and then uncomment */}
+      {/* {!isIOS && <LinkWithTmdb />} */}
     </div>
   )
 }

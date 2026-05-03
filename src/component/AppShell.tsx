@@ -5,7 +5,6 @@ import { Search } from '#/component/Search'
 import { Button } from '#/component/ui/button'
 import { User } from '#/component/User'
 import useSearchParams from '#/hooks/useSearchParams'
-import useSyncWithTmdb from '#/hooks/useSyncWithTmdb'
 import { useViewportHeight } from '#/hooks/useViewportHeight'
 import { cn } from '#/lib/cn'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
@@ -43,7 +42,8 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const searchParams = useSearchParams()
   const location = useLocation()
-  useSyncWithTmdb()
+  // TODO fix tmdb and then uncomment
+  // useSyncWithTmdb()
 
   const { visualHeight, fullHeight } = useViewportHeight()
   const { width = 0 } = useWindowSize()
@@ -110,7 +110,7 @@ export default function AppShell({ children }: AppShellProps) {
                         'duration-slow relative flex h-fit w-full rounded-[22px] p-2.5 transition-[color,width]',
                         location.pathname === item.to && 'text-sky-500!',
                         location.pathname !== item.to &&
-                          'text-white! hover:bg-neutral-400/10! focus-visible:bg-neutral-400/10!',
+                        'text-white! hover:bg-neutral-400/10! focus-visible:bg-neutral-400/10!',
                       )}
                     >
                       <FontAwesomeIcon
