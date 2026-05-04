@@ -99,20 +99,18 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
   return (
     <Section
       sectionKey="watch-providers"
-      title={
-        <>
-          Where to watch in {selectedCountry ? selectedCountry.name : 'your country'}
-          {countryData && countryData.link && (
-            <a
-              href={countryData.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 text-xs tracking-wide text-nowrap opacity-50 hover:opacity-80 focus-visible:opacity-80"
-            >
-              by JustWatch
-            </a>
-          )}
-        </>
+      title={`Where to watch in ${selectedCountry ? selectedCountry.name : 'your country'}`}
+      besidesTitle={
+        countryData && countryData.link && (
+          <a
+            href={countryData.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm tracking-wide text-nowrap opacity-50 hover:opacity-80 focus-visible:opacity-80"
+          >
+            by JustWatch
+          </a>
+        )
       }
     >
       {countryData && countryData.flatrate && <ProviderList providers={countryData.flatrate} type="flatrate" />}

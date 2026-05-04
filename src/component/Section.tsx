@@ -16,6 +16,7 @@ interface SectionProps {
   defaultCollapsed?: boolean
   className?: string
   below?: ReactNode
+  besidesTitle?: ReactNode
 }
 
 export function Section({
@@ -26,6 +27,7 @@ export function Section({
   defaultCollapsed = false,
   className,
   below,
+  besidesTitle,
 }: SectionProps) {
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
@@ -34,28 +36,33 @@ export function Section({
 
   return (
     <section className={cn('flex flex-col', className)}>
-      <Button
-        variant="link"
-        size="link"
-        className={cn(
-          'px-4',
-          !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
-          !canCollapse && 'pointer-events-none!',
-        )}
-        onClick={() => setIsCollapsed(!isCollapsed)}
-      >
-        <h2 className="text-lg font-semibold opacity-80">{title}</h2>
+      <div className={cn(
+        'px-4 flex items-center gap-4',
+        !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
+      )}>
+        <Button
+          variant="link"
+          size="link"
+          className={cn(
+            !canCollapse && 'pointer-events-none!',
+          )}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <h2 className="text-lg font-semibold opacity-80">{title}</h2>
 
-        {canCollapse && (
-          <motion.div
-            animate={{ rotate: isCollapsed ? -90 : 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="text-neutral-500!"
-          >
-            <FontAwesomeIcon icon={faChevronDown} />
-          </motion.div>
-        )}
-      </Button>
+          {canCollapse && (
+            <motion.div
+              animate={{ rotate: isCollapsed ? -90 : 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="text-neutral-500!"
+            >
+              <FontAwesomeIcon icon={faChevronDown} />
+            </motion.div>
+          )}
+        </Button>
+
+        {!!besidesTitle && besidesTitle}
+      </div>
 
       <AnimatePresence initial={false}>
         {(!isCollapsed || !canCollapse) && (
@@ -103,8 +110,8 @@ export function Section({
             {below && (
               <div
                 className={cn(
-                  '-mt-4 px-4',
-                  !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
+                  '-mt-4',
+                  !isMobile && '-mx-4 pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
                 )}
               >
                 {below}
