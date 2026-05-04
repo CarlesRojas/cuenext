@@ -7,6 +7,7 @@ import { convexAction } from '@convex-dev/react-query'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
+import type { MouseEvent } from 'react'
 import { useState } from 'react'
 import { isAndroid, isIOS } from 'react-device-detect'
 
@@ -29,7 +30,9 @@ function VideoItem({ video }: VideoItemProps) {
     setHasError(true)
   }
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+
     if (isIOS) {
       const youtubeAppUrl = `youtube://www.youtube.com/watch?v=${video.key}`
 
