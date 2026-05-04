@@ -63,7 +63,12 @@ function App() {
           {tvSectionsLoading &&
             ['Watch next', "Haven't started", 'Waiting for episodes', 'Stopped watching', 'Finished'].map(
               (title, i) => (
-                <Section title={title} key={i} defaultCollapsed={!['Watch next', "Haven't started"].includes(title)}>
+                <Section
+                  sectionKey={`tv-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                  title={title}
+                  key={i}
+                  defaultCollapsed={!['Watch next', "Haven't started"].includes(title)}
+                >
                   {Array.from({ length: 10 }).map((_, epispdeIndex) => (
                     <PosterCard key={epispdeIndex} isLoading />
                   ))}
@@ -89,7 +94,7 @@ function App() {
           )}
 
           {tvSections && tvSections.watchNext.length > 0 && (
-            <Section title="Watch next">
+            <Section sectionKey="tv-watch-next" title="Watch next">
               {tvSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
@@ -108,7 +113,7 @@ function App() {
           )}
 
           {tvSections && tvSections.haventStarted.length > 0 && (
-            <Section title="Haven't started">
+            <Section sectionKey="tv-havent-started" title="Haven't started">
               {tvSections.haventStarted.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
@@ -128,6 +133,7 @@ function App() {
 
           {tvSections && tvSections.waitingForEpisodes.length > 0 && (
             <Section
+              sectionKey="tv-waiting-for-episodes"
               title="Waiting for episodes"
               below={
                 <Button variant="secondary" asChild>
@@ -162,7 +168,7 @@ function App() {
           )}
 
           {tvSections && tvSections.stoppedWatching.length > 0 && (
-            <Section title="Stopped watching" defaultCollapsed>
+            <Section sectionKey="tv-stopped-watching" title="Stopped watching" defaultCollapsed>
               {tvSections.stoppedWatching.slice(0, MAX_SECTION_ITEMS).map(item => {
                 const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
                 if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
@@ -193,7 +199,7 @@ function App() {
           )}
 
           {tvSections && tvSections.finished.length > 0 && (
-            <Section title="Finished" defaultCollapsed>
+            <Section sectionKey="tv-finished" title="Finished" defaultCollapsed>
               {tvSections.finished.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.id}
@@ -221,7 +227,11 @@ function App() {
         <div className="flex flex-col gap-6">
           {movieSectionsLoading &&
             ['Watch next', ''].map((title, i) => (
-              <Section title={title} key={i}>
+              <Section
+                sectionKey={`movie-${title.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'loading'}`}
+                title={title}
+                key={i}
+              >
                 {Array.from({ length: 10 }).map((_, epispdeIndex) => (
                   <PosterCard key={epispdeIndex} isLoading />
                 ))}
@@ -246,7 +256,7 @@ function App() {
           )}
 
           {movieSections && movieSections.watchNext.length > 0 && (
-            <Section title="Watch next">
+            <Section sectionKey="movie-watch-next" title="Watch next">
               {movieSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchMovie key={item.tmdbId} movie={item} />
               ))}
@@ -266,6 +276,7 @@ function App() {
 
           {movieSections && movieSections.unreleased.length > 0 && (
             <Section
+              sectionKey="movie-not-released"
               title="Not released yet"
               below={
                 <Button variant="secondary" asChild>
@@ -300,7 +311,7 @@ function App() {
           )}
 
           {movieSections && movieSections.finished.length > 0 && (
-            <Section title="Finished">
+            <Section sectionKey="movie-finished" title="Finished">
               {movieSections.finished.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.tmdbId}

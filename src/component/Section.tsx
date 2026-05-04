@@ -9,8 +9,9 @@ import React from 'react'
 import { useLocalStorage, useWindowSize } from 'usehooks-ts'
 
 interface SectionProps {
-  title: string
-  children: ReactNode
+  sectionKey: string
+  title: ReactNode
+  children?: ReactNode
   canCollapse?: boolean
   defaultCollapsed?: boolean
   className?: string
@@ -18,6 +19,7 @@ interface SectionProps {
 }
 
 export function Section({
+  sectionKey,
   title,
   children,
   canCollapse = true,
@@ -28,7 +30,7 @@ export function Section({
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
-  const [isCollapsed, setIsCollapsed] = useLocalStorage(`CUENEXT-section-${title.toLowerCase().replace(/\s+/g, '-')}-collapsed`, defaultCollapsed)
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(`CUENEXT-section-${sectionKey}-collapsed`, defaultCollapsed)
 
   return (
     <section className={cn('flex flex-col', className)}>

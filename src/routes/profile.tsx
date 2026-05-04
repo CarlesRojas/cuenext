@@ -214,14 +214,14 @@ function ProfilePage() {
           <>
             {isLoadingShows &&
               ['Finished Shows', 'Favorite Shows'].map((title, i) => (
-                <Section title={title} key={i}>
+                <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
                   {Array.from({ length: 10 }).map((_, episodeIndex) => (
                     <PosterCard key={episodeIndex} isLoading />
                   ))}
                 </Section>
               ))}
 
-            <Section title="Finished Shows">
+            <Section sectionKey="profile-finished-shows" title="Finished Shows">
               {tvSections?.finished.map(item => (
                 <PosterCard
                   key={item.id}
@@ -239,7 +239,7 @@ function ProfilePage() {
               )}
             </Section>
 
-            <Section title="Favorite Shows">
+            <Section sectionKey="profile-favorite-shows" title="Favorite Shows">
               {favoriteShows?.map(item => (
                 <PosterCard
                   key={item.id}
@@ -263,14 +263,14 @@ function ProfilePage() {
           <>
             {isLoadingMovies &&
               ['Finished Movies', 'Favorite Movies'].map((title, i) => (
-                <Section title={title} key={i}>
+                <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
                   {Array.from({ length: 10 }).map((_, episodeIndex) => (
                     <PosterCard key={episodeIndex} isLoading />
                   ))}
                 </Section>
               ))}
 
-            <Section title="Finished Movies">
+            <Section sectionKey="profile-finished-movies" title="Finished Movies">
               {movieSections?.finished.map(item => (
                 <PosterCard
                   key={item.tmdbId}
@@ -288,7 +288,7 @@ function ProfilePage() {
               )}
             </Section>
 
-            <Section title="Favorite Movies">
+            <Section sectionKey="profile-favorite-movies" title="Favorite Movies">
               {favoriteMovies?.map(item => (
                 <PosterCard
                   key={item.tmdbId}

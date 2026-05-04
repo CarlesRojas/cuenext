@@ -1,5 +1,6 @@
 import { api } from '#/../convex/_generated/api'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
+import { Section } from '#/component/Section'
 import type { Country } from '#/hooks/useCountryDetection'
 import { useCountryDetection } from '#/hooks/useCountryDetection'
 import type { MediaType } from '#/type/media'
@@ -96,9 +97,10 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
   const hasBeenReleased = releaseDate && new Date(releaseDate) <= new Date()
 
   return (
-    <section className="screen-px pb-8">
-      <div className="flex flex-col gap-3">
-        <h2 className="page-width text-lg font-semibold opacity-80">
+    <Section
+      sectionKey="watch-providers"
+      title={
+        <>
           Where to watch in {selectedCountry ? selectedCountry.name : 'your country'}
           {countryData && countryData.link && (
             <a
@@ -110,41 +112,24 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
               by JustWatch
             </a>
           )}
-        </h2>
+        </>
+      }
+    >
+      {countryData && countryData.flatrate && <ProviderList providers={countryData.flatrate} type="flatrate" />}
+      {countryData && countryData.free && <ProviderList providers={countryData.free} type="free" />}
+      {countryData && countryData.ads && <ProviderList providers={countryData.ads} type="ads" />}
+      {countryData && countryData.buy && <ProviderList providers={countryData.buy} type="buy" />}
+      {countryData && countryData.rent && <ProviderList providers={countryData.rent} type="rent" />}
 
-        {/* <div className="page-width  gap-2">
-          <NativeSelect
-            value={selectedCountry?.code ?? ''}
-            onChange={e => setSelectedCountry(availableCountries.find(c => c.code === e.target.value) ?? null)}
-          >
-            {availableCountries.map(country => (
-              <NativeSelectOption key={country.code} value={country.code}>
-                {country.name}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </div> */}
-
-        {countryData && (
-          <div className="flex w-full flex-wrap gap-3">
-            {countryData.flatrate && <ProviderList providers={countryData.flatrate} type="flatrate" />}
-            {countryData.free && <ProviderList providers={countryData.free} type="free" />}
-            {countryData.ads && <ProviderList providers={countryData.ads} type="ads" />}
-            {countryData.buy && <ProviderList providers={countryData.buy} type="buy" />}
-            {countryData.rent && <ProviderList providers={countryData.rent} type="rent" />}
-          </div>
-        )}
-
-        {!isLoading && selectedCountry && !countryData && (
-          <p className="page-width pointer-events-none -mt-2 tracking-wide text-neutral-500">
-            {!hasBeenReleased
-              ? releaseDate
-                ? `This ${media === 'tv' ? 'show' : 'movie'} will release on ${new Date(releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`
-                : 'Not released yet'
-              : `No streaming providers available in ${selectedCountry.name}`}
-          </p>
-        )}
-      </div>
-    </section>
+      {!isLoading && selectedCountry && !countryData && (
+        <p className="pointer-events-none -mt-2 tracking-wide text-neutral-500">
+          {!hasBeenReleased
+            ? releaseDate
+              ? `This ${media === 'tv' ? 'show' : 'movie'} will release on ${new Date(releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`
+              : 'Not released yet'
+            : `No streaming providers available in ${selectedCountry.name}`}
+        </p>
+      )}
+    </Section>
   )
 }

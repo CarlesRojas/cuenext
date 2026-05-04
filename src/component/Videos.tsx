@@ -120,7 +120,7 @@ export function Videos({ tmdbId, media }: VideosProps) {
     .slice(0, 15)
 
   return (
-    <Section title="Videos">
+    <Section sectionKey="videos" title="Videos">
       {sortedVideos.map(video => (
         <VideoItem key={video.id} video={video} />
       ))}

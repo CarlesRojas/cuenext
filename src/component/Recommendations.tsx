@@ -23,7 +23,7 @@ export function Recommendations({ tmdbId, media }: RecommendationsProps) {
   })
 
   return (
-    <Section title={media === 'movie' ? 'Similar Movies' : 'Similar Shows'}>
+    <Section sectionKey="recommendations" title={media === 'movie' ? 'Similar Movies' : 'Similar Shows'}>
       {media === 'tv' &&
         showRecommendations.data &&
         showRecommendations.data.results.length &&

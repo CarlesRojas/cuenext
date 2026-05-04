@@ -21,7 +21,7 @@ export function Cast({ tmdbId, media }: CastProps) {
 
   if (query.isLoading) {
     return (
-      <Section title="Cast">
+      <Section sectionKey="cast" title="Cast">
         {Array.from({ length: 8 }, (_, index) => (
           <CastCardSkeleton key={index} />
         ))}
@@ -34,7 +34,7 @@ export function Cast({ tmdbId, media }: CastProps) {
   const mainCast = query.data.cast.slice(0, 30)
 
   return (
-    <Section title="Cast">
+    <Section sectionKey="cast" title="Cast">
       {mainCast.map(member => (
         <CastCard key={member.id} member={member} />
       ))}
