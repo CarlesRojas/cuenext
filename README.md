@@ -51,9 +51,3 @@ bubblewrap build
 ```bash
 adb install app-release-signed.apk
 ```
-
-# TODO
-
-- [ ] Remember sections that are closed with localstorage
-
-Test remote change

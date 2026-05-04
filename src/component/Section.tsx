@@ -5,8 +5,8 @@ import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AnimatePresence, motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import React, { useState } from 'react'
-import { useWindowSize } from 'usehooks-ts'
+import React from 'react'
+import { useLocalStorage, useWindowSize } from 'usehooks-ts'
 
 interface SectionProps {
   title: string
@@ -28,7 +28,7 @@ export function Section({
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(`CUENEXT-section-${title.toLowerCase().replace(/\s+/g, '-')}-collapsed`, defaultCollapsed)
 
   return (
     <section className={cn('flex flex-col', className)}>
