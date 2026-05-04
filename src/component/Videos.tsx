@@ -30,12 +30,16 @@ function VideoItem({ video }: VideoItemProps) {
   }
 
   const handleClick = () => {
-    if (isIOS || isAndroid) {
+    if (isIOS) {
       const youtubeAppUrl = `youtube://www.youtube.com/watch?v=${video.key}`
 
       const link = document.createElement('a')
       link.href = youtubeAppUrl
       link.click()
+    } else if (isAndroid) {
+      const intentUrl = `intent://www.youtube.com/watch?v=${video.key}#Intent;scheme=https;package=com.google.android.youtube;end`
+
+      window.location.href = intentUrl
     } else {
       window.open(videoUrl, '_blank', 'noopener,noreferrer')
     }
