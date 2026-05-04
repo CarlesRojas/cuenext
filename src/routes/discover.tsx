@@ -109,7 +109,7 @@ function RouteComponent() {
 
       {media === 'tv' && (
         <>
-          <Section title="Dropping This Week" canCollapse={false} key="dropping-this-week">
+          <Section title="Dropping This Week" key="dropping-this-week">
             {onTheAirShows &&
               onTheAirShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
 
@@ -129,7 +129,7 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Trending Shows" canCollapse={false} key="trending-shows">
+          <Section title="Trending Shows" key="trending-shows">
             {trendingShows &&
               trendingShows.results.map((tv: TmdbTv, index: number) => (
                 <FollowEpisode key={tv.id} episode={tv} number={index + 1} variant="poster" />
@@ -151,7 +151,7 @@ function RouteComponent() {
               Array.from({ length: 20 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top Rated Shows" canCollapse={false} key="top-rated-shows">
+          <Section title="Top Rated Shows" key="top-rated-shows">
             {topRatedShows &&
               topRatedShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
 
@@ -175,7 +175,7 @@ function RouteComponent() {
 
       {media === 'movie' && (
         <>
-          <Section title="Upcoming Movies" canCollapse={false} key="upcoming-movies">
+          <Section title="Upcoming Movies" key="upcoming-movies">
             {upcomingMovies &&
               upcomingMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
@@ -197,7 +197,7 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Trending Movies" canCollapse={false} key="trending-movies">
+          <Section title="Trending Movies" key="trending-movies">
             {trendingMovies &&
               trendingMovies.results.map((movie: TmdbMovie, index: number) => (
                 <FollowMovie key={movie.id} movie={movie} number={index + 1} variant="poster" />
@@ -219,7 +219,7 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section title="Top Rated Movies" canCollapse={false} key="top-rated-movies">
+          <Section title="Top Rated Movies" key="top-rated-movies">
             {topRatedMovies &&
               topRatedMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
