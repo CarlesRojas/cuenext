@@ -8,7 +8,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { isIOS } from 'react-device-detect'
+import { isAndroid, isIOS } from 'react-device-detect'
 
 interface VideosProps {
   tmdbId: number
@@ -30,7 +30,7 @@ function VideoItem({ video }: VideoItemProps) {
   }
 
   const handleClick = () => {
-    if (isIOS) {
+    if (isIOS || isAndroid) {
       const youtubeAppUrl = `youtube://www.youtube.com/watch?v=${video.key}`
 
       const link = document.createElement('a')
