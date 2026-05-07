@@ -308,10 +308,6 @@ function ProfilePage() {
           </>
         )}
       </div>
-
-      {/* TODO remove after review */}
-      {/* TODO fix tmdb and then uncomment */}
-      {/* {!isIOS && <LinkWithTmdb />} */}
     </div>
   )
 }
