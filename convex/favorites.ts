@@ -83,6 +83,7 @@ export const getFavoriteShows = query({
   },
 })
 
+// TODO optimistic update
 export const favoriteItem = mutation({
   args: {
     tmdbId: v.number(),
@@ -132,6 +133,7 @@ export const favoriteItem = mutation({
   },
 })
 
+// TODO optimistic update
 export const unfavoriteItem = mutation({
   args: {
     tmdbId: v.number(),

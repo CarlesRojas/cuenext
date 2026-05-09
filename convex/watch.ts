@@ -31,6 +31,7 @@ export const checkMovieWatched = query({
   },
 })
 
+// TODO optimistic update
 export const markMovieWatched = mutation({
   args: {
     tmdbId: v.number(),
@@ -74,6 +75,7 @@ export const markMovieWatched = mutation({
   },
 })
 
+// TODO optimistic update
 export const unmarkMovieWatched = mutation({
   args: {
     tmdbId: v.number(),
@@ -155,6 +157,7 @@ export const checkEpisodeWatched = query({
   },
 })
 
+// TODO optimistic update
 export const markEpisodeWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -222,6 +225,7 @@ export const markEpisodeWatched = mutation({
   },
 })
 
+// TODO optimistic update
 export const unmarkEpisodeWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -308,6 +312,7 @@ export const upsertNextEpisode = mutation({
   },
 })
 
+// TODO optimistic update
 export const markMultipleEpisodesAsWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -381,6 +386,7 @@ export const markMultipleEpisodesAsWatched = mutation({
   },
 })
 
+// TODO optimistic update
 export const unmarkMultipleEpisodesAsWatched = mutation({
   args: {
     showTmdbId: v.number(),
