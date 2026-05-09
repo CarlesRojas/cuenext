@@ -376,7 +376,7 @@
 				CODE_SIGN_ENTITLEMENTS = CueNext/Entitlements/Entitlements.plist;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = MGKXDZQH43;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
@@ -395,7 +395,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1;
+				MARKETING_VERSION = 2;
 				PRODUCT_BUNDLE_IDENTIFIER = app.cuenext.pinya;
 				PRODUCT_NAME = CueNext;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -416,7 +416,7 @@
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = MGKXDZQH43;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = MGKXDZQH43;
 				ENABLE_APP_SANDBOX = YES;
@@ -436,7 +436,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1;
+				MARKETING_VERSION = 2;
 				PRODUCT_BUNDLE_IDENTIFIER = app.cuenext.pinya;
 				PRODUCT_NAME = CueNext;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = app.cuenext.pinya;

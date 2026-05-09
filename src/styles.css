@@ -49,4 +49,14 @@
   a {
     @apply no-underline;
   }
+
+  /* TODO remove after review */
+  /* Hide image management actions */
+  .cl-avatarImageActions {
+    @apply hidden!;
+  }
+
+  .cl-avatarImageActions ~ p {
+    @apply hidden!;
+  }
 }
