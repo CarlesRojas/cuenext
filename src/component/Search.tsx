@@ -7,8 +7,9 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
 import { useLocation, useNavigate } from '@tanstack/react-router'
-import { useEffect, useRef } from 'react'
-import { useDebounceCallback } from 'usehooks-ts'
+import type { RefObject } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useDebounceCallback, useOnClickOutside } from 'usehooks-ts'
 import z from 'zod'
 
 interface Props {
@@ -25,6 +26,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
 
   const formSchema = z.object({ query: z.string() })
   const inputRef = useRef<HTMLInputElement>(null)
+  const [contractAfterSearch, setContractAfterSearch] = useState(false)
 
   const performSearch = (query: string) => {
     const sanitizedQuery = encodeURIComponent(query.trim())
@@ -56,6 +58,14 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
     debouncedSearch(value)
   }
 
+  const searchRef = useRef<HTMLFormElement>(null)
+  const handleClickOutside = () => {
+    if (!contractAfterSearch) return
+    setIsExpanded(false)
+    setContractAfterSearch(false)
+  }
+  useOnClickOutside(searchRef as RefObject<HTMLFormElement>, handleClickOutside)
+
   if (!isMobile) {
     return (
       <LiquidGlass className="relative w-full rounded-full bg-neutral-800/40">
@@ -65,6 +75,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
             form.handleSubmit()
           }}
           className="relative flex w-full items-center justify-between px-1"
+          ref={searchRef}
         >
           <form.Field
             name="query"
@@ -101,10 +112,9 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
                         e.preventDefault()
                         e.stopPropagation()
                         setIsExpanded(true)
+                        setContractAfterSearch(true)
 
-                        setTimeout(() => {
-                          inputRef.current?.focus()
-                        }, 100)
+                        setTimeout(() => inputRef.current?.focus(), 100)
                       }
                 }
                 disabled={isExpanded && (!canSubmit || !query.trim())}
