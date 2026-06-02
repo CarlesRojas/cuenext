@@ -3,7 +3,7 @@ import { cn } from '#/lib/cn'
 import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import { faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Authenticated, Unauthenticated } from 'convex/react'
+import { Authenticated, Unauthenticated, useConvexAuth } from 'convex/react'
 
 interface UserProps {
   isMobile?: boolean
@@ -11,6 +11,10 @@ interface UserProps {
 }
 
 export function User({ isMobile, isExpanded }: UserProps) {
+  const { isLoading } = useConvexAuth()
+
+  if (isLoading) return null
+
   return (
     <>
       <Authenticated>
