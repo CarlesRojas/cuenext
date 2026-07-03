@@ -122,30 +122,33 @@ export const deleteCachedData = mutation({
   },
 })
 
+// Keep the batch small: each tmdbCache row stores an arbitrary `data` payload
+// (whole TMDB responses), and a single Convex transaction fails once it reads
+// more than 16 MB. Deleting many rows in one transaction accumulates every
+// row's bytes toward that limit, so we process one bounded batch per
+// transaction and reschedule ourselves until no expired rows remain.
+const CLEANUP_BATCH_SIZE = 25
+
 export const cleanupExpiredCache = mutation({
   args: { batchSize: v.optional(v.number()) },
-  handler: async (context, { batchSize = 100 }) => {
+  handler: async (context, { batchSize = CLEANUP_BATCH_SIZE }) => {
     const now = Date.now()
-    let totalDeleted = 0
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-      const expiredEntries = await context.db
-        .query('tmdbCache')
-        .withIndex('by_expiresAt', q => q.lt('expiresAt', now))
-        .take(batchSize)
+    const expiredEntries = await context.db
+      .query('tmdbCache')
+      .withIndex('by_expiresAt', q => q.lt('expiresAt', now))
+      .take(batchSize)
 
-      if (expiredEntries.length === 0) break
-
-      for (const entry of expiredEntries) {
-        await context.db.delete(entry._id)
-      }
-
-      totalDeleted += expiredEntries.length
-
-      if (expiredEntries.length < batchSize) break
+    for (const entry of expiredEntries) {
+      await context.db.delete(entry._id)
     }
 
-    return { deletedCount: totalDeleted }
+    // A full batch means there may be more expired rows. Reschedule a fresh
+    // transaction to continue rather than reading everything in this one.
+    if (expiredEntries.length === batchSize) {
+      await context.scheduler.runAfter(0, api.tmdbCache.cleanupExpiredCache, { batchSize })
+    }
+
+    return { deletedCount: expiredEntries.length }
   },
 })
