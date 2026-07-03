@@ -5,10 +5,12 @@ import {
   paginated,
   tmdbCreditsSchema,
   tmdbEpisodeMinimalSchema,
+  tmdbMovieExtrasSchema,
   tmdbMovieMinimalSchema,
   tmdbMovieSchema,
   tmdbReviewsResponseSchema,
   tmdbSeasonSchema,
+  tmdbTvExtrasSchema,
   tmdbTvMinimalSchema,
   tmdbTvSchema,
   tmdbVideosResponseSchema,
@@ -323,6 +325,37 @@ export const getShowDetails = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
     return fetchTmdbCached(context, tmdbTvSchema, `/tv/${args.tmdbId}`)
+  },
+})
+
+// The detail page needs details, credits, videos, reviews, recommendations and watch
+// providers at once. append_to_response returns them all in a single TMDB request cached
+// under one key, instead of six separate actions each paying their own cache round-trip.
+const DETAIL_APPEND = 'credits,videos,reviews,recommendations,watch/providers'
+
+export const getShowExtras = action({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    return fetchTmdbCached(context, tmdbTvExtrasSchema, `/tv/${args.tmdbId}`, {
+      append_to_response: DETAIL_APPEND,
+    })
+  },
+})
+
+export const getMovieExtras = action({
+  args: { tmdbId: v.number() },
+  handler: async (context, args) => {
+    const result = await fetchTmdbCached(context, tmdbMovieExtrasSchema, `/movie/${args.tmdbId}`, {
+      append_to_response: DETAIL_APPEND,
+    })
+
+    const runtime = result.runtime
+    if (runtime)
+      await context.runMutation(api.movieInfo.saveMovieInfo, {
+        movies: [{ tmdbId: result.id, runtime }],
+      })
+
+    return result
   },
 })
 

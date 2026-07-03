@@ -239,6 +239,40 @@ export const tmdbCreditsSchema = z.object({
   crew: z.array(tmdbCrewMemberSchema),
 })
 
+// Sub-responses appended via TMDB's append_to_response are identical to the standalone
+// endpoints except they carry no top-level `id` (it lives on the parent object).
+const tmdbAppendedCreditsSchema = z.object({
+  cast: z.array(tmdbCastMemberSchema),
+  crew: z.array(tmdbCrewMemberSchema),
+})
+
+const tmdbAppendedVideosSchema = z.object({
+  results: z.array(tmdbVideoSchema),
+})
+
+const tmdbAppendedWatchProvidersSchema = z.object({
+  results: tmdbWatchProvidersSchema.shape.results,
+})
+
+export const tmdbTvExtrasSchema = tmdbTvSchema.extend({
+  credits: tmdbAppendedCreditsSchema.optional(),
+  videos: tmdbAppendedVideosSchema.optional(),
+  reviews: tmdbReviewsResponseSchema.optional(),
+  recommendations: paginated(tmdbTvMinimalSchema).optional(),
+  'watch/providers': tmdbAppendedWatchProvidersSchema.optional(),
+})
+
+export const tmdbMovieExtrasSchema = tmdbMovieSchema.extend({
+  credits: tmdbAppendedCreditsSchema.optional(),
+  videos: tmdbAppendedVideosSchema.optional(),
+  reviews: tmdbReviewsResponseSchema.optional(),
+  recommendations: paginated(tmdbMovieMinimalSchema).optional(),
+  'watch/providers': tmdbAppendedWatchProvidersSchema.optional(),
+})
+
+export type TmdbTvExtras = z.infer<typeof tmdbTvExtrasSchema>
+export type TmdbMovieExtras = z.infer<typeof tmdbMovieExtrasSchema>
+
 export type TmdbMovieMinimal = z.infer<typeof tmdbMovieMinimalSchema>
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>
 export type TmdbTv = z.infer<typeof tmdbTvSchema>

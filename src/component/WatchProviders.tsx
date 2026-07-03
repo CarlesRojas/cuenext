@@ -1,13 +1,10 @@
-import { api } from '#/../convex/_generated/api'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Section } from '#/component/Section'
 import type { Country } from '#/hooks/useCountryDetection'
-import { tmdbStale } from '#/lib/tmdbQuery'
 import { useCountryDetection } from '#/hooks/useCountryDetection'
+import { useMediaExtras } from '#/hooks/useMediaExtras'
 import type { MediaType } from '#/type/media'
 import type { TmdbProvider } from '#/type/tmdb'
-import { convexAction } from '@convex-dev/react-query'
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 interface WatchProvidersProps {
@@ -77,20 +74,11 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
 
   useCountryDetection({ onDetected: country => setSelectedCountry(country) })
 
-  const movieProviders = useQuery({
-    ...convexAction(api.tmdb.getMovieWatchProviders, { tmdbId }),
-    ...tmdbStale(),
-    enabled: media === 'movie',
-  })
+  const { movie, show } = useMediaExtras(media, tmdbId)
 
-  const showProviders = useQuery({
-    ...convexAction(api.tmdb.getShowWatchProviders, { tmdbId }),
-    ...tmdbStale(),
-    enabled: media === 'tv',
-  })
-
-  const data = media === 'movie' ? movieProviders.data : showProviders.data
-  const isLoading = media === 'movie' ? movieProviders.isLoading : showProviders.isLoading
+  const query = media === 'movie' ? movie : show
+  const data = query.data?.['watch/providers']
+  const isLoading = query.isLoading
 
   const countryData = selectedCountry ? data?.results[selectedCountry.code] : null
   // const availableCountries = getCountries(data?.results ? Object.keys(data.results) : []).sort((a, b) =>

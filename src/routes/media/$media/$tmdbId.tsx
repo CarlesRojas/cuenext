@@ -1,4 +1,3 @@
-import { api } from '#/../convex/_generated/api'
 import BackButton from '#/component/BackButton'
 import { Cast } from '#/component/Cast'
 import { MovieDetails } from '#/component/MovieDetails'
@@ -8,11 +7,9 @@ import { ShowDetails } from '#/component/ShowDetails'
 import { ShowSeasons } from '#/component/ShowSeasons'
 import { Videos } from '#/component/Videos'
 import { WatchProviders } from '#/component/WatchProviders'
+import { useMediaExtras } from '#/hooks/useMediaExtras'
 import { cn } from '#/lib/cn'
-import { tmdbStale } from '#/lib/tmdbQuery'
 import type { MediaType } from '#/type/media'
-import { convexAction } from '@convex-dev/react-query'
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useWindowSize } from 'usehooks-ts'
@@ -29,17 +26,7 @@ function RouteComponent() {
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
-  const show = useQuery({
-    ...convexAction(api.tmdb.getShowDetails, { tmdbId: tmdbIdNumber }),
-    ...tmdbStale(),
-    enabled: media === 'tv',
-  })
-
-  const movie = useQuery({
-    ...convexAction(api.tmdb.getMovieDetails, { tmdbId: tmdbIdNumber }),
-    ...tmdbStale(),
-    enabled: media === 'movie',
-  })
+  const { movie, show } = useMediaExtras(media as MediaType, tmdbIdNumber)
 
   const displayName = media === 'movie' ? movie.data?.title : show.data?.name
 

@@ -1,13 +1,10 @@
-import { api } from '#/../convex/_generated/api'
 import { Section } from '#/component/Section'
+import { useMediaExtras } from '#/hooks/useMediaExtras'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
 import type { TmdbVideo } from '#/type/tmdb'
-import { tmdbStale } from '#/lib/tmdbQuery'
-import { convexAction } from '@convex-dev/react-query'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useQuery } from '@tanstack/react-query'
 import type { MouseEvent } from 'react'
 import { useState } from 'react'
 import { isAndroid, isIOS } from 'react-device-detect'
@@ -100,14 +97,12 @@ function VideoItem({ video }: VideoItemProps) {
 }
 
 export function Videos({ tmdbId, media }: VideosProps) {
-  const videos = useQuery({
-    ...convexAction(media === 'movie' ? api.tmdb.getMovieVideos : api.tmdb.getTvVideos, { tmdbId }),
-    ...tmdbStale(),
-  })
+  const { movie, show } = useMediaExtras(media, tmdbId)
+  const videos = (media === 'movie' ? movie : show).data?.videos
 
-  if (!videos.data?.results.length) return null
+  if (!videos?.results.length) return null
 
-  const sortedVideos = videos.data.results
+  const sortedVideos = videos.results
     .filter(video => video.site.toLowerCase() === 'youtube')
 
     .sort((a, b) => {

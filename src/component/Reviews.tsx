@@ -2,12 +2,14 @@ import { api } from '#/../convex/_generated/api'
 import ReviewCard from '#/component/ReviewCard'
 import { Button } from '#/component/ui/button'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
+import { movieExtrasQuery, showExtrasQuery } from '#/hooks/useMediaExtras'
 import { cn } from '#/lib/cn'
-import type { MediaType } from '#/type/media'
 import { tmdbStale } from '#/lib/tmdbQuery'
+import type { MediaType } from '#/type/media'
+import type { TmdbReviewsResponse } from '#/type/tmdb'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useAction } from 'convex/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
@@ -24,10 +26,22 @@ export function Reviews({ tmdbId, media }: ReviewsProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const getReviews = useAction(media === 'movie' ? api.tmdb.getMovieReviews : api.tmdb.getTvReviews)
+  const queryClient = useQueryClient()
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } = useInfiniteQuery({
     queryKey: ['reviews', media, tmdbId],
-    queryFn: async ({ pageParam = 1 }) => await getReviews({ tmdbId, page: pageParam }),
+    queryFn: async ({ pageParam = 1 }): Promise<TmdbReviewsResponse> => {
+      // The first page ships with the bundled detail query the rest of the page already
+      // fetches, so only later pages need their own action call.
+      if (pageParam === 1) {
+        const extras =
+          media === 'movie'
+            ? await queryClient.ensureQueryData(movieExtrasQuery(tmdbId))
+            : await queryClient.ensureQueryData(showExtrasQuery(tmdbId))
+        if (extras.reviews) return extras.reviews
+      }
+      return await getReviews({ tmdbId, page: pageParam })
+    },
     initialPageParam: 1,
     getNextPageParam: lastPage => {
       if (lastPage.page < lastPage.total_pages) return lastPage.page + 1

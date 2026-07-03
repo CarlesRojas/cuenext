@@ -1,13 +1,10 @@
-import { api } from '#/../convex/_generated/api'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Section } from '#/component/Section'
+import { useMediaExtras } from '#/hooks/useMediaExtras'
 import type { MediaType } from '#/type/media'
 import type { TmdbCastMember } from '#/type/tmdb'
-import { tmdbStale } from '#/lib/tmdbQuery'
-import { convexAction } from '@convex-dev/react-query'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useQuery } from '@tanstack/react-query'
 
 interface CastProps {
   tmdbId: number
@@ -15,11 +12,9 @@ interface CastProps {
 }
 
 export function Cast({ tmdbId, media }: CastProps) {
-  const query = useQuery({
-    ...convexAction(media === 'movie' ? api.tmdb.getMovieCredits : api.tmdb.getTvCredits, { tmdbId }),
-    ...tmdbStale(),
-    enabled: !!tmdbId,
-  })
+  const { movie, show } = useMediaExtras(media, tmdbId)
+  const query = media === 'movie' ? movie : show
+  const credits = query.data?.credits
 
   if (query.isLoading) {
     return (
@@ -31,9 +26,9 @@ export function Cast({ tmdbId, media }: CastProps) {
     )
   }
 
-  if (!query.data?.cast || query.data.cast.length === 0) return null
+  if (!credits?.cast || credits.cast.length === 0) return null
 
-  const mainCast = query.data.cast.slice(0, 30)
+  const mainCast = credits.cast.slice(0, 30)
 
   return (
     <Section sectionKey="cast" title="Cast">
