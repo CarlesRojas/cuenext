@@ -16,6 +16,11 @@ const useShowInfo = ({ showId }: Props) => {
 
   const result = useQuery({
     queryKey: ['showInformation', showId],
+    // Whether a show uses continuous episode numbering never changes, so never refetch:
+    // every watchlist card mounts this hook and would otherwise re-run the query (and, on
+    // a cold cache, the whole show + per-season action cascade) on each mount.
+    staleTime: Infinity,
+    refetchOnMount: true,
     queryFn: async () => {
       const currentShowInfo = await convex.query(api.showInfo.getShowInfo, { tmdbId: showId })
       if (currentShowInfo) return { continuousEpisodeNumbers: currentShowInfo.continuousEpisodeNumbers }
