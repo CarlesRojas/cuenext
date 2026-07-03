@@ -3,6 +3,7 @@ import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { Section } from '#/component/Section'
 import type { MediaType } from '#/type/media'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 
@@ -14,11 +15,13 @@ interface RecommendationsProps {
 export function Recommendations({ tmdbId, media }: RecommendationsProps) {
   const movieRecommendations = useQuery({
     ...convexAction(api.tmdb.getMovieRecommendations, { tmdbId }),
+    ...tmdbStale(),
     enabled: media === 'movie',
   })
 
   const showRecommendations = useQuery({
     ...convexAction(api.tmdb.getTvRecommendations, { tmdbId }),
+    ...tmdbStale(),
     enabled: media === 'tv',
   })
 

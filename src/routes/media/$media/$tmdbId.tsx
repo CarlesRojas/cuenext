@@ -9,6 +9,7 @@ import { ShowSeasons } from '#/component/ShowSeasons'
 import { Videos } from '#/component/Videos'
 import { WatchProviders } from '#/component/WatchProviders'
 import { cn } from '#/lib/cn'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import type { MediaType } from '#/type/media'
 import { convexAction } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
@@ -30,11 +31,13 @@ function RouteComponent() {
 
   const show = useQuery({
     ...convexAction(api.tmdb.getShowDetails, { tmdbId: tmdbIdNumber }),
+    ...tmdbStale(),
     enabled: media === 'tv',
   })
 
   const movie = useQuery({
     ...convexAction(api.tmdb.getMovieDetails, { tmdbId: tmdbIdNumber }),
+    ...tmdbStale(),
     enabled: media === 'movie',
   })
 

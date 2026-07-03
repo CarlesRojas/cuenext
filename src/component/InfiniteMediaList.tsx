@@ -1,5 +1,6 @@
 import { cn } from '#/lib/cn'
 import { categorizeDate, getGroupDisplayName, getGroupOrder } from '#/utils/dateCategory'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAction } from 'convex/react'
 import type { FunctionReference } from 'convex/server'
@@ -52,7 +53,7 @@ export function InfiniteMediaList<TItem>({
       if (lastPage.page < lastPage.total_pages) return lastPage.page + 1
       return undefined
     },
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    ...tmdbStale(),
   })
 
   const { ref } = useIntersectionObserver({

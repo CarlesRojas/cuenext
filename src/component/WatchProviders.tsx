@@ -2,6 +2,7 @@ import { api } from '#/../convex/_generated/api'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Section } from '#/component/Section'
 import type { Country } from '#/hooks/useCountryDetection'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import { useCountryDetection } from '#/hooks/useCountryDetection'
 import type { MediaType } from '#/type/media'
 import type { TmdbProvider } from '#/type/tmdb'
@@ -78,11 +79,13 @@ export function WatchProviders({ tmdbId, media, releaseDate }: WatchProvidersPro
 
   const movieProviders = useQuery({
     ...convexAction(api.tmdb.getMovieWatchProviders, { tmdbId }),
+    ...tmdbStale(),
     enabled: media === 'movie',
   })
 
   const showProviders = useQuery({
     ...convexAction(api.tmdb.getShowWatchProviders, { tmdbId }),
+    ...tmdbStale(),
     enabled: media === 'tv',
   })
 

@@ -7,6 +7,7 @@ import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
+import { TMDB_STALE_TIME, tmdbStale } from '#/lib/tmdbQuery'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
 import { convexAction } from '@convex-dev/react-query'
@@ -40,16 +41,19 @@ function RouteComponent() {
       air_date_gte: minDate,
       air_date_lte: maxDate,
     }),
+    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
 
   const { data: trendingShows, isPending: trendingShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getTrendingTv, { page: 1, time_window: 'week' }),
+    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
 
   const { data: topRatedShows, isPending: topRatedShowsLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
 
@@ -73,16 +77,19 @@ function RouteComponent() {
       include_adult: false,
       include_video: false,
     }),
+    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 
   const { data: trendingMovies, isPending: trendingMoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getTrendingMovies, { page: 1, time_window: 'week' }),
+    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 
   const { data: topRatedMovies, isPending: topRatedMoviesLoading } = useQuery({
     ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 

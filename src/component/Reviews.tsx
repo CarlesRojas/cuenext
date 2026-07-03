@@ -4,6 +4,7 @@ import { Button } from '#/component/ui/button'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -32,7 +33,7 @@ export function Reviews({ tmdbId, media }: ReviewsProps) {
       if (lastPage.page < lastPage.total_pages) return lastPage.page + 1
       return undefined
     },
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    ...tmdbStale(),
     enabled: !!tmdbId,
   })
 

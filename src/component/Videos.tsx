@@ -3,6 +3,7 @@ import { Section } from '#/component/Section'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
 import type { TmdbVideo } from '#/type/tmdb'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import { convexAction } from '@convex-dev/react-query'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -101,6 +102,7 @@ function VideoItem({ video }: VideoItemProps) {
 export function Videos({ tmdbId, media }: VideosProps) {
   const videos = useQuery({
     ...convexAction(media === 'movie' ? api.tmdb.getMovieVideos : api.tmdb.getTvVideos, { tmdbId }),
+    ...tmdbStale(),
   })
 
   if (!videos.data?.results.length) return null

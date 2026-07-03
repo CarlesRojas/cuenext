@@ -1,3 +1,4 @@
+import { TMDB_STALE_TIME, tmdbStale } from '#/lib/tmdbQuery'
 import { api } from '#/../convex/_generated/api'
 import ShowEpisode from '#/component/ShowEpisode'
 import { ShowSeason } from '#/component/ShowSeason'
@@ -21,6 +22,7 @@ export function ShowSeasons({ show }: Props) {
         tmdbId: show.id,
         seasonNumber: season.season_number,
       }),
+      ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
       enabled: !!show.seasons?.length,
     })),
   })

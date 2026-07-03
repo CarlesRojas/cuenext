@@ -3,6 +3,7 @@ import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Section } from '#/component/Section'
 import type { MediaType } from '#/type/media'
 import type { TmdbCastMember } from '#/type/tmdb'
+import { tmdbStale } from '#/lib/tmdbQuery'
 import { convexAction } from '@convex-dev/react-query'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -16,6 +17,7 @@ interface CastProps {
 export function Cast({ tmdbId, media }: CastProps) {
   const query = useQuery({
     ...convexAction(media === 'movie' ? api.tmdb.getMovieCredits : api.tmdb.getTvCredits, { tmdbId }),
+    ...tmdbStale(),
     enabled: !!tmdbId,
   })
 
