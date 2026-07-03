@@ -6,18 +6,28 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
 
-export function useWatchEpisode(episode: TvSectionItemMinimal) {
+// All episode rows of a show share one getWatchedEpisodesForShow subscription (the show page
+// already loads it with identical args, so react-query dedupes them) instead of each row
+// issuing its own checkEpisodeWatched lookup. Callers that already know the watched state
+// (watchlist cards, whose item is by definition the next unwatched episode) pass
+// `knownIsWatched` to skip the query entirely.
+export function useWatchEpisode(episode: TvSectionItemMinimal, knownIsWatched?: boolean) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isWatched, isFetching: isWatchedLoading } = useQuery({
-    ...convexQuery(api.watch.checkEpisodeWatched, {
-      showTmdbId: episode.showTmdbId,
-      seasonNumber: episode.seasonNumber,
-      episodeNumber: episode.episodeNumber,
-    }),
-    enabled: clerk.isSignedIn,
+  const { data: watchedEpisodes, isFetching } = useQuery({
+    ...convexQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: episode.showTmdbId }),
+    enabled: clerk.isSignedIn && knownIsWatched === undefined,
   })
+
+  const isWatched =
+    knownIsWatched !== undefined
+      ? knownIsWatched
+      : watchedEpisodes?.some(
+          we => we.seasonNumber === episode.seasonNumber && we.episodeNumber === episode.episodeNumber,
+        )
+
+  const isWatchedLoading = knownIsWatched === undefined && isFetching
 
   const markEpisodeWatched = useDbMutation(api.watch.markEpisodeWatched)
   const unmarkEpisodeWatched = useDbMutation(api.watch.unmarkEpisodeWatched)

@@ -9,7 +9,8 @@ interface Props {
 }
 
 export default function WatchEpisode({ episode }: Props) {
-  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({ ...episode })
+  // A section item is by definition the next unwatched episode, so no lookup is needed.
+  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode({ ...episode }, false)
 
   const showInfo = useShowInfo({ showId: episode.showTmdbId })
   const continuousEpisodeNumbers = showInfo.data?.continuousEpisodeNumbers || episode.numberOfSeasons === 1
