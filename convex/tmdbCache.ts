@@ -124,10 +124,15 @@ export const deleteCachedData = mutation({
 
 // Keep the batch small: each tmdbCache row stores an arbitrary `data` payload
 // (whole TMDB responses), and a single Convex transaction fails once it reads
-// more than 16 MB. Deleting many rows in one transaction accumulates every
+// more than 16 MiB. Deleting many rows in one transaction accumulates every
 // row's bytes toward that limit, so we process one bounded batch per
 // transaction and reschedule ourselves until no expired rows remain.
-const CLEANUP_BATCH_SIZE = 25
+//
+// Bounding the batch size guarantees we stay under the limit: Convex caps any
+// single document at 1 MiB, so a batch reads at most (batchSize × 1 MiB). With
+// batchSize = 10 the worst case is ~10 MiB, leaving comfortable headroom below
+// 16 MiB regardless of how large individual cached payloads are.
+const CLEANUP_BATCH_SIZE = 10
 
 export const cleanupExpiredCache = mutation({
   args: { batchSize: v.optional(v.number()) },
