@@ -69,21 +69,31 @@ export async function fetchTmdbCached<T extends z.ZodTypeAny>(
   params: Record<string, string> = {},
   cacheDurationMs?: number | typeof CACHE_DURATIONS.MIDNIGHT,
 ): Promise<z.infer<T>> {
+  const { data } = await fetchTmdbCachedWithMeta(context, schema, endpoint, params, cacheDurationMs)
+  return data
+}
+
+// Reports whether the data came from the cache so callers that persist derived rows
+// (episode/movie runtimes) can skip the write on a hit: those rows were already saved
+// when the response first entered the cache.
+export async function fetchTmdbCachedWithMeta<T extends z.ZodTypeAny>(
+  context: ActionCtx,
+  schema: T,
+  endpoint: string,
+  params: Record<string, string> = {},
+  cacheDurationMs?: number | typeof CACHE_DURATIONS.MIDNIGHT,
+): Promise<{ data: z.infer<T>; fromCache: boolean }> {
   const paramsString = Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''
   const cacheKey = `${endpoint}${paramsString}`
 
   const cachedData = await getCachedTmdbData(context, cacheKey)
-  if (cachedData) {
-    // console.log(`Cache hit for ${cacheKey}`)
-    return schema.parse(cachedData)
-  }
+  if (cachedData) return { data: schema.parse(cachedData), fromCache: true }
 
-  // console.log(`Cache miss ${cacheKey}, call TMDB`)
   const freshData = await fetchTmdb(schema, endpoint, params)
 
   await setCachedTmdbData(context, cacheKey, freshData, cacheDurationMs)
 
-  return freshData
+  return { data: freshData, fromCache: false }
 }
 
 export const getCachedData = query({

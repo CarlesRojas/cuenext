@@ -18,7 +18,7 @@ import {
 } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
-import { CACHE_DURATIONS, fetchTmdbCached } from './tmdbCache'
+import { CACHE_DURATIONS, fetchTmdbCached, fetchTmdbCachedWithMeta } from './tmdbCache'
 
 export const getDiscoverMovies = action({
   args: {
@@ -309,10 +309,10 @@ export const searchTv = action({
 export const getMovieDetails = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
-    const result = await fetchTmdbCached(context, tmdbMovieSchema, `/movie/${args.tmdbId}`)
+    const { data: result, fromCache } = await fetchTmdbCachedWithMeta(context, tmdbMovieSchema, `/movie/${args.tmdbId}`)
 
     const runtime = result.runtime
-    if (runtime)
+    if (!fromCache && runtime)
       await context.runMutation(api.movieInfo.saveMovieInfo, {
         movies: [{ tmdbId: result.id, runtime }],
       })
@@ -345,12 +345,15 @@ export const getShowExtras = action({
 export const getMovieExtras = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
-    const result = await fetchTmdbCached(context, tmdbMovieExtrasSchema, `/movie/${args.tmdbId}`, {
-      append_to_response: DETAIL_APPEND,
-    })
+    const { data: result, fromCache } = await fetchTmdbCachedWithMeta(
+      context,
+      tmdbMovieExtrasSchema,
+      `/movie/${args.tmdbId}`,
+      { append_to_response: DETAIL_APPEND },
+    )
 
     const runtime = result.runtime
-    if (runtime)
+    if (!fromCache && runtime)
       await context.runMutation(api.movieInfo.saveMovieInfo, {
         movies: [{ tmdbId: result.id, runtime }],
       })
@@ -454,13 +457,13 @@ export const getTvCredits = action({
 export const getShowSeasonDetails = action({
   args: { tmdbId: v.number(), seasonNumber: v.number() },
   handler: async (context, args) => {
-    const seasonDetails = await fetchTmdbCached(
+    const { data: seasonDetails, fromCache } = await fetchTmdbCachedWithMeta(
       context,
       tmdbSeasonSchema,
       `/tv/${args.tmdbId}/season/${args.seasonNumber}`,
     )
 
-    if (args.seasonNumber > 0 && seasonDetails.episodes && Array.isArray(seasonDetails.episodes)) {
+    if (!fromCache && args.seasonNumber > 0 && seasonDetails.episodes && Array.isArray(seasonDetails.episodes)) {
       const episodeRuntimes = seasonDetails.episodes
         .filter(episode => !!episode.runtime && episode.runtime > 0)
         .map(episode => ({
