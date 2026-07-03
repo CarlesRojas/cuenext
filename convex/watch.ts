@@ -1,6 +1,7 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+import { recomputeNextEpisodeInDb } from './lib/nextEpisodeCompute'
 import { requireUser } from './requireUser'
 
 export const getWatchedMovies = query({
@@ -221,7 +222,9 @@ export const markEpisodeWatched = mutation({
         releaseDate: args.releaseDate,
       })
 
-    return { wasStopped, wasNotFollowed }
+    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+
+    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed }
   },
 })
 
@@ -248,7 +251,7 @@ export const unmarkEpisodeWatched = mutation({
       )
       .unique()
 
-    if (!existing) return
+    if (!existing) return { nextEpisodeRecomputed: true }
 
     await context.db.delete(existing._id)
 
@@ -269,6 +272,10 @@ export const unmarkEpisodeWatched = mutation({
 
       if (followEntry) await context.db.delete(followEntry._id)
     }
+
+    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+
+    return { nextEpisodeRecomputed }
   },
 })
 
@@ -382,7 +389,9 @@ export const markMultipleEpisodesAsWatched = mutation({
         releaseDate: args.releaseDate,
       })
 
-    return { wasStopped, wasNotFollowed }
+    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+
+    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed }
   },
 })
 
@@ -434,5 +443,9 @@ export const unmarkMultipleEpisodesAsWatched = mutation({
 
       if (followEntry) await context.db.delete(followEntry._id)
     }
+
+    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+
+    return { nextEpisodeRecomputed }
   },
 })

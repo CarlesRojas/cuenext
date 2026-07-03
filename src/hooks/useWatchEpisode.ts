@@ -37,7 +37,8 @@ export function useWatchEpisode(episode: TvSectionItemMinimal, knownIsWatched?: 
   const watch = useMutation({
     mutationFn: async (args: Parameters<typeof markEpisodeWatched>[0]) => {
       const result = await markEpisodeWatched(args)
-      await updateNextEpisode({ tmdbId: args.showTmdbId })
+      // The mutation already recomputed the next episode unless its season data was stale.
+      if (!result.nextEpisodeRecomputed) await updateNextEpisode({ tmdbId: args.showTmdbId })
       await tmdbWatchlist({ media: 'tv', tmdbId: args.showTmdbId, add: true })
       return result
     },
@@ -47,8 +48,8 @@ export function useWatchEpisode(episode: TvSectionItemMinimal, knownIsWatched?: 
     mutationFn: async (
       args: { wasStopped?: boolean; wasNotFollowed?: boolean } & Parameters<typeof unmarkEpisodeWatched>[0],
     ) => {
-      await unmarkEpisodeWatched(args)
-      await updateNextEpisode({ tmdbId: episode.showTmdbId })
+      const result = await unmarkEpisodeWatched(args)
+      if (!result.nextEpisodeRecomputed) await updateNextEpisode({ tmdbId: episode.showTmdbId })
       if (args.wasNotFollowed) await tmdbWatchlist({ media: 'tv', tmdbId: episode.showTmdbId, add: false })
     },
   })

@@ -1,9 +1,25 @@
 import { v } from 'convex/values'
 import type { TmdbEpisode } from '../src/type/tmdb'
 import { tmdbTvSchema } from '../src/type/tmdb'
-import { api } from './_generated/api'
-import { action } from './_generated/server'
+import { api, internal } from './_generated/api'
+import { action, internalMutation } from './_generated/server'
+import { computeNextEpisode } from './lib/nextEpisodeCompute'
+import { requireUser } from './requireUser'
 import { fetchTmdbCached } from './tmdbCache'
+
+// Explicit so the action's return type doesn't circularly depend on the generated api types.
+export interface NextEpisodeData {
+  showTmdbId: number
+  seasonEpisodeCounts: number[]
+  seasonFirstEpisodeIndex: number[]
+  seasonDataUpdatedAt: number | null
+  numberOfSeasons: number
+  status: string
+  lastWatchedAt: number | null
+  seasonNumber: number
+  episodeNumber: number
+  watchedPercentage: number
+}
 
 const airedEpisodes = (episode: TmdbEpisode) => {
   if (!episode.air_date) return false
@@ -13,9 +29,45 @@ const airedEpisodes = (episode: TmdbEpisode) => {
   return airDate <= today
 }
 
+// Reads the watched episodes and writes the recomputed row in one transaction, so the
+// action above it only pays one internal call instead of a read query plus a write
+// mutation.
+export const applyNextEpisode = internalMutation({
+  args: {
+    showTmdbId: v.number(),
+    seasonEpisodeCounts: v.array(v.number()),
+    seasonFirstEpisodeIndex: v.array(v.number()),
+    seasonDataUpdatedAt: v.union(v.number(), v.null()),
+    numberOfSeasons: v.number(),
+    status: v.string(),
+  },
+  handler: async (context, args): Promise<NextEpisodeData> => {
+    const userId = await requireUser(context)
+
+    const watchedEpisodes = await context.db
+      .query('episode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
+      .collect()
+
+    const computed = computeNextEpisode(watchedEpisodes, args.seasonEpisodeCounts, args.seasonFirstEpisodeIndex)
+
+    const updateData = { ...args, ...computed }
+
+    const existing = await context.db
+      .query('nextEpisode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
+      .first()
+
+    if (existing) await context.db.patch(existing._id, updateData)
+    else await context.db.insert('nextEpisode', { userId, ...updateData })
+
+    return updateData
+  },
+})
+
 export const updateNextEpisode = action({
   args: { tmdbId: v.number(), forceFetch: v.optional(v.boolean()) },
-  handler: async (context, args) => {
+  handler: async (context, args): Promise<NextEpisodeData> => {
     const now = Date.now()
     const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000
 
@@ -58,59 +110,13 @@ export const updateNextEpisode = action({
       numberOfSeasons = nonSpecialSeasons.length
     }
 
-    const watchedEpisodes = await context.runQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: args.tmdbId })
-    const watchedEpisodesWithoutSpecials = watchedEpisodes.filter(ep => ep.seasonNumber >= 0)
-
-    const totalEpisodes = seasonEpisodeCounts.reduce((sum, count) => sum + count, 0)
-    const watchedPercentage =
-      totalEpisodes > 0 ? Math.round((watchedEpisodesWithoutSpecials.length / totalEpisodes) * 100) : 0
-
-    let nextSeasonNumber = -1
-    let nextEpisodeNumber = -1
-
-    const watchedSet = new Set(watchedEpisodesWithoutSpecials.map(ep => `${ep.seasonNumber}-${ep.episodeNumber}`))
-    found: for (let seasonIndex = 0; seasonIndex < seasonEpisodeCounts.length; seasonIndex++) {
-      const episodeCount = seasonEpisodeCounts[seasonIndex]
-
-      for (let episodeNumber = 0; episodeNumber < episodeCount; episodeNumber++) {
-        const displacement = seasonFirstEpisodeIndex[seasonIndex] || 0
-        if (!watchedSet.has(`${seasonIndex}-${episodeNumber + displacement}`)) {
-          nextSeasonNumber = seasonIndex
-          nextEpisodeNumber = episodeNumber + displacement
-          break found
-        }
-      }
-    }
-
-    const updateData: {
-      showTmdbId: number
-      lastWatchedAt: number | null
-      seasonNumber: number
-      episodeNumber: number
-      seasonEpisodeCounts: number[]
-      seasonFirstEpisodeIndex: number[]
-      seasonDataUpdatedAt: number | null
-      watchedPercentage: number
-      numberOfSeasons: number
-      status: string
-    } = {
+    return await context.runMutation(internal.nextEpisode.applyNextEpisode, {
       showTmdbId: args.tmdbId,
-      lastWatchedAt:
-        watchedEpisodesWithoutSpecials.length > 0
-          ? Math.max(...watchedEpisodesWithoutSpecials.map(ep => ep.watchedAt))
-          : null,
-      seasonNumber: nextSeasonNumber,
-      episodeNumber: nextEpisodeNumber,
       seasonEpisodeCounts,
       seasonFirstEpisodeIndex,
       seasonDataUpdatedAt: needsSeasonDataUpdate ? now : existingNextEpisode.seasonDataUpdatedAt,
-      watchedPercentage,
       numberOfSeasons,
       status,
-    }
-
-    await context.runMutation(api.watch.upsertNextEpisode, updateData)
-
-    return updateData
+    })
   },
 })

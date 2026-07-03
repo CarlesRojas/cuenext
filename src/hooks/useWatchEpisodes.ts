@@ -36,7 +36,8 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
         releaseDate: 0,
       })
 
-      await updateNextEpisode({ tmdbId: showId })
+      // The mutation already recomputed the next episode unless its season data was stale.
+      if (!result.nextEpisodeRecomputed) await updateNextEpisode({ tmdbId: showId })
       await tmdbWatchlist({ media: 'tv', tmdbId: showId, add: true })
 
       return result
@@ -53,14 +54,14 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
       wasStopped?: boolean
       wasNotFollowed?: boolean
     }) => {
-      await unmarkEpisodesWatched({
+      const result = await unmarkEpisodesWatched({
         showTmdbId: showId,
         episodes,
         wasStopped,
         wasNotFollowed,
       })
 
-      await updateNextEpisode({ tmdbId: showId })
+      if (!result.nextEpisodeRecomputed) await updateNextEpisode({ tmdbId: showId })
       if (wasNotFollowed) await tmdbWatchlist({ media: 'tv', tmdbId: showId, add: false })
     },
   })
