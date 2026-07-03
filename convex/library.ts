@@ -57,17 +57,20 @@ export const unfollow = mutation({
   },
 })
 
-export const checkIsFollowed = query({
-  args: { type: v.union(v.literal('movie'), v.literal('tv')), tmdbId: v.number() },
+// Returns every followed tmdbId for the given type in a single query. Cards check
+// membership locally instead of each issuing its own checkIsFollowed lookup, which
+// collapses the per-card N+1 into one shared, deduplicated subscription.
+export const listFollowedIds = query({
+  args: { type: v.union(v.literal('movie'), v.literal('tv')) },
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
-    const existing = await context.db
+    const followed = await context.db
       .query('follow')
-      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
-      .unique()
+      .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', args.type))
+      .collect()
 
-    return !!existing
+    return followed.map(f => f.tmdbId)
   },
 })
 
