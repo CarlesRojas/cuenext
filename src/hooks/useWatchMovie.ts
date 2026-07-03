@@ -1,18 +1,22 @@
 import { api } from '#/../convex/_generated/api'
+import { useMediaUserState } from '#/hooks/useMediaUserState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { MovieSectionItem } from '#/type/section'
 import { useClerk } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
 
-export function useWatchMovie(movie: MovieSectionItem) {
+// Section items already carry watchedAt, so watchlist cards derive the watched state
+// locally by passing `knownIsWatched` and skip the query; the detail page (which builds
+// the item from TMDB data) leaves it undefined and subscribes to the shared per-title
+// user-state query.
+export function useWatchMovie(movie: MovieSectionItem, knownIsWatched?: boolean) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isWatched, isFetching: isWatchedLoading } = useQuery(
-    convexQuery(api.watch.checkMovieWatched, { tmdbId: movie.tmdbId }),
-  )
+  const { userState, isUserStateLoading } = useMediaUserState('movie', movie.tmdbId, knownIsWatched === undefined)
+  const isWatched = knownIsWatched !== undefined ? knownIsWatched : userState?.isWatched
+  const isWatchedLoading = knownIsWatched === undefined && isUserStateLoading
 
   const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
   const unmarkMovieWatched = useDbMutation(api.watch.unmarkMovieWatched)

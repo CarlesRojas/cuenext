@@ -45,7 +45,8 @@ function EpisodeWrapper({
   showWatch: boolean
   showProgress: boolean
 }) {
-  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode(episode)
+  // A section item is by definition the next unwatched episode, so no lookup is needed.
+  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchEpisode(episode, false)
 
   const { name, poster, backdrop, numberOfSeasons, lastWatchedAt, watchedPercentage } = episode
   const seasonsText = numberOfSeasons ? `${numberOfSeasons} Season${numberOfSeasons > 1 ? 's' : ''}` : null
@@ -95,7 +96,8 @@ function EmptyEpisodeWrapper(episode: TvSectionItem) {
 }
 
 function MovieWrapper({ movie, showWatch }: { movie: MovieSectionItem; showWatch: boolean }) {
-  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie(movie)
+  // Section items carry watchedAt, so list rows need no lookup.
+  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie(movie, !!movie.watchedAt)
 
   const { name, poster, backdrop } = movie
 

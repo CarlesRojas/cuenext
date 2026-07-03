@@ -1,19 +1,18 @@
 import { api } from '#/../convex/_generated/api'
+import { useMediaUserState } from '#/hooks/useMediaUserState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbTvMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useMutation as useDbMutation } from 'convex/react'
 
 export function useStopEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isStopped, isFetching: isStoppedLoading } = useQuery({
-    ...convexQuery(api.stopped.checkIsStopped, { tmdbId: episode.id }),
-    enabled: clerk.isSignedIn,
-  })
+  const { userState, isUserStateLoading } = useMediaUserState('tv', episode.id)
+  const isStopped = userState?.isStopped
+  const isStoppedLoading = isUserStateLoading
 
   const setStopped = useDbMutation(api.stopped.setStopped)
   const setUnstopped = useDbMutation(api.stopped.setUnstopped)

@@ -1,19 +1,18 @@
 import { api } from '#/../convex/_generated/api'
+import { useMediaUserState } from '#/hooks/useMediaUserState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbMovieMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 export function useFavoriteMovie(movie: TmdbMovieMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isFavorited, isFetching: isFavoriteLoading } = useQuery({
-    ...convexQuery(api.favorites.checkIsFavorite, { type: 'movie', tmdbId: movie.id }),
-    enabled: clerk.isSignedIn,
-  })
+  const { userState, isUserStateLoading } = useMediaUserState('movie', movie.id)
+  const isFavorited = userState?.isFavorite
+  const isFavoriteLoading = isUserStateLoading
 
   const markAsFavorite = useDbMutation(api.favorites.favoriteItem)
   const unmarkAsFavorite = useDbMutation(api.favorites.unfavoriteItem)

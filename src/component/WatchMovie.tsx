@@ -7,7 +7,8 @@ interface Props {
 }
 
 export default function WatchMovie({ movie }: Props) {
-  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie(movie)
+  // Section items carry watchedAt, so the card needs no lookup.
+  const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie(movie, !!movie.watchedAt)
 
   return (
     <PosterCard
