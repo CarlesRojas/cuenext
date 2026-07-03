@@ -31,11 +31,10 @@ async function getCachedTmdbData(context: ActionCtx, endpoint: string): Promise<
   const cached = await context.runQuery(api.tmdbCache.getCachedData, { endpoint })
   if (!cached) return null
 
+  // Expired rows are not deleted here: the setCachedData upsert that follows a miss
+  // overwrites them in place, and the cleanup cron removes the ones never fetched again.
   const now = Date.now()
-  if (now > cached.expiresAt) {
-    await context.runMutation(api.tmdbCache.deleteCachedData, { id: cached._id })
-    return null
-  }
+  if (now > cached.expiresAt) return null
 
   return cached.data
 }
