@@ -1,19 +1,17 @@
 import { api } from '#/../convex/_generated/api'
+import { useFollowedIds } from '#/hooks/useFollowedIds'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbTvMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
-import { convexQuery } from '@convex-dev/react-query'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 export function useFollowEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
 
-  const { data: isFollowed, isFetching: isFollowedLoading } = useQuery({
-    ...convexQuery(api.library.checkIsFollowed, { type: 'tv', tmdbId: episode.id }),
-    enabled: clerk.isSignedIn,
-  })
+  const { followedIds, isFollowedLoading } = useFollowedIds('tv')
+  const isFollowed = followedIds.has(episode.id)
 
   const markAsFollowed = useDbMutation(api.library.follow)
   const unmarkAsFollowed = useDbMutation(api.library.unfollow)
