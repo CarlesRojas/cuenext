@@ -4,7 +4,7 @@ import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbTvMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { useMutation } from '@tanstack/react-query'
-import { useAction, useMutation as useDbMutation } from 'convex/react'
+import { useMutation as useDbMutation } from 'convex/react'
 
 export function useFavoriteEpisode(episode: TmdbTvMinimal) {
   const clerk = useClerk()
@@ -16,23 +16,16 @@ export function useFavoriteEpisode(episode: TmdbTvMinimal) {
 
   const markAsFavorite = useDbMutation(api.favorites.favoriteItem)
   const unmarkAsFavorite = useDbMutation(api.favorites.unfavoriteItem)
-  const tmdbFavorites = useAction(api.tmdbAccount.addToFavorites)
-  const tmdbWatchlist = useAction(api.tmdbAccount.addToWatchlist)
 
   const favorite = useMutation({
     mutationFn: async (args: Parameters<typeof markAsFavorite>[0]) => {
-      const result = await markAsFavorite(args)
-      await tmdbWatchlist({ media: 'tv', tmdbId: args.tmdbId, add: true })
-      await tmdbFavorites({ media: 'tv', tmdbId: args.tmdbId, add: true })
-      return result
+      return await markAsFavorite(args)
     },
   })
 
   const unfavorite = useMutation({
     mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkAsFavorite>[0]) => {
       await unmarkAsFavorite(args)
-      await tmdbFavorites({ media: 'tv', tmdbId: args.tmdbId, add: false })
-      if (args.wasNotFollowed) await tmdbWatchlist({ media: 'tv', tmdbId: args.tmdbId, add: false })
     },
   })
 

@@ -4,7 +4,7 @@ import { useUndoToast } from '#/hooks/useUndoToast'
 import type { MovieSectionItem } from '#/type/section'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { useMutation } from '@tanstack/react-query'
-import { useAction, useMutation as useDbMutation } from 'convex/react'
+import { useMutation as useDbMutation } from 'convex/react'
 
 // Section items already carry watchedAt, so watchlist cards derive the watched state
 // locally by passing `knownIsWatched` and skip the query; the detail page (which builds
@@ -20,20 +20,16 @@ export function useWatchMovie(movie: MovieSectionItem, knownIsWatched?: boolean)
 
   const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
   const unmarkMovieWatched = useDbMutation(api.watch.unmarkMovieWatched)
-  const tmdbWatchlist = useAction(api.tmdbAccount.addToWatchlist)
 
   const watch = useMutation({
     mutationFn: async (args: Parameters<typeof markMovieWatched>[0]) => {
-      const result = await markMovieWatched(args)
-      await tmdbWatchlist({ media: 'movie', tmdbId: args.tmdbId, add: true })
-      return result
+      return await markMovieWatched(args)
     },
   })
 
   const unwatch = useMutation({
     mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkMovieWatched>[0]) => {
       await unmarkMovieWatched(args)
-      if (args.wasNotFollowed) await tmdbWatchlist({ media: 'movie', tmdbId: args.tmdbId, add: false })
     },
   })
 
