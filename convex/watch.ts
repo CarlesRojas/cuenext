@@ -19,20 +19,6 @@ export const getWatchedMovies = query({
   },
 })
 
-export const checkMovieWatched = query({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const existing = await context.db
-      .query('movie')
-      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
-      .unique()
-
-    return !!existing
-  },
-})
-
 // TODO optimistic update
 export const markMovieWatched = mutation({
   args: {
@@ -140,30 +126,6 @@ export const getWatchedEpisodesForShow = query({
       .collect()
 
     return episodes
-  },
-})
-
-export const checkEpisodeWatched = query({
-  args: {
-    showTmdbId: v.number(),
-    seasonNumber: v.number(),
-    episodeNumber: v.number(),
-  },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const existing = await context.db
-      .query('episode')
-      .withIndex('by_user_show_season_episode', q =>
-        q
-          .eq('userId', userId)
-          .eq('showTmdbId', args.showTmdbId)
-          .eq('seasonNumber', args.seasonNumber)
-          .eq('episodeNumber', args.episodeNumber),
-      )
-      .unique()
-
-    return !!existing
   },
 })
 
@@ -306,32 +268,6 @@ export const getNextEpisode = query({
       .unique()
 
     return nextEpisode
-  },
-})
-
-export const upsertNextEpisode = mutation({
-  args: {
-    showTmdbId: v.number(),
-    lastWatchedAt: v.union(v.number(), v.null()),
-    seasonNumber: v.number(),
-    episodeNumber: v.number(),
-    seasonEpisodeCounts: v.array(v.number()),
-    seasonFirstEpisodeIndex: v.array(v.number()),
-    seasonDataUpdatedAt: v.union(v.number(), v.null()),
-    watchedPercentage: v.number(),
-    numberOfSeasons: v.number(),
-    status: v.string(),
-  },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const existing = await context.db
-      .query('nextEpisode')
-      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
-      .first()
-
-    if (existing) await context.db.patch(existing._id, { ...args })
-    else await context.db.insert('nextEpisode', { userId, ...args })
   },
 })
 

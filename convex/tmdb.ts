@@ -3,7 +3,6 @@ import { z } from 'zod'
 import type { TmdbMovie, TmdbTv } from '../src/type/tmdb'
 import {
   paginated,
-  tmdbCreditsSchema,
   tmdbEpisodeMinimalSchema,
   tmdbMovieExtrasSchema,
   tmdbMovieMinimalSchema,
@@ -13,8 +12,6 @@ import {
   tmdbTvExtrasSchema,
   tmdbTvMinimalSchema,
   tmdbTvSchema,
-  tmdbVideosResponseSchema,
-  tmdbWatchProvidersSchema,
 } from '../src/type/tmdb'
 import { api } from './_generated/api'
 import { action } from './_generated/server'
@@ -306,21 +303,6 @@ export const searchTv = action({
   },
 })
 
-export const getMovieDetails = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    const { data: result, fromCache } = await fetchTmdbCachedWithMeta(context, tmdbMovieSchema, `/movie/${args.tmdbId}`)
-
-    const runtime = result.runtime
-    if (!fromCache && runtime)
-      await context.runMutation(api.movieInfo.saveMovieInfo, {
-        movies: [{ tmdbId: result.id, runtime }],
-      })
-
-    return result
-  },
-})
-
 export const getShowDetails = action({
   args: { tmdbId: v.number() },
   handler: async (context, args) => {
@@ -359,98 +341,6 @@ export const getMovieExtras = action({
       })
 
     return result
-  },
-})
-
-export const getMovieWatchProviders = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    return fetchTmdbCached(
-      context,
-      tmdbWatchProvidersSchema,
-      `/movie/${args.tmdbId}/watch/providers`,
-      {},
-      CACHE_DURATIONS.ONE_WEEK,
-    )
-  },
-})
-
-export const getShowWatchProviders = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    return fetchTmdbCached(
-      context,
-      tmdbWatchProvidersSchema,
-      `/tv/${args.tmdbId}/watch/providers`,
-      {},
-      CACHE_DURATIONS.ONE_WEEK,
-    )
-  },
-})
-
-export const getMovieVideos = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    return fetchTmdbCached(
-      context,
-      tmdbVideosResponseSchema,
-      `/movie/${args.tmdbId}/videos`,
-      {},
-      CACHE_DURATIONS.ONE_WEEK,
-    )
-  },
-})
-
-export const getMovieRecommendations = action({
-  args: { tmdbId: v.number(), page: v.optional(v.number()) },
-  handler: async (context, args) => {
-    const params: Record<string, string> = {}
-    if (args.page) params.page = String(args.page)
-
-    return fetchTmdbCached(
-      context,
-      paginated(tmdbMovieMinimalSchema),
-      `/movie/${args.tmdbId}/recommendations`,
-      params,
-      CACHE_DURATIONS.ONE_WEEK,
-    )
-  },
-})
-
-export const getTvRecommendations = action({
-  args: { tmdbId: v.number(), page: v.optional(v.number()) },
-  handler: async (context, args) => {
-    const params: Record<string, string> = {}
-    if (args.page) params.page = String(args.page)
-
-    return fetchTmdbCached(
-      context,
-      paginated(tmdbTvMinimalSchema),
-      `/tv/${args.tmdbId}/recommendations`,
-      params,
-      CACHE_DURATIONS.ONE_WEEK,
-    )
-  },
-})
-
-export const getTvVideos = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    return fetchTmdbCached(context, tmdbVideosResponseSchema, `/tv/${args.tmdbId}/videos`, {}, CACHE_DURATIONS.ONE_WEEK)
-  },
-})
-
-export const getMovieCredits = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    return fetchTmdbCached(context, tmdbCreditsSchema, `/movie/${args.tmdbId}/credits`, {}, CACHE_DURATIONS.ONE_WEEK)
-  },
-})
-
-export const getTvCredits = action({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    return fetchTmdbCached(context, tmdbCreditsSchema, `/tv/${args.tmdbId}/credits`, {}, CACHE_DURATIONS.ONE_WEEK)
   },
 })
 

@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation } from './_generated/server'
 import { requireUser } from './requireUser'
 
 // TODO optimistic update
@@ -33,19 +33,5 @@ export const setUnstopped = mutation({
       .unique()
 
     if (existingStopped) await context.db.delete(existingStopped._id)
-  },
-})
-
-export const checkIsStopped = query({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const existing = await context.db
-      .query('stopped')
-      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
-      .unique()
-
-    return !!existing
   },
 })

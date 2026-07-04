@@ -8,7 +8,7 @@ import { useAction, useMutation as useDbMutation } from 'convex/react'
 
 // All episode rows of a show share one getWatchedEpisodesForShow subscription (the show page
 // already loads it with identical args, so react-query dedupes them) instead of each row
-// issuing its own checkEpisodeWatched lookup. Callers that already know the watched state
+// issuing its own per-episode lookup. Callers that already know the watched state
 // (watchlist cards, whose item is by definition the next unwatched episode) pass
 // `knownIsWatched` to skip the query entirely.
 export function useWatchEpisode(episode: TvSectionItemMinimal, knownIsWatched?: boolean) {
