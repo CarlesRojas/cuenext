@@ -1,2 +1,0 @@
-export const TMDB_AUTH_SUCCESS = 'TMDB_AUTH_SUCCESS'
-export const TMDB_AUTH_ERROR = 'TMDB_AUTH_ERROR'
