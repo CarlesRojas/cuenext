@@ -12,6 +12,7 @@ import type * as crons from "../crons.js";
 import type * as episodeInfo from "../episodeInfo.js";
 import type * as favorites from "../favorites.js";
 import type * as lib_nextEpisodeCompute from "../lib/nextEpisodeCompute.js";
+import type * as lib_statsDelta from "../lib/statsDelta.js";
 import type * as lib_tmdbClient from "../lib/tmdbClient.js";
 import type * as library from "../library.js";
 import type * as media from "../media.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   episodeInfo: typeof episodeInfo;
   favorites: typeof favorites;
   "lib/nextEpisodeCompute": typeof lib_nextEpisodeCompute;
+  "lib/statsDelta": typeof lib_statsDelta;
   "lib/tmdbClient": typeof lib_tmdbClient;
   library: typeof library;
   media: typeof media;
