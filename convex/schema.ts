@@ -94,6 +94,18 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index('by_tmdbId', ['tmdbId']),
 
+  // Materialized watch statistics per user, updated incrementally by the watch mutations
+  // and rebuilt from scratch by stats.recomputeStats. Follow counts are cheap enough to
+  // read live, so they are not stored here.
+  userStats: defineTable({
+    userId: v.string(),
+    episodesWatchedCount: v.number(),
+    showTimeMinutes: v.number(),
+    moviesWatchedCount: v.number(),
+    movieTimeMinutes: v.number(),
+    recomputedAt: v.number(),
+  }).index('by_user', ['userId']),
+
   tmdbAccountLink: defineTable({
     userId: v.string(),
     tmdbAccountId: v.number(),

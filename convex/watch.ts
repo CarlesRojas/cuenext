@@ -2,6 +2,7 @@ import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { recomputeNextEpisodeInDb } from './lib/nextEpisodeCompute'
+import { applyStatsDelta, getEpisodeRuntime, getMovieRuntime } from './lib/statsDelta'
 import { requireUser } from './requireUser'
 
 export const getWatchedMovies = query({
@@ -51,7 +52,12 @@ export const markMovieWatched = mutation({
       .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
       .unique()
 
-    if (!existing) await context.db.insert('movie', { userId, tmdbId: args.tmdbId, watchedAt: watchTimestamp })
+    if (!existing) {
+      await context.db.insert('movie', { userId, tmdbId: args.tmdbId, watchedAt: watchTimestamp })
+
+      const runtime = await getMovieRuntime(context, args.tmdbId)
+      await applyStatsDelta(context, userId, { moviesWatchedCount: 1, movieTimeMinutes: runtime })
+    }
 
     const followEntry = await context.db
       .query('follow')
@@ -93,6 +99,9 @@ export const unmarkMovieWatched = mutation({
     if (!existing) return
 
     await context.db.delete(existing._id)
+
+    const runtime = await getMovieRuntime(context, args.tmdbId)
+    await applyStatsDelta(context, userId, { moviesWatchedCount: -1, movieTimeMinutes: -runtime })
 
     if (args.wasNotFollowed) {
       const followEntry = await context.db
@@ -185,7 +194,7 @@ export const markEpisodeWatched = mutation({
       )
       .unique()
 
-    if (!existing)
+    if (!existing) {
       await context.db.insert('episode', {
         userId,
         watchedAt: watchTimestamp,
@@ -193,6 +202,10 @@ export const markEpisodeWatched = mutation({
         seasonNumber: args.seasonNumber,
         episodeNumber: args.episodeNumber,
       })
+
+      const runtime = await getEpisodeRuntime(context, args.showTmdbId, args.seasonNumber, args.episodeNumber)
+      await applyStatsDelta(context, userId, { episodesWatchedCount: 1, showTimeMinutes: runtime })
+    }
 
     const stoppedEntry = await context.db
       .query('stopped')
@@ -254,6 +267,9 @@ export const unmarkEpisodeWatched = mutation({
     if (!existing) return { nextEpisodeRecomputed: true }
 
     await context.db.delete(existing._id)
+
+    const runtime = await getEpisodeRuntime(context, args.showTmdbId, args.seasonNumber, args.episodeNumber)
+    await applyStatsDelta(context, userId, { episodesWatchedCount: -1, showTimeMinutes: -runtime })
 
     if (args.wasStopped) {
       const stoppedEntry = await context.db
@@ -339,6 +355,9 @@ export const markMultipleEpisodesAsWatched = mutation({
     const userId = await requireUser(context)
     const now = Date.now()
 
+    let insertedCount = 0
+    let insertedMinutes = 0
+
     for (const episode of args.episodes) {
       const existing = await context.db
         .query('episode')
@@ -351,7 +370,7 @@ export const markMultipleEpisodesAsWatched = mutation({
         )
         .unique()
 
-      if (!existing)
+      if (!existing) {
         await context.db.insert('episode', {
           userId,
           showTmdbId: args.showTmdbId,
@@ -359,7 +378,19 @@ export const markMultipleEpisodesAsWatched = mutation({
           episodeNumber: episode.episodeNumber,
           watchedAt: episode.watchedAt ?? now,
         })
+
+        insertedCount++
+        insertedMinutes += await getEpisodeRuntime(
+          context,
+          args.showTmdbId,
+          episode.seasonNumber,
+          episode.episodeNumber,
+        )
+      }
     }
+
+    if (insertedCount > 0)
+      await applyStatsDelta(context, userId, { episodesWatchedCount: insertedCount, showTimeMinutes: insertedMinutes })
 
     const stoppedEntry = await context.db
       .query('stopped')
@@ -411,6 +442,9 @@ export const unmarkMultipleEpisodesAsWatched = mutation({
   handler: async (context, args) => {
     const userId = await requireUser(context)
 
+    let deletedCount = 0
+    let deletedMinutes = 0
+
     for (const episode of args.episodes) {
       const existing = await context.db
         .query('episode')
@@ -423,8 +457,16 @@ export const unmarkMultipleEpisodesAsWatched = mutation({
         )
         .unique()
 
-      if (existing) await context.db.delete(existing._id)
+      if (existing) {
+        await context.db.delete(existing._id)
+
+        deletedCount++
+        deletedMinutes += await getEpisodeRuntime(context, args.showTmdbId, episode.seasonNumber, episode.episodeNumber)
+      }
     }
+
+    if (deletedCount > 0)
+      await applyStatsDelta(context, userId, { episodesWatchedCount: -deletedCount, showTimeMinutes: -deletedMinutes })
 
     if (args.wasStopped) {
       const stoppedEntry = await context.db

@@ -5,13 +5,20 @@ import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
-import { convexAction, convexQuery } from '@convex-dev/react-query'
+import { convexQuery } from '@convex-dev/react-query'
 import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useAction } from 'convex/react'
 import type { ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
 import { api } from '../../convex/_generated/api'
+
+// Rebuild the materialized stats row when it doesn't exist yet or hasn't been fully
+// recomputed in a month (the incremental deltas keep it current in between; the periodic
+// rebuild self-heals any drift).
+const STATS_RECOMPUTE_AFTER_MS = 30 * 24 * 60 * 60 * 1000
 
 function formatWatchTime(minutes: number): string {
   if (minutes === 0) return '0h'
@@ -74,15 +81,26 @@ function ProfilePage() {
   const clerk = useClerk()
   const { user } = useUser()
 
-  const { data: showStats } = useQuery({
-    ...convexAction(api.stats.getShowStats),
-    enabled: !!user && media === 'tv',
+  const { data: stats } = useQuery({
+    ...convexQuery(api.stats.getStats),
+    enabled: !!user,
   })
 
-  const { data: movieStats } = useQuery({
-    ...convexAction(api.stats.getMovieStats),
-    enabled: !!user && media === 'movie',
-  })
+  const recomputeStats = useAction(api.stats.recomputeStats)
+  const isRecomputingRef = useRef(false)
+
+  useEffect(() => {
+    const needsRecompute = stats === null || (stats && stats.recomputedAt < Date.now() - STATS_RECOMPUTE_AFTER_MS)
+    if (!user || !needsRecompute || isRecomputingRef.current) return
+
+    isRecomputingRef.current = true
+    recomputeStats().catch(() => {
+      isRecomputingRef.current = false
+    })
+  }, [user, stats, recomputeStats])
+
+  const showStats = stats?.showStats
+  const movieStats = stats?.movieStats
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections),
