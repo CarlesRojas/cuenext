@@ -2,7 +2,7 @@ import { Button } from '#/component/ui/button'
 import { useUserDataTransfer } from '#/hooks/useUserDataTransfer'
 import { cn } from '#/lib/cn'
 import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
-import { faFileExport, faFileImport, faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { faRightFromBracket, faRightToBracket, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Authenticated, Unauthenticated, useConvexAuth } from 'convex/react'
 
@@ -51,12 +51,12 @@ export function User({ isMobile, isExpanded }: UserProps) {
           <UserButton.MenuItems>
             <UserButton.Action
               label="Export data"
-              labelIcon={<FontAwesomeIcon icon={faFileExport} />}
+              labelIcon={<FontAwesomeIcon icon={faRightFromBracket} rotation={270} />}
               onClick={exportUserData}
             />
             <UserButton.Action
               label="Import data"
-              labelIcon={<FontAwesomeIcon icon={faFileImport} />}
+              labelIcon={<FontAwesomeIcon icon={faRightToBracket} rotation={90} />}
               onClick={importUserData}
             />
           </UserButton.MenuItems>
