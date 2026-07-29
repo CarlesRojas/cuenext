@@ -59,4 +59,10 @@
   .cl-avatarImageActions ~ p {
     @apply hidden!;
   }
+
+  /* Color the whole sign out entry (icon and label) in the user menu red */
+  .cl-userButtonPopoverCustomItemButton:has(.sign-out-menu-icon),
+  .cl-userButtonPopoverCustomItemButton:has(.sign-out-menu-icon) * {
+    @apply text-red-400!;
+  }
 }
