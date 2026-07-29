@@ -7,7 +7,7 @@ import WatchMovie from '#/component/WatchMovie'
 import useCheckForNewEpisodes from '#/hooks/useCheckForNewEpisodes'
 import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
-import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
+import { SignInButton, useAuth } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { faArrowRight, faCalendarDays, faCompass, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -22,17 +22,17 @@ export const Route = createFileRoute('/')({
 const MAX_SECTION_ITEMS = 12
 
 function App() {
-  const clerk = useClerk()
+  const { isLoaded, isSignedIn } = useAuth()
   const { media } = useSearchParams()
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections, {}),
-    enabled: media === 'tv' && clerk.isSignedIn,
+    enabled: media === 'tv' && !!isSignedIn,
   })
 
   const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getMovieSections, {}),
-    enabled: media === 'movie' && clerk.isSignedIn,
+    enabled: media === 'movie' && !!isSignedIn,
   })
 
   useCheckForNewEpisodes({ waitingForEpisodes: tvSections?.waitingForEpisodes })
@@ -43,7 +43,7 @@ function App() {
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Watchlist</h1>
       </header>
 
-      {!clerk.isSignedIn && (
+      {isLoaded && !isSignedIn && (
         <div className="screen-px mb-8 flex flex-col gap-4">
           <span className="font-semibold tracking-wide text-neutral-500">
             Sign in to view upcoming movies and TV episodes

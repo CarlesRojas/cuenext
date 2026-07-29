@@ -9,7 +9,7 @@ import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { TMDB_STALE_TIME, tmdbStale } from '#/lib/tmdbQuery'
 import { UrlParamsSchema } from '#/type/url'
-import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
+import { SignInButton, useAuth } from '@clerk/tanstack-react-start'
 import { convexAction } from '@convex-dev/react-query'
 import { faForward, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -22,7 +22,7 @@ export const Route = createFileRoute('/discover')({
 })
 
 function RouteComponent() {
-  const clerk = useClerk()
+  const { isLoaded, isSignedIn } = useAuth()
   const { media } = useSearchParams()
 
   const today = new Date()
@@ -99,7 +99,7 @@ function RouteComponent() {
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Discover</h1>
       </header>
 
-      {!clerk.isSignedIn && (
+      {isLoaded && !isSignedIn && (
         <div className="screen-px mb-8 flex flex-col gap-4">
           <span className="font-semibold tracking-wide text-neutral-500">
             Sign in to view upcoming movies and TV episodes

@@ -1,6 +1,6 @@
 import { api } from '#/../convex/_generated/api'
 import { Button } from '#/component/ui/button'
-import { useClerk } from '@clerk/tanstack-react-start'
+import { useAuth } from '@clerk/tanstack-react-start'
 import { faFileImport, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useMutation } from '@tanstack/react-query'
@@ -32,7 +32,7 @@ type ImportResult = {
 }
 
 function ImportPage() {
-  const clerk = useClerk()
+  const { isLoaded, isSignedIn } = useAuth()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [importing, setImporting] = useState(false)
@@ -173,7 +173,9 @@ function ImportPage() {
     }
   }
 
-  if (!clerk.isSignedIn) {
+  if (!isLoaded) return null
+
+  if (!isSignedIn) {
     return (
       <div className="screen-py screen-px flex w-full flex-col items-center gap-8">
         <div className="text-center">
