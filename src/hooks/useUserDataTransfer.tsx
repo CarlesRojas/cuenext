@@ -2,6 +2,9 @@ import type { UserDataExport } from '#/type/userData'
 import { USER_DATA_EXPORT_VERSION, UserDataExportSchema } from '#/type/userData'
 import { getAllPages } from '#/utils/getAllPages'
 import { useUser } from '@clerk/tanstack-react-start'
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import { faCheckCircle, faCircleXmark, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAction, useConvex } from 'convex/react'
 import type { FunctionArgs } from 'convex/server'
 import { useRef } from 'react'
@@ -9,6 +12,30 @@ import { toast } from 'sonner'
 import { api } from '../../convex/_generated/api'
 
 const TOAST_ID = 'user-data-transfer'
+
+// Same inline-icon toast layout as useUndoToast, so transfer notifications look like the
+// rest of the app's toasts.
+function showTransferToast(
+  message: string,
+  { icon, iconClass, spin, duration }: { icon: IconDefinition; iconClass: string; spin?: boolean; duration?: number },
+) {
+  toast(
+    <div className="flex w-full items-center gap-2">
+      <FontAwesomeIcon icon={icon} spin={spin} className={`size-4 min-h-4 min-w-4 ${iconClass}`} />
+      <span className="line-clamp-2 leading-5">{message}</span>
+    </div>,
+    { id: TOAST_ID, duration },
+  )
+}
+
+const showProgressToast = (message: string) =>
+  showTransferToast(message, { icon: faSpinner, iconClass: 'text-sky-500', spin: true, duration: Infinity })
+
+const showSuccessToast = (message: string) =>
+  showTransferToast(message, { icon: faCheckCircle, iconClass: 'text-sky-500', duration: 4000 })
+
+const showErrorToast = (message: string) =>
+  showTransferToast(message, { icon: faCircleXmark, iconClass: 'text-red-400', duration: 4000 })
 
 // Rows per importChunk call, small enough to stay well within Convex's per-mutation limits
 // while keeping the number of round trips low.
@@ -58,7 +85,7 @@ export function useUserDataTransfer() {
     if (isTransferringRef.current) return
     isTransferringRef.current = true
 
-    toast.loading('Exporting your data...', { id: TOAST_ID })
+    showProgressToast('Exporting your data...')
 
     try {
       const [snapshot, watchedMovies, watchedEpisodes] = await Promise.all([
@@ -86,12 +113,11 @@ export function useUserDataTransfer() {
       const username = user?.username || user?.fullName || user?.primaryEmailAddress?.emailAddress.split('@')[0]
       downloadJsonFile(buildExportFilename(username ?? undefined), exportData)
 
-      toast.success(
+      showSuccessToast(
         `Exported ${exportData.follows.length} titles, ${exportData.watchedEpisodes.length} episodes and ${exportData.watchedMovies.length} movies`,
-        { id: TOAST_ID },
       )
     } catch {
-      toast.error('Export failed. Please try again.', { id: TOAST_ID })
+      showErrorToast('Export failed. Please try again.')
     } finally {
       isTransferringRef.current = false
     }
@@ -101,7 +127,7 @@ export function useUserDataTransfer() {
     type ImportChunk = FunctionArgs<typeof api.userData.importChunk>
 
     const chunks: ImportChunk[] = []
-    const pushChunks = <T>(rows: T[], toChunk: (slice: T[]) => ImportChunk) => {
+    const pushChunks = <T,>(rows: T[], toChunk: (slice: T[]) => ImportChunk) => {
       for (let i = 0; i < rows.length; i += IMPORT_CHUNK_SIZE)
         chunks.push(toChunk(rows.slice(i, i + IMPORT_CHUNK_SIZE)))
     }
@@ -113,7 +139,7 @@ export function useUserDataTransfer() {
     pushChunks(data.watchedEpisodes, watchedEpisodes => ({ watchedEpisodes }))
 
     if (chunks.length === 0) {
-      toast.error('This file contains no data to import.', { id: TOAST_ID })
+      showErrorToast('This file contains no data to import.')
       return
     }
 
@@ -121,7 +147,7 @@ export function useUserDataTransfer() {
     let skipped = 0
 
     for (let i = 0; i < chunks.length; i++) {
-      toast.loading(`Importing your data... ${i + 1}/${chunks.length}`, { id: TOAST_ID })
+      showProgressToast(`Importing your data... ${i + 1}/${chunks.length}`)
       const result = await convex.mutation(api.userData.importChunk, chunks[i])
       imported += result.imported
       skipped += result.skipped
@@ -138,18 +164,15 @@ export function useUserDataTransfer() {
 
     for (let i = 0; i < showIds.length; i += NEXT_EPISODE_BATCH_SIZE) {
       const batch = showIds.slice(i, i + NEXT_EPISODE_BATCH_SIZE)
-      toast.loading(`Preparing your shows... ${Math.min(i + batch.length, showIds.length)}/${showIds.length}`, {
-        id: TOAST_ID,
-      })
+      showProgressToast(`Preparing your shows... ${Math.min(i + batch.length, showIds.length)}/${showIds.length}`)
       await Promise.all(batch.map(tmdbId => updateNextEpisode({ tmdbId }).catch(() => null)))
     }
 
-    toast.loading('Recalculating your stats...', { id: TOAST_ID })
+    showProgressToast('Recalculating your stats...')
     await recomputeStats().catch(() => null)
 
-    toast.success(
+    showSuccessToast(
       skipped > 0 ? `Imported ${imported} items (${skipped} already existed)` : `Imported ${imported} items`,
-      { id: TOAST_ID },
     )
   }
 
@@ -173,14 +196,14 @@ export function useUserDataTransfer() {
         const parsed = UserDataExportSchema.safeParse(JSON.parse(await file.text()))
 
         if (!parsed.success) {
-          toast.error('This file is not a valid CueNext data export.', { id: TOAST_ID })
+          showErrorToast('This file is not a valid CueNext data export.')
           return
         }
 
         await runImport(parsed.data)
       } catch (error) {
-        if (error instanceof SyntaxError) toast.error('This file is not a valid JSON file.', { id: TOAST_ID })
-        else toast.error('Import failed. Please try again.', { id: TOAST_ID })
+        if (error instanceof SyntaxError) showErrorToast('This file is not a valid JSON file.')
+        else showErrorToast('Import failed. Please try again.')
       } finally {
         isTransferringRef.current = false
       }
