@@ -1,4 +1,5 @@
 import { env } from '#/env'
+import { QUERY_CACHE_STORAGE_KEY } from '#/lib/queryCache'
 import { routeTree } from '#/routeTree.gen'
 import { ConvexQueryClient } from '@convex-dev/react-query'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
@@ -26,6 +27,7 @@ export function getRouter() {
 
   const persister = createAsyncStoragePersister({
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    key: QUERY_CACHE_STORAGE_KEY,
   })
 
   const router = createTanStackRouter({

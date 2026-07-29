@@ -6,7 +6,7 @@ import UpcomingEpisode from '#/component/UpcomingEpisode'
 import UpcomingMovie from '#/component/UpcomingMovie'
 import useSearchParams from '#/hooks/useSearchParams'
 import { UrlParamsSchema } from '#/type/url'
-import { SignInButton, useClerk } from '@clerk/tanstack-react-start'
+import { SignInButton, useAuth } from '@clerk/tanstack-react-start'
 import { faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { createFileRoute } from '@tanstack/react-router'
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/upcoming')({
 
 function UpcomingPage() {
   const { media } = useSearchParams()
-  const clerk = useClerk()
+  const { isLoaded, isSignedIn } = useAuth()
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
@@ -26,7 +26,7 @@ function UpcomingPage() {
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Upcoming</h1>
       </header>
 
-      {!clerk.isSignedIn && (
+      {isLoaded && !isSignedIn && (
         <div className="screen-px mb-8 flex flex-col gap-4">
           <span className="font-semibold tracking-wide text-neutral-500">
             Sign in to view upcoming movies and TV episodes
@@ -42,7 +42,7 @@ function UpcomingPage() {
       )}
 
       <div className="screen-px">
-        {clerk.isSignedIn && (
+        {isSignedIn && (
           <div className="page-width">
             {media === 'movie' && (
               <InfiniteMediaList

@@ -4,7 +4,7 @@ import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
 import { UrlParamsSchema } from '#/type/url'
-import { SignInButton, useClerk, useUser } from '@clerk/tanstack-react-start'
+import { SignInButton, useUser } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -78,8 +78,7 @@ export const Route = createFileRoute('/profile')({
 
 function ProfilePage() {
   const { media } = useSearchParams()
-  const clerk = useClerk()
-  const { user } = useUser()
+  const { isLoaded, isSignedIn, user } = useUser()
 
   const { data: stats } = useQuery({
     ...convexQuery(api.stats.getStats),
@@ -104,22 +103,22 @@ function ProfilePage() {
 
   const { data: tvSections, isPending: tvSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getTvSections),
-    enabled: media === 'tv' && clerk.isSignedIn,
+    enabled: media === 'tv' && !!isSignedIn,
   })
 
   const { data: movieSections, isPending: movieSectionsLoading } = useQuery({
     ...convexQuery(api.watchlist.getMovieSections),
-    enabled: media === 'movie' && clerk.isSignedIn,
+    enabled: media === 'movie' && !!isSignedIn,
   })
 
   const { data: favoriteShows, isPending: favoriteShowsLoading } = useQuery({
     ...convexQuery(api.favorites.getFavoriteShows),
-    enabled: media === 'tv' && clerk.isSignedIn,
+    enabled: media === 'tv' && !!isSignedIn,
   })
 
   const { data: favoriteMovies, isPending: favoriteMoviesLoading } = useQuery({
     ...convexQuery(api.favorites.getFavoriteMovies),
-    enabled: media === 'movie' && clerk.isSignedIn,
+    enabled: media === 'movie' && !!isSignedIn,
   })
 
   const isLoadingShows = tvSectionsLoading || favoriteShowsLoading
@@ -134,11 +133,13 @@ function ProfilePage() {
           <p className="mt-2 text-neutral-400">
             {user
               ? `Signed in as ${user.fullName || user.username || user.primaryEmailAddress?.emailAddress}`
-              : 'Sign in to view your stats'}
+              : isLoaded
+                ? 'Sign in to view your stats'
+                : '\u00A0'}
           </p>
         </div>
 
-        {!user && (
+        {isLoaded && !user && (
           <SignInButton mode="modal">
             <Button>
               <FontAwesomeIcon icon={faSignIn} size="lg" />
