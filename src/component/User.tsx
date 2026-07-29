@@ -1,7 +1,8 @@
 import { Button } from '#/component/ui/button'
+import { useUserDataTransfer } from '#/hooks/useUserDataTransfer'
 import { cn } from '#/lib/cn'
 import { SignInButton, UserButton } from '@clerk/tanstack-react-start'
-import { faSignIn } from '@fortawesome/free-solid-svg-icons'
+import { faFileExport, faFileImport, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Authenticated, Unauthenticated, useConvexAuth } from 'convex/react'
 
@@ -12,6 +13,7 @@ interface UserProps {
 
 export function User({ isMobile, isExpanded }: UserProps) {
   const { isLoading } = useConvexAuth()
+  const { exportUserData, importUserData } = useUserDataTransfer()
 
   if (isLoading) return null
 
@@ -45,7 +47,20 @@ export function User({ isMobile, isExpanded }: UserProps) {
                       '!text-base !font-semibold !text-white pl-3! pr-2! !m-0 !p-0 w-full! max-w-0! !text-left opacity-0! transition-[max-width,opacity]! duration-slow! overflow-hidden! text-nowrap! text-ellipsis!',
                   },
           }}
-        />
+        >
+          <UserButton.MenuItems>
+            <UserButton.Action
+              label="Export data"
+              labelIcon={<FontAwesomeIcon icon={faFileExport} />}
+              onClick={exportUserData}
+            />
+            <UserButton.Action
+              label="Import data"
+              labelIcon={<FontAwesomeIcon icon={faFileImport} />}
+              onClick={importUserData}
+            />
+          </UserButton.MenuItems>
+        </UserButton>
       </Authenticated>
 
       <Unauthenticated>

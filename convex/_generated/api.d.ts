@@ -25,6 +25,7 @@ import type * as stopped from "../stopped.js";
 import type * as tmdb from "../tmdb.js";
 import type * as tmdbCache from "../tmdbCache.js";
 import type * as upcoming from "../upcoming.js";
+import type * as userData from "../userData.js";
 import type * as watch from "../watch.js";
 import type * as watchlist from "../watchlist.js";
 
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   tmdb: typeof tmdb;
   tmdbCache: typeof tmdbCache;
   upcoming: typeof upcoming;
+  userData: typeof userData;
   watch: typeof watch;
   watchlist: typeof watchlist;
 }>;
