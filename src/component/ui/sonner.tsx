@@ -35,6 +35,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
         className: 'backdrop-blur-md! flex! justify-between! gap-3! p-2! pl-5! h-fit!',
         classNames: {
           title: 'text-base font-semibold',
+          // The toast root uses justify-between so action buttons sit on the right; let the
+          // content block absorb the free space so titles stay right after the icon.
+          content: 'flex-1 text-left',
         },
       }}
       {...props}
