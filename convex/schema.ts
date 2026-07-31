@@ -107,8 +107,9 @@ export default defineSchema({
   }).index('by_user', ['userId']),
 
   // CueNext-owned reviews. One row per user per title holding that user's rating (1-10)
-  // and/or written review. Rows with an empty content are rating-only and never show up in
-  // the review list, they only feed the community average. Nothing here is sent to TMDB.
+  // and/or written review, so nobody reviews the same title twice. Rows with an empty
+  // content are rating-only and never show up in the review list, they only feed the
+  // community average. Nothing here is sent to TMDB.
   review: defineTable({
     userId: v.string(),
     type: v.union(v.literal('movie'), v.literal('tv')),
@@ -120,42 +121,20 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     upvoteCount: v.number(),
-    replyCount: v.number(),
   })
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId'])
     .index('by_user', ['userId'])
     // Reviews are listed most upvoted first, which is exactly this index read in reverse.
     .index('by_type_tmdbId_upvotes', ['type', 'tmdbId', 'upvoteCount']),
 
-  // Replies under a review. parentCommentId is null for a direct reply to the review and
-  // points at another comment for a reply inside the thread, so a thread is one indexed
-  // read per review and the tree is assembled from parentCommentId.
-  reviewComment: defineTable({
-    reviewId: v.id('review'),
-    parentCommentId: v.union(v.id('reviewComment'), v.null()),
-    userId: v.string(),
-    content: v.string(),
-    authorName: v.string(),
-    authorImage: v.union(v.string(), v.null()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-    upvoteCount: v.number(),
-    // A deleted comment that still has replies is kept as a tombstone so its subtree does
-    // not disappear with it.
-    isDeleted: v.boolean(),
-  })
-    .index('by_review', ['reviewId'])
-    .index('by_parent', ['parentCommentId']),
-
-  // Upvote only, no downvotes. targetId holds either a review or a reviewComment id.
+  // Upvote only, no downvotes. Authors start with a vote on their own review.
   reviewVote: defineTable({
     userId: v.string(),
-    targetKind: v.union(v.literal('review'), v.literal('comment')),
-    targetId: v.string(),
+    reviewId: v.id('review'),
     createdAt: v.number(),
   })
-    .index('by_user_target', ['userId', 'targetKind', 'targetId'])
-    .index('by_target', ['targetKind', 'targetId']),
+    .index('by_user_review', ['userId', 'reviewId'])
+    .index('by_review', ['reviewId']),
 
   // Materialized community rating per title, updated by the review mutations so the detail
   // page never has to scan every review of a title to show an average.

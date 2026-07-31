@@ -1,7 +1,6 @@
-import { CommunityRating } from '#/component/CommunityRating'
+import { CombinedRating } from '#/component/CombinedRating'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { RateButton } from '#/component/RateButton'
-import { StarRating } from '#/component/StarRating'
 import { Button } from '#/component/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '#/component/ui/dropdown-menu'
 import { ShowMore } from '#/component/ui/show-more'
@@ -90,10 +89,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
         </div>
 
         <div className="mb-2 flex w-full max-w-3xl items-start justify-between gap-2">
-          <div className="flex flex-wrap items-start gap-x-5">
-            <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} label="TMDB" />
-            <CommunityRating type="tv" tmdbId={id} />
-          </div>
+          <CombinedRating type="tv" tmdbId={id} tmdbAverage={show.vote_average} tmdbCount={show.vote_count} />
 
           <div className="flex w-fit flex-row-reverse flex-wrap gap-2">
             <DropdownMenu>

@@ -1,3 +1,4 @@
+import type { Id } from '#/../convex/_generated/dataModel'
 import { Button } from '#/component/ui/button'
 import { useReviewActions } from '#/hooks/useTitleReviews'
 import { cn } from '#/lib/cn'
@@ -6,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
 interface UpvoteButtonProps {
-  targetKind: 'review' | 'comment'
-  targetId: string
+  reviewId: Id<'review'>
   upvoteCount: number
   hasUpvoted: boolean
   className?: string
@@ -15,13 +15,13 @@ interface UpvoteButtonProps {
 
 // Upvotes only, no downvotes. Pressing it again takes the upvote back, and the count it
 // keeps is what reviews are sorted by.
-export function UpvoteButton({ targetKind, targetId, upvoteCount, hasUpvoted, className }: UpvoteButtonProps) {
+export function UpvoteButton({ reviewId, upvoteCount, hasUpvoted, className }: UpvoteButtonProps) {
   const { toggleUpvote } = useReviewActions()
   const [isPending, setIsPending] = useState(false)
 
   const onClick = async () => {
     setIsPending(true)
-    await toggleUpvote({ targetKind, targetId })
+    await toggleUpvote({ reviewId })
     setIsPending(false)
   }
 

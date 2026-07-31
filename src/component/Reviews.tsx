@@ -33,8 +33,8 @@ export function Reviews({ tmdbId, media, title }: ReviewsProps) {
   const getReviews = useAction(media === 'movie' ? api.tmdb.getMovieReviews : api.tmdb.getTvReviews)
   const queryClient = useQueryClient()
 
-  // Reviews written on CueNext are ours: they live in our own tables, carry a thread and
-  // upvotes, and are listed ahead of the imported TMDB ones.
+  // Reviews written on CueNext are ours: they live in our own tables, carry their upvotes,
+  // and are listed ahead of the imported TMDB ones.
   const { reviews: userReviews, myReview } = useTitleReviews(media, tmdbId)
   const { isSignedIn, requireSignIn } = useReviewActions()
 

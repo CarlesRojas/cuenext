@@ -70,7 +70,19 @@ const ReviewCard = ({ review, inDialog = false }: Props) => {
         </div>
       </div>
 
-      {!inDialog && <ShowMore lines={4} onClick={() => setIsDialogOpen(true)} text={content} />}
+      {!inDialog && (
+        <ShowMore lines={4} onClick={() => setIsDialogOpen(true)} text={content} containerClassName="grow" />
+      )}
+
+      {/* Imported reviews cannot be upvoted, so the slot the upvote sits on for CueNext
+          reviews names where this one came from instead. */}
+      {!inDialog && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex h-8 w-fit items-center rounded-full border border-neutral-500/40 px-3 text-sm font-semibold tracking-wide text-white/40">
+            {'TMDB'}
+          </span>
+        </div>
+      )}
 
       {inDialog && (
         <p className="scroll-container max-h-[50dvh] overflow-x-hidden p-0 px-4.5 tracking-wide text-white/70 select-all">

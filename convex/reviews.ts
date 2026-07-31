@@ -4,38 +4,23 @@ import { mutation, query } from './_generated/server'
 import { optionalUser, requireIdentity } from './requireUser'
 
 const mediaType = v.union(v.literal('movie'), v.literal('tv'))
-const voteTarget = v.union(v.literal('review'), v.literal('comment'))
 
 export const MAX_REVIEW_LENGTH = 5000
-export const MAX_COMMENT_LENGTH = 2000
 
-// A title's review list and a thread are both read in one shot, so both are capped. Titles
-// never get anywhere near these numbers today; when they do, these are the two reads to
-// turn into paginated ones.
+// A title's review list is read in one shot, so it is capped. Titles never get anywhere
+// near this today; when they do, this is the read to turn into a paginated one.
 const REVIEW_PAGE_SIZE = 50
-const THREAD_COMMENT_LIMIT = 500
 
 function assertRating(rating: number | null) {
   if (rating === null) return
   if (!Number.isInteger(rating) || rating < 1 || rating > 10) throw new Error('A rating must be a whole 1 to 10')
 }
 
-async function findVote(context: any, userId: string, targetKind: 'review' | 'comment', targetId: string) {
+async function findVote(context: any, userId: string, reviewId: string) {
   return await context.db
     .query('reviewVote')
-    .withIndex('by_user_target', (q: any) =>
-      q.eq('userId', userId).eq('targetKind', targetKind).eq('targetId', targetId),
-    )
+    .withIndex('by_user_review', (q: any) => q.eq('userId', userId).eq('reviewId', reviewId))
     .unique()
-}
-
-async function deleteVotesFor(context: any, targetKind: 'review' | 'comment', targetId: string) {
-  const votes = await context.db
-    .query('reviewVote')
-    .withIndex('by_target', (q: any) => q.eq('targetKind', targetKind).eq('targetId', targetId))
-    .collect()
-
-  for (const vote of votes) await context.db.delete(vote._id)
 }
 
 // The community average is materialized instead of recomputed, so every rating write moves
@@ -89,33 +74,14 @@ function reviewPayload(review: Doc<'review'>, userId: string | null, hasUpvoted:
     createdAt: review.createdAt,
     updatedAt: review.updatedAt,
     upvoteCount: review.upvoteCount,
-    replyCount: review.replyCount,
     hasUpvoted,
     isOwn: userId !== null && review.userId === userId,
   }
 }
 
-function commentPayload(comment: Doc<'reviewComment'>, userId: string | null, hasUpvoted: boolean) {
-  return {
-    id: comment._id,
-    reviewId: comment.reviewId,
-    parentCommentId: comment.parentCommentId,
-    content: comment.content,
-    authorName: comment.authorName,
-    authorImage: comment.authorImage,
-    createdAt: comment.createdAt,
-    updatedAt: comment.updatedAt,
-    upvoteCount: comment.upvoteCount,
-    isDeleted: comment.isDeleted,
-    hasUpvoted,
-    isOwn: userId !== null && comment.userId === userId,
-  }
-}
-
 export type ReviewPayload = ReturnType<typeof reviewPayload>
-export type ReviewCommentPayload = ReturnType<typeof commentPayload>
 
-// Everything the reviews section of a detail page needs: the community average, the
+// Everything the reviews section of a detail page needs: the community rating totals, the
 // signed-in user's own row (rating included, even when they never wrote a review) and the
 // written reviews, most upvoted first.
 export const getTitleReviews = query({
@@ -144,13 +110,15 @@ export const getTitleReviews = query({
 
     const withVotes = []
     for (const review of reviews) {
-      const vote = userId ? await findVote(context, userId, 'review', review._id) : null
+      const vote = userId ? await findVote(context, userId, review._id) : null
       withVotes.push(reviewPayload(review, userId, !!vote))
     }
 
     return {
-      average: summary && summary.ratingCount > 0 ? summary.ratingSum / summary.ratingCount : null,
+      // The count and the sum are both returned so the client can fold the TMDB votes into
+      // the same average instead of showing two competing scores.
       ratingCount: summary?.ratingCount ?? 0,
+      ratingSum: summary?.ratingSum ?? 0,
       myRating: myReview?.rating ?? null,
       myReview: myReview
         ? {
@@ -165,47 +133,26 @@ export const getTitleReviews = query({
   },
 })
 
-// The full discussion under one review. Comments come back flat with their parent id; the
-// client nests them, which keeps the read to a single indexed scan.
-export const getReviewThread = query({
-  args: { reviewId: v.id('review') },
-  handler: async (context, args) => {
-    const userId = await optionalUser(context)
-
-    const review = await context.db.get(args.reviewId)
-    if (!review) return null
-
-    const comments = await context.db
-      .query('reviewComment')
-      .withIndex('by_review', q => q.eq('reviewId', args.reviewId))
-      .take(THREAD_COMMENT_LIMIT)
-
-    const reviewVote = userId ? await findVote(context, userId, 'review', review._id) : null
-
-    const withVotes = []
-    for (const comment of comments) {
-      const vote = userId ? await findVote(context, userId, 'comment', comment._id) : null
-      withVotes.push(commentPayload(comment, userId, !!vote))
-    }
-
-    return {
-      review: reviewPayload(review, userId, !!reviewVote),
-      comments: withVotes,
-    }
-  },
-})
-
-// One row per user per title, so rating a title you already reviewed edits that review
-// instead of adding a second one. A row with a rating and no content is a rating-only row.
+// One row per user per title: rating a title you already reviewed edits that review instead
+// of adding a second one, so nobody can review the same title twice. A row with a rating and
+// no content is a rating-only row and stays out of the review list.
 export const saveReview = mutation({
   args: {
     type: mediaType,
     tmdbId: v.number(),
     rating: v.union(v.number(), v.null()),
     content: v.optional(v.string()),
+    // Only used when the auth provider does not put the name and picture claims in the
+    // token; the identity always wins when it carries them.
+    fallbackAuthorName: v.optional(v.string()),
+    fallbackAuthorImage: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (context, args) => {
-    const { userId, authorName, authorImage } = await requireIdentity(context)
+    const identity = await requireIdentity(context)
+    const userId = identity.userId
+
+    const authorName = identity.hasName ? identity.authorName : (args.fallbackAuthorName ?? identity.authorName)
+    const authorImage = identity.authorImage ?? args.fallbackAuthorImage ?? null
 
     assertRating(args.rating)
 
@@ -243,6 +190,8 @@ export const saveReview = mutation({
       return existing._id
     }
 
+    // Posting a review counts as standing behind it, so it starts with the author's own
+    // upvote already cast. They can still take it back like any other upvote.
     const reviewId = await context.db.insert('review', {
       userId,
       type: args.type,
@@ -253,9 +202,10 @@ export const saveReview = mutation({
       authorImage,
       createdAt: now,
       updatedAt: now,
-      upvoteCount: 0,
-      replyCount: 0,
+      upvoteCount: 1,
     })
+
+    await context.db.insert('reviewVote', { userId, reviewId, createdAt: now })
 
     if (args.rating !== null) await applySummaryDelta(context, args.type, args.tmdbId, 1, args.rating)
 
@@ -263,22 +213,7 @@ export const saveReview = mutation({
   },
 })
 
-// Clearing the written part while keeping the rating, so the review leaves the list but the
-// title stays rated.
-export const clearReviewContent = mutation({
-  args: { reviewId: v.id('review') },
-  handler: async (context, args) => {
-    const { userId } = await requireIdentity(context)
-
-    const review = await context.db.get(args.reviewId)
-    if (!review) return
-    if (review.userId !== userId) throw new Error('That review belongs to someone else')
-
-    await context.db.patch(review._id, { content: '', updatedAt: Date.now() })
-  },
-})
-
-// Removes the review, its whole thread and every vote cast on any of it.
+// Removes the review and every vote cast on it.
 export const deleteReview = mutation({
   args: { reviewId: v.id('review') },
   handler: async (context, args) => {
@@ -288,155 +223,43 @@ export const deleteReview = mutation({
     if (!review) return
     if (review.userId !== userId) throw new Error('That review belongs to someone else')
 
-    const comments = await context.db
-      .query('reviewComment')
+    const votes = await context.db
+      .query('reviewVote')
       .withIndex('by_review', q => q.eq('reviewId', review._id))
       .collect()
 
-    for (const comment of comments) {
-      await deleteVotesFor(context, 'comment', comment._id)
-      await context.db.delete(comment._id)
-    }
+    for (const vote of votes) await context.db.delete(vote._id)
 
-    await deleteVotesFor(context, 'review', review._id)
     await context.db.delete(review._id)
 
     if (review.rating !== null) await applySummaryDelta(context, review.type, review.tmdbId, -1, -review.rating)
   },
 })
 
-// A reply to the review itself (no parentCommentId) or to another comment in the same
-// thread. Anyone signed in can reply, including the review author.
-export const addComment = mutation({
-  args: {
-    reviewId: v.id('review'),
-    parentCommentId: v.optional(v.id('reviewComment')),
-    content: v.string(),
-  },
+// Upvotes only, and toggling one off is the only way back down. The count lives on the
+// review row so the list can sort on it without reading the vote rows.
+export const toggleUpvote = mutation({
+  args: { reviewId: v.id('review') },
   handler: async (context, args) => {
-    const { userId, authorName, authorImage } = await requireIdentity(context)
-
-    const content = args.content.trim()
-    if (content === '') throw new Error('Write something first')
-    if (content.length > MAX_COMMENT_LENGTH) throw new Error(`A reply can be at most ${MAX_COMMENT_LENGTH} characters`)
+    const { userId } = await requireIdentity(context)
 
     const review = await context.db.get(args.reviewId)
     if (!review) throw new Error('That review no longer exists')
 
-    if (args.parentCommentId) {
-      const parent = await context.db.get(args.parentCommentId)
-      if (!parent || parent.reviewId !== args.reviewId) throw new Error('That comment no longer exists')
-    }
-
-    const now = Date.now()
-
-    const commentId = await context.db.insert('reviewComment', {
-      reviewId: args.reviewId,
-      parentCommentId: args.parentCommentId ?? null,
-      userId,
-      content,
-      authorName,
-      authorImage,
-      createdAt: now,
-      updatedAt: now,
-      upvoteCount: 0,
-      isDeleted: false,
-    })
-
-    await context.db.patch(review._id, { replyCount: review.replyCount + 1 })
-
-    return commentId
-  },
-})
-
-export const editComment = mutation({
-  args: { commentId: v.id('reviewComment'), content: v.string() },
-  handler: async (context, args) => {
-    const { userId } = await requireIdentity(context)
-
-    const comment = await context.db.get(args.commentId)
-    if (!comment) throw new Error('That comment no longer exists')
-    if (comment.userId !== userId) throw new Error('That comment belongs to someone else')
-
-    const content = args.content.trim()
-    if (content === '') throw new Error('Write something first')
-    if (content.length > MAX_COMMENT_LENGTH) throw new Error(`A reply can be at most ${MAX_COMMENT_LENGTH} characters`)
-
-    await context.db.patch(comment._id, { content, updatedAt: Date.now() })
-  },
-})
-
-// A comment with replies under it becomes a tombstone so the rest of the thread keeps its
-// shape; a leaf comment is removed outright.
-export const deleteComment = mutation({
-  args: { commentId: v.id('reviewComment') },
-  handler: async (context, args) => {
-    const { userId } = await requireIdentity(context)
-
-    const comment = await context.db.get(args.commentId)
-    if (!comment) return
-    if (comment.userId !== userId) throw new Error('That comment belongs to someone else')
-
-    const replies = await context.db
-      .query('reviewComment')
-      .withIndex('by_parent', q => q.eq('parentCommentId', comment._id))
-      .take(1)
-
-    await deleteVotesFor(context, 'comment', comment._id)
-
-    if (replies.length > 0)
-      await context.db.patch(comment._id, {
-        content: '',
-        isDeleted: true,
-        upvoteCount: 0,
-        updatedAt: Date.now(),
-      })
-    else await context.db.delete(comment._id)
-
-    const review = await context.db.get(comment.reviewId)
-    if (review) await context.db.patch(review._id, { replyCount: Math.max(0, review.replyCount - 1) })
-  },
-})
-
-// Upvotes only, and toggling one off is the only way back down. The count lives on the
-// review or comment row so lists can sort on it without reading the vote rows.
-export const toggleUpvote = mutation({
-  args: { targetKind: voteTarget, targetId: v.string() },
-  handler: async (context, args) => {
-    const { userId } = await requireIdentity(context)
-
-    let target: Doc<'review'> | Doc<'reviewComment'> | null = null
-
-    if (args.targetKind === 'review') {
-      const reviewId = context.db.normalizeId('review', args.targetId)
-      target = reviewId ? await context.db.get(reviewId) : null
-    } else {
-      const commentId = context.db.normalizeId('reviewComment', args.targetId)
-      const comment = commentId ? await context.db.get(commentId) : null
-      if (comment?.isDeleted) throw new Error('That comment was deleted')
-      target = comment
-    }
-
-    if (!target) throw new Error('That post no longer exists')
-
-    const existing = await findVote(context, userId, args.targetKind, args.targetId)
+    const existing = await findVote(context, userId, review._id)
 
     if (existing) {
       await context.db.delete(existing._id)
-      const upvoteCount = Math.max(0, target.upvoteCount - 1)
-      await context.db.patch(target._id, { upvoteCount })
+      const upvoteCount = Math.max(0, review.upvoteCount - 1)
+      await context.db.patch(review._id, { upvoteCount })
+
       return { hasUpvoted: false, upvoteCount }
     }
 
-    await context.db.insert('reviewVote', {
-      userId,
-      targetKind: args.targetKind,
-      targetId: args.targetId,
-      createdAt: Date.now(),
-    })
+    await context.db.insert('reviewVote', { userId, reviewId: review._id, createdAt: Date.now() })
 
-    const upvoteCount = target.upvoteCount + 1
-    await context.db.patch(target._id, { upvoteCount })
+    const upvoteCount = review.upvoteCount + 1
+    await context.db.patch(review._id, { upvoteCount })
 
     return { hasUpvoted: true, upvoteCount }
   },

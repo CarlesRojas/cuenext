@@ -69,9 +69,7 @@ export function ReviewDialog({ type, tmdbId, title, open, onOpenChange }: Review
       <DialogContent className="gap-5">
         <DialogHeader>
           <DialogTitle>{myReview ? 'Edit your review' : 'Rate & review'}</DialogTitle>
-          <DialogDescription className="text-white/50">
-            {`Your rating and review of ${title} stay on CueNext.`}
-          </DialogDescription>
+          <DialogDescription className="text-white/50">{title}</DialogDescription>
         </DialogHeader>
 
         <RatingInput value={rating} onChange={setRating} disabled={isSaving} />
@@ -84,11 +82,11 @@ export function ReviewDialog({ type, tmdbId, title, open, onOpenChange }: Review
             rows={5}
             maxLength={MAX_REVIEW_LENGTH}
             placeholder="Write a review (optional)"
-            className="max-h-[35dvh] min-h-28 rounded-[18px] border-neutral-500/40"
+            className="max-h-[35dvh] min-h-28 rounded-[18px] border-neutral-500/40 focus-visible:border-sky-500/50 focus-visible:ring-0"
           />
 
           <div className="flex justify-between gap-2 text-xs tracking-wide text-white/40">
-            <span>{'Anyone can reply to your review and upvote it.'}</span>
+            <span>{'One review per title. You can edit it any time.'}</span>
             <span className={cn('tabular-nums', isTooLong && 'text-red-400')}>
               {`${content.length} / ${MAX_REVIEW_LENGTH}`}
             </span>

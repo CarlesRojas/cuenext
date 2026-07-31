@@ -1,32 +1,48 @@
 import { api } from '#/../convex/_generated/api'
 import type { MediaType } from '#/type/media'
-import { useClerk } from '@clerk/tanstack-react-start'
+import { useClerk, useUser } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { useMutation as useDbMutation } from 'convex/react'
 import { toast } from 'sonner'
 
 export const MAX_REVIEW_LENGTH = 5000
-export const MAX_COMMENT_LENGTH = 2000
 
 export function titleReviewsQuery(type: MediaType, tmdbId: number) {
   return convexQuery(api.reviews.getTitleReviews, { type, tmdbId })
 }
 
-// CueNext reviews and the community rating for one title. Reviews are public, so this runs
-// for signed-out visitors too; every component on the detail page that calls this with the
-// same title shares a single subscription.
+// CueNext reviews and rating totals for one title. Reviews are public, so this runs for
+// signed-out visitors too; every component on the detail page that calls this with the same
+// title shares a single subscription.
 export function useTitleReviews(type: MediaType, tmdbId: number, enabled = true) {
   const { data, isPending } = useQuery({ ...titleReviewsQuery(type, tmdbId), enabled: enabled && !!tmdbId })
 
   return {
-    average: data?.average ?? null,
     ratingCount: data?.ratingCount ?? 0,
+    ratingSum: data?.ratingSum ?? 0,
     myRating: data?.myRating ?? null,
     myReview: data?.myReview ?? null,
     reviews: data?.reviews ?? [],
     isReviewsLoading: isPending,
   }
+}
+
+// TMDB votes and CueNext votes rate the same title, so they are shown as one score: the two
+// vote pools are summed and averaged together rather than competing side by side.
+export function combineRatings(
+  tmdbAverage: number | undefined,
+  tmdbCount: number | undefined,
+  cueNextSum: number,
+  cueNextCount: number,
+) {
+  const tmdbVotes = tmdbCount ?? 0
+  const tmdbSum = (tmdbAverage ?? 0) * tmdbVotes
+
+  const voteCount = tmdbVotes + cueNextCount
+  if (voteCount === 0) return { voteAverage: 0, voteCount: 0 }
+
+  return { voteAverage: (tmdbSum + cueNextSum) / voteCount, voteCount }
 }
 
 export function reviewErrorMessage(error: unknown) {
@@ -42,14 +58,11 @@ export function reviewErrorMessage(error: unknown) {
 // through the same sign-in prompt first and reports failures as a toast.
 export function useReviewActions() {
   const clerk = useClerk()
+  const { user } = useUser()
 
-  const saveReview = useDbMutation(api.reviews.saveReview)
-  const deleteReview = useDbMutation(api.reviews.deleteReview)
-  const clearReviewContent = useDbMutation(api.reviews.clearReviewContent)
-  const addComment = useDbMutation(api.reviews.addComment)
-  const editComment = useDbMutation(api.reviews.editComment)
-  const deleteComment = useDbMutation(api.reviews.deleteComment)
-  const toggleUpvote = useDbMutation(api.reviews.toggleUpvote)
+  const saveReviewMutation = useDbMutation(api.reviews.saveReview)
+  const deleteReviewMutation = useDbMutation(api.reviews.deleteReview)
+  const toggleUpvoteMutation = useDbMutation(api.reviews.toggleUpvote)
 
   const requireSignIn = () => {
     if (clerk.isSignedIn) return true
@@ -73,39 +86,29 @@ export function useReviewActions() {
     isSignedIn: !!clerk.isSignedIn,
     requireSignIn,
 
-    saveReview: async (args: Parameters<typeof saveReview>[0]) => {
+    // Clerk only forwards the name and picture claims when the Convex JWT template asks
+    // for them, so the profile the browser already has is sent along as a fallback.
+    saveReview: async (
+      args: Omit<Parameters<typeof saveReviewMutation>[0], 'fallbackAuthorName' | 'fallbackAuthorImage'>,
+    ) => {
       if (!requireSignIn()) return
-      return await run(() => saveReview(args))
+      return await run(() =>
+        saveReviewMutation({
+          ...args,
+          fallbackAuthorName: user?.fullName ?? user?.username ?? undefined,
+          fallbackAuthorImage: user?.imageUrl ?? null,
+        }),
+      )
     },
 
-    deleteReview: async (args: Parameters<typeof deleteReview>[0]) => {
+    deleteReview: async (args: Parameters<typeof deleteReviewMutation>[0]) => {
       if (!requireSignIn()) return
-      return await run(() => deleteReview(args))
+      return await run(() => deleteReviewMutation(args))
     },
 
-    clearReviewContent: async (args: Parameters<typeof clearReviewContent>[0]) => {
+    toggleUpvote: async (args: Parameters<typeof toggleUpvoteMutation>[0]) => {
       if (!requireSignIn()) return
-      return await run(() => clearReviewContent(args))
-    },
-
-    addComment: async (args: Parameters<typeof addComment>[0]) => {
-      if (!requireSignIn()) return
-      return await run(() => addComment(args))
-    },
-
-    editComment: async (args: Parameters<typeof editComment>[0]) => {
-      if (!requireSignIn()) return
-      return await run(() => editComment(args))
-    },
-
-    deleteComment: async (args: Parameters<typeof deleteComment>[0]) => {
-      if (!requireSignIn()) return
-      return await run(() => deleteComment(args))
-    },
-
-    toggleUpvote: async (args: Parameters<typeof toggleUpvote>[0]) => {
-      if (!requireSignIn()) return
-      return await run(() => toggleUpvote(args))
+      return await run(() => toggleUpvoteMutation(args))
     },
   }
 }
