@@ -19,6 +19,7 @@ import type * as media from "../media.js";
 import type * as movieInfo from "../movieInfo.js";
 import type * as nextEpisode from "../nextEpisode.js";
 import type * as requireUser from "../requireUser.js";
+import type * as reviews from "../reviews.js";
 import type * as showInfo from "../showInfo.js";
 import type * as stats from "../stats.js";
 import type * as stopped from "../stopped.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   movieInfo: typeof movieInfo;
   nextEpisode: typeof nextEpisode;
   requireUser: typeof requireUser;
+  reviews: typeof reviews;
   showInfo: typeof showInfo;
   stats: typeof stats;
   stopped: typeof stopped;

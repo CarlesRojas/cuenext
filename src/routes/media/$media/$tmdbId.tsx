@@ -95,7 +95,7 @@ function RouteComponent() {
 
         <Cast tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
-        <Reviews tmdbId={tmdbIdNumber} media={media as MediaType} />
+        <Reviews tmdbId={tmdbIdNumber} media={media as MediaType} title={displayName ?? ''} />
         <Recommendations tmdbId={tmdbIdNumber} media={media as MediaType} />
       </div>
     </div>

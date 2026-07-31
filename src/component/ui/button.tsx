@@ -43,6 +43,22 @@ const buttonVariants = cva(
           'data-[state=on]:hover:bg-sky-500/40 data-[state=on]:focus-visible:bg-sky-500/40',
         ],
 
+        rate: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
+          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
+
+          'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/20 data-[state=on]:text-sky-500',
+          'data-[state=on]:hover:bg-sky-500/40 data-[state=on]:focus-visible:bg-sky-500/40',
+        ],
+
+        upvote: [
+          'border border-neutral-500/40 bg-transparent text-white/60',
+          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:hover:text-white data-[state=off]:focus-visible:bg-neutral-500/25',
+
+          'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/15 data-[state=on]:text-sky-500',
+          'data-[state=on]:hover:bg-sky-500/30 data-[state=on]:focus-visible:bg-sky-500/30',
+        ],
+
         showMore: [
           'font-medium tracking-wide text-neutral-500/70 hover:text-neutral-400/90 focus-visible:text-neutral-400/90',
         ],
@@ -53,6 +69,7 @@ const buttonVariants = cva(
         icon: 'size-11',
         iconSmall: 'size-9',
         small: 'm-1 h-9 w-fit gap-1 px-4',
+        pill: 'h-8 w-fit gap-1.5 px-3 text-sm',
         link: 'w-fit gap-2',
         input: 'size-8',
         showMore: 'h-fit w-fit p-0',
