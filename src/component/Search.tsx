@@ -76,6 +76,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
           }}
           className="relative flex w-full items-center justify-between px-1"
           ref={searchRef}
+          autoComplete="off"
         >
           <form.Field
             name="query"
@@ -151,6 +152,7 @@ export function Search({ isMobile = false, mobileTabsWidth, isExpanded = false, 
             isExpanded ? 'opacity-100' : 'w-0 opacity-0',
           )}
           style={isExpanded ? { width: (mobileTabsWidth ?? 0) - 68 - 70 } : undefined}
+          autoComplete="off"
         >
           {isExpanded && (
             <form.Field
