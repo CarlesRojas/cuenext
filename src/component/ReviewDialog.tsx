@@ -1,12 +1,12 @@
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { RatingInput } from '#/component/RatingInput'
 import { Button } from '#/component/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
 import { Textarea } from '#/component/ui/textarea'
 import { MAX_REVIEW_LENGTH, useReviewActions, useTitleReviews } from '#/hooks/useTitleReviews'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
-import { faSpinner, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faSpinner, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react'
 
@@ -31,6 +31,7 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
   const [rating, setRating] = useState<number | null>(null)
   const [content, setContent] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   // Reopening starts from whatever is stored, so an edit never begins from a stale draft.
   useEffect(() => {
@@ -75,8 +76,8 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
       {/* Opening with no star focused: the dialog should show the rating you already gave,
           not land focus on the first star. */}
       <DialogContent className="gap-5" onOpenAutoFocus={event => event.preventDefault()}>
-        <DialogHeader className="flex-row items-center gap-3">
-          <div className="aspect-2/3 h-16 min-h-16 w-11 min-w-11 overflow-hidden rounded-lg border border-neutral-500/40 bg-neutral-900">
+        <DialogHeader className="flex-row items-start gap-4">
+          <div className="aspect-2/3 w-20 min-w-20 overflow-hidden rounded-xl border border-neutral-500/40 bg-neutral-900 sm:w-24 sm:min-w-24">
             <ProgressiveImage
               paths={[poster, backdrop]}
               alt={title}
@@ -86,10 +87,12 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
             />
           </div>
 
-          <DialogTitle>{myReview ? 'Edit your review' : 'Rate & review'}</DialogTitle>
-        </DialogHeader>
+          <div className="flex min-w-0 grow flex-col gap-3">
+            <DialogTitle>{myReview ? 'Edit your review' : 'Rate & review'}</DialogTitle>
 
-        <RatingInput value={rating} onChange={setRating} disabled={isSaving} />
+            <RatingInput value={rating} onChange={setRating} disabled={isSaving} />
+          </div>
+        </DialogHeader>
 
         <div className="flex flex-col gap-1">
           <Textarea
@@ -120,12 +123,43 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
           </Button>
 
           {myReview && (
-            <Button variant="negative" onClick={onDelete} disabled={isSaving} className="mr-auto">
+            <Button
+              variant="negative"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isSaving}
+              className="mr-auto"
+            >
               <FontAwesomeIcon icon={faTrash} className="size-4" />
               <span>{'Delete'}</span>
             </Button>
           )}
         </DialogFooter>
+
+        {/* Deleting drops the rating and the review together and cannot be undone, so it
+            asks first. */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{`Do you want to delete your rating and review of ${title}?`}</DialogTitle>
+            </DialogHeader>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="negative" onClick={onDelete} disabled={isSaving}>
+                  <FontAwesomeIcon icon={faTrash} className="size-4" />
+                  <span>{'Delete'}</span>
+                </Button>
+              </DialogClose>
+
+              <DialogClose asChild>
+                <Button variant="secondary" disabled={isSaving}>
+                  <FontAwesomeIcon icon={faTimes} />
+                  <span>{'Cancel'}</span>
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   )

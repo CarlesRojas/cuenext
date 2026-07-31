@@ -37,7 +37,10 @@ export function RatingInput({ value, onChange, disabled = false, className }: Ra
             <FontAwesomeIcon
               icon={faStar}
               className={cn(
-                'size-5 max-h-5 min-h-5 w-5 max-w-5 min-w-5 transition-colors',
+                // Ten stars share a row with the cover beside them, so they step down a
+                // size on the narrowest screens rather than overflowing the dialog.
+                'size-4 max-h-4 min-h-4 w-4 max-w-4 min-w-4 transition-colors',
+                'sm:size-5 sm:max-h-5 sm:min-h-5 sm:w-5 sm:max-w-5 sm:min-w-5',
                 shown !== null && rating <= shown ? 'text-amber-400' : 'text-white/20',
               )}
             />
