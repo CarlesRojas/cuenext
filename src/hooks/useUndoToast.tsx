@@ -4,8 +4,6 @@ import {
   faCheckCircle,
   faEye,
   faEyeSlash,
-  faHeart,
-  faHeartBroken,
   faMinus,
   faPlay,
   faStop,
@@ -23,8 +21,6 @@ export type ToastActionType =
   | 'unwatch'
   | 'watchMultiple'
   | 'unwatchMultiple'
-  | 'favorite'
-  | 'unfavorite'
   | 'stop'
   | 'unstop'
 
@@ -81,16 +77,6 @@ export function ToastProvider({ children }: ToastProviderProps) {
         icon = faEyeSlash
         iconClass = 'text-red-400'
         message = `Unwatched multiple episodes of ${title}`
-        break
-      case 'favorite':
-        icon = faHeart
-        iconClass = 'text-rose-500'
-        message = `Favorited ${title}`
-        break
-      case 'unfavorite':
-        icon = faHeartBroken
-        iconClass = 'text-neutral-400'
-        message = `Unfavorited ${title}`
         break
       case 'stop':
         icon = faStop

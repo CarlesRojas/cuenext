@@ -99,7 +99,6 @@ export function useUserDataTransfer() {
         version: USER_DATA_EXPORT_VERSION,
         exportedAt: Date.now(),
         follows: snapshot.follows,
-        favorites: snapshot.favorites,
         stopped: snapshot.stopped,
         watchedMovies: watchedMovies.map(({ tmdbId, watchedAt }) => ({ tmdbId, watchedAt })),
         watchedEpisodes: watchedEpisodes.map(({ showTmdbId, seasonNumber, episodeNumber, watchedAt }) => ({
@@ -134,7 +133,6 @@ export function useUserDataTransfer() {
     }
 
     pushChunks(data.follows, follows => ({ follows }))
-    pushChunks(data.favorites, favorites => ({ favorites }))
     pushChunks(data.stopped, stopped => ({ stopped }))
     pushChunks(data.watchedMovies, watchedMovies => ({ watchedMovies }))
     pushChunks(data.watchedEpisodes, watchedEpisodes => ({ watchedEpisodes }))

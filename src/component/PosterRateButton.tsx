@@ -11,12 +11,14 @@ interface PosterRateButtonProps {
   type: MediaType
   tmdbId: number
   title: string
+  poster?: string | null
+  backdrop?: string | null
 }
 
 // Sits on a poster where the track and watch buttons sit, and opens the same rate and
 // review dialog the detail page uses. Plain until the title is rated, then it wears the
 // rating in the same colours the detail page gives it.
-export function PosterRateButton({ type, tmdbId, title }: PosterRateButtonProps) {
+export function PosterRateButton({ type, tmdbId, title, poster, backdrop }: PosterRateButtonProps) {
   const rating = useMyRating(type, tmdbId)
   const { isSignedIn, requireSignIn } = useReviewActions()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -46,7 +48,15 @@ export function PosterRateButton({ type, tmdbId, title }: PosterRateButtonProps)
         <FontAwesomeIcon icon={faStar} />
       </Button>
 
-      <ReviewDialog type={type} tmdbId={tmdbId} title={title} open={isDialogOpen} onOpenChange={setIsDialogOpen} />
+      <ReviewDialog
+        type={type}
+        tmdbId={tmdbId}
+        title={title}
+        poster={poster}
+        backdrop={backdrop}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </>
   )
 }

@@ -5,8 +5,8 @@ import { requireIdentity, requireUser } from './requireUser'
 
 const mediaType = v.union(v.literal('movie'), v.literal('tv'))
 
-// Serves the export flow: follows, favorites and stopped rows are bounded by how many
-// titles a user tracks, so one collect per table is fine. Watched movies and episodes can
+// Serves the export flow: follows and stopped rows are bounded by how many titles a user
+// tracks, so one collect per table is fine. Watched movies and episodes can
 // be much larger, so the client pages them through watch.getWatchedMovies and
 // watch.getWatchedEpisodes instead. Derived tables (nextEpisode, userStats) and the TMDB
 // account link are intentionally excluded: they are rebuilt on the importing account.
@@ -17,11 +17,6 @@ export const getExportSnapshot = query({
 
     const follows = await context.db
       .query('follow')
-      .withIndex('by_user_type', q => q.eq('userId', userId))
-      .collect()
-
-    const favorites = await context.db
-      .query('favorite')
       .withIndex('by_user_type', q => q.eq('userId', userId))
       .collect()
 
@@ -48,13 +43,15 @@ export const getExportSnapshot = query({
         releaseDate,
         followedAt,
       })),
-      favorites: favorites.map(({ type, tmdbId, favoritedAt }) => ({ type, tmdbId, favoritedAt })),
       stopped: stopped.map(({ tmdbId, stoppedAt }) => ({ tmdbId, stoppedAt })),
-      reviews: reviews.map(({ type, tmdbId, rating, content, createdAt, updatedAt }) => ({
+      reviews: reviews.map(({ type, tmdbId, rating, content, name, poster, backdrop, createdAt, updatedAt }) => ({
         type,
         tmdbId,
         rating,
         content,
+        name,
+        poster,
+        backdrop,
         createdAt,
         updatedAt,
       })),
@@ -83,7 +80,6 @@ export const importChunk = mutation({
         }),
       ),
     ),
-    favorites: v.optional(v.array(v.object({ type: mediaType, tmdbId: v.number(), favoritedAt: v.number() }))),
     stopped: v.optional(v.array(v.object({ tmdbId: v.number(), stoppedAt: v.number() }))),
     watchedMovies: v.optional(v.array(v.object({ tmdbId: v.number(), watchedAt: v.number() }))),
     watchedEpisodes: v.optional(
@@ -103,6 +99,9 @@ export const importChunk = mutation({
           tmdbId: v.number(),
           rating: v.union(v.number(), v.null()),
           content: v.string(),
+          name: v.optional(v.string()),
+          poster: v.optional(v.union(v.string(), v.null())),
+          backdrop: v.optional(v.union(v.string(), v.null())),
           createdAt: v.number(),
           updatedAt: v.number(),
         }),
@@ -125,19 +124,6 @@ export const importChunk = mutation({
       if (existing) skipped++
       else {
         await context.db.insert('follow', { userId, ...row })
-        imported++
-      }
-    }
-
-    for (const row of args.favorites ?? []) {
-      const existing = await context.db
-        .query('favorite')
-        .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', row.type).eq('tmdbId', row.tmdbId))
-        .unique()
-
-      if (existing) skipped++
-      else {
-        await context.db.insert('favorite', { userId, ...row })
         imported++
       }
     }

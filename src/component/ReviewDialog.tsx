@@ -1,13 +1,7 @@
+import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { RatingInput } from '#/component/RatingInput'
 import { Button } from '#/component/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '#/component/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
 import { Textarea } from '#/component/ui/textarea'
 import { MAX_REVIEW_LENGTH, useReviewActions, useTitleReviews } from '#/hooks/useTitleReviews'
 import { cn } from '#/lib/cn'
@@ -20,13 +14,17 @@ interface ReviewDialogProps {
   type: MediaType
   tmdbId: number
   title: string
+  // Stored with the rating so the profile can list and illustrate what you rated without
+  // going back to TMDB for every row.
+  poster?: string | null
+  backdrop?: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 // Rating and review are the same row, so this dialog covers both: rate without writing,
 // write without rating, or do both. None of it is sent to TMDB.
-export function ReviewDialog({ type, tmdbId, title, open, onOpenChange }: ReviewDialogProps) {
+export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOpenChange }: ReviewDialogProps) {
   const { myReview } = useTitleReviews(type, tmdbId, open)
   const { saveReview, deleteReview } = useReviewActions()
 
@@ -49,7 +47,15 @@ export function ReviewDialog({ type, tmdbId, title, open, onOpenChange }: Review
     if (isEmpty || isTooLong) return
 
     setIsSaving(true)
-    const saved = await saveReview({ type, tmdbId, rating, content })
+    const saved = await saveReview({
+      type,
+      tmdbId,
+      rating,
+      content,
+      name: title,
+      poster: poster ?? null,
+      backdrop: backdrop ?? null,
+    })
     setIsSaving(false)
 
     if (saved !== undefined) onOpenChange(false)
@@ -66,10 +72,21 @@ export function ReviewDialog({ type, tmdbId, title, open, onOpenChange }: Review
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-5">
-        <DialogHeader>
+      {/* Opening with no star focused: the dialog should show the rating you already gave,
+          not land focus on the first star. */}
+      <DialogContent className="gap-5" onOpenAutoFocus={event => event.preventDefault()}>
+        <DialogHeader className="flex-row items-center gap-3">
+          <div className="aspect-2/3 h-16 min-h-16 w-11 min-w-11 overflow-hidden rounded-lg border border-neutral-500/40 bg-neutral-900">
+            <ProgressiveImage
+              paths={[poster, backdrop]}
+              alt={title}
+              className="size-full object-cover object-center"
+              minSize="w185"
+              maxSize="w185"
+            />
+          </div>
+
           <DialogTitle>{myReview ? 'Edit your review' : 'Rate & review'}</DialogTitle>
-          <DialogDescription className="text-white/50">{title}</DialogDescription>
         </DialogHeader>
 
         <RatingInput value={rating} onChange={setRating} disabled={isSaving} />

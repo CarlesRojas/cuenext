@@ -27,14 +27,6 @@ const buttonVariants = cva(
         ],
         input: ['text-white/70 hover:text-white focus-visible:text-white'],
 
-        favorite: [
-          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
-          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
-
-          'data-[state=on]:border-rose-500/40 data-[state=on]:bg-rose-500/15 data-[state=on]:text-rose-500',
-          'data-[state=on]:hover:bg-rose-500/25 data-[state=on]:focus-visible:bg-rose-500/25',
-        ],
-
         watch: [
           'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
           'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
@@ -47,8 +39,8 @@ const buttonVariants = cva(
           'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
           'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
 
-          'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/20 data-[state=on]:text-sky-500',
-          'data-[state=on]:hover:bg-sky-500/40 data-[state=on]:focus-visible:bg-sky-500/40',
+          'data-[state=on]:border-amber-400/40 data-[state=on]:bg-amber-400/20 data-[state=on]:text-amber-400',
+          'data-[state=on]:hover:bg-amber-400/40 data-[state=on]:focus-visible:bg-amber-400/40',
         ],
 
         upvote: [

@@ -4,12 +4,11 @@ import { RateButton } from '#/component/RateButton'
 import { Button } from '#/component/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '#/component/ui/dropdown-menu'
 import { ShowMore } from '#/component/ui/show-more'
-import { useFavoriteMovie } from '#/hooks/useFavoriteMovie'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
 import { cn } from '#/lib/cn'
 import type { TmdbMovie } from '#/type/tmdb'
-import { faBookmark, faEllipsis, faEye, faHeart, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faEllipsis, faEye, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -21,7 +20,6 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
   const { id, title, poster_path, backdrop_path, release_date, runtime, overview, status, genres } = movie
 
   const { isFollowed, isFollowedLoading, toggleFollow } = useFollowMovie(movie)
-  const { isFavorited, isFavoritedLoading, toggleFavorite } = useFavoriteMovie(movie)
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie({
     ...movie,
     name: title,
@@ -125,17 +123,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
               </Button>
             )}
 
-            <RateButton type="movie" tmdbId={id} title={title} />
-
-            <Button
-              size="icon"
-              variant="favorite"
-              onClick={() => toggleFavorite(id, title)}
-              disabled={isFavoritedLoading}
-              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-            >
-              <FontAwesomeIcon icon={isFavoritedLoading ? faSpinner : faHeart} className="size-5" />
-            </Button>
+            <RateButton type="movie" tmdbId={id} title={title} poster={poster_path} backdrop={backdrop_path} />
 
             {isReleased && (
               <Button

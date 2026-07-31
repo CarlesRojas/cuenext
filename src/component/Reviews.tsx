@@ -22,9 +22,11 @@ interface ReviewsProps {
   tmdbId: number
   media: MediaType
   title: string
+  poster?: string | null
+  backdrop?: string | null
 }
 
-export function Reviews({ tmdbId, media, title }: ReviewsProps) {
+export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps) {
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -181,6 +183,8 @@ export function Reviews({ tmdbId, media, title }: ReviewsProps) {
         type={media}
         tmdbId={tmdbId}
         title={title}
+        poster={poster}
+        backdrop={backdrop}
         open={isReviewDialogOpen}
         onOpenChange={setIsReviewDialogOpen}
       />

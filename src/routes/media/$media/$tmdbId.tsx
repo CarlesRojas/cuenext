@@ -95,7 +95,13 @@ function RouteComponent() {
 
         <Cast tmdbId={tmdbIdNumber} media={media as MediaType} />
         <Videos tmdbId={tmdbIdNumber} media={media as MediaType} />
-        <Reviews tmdbId={tmdbIdNumber} media={media as MediaType} title={displayName ?? ''} />
+        <Reviews
+          tmdbId={tmdbIdNumber}
+          media={media as MediaType}
+          title={displayName ?? ''}
+          poster={media === 'movie' ? movie.data?.poster_path : show.data?.poster_path}
+          backdrop={media === 'movie' ? movie.data?.backdrop_path : show.data?.backdrop_path}
+        />
         <Recommendations tmdbId={tmdbIdNumber} media={media as MediaType} />
       </div>
     </div>

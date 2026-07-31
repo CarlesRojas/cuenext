@@ -10,11 +10,13 @@ interface RateButtonProps {
   type: MediaType
   tmdbId: number
   title: string
+  poster?: string | null
+  backdrop?: string | null
 }
 
 // Sits with the other title actions and opens the rate + review dialog. Once rated it
 // shows the score the signed-in user gave.
-export function RateButton({ type, tmdbId, title }: RateButtonProps) {
+export function RateButton({ type, tmdbId, title, poster, backdrop }: RateButtonProps) {
   const { myRating } = useTitleReviews(type, tmdbId)
   const { isSignedIn, requireSignIn } = useReviewActions()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -41,7 +43,15 @@ export function RateButton({ type, tmdbId, title }: RateButtonProps) {
         {myRating !== null && <span className="tabular-nums">{myRating}</span>}
       </Button>
 
-      <ReviewDialog type={type} tmdbId={tmdbId} title={title} open={isDialogOpen} onOpenChange={setIsDialogOpen} />
+      <ReviewDialog
+        type={type}
+        tmdbId={tmdbId}
+        title={title}
+        poster={poster}
+        backdrop={backdrop}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </>
   )
 }

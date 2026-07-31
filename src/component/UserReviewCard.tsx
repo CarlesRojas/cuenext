@@ -39,9 +39,7 @@ export function UserReviewCard({ review, inDialog = false }: UserReviewCardProps
 
         <div className="flex grow justify-between gap-3">
           <div className="flex flex-col">
-            <h4 className="line-clamp-1 leading-4 font-semibold">
-              {review.isOwn ? `${review.authorName} (you)` : review.authorName}
-            </h4>
+            <h4 className="line-clamp-1 leading-4 font-semibold">{review.authorName}</h4>
             <time className="line-clamp-1 text-sm text-neutral-400">{reviewDate}</time>
           </div>
 

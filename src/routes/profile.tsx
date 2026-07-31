@@ -1,4 +1,5 @@
 import { PosterCard } from '#/component/PosterCard'
+import { ProfileReviewCard } from '#/component/ProfileReviewCard'
 import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
@@ -111,18 +112,18 @@ function ProfilePage() {
     enabled: media === 'movie' && !!isSignedIn,
   })
 
-  const { data: favoriteShows, isPending: favoriteShowsLoading } = useQuery({
-    ...convexQuery(api.favorites.getFavoriteShows),
-    enabled: media === 'tv' && !!isSignedIn,
+  // Both rating sections read the same list: the rated grid takes the rows with a rating,
+  // the reviews list takes the ones that were written. Already sorted best rated first.
+  const { data: myReviews, isPending: myReviewsLoading } = useQuery({
+    ...convexQuery(api.reviews.getMyReviews, { type: media ?? 'tv' }),
+    enabled: !!isSignedIn,
   })
 
-  const { data: favoriteMovies, isPending: favoriteMoviesLoading } = useQuery({
-    ...convexQuery(api.favorites.getFavoriteMovies),
-    enabled: media === 'movie' && !!isSignedIn,
-  })
+  const ratedTitles = (myReviews ?? []).filter(review => review.rating !== null)
+  const writtenReviews = (myReviews ?? []).filter(review => review.content !== '')
 
-  const isLoadingShows = tvSectionsLoading || favoriteShowsLoading
-  const isLoadingMovies = movieSectionsLoading || favoriteMoviesLoading
+  const isLoadingShows = tvSectionsLoading || myReviewsLoading
+  const isLoadingMovies = movieSectionsLoading || myReviewsLoading
 
   return (
     <div className="screen-py flex w-full flex-col gap-8">
@@ -175,6 +176,33 @@ function ProfilePage() {
                 }
                 name="Followed Shows"
               />
+              <StatCard
+                colorClassName="text-sky-500"
+                value={
+                  showStats ? (
+                    showStats.averageShowRating !== null ? (
+                      formatNumber(Math.round(showStats.averageShowRating * 10) / 10)
+                    ) : (
+                      '-'
+                    )
+                  ) : (
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  )
+                }
+                name="Average Rating"
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value={showStats ? formatNumber(showStats.ratedShowsCount) : <FontAwesomeIcon icon={faSpinner} spin />}
+                name="Rated Shows"
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value={
+                  showStats ? formatNumber(showStats.showUpvotesReceived) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Review Upvotes"
+              />
             </>
           )}
 
@@ -202,6 +230,35 @@ function ProfilePage() {
                 }
                 name="Followed Movies"
               />
+              <StatCard
+                colorClassName="text-sky-500"
+                value={
+                  movieStats ? (
+                    movieStats.averageMovieRating !== null ? (
+                      formatNumber(Math.round(movieStats.averageMovieRating * 10) / 10)
+                    ) : (
+                      '-'
+                    )
+                  ) : (
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  )
+                }
+                name="Average Rating"
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value={
+                  movieStats ? formatNumber(movieStats.ratedMoviesCount) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Rated Movies"
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value={
+                  movieStats ? formatNumber(movieStats.movieUpvotesReceived) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Review Upvotes"
+              />
             </>
           )}
 
@@ -223,6 +280,13 @@ function ProfilePage() {
                 value="-"
                 name={media === 'tv' ? 'Followed Shows' : 'Followed Movies'}
               />
+              <StatCard colorClassName="text-sky-500" value="-" name="Average Rating" />
+              <StatCard
+                colorClassName="text-lime-500"
+                value="-"
+                name={media === 'tv' ? 'Rated Shows' : 'Rated Movies'}
+              />
+              <StatCard colorClassName="text-amber-500" value="-" name="Review Upvotes" />
             </>
           )}
         </div>
@@ -232,7 +296,7 @@ function ProfilePage() {
         {media === 'tv' && (
           <>
             {isLoadingShows &&
-              ['Finished Shows', 'Favorite Shows'].map((title, i) => (
+              ['Finished Shows', 'Rated Shows'].map((title, i) => (
                 <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
                   {Array.from({ length: 10 }).map((_, episodeIndex) => (
                     <PosterCard key={episodeIndex} isLoading />
@@ -259,20 +323,43 @@ function ProfilePage() {
               )}
             </Section>
 
-            <Section sectionKey="profile-favorite-shows" title="Favorite Shows">
-              {favoriteShows?.map(item => (
+            <Section sectionKey="profile-rated-shows" title="Rated Shows">
+              {ratedTitles.map(review => (
                 <PosterCard
-                  key={item.id}
-                  id={item.showTmdbId}
-                  title={item.name}
+                  key={review.id}
+                  id={review.tmdbId}
+                  title={review.name}
                   media="tv"
-                  imagePaths={[item.poster, item.backdrop]}
+                  imagePaths={[review.poster, review.backdrop]}
+                  showRate
                 />
               ))}
 
-              {favoriteShows && favoriteShows.length === 0 && (
+              {myReviews && ratedTitles.length === 0 && (
                 <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your favorite shows will appear here.
+                  Shows you rate will appear here, best rated first.
+                </p>
+              )}
+            </Section>
+
+            <Section sectionKey="profile-show-reviews" title="Your Show Reviews">
+              {writtenReviews.map(review => (
+                <ProfileReviewCard
+                  key={review.id}
+                  type="tv"
+                  tmdbId={review.tmdbId}
+                  title={review.name}
+                  rating={review.rating}
+                  content={review.content}
+                  poster={review.poster}
+                  backdrop={review.backdrop}
+                  upvoteCount={review.upvoteCount}
+                />
+              ))}
+
+              {myReviews && writtenReviews.length === 0 && (
+                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
+                  Reviews you write will appear here.
                 </p>
               )}
             </Section>
@@ -282,7 +369,7 @@ function ProfilePage() {
         {media === 'movie' && (
           <>
             {isLoadingMovies &&
-              ['Finished Movies', 'Favorite Movies'].map((title, i) => (
+              ['Finished Movies', 'Rated Movies'].map((title, i) => (
                 <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
                   {Array.from({ length: 10 }).map((_, episodeIndex) => (
                     <PosterCard key={episodeIndex} isLoading />
@@ -309,20 +396,43 @@ function ProfilePage() {
               )}
             </Section>
 
-            <Section sectionKey="profile-favorite-movies" title="Favorite Movies">
-              {favoriteMovies?.map(item => (
+            <Section sectionKey="profile-rated-movies" title="Rated Movies">
+              {ratedTitles.map(review => (
                 <PosterCard
-                  key={item.tmdbId}
-                  id={item.tmdbId}
-                  title={item.name}
+                  key={review.id}
+                  id={review.tmdbId}
+                  title={review.name}
                   media="movie"
-                  imagePaths={[item.poster, item.backdrop]}
+                  imagePaths={[review.poster, review.backdrop]}
+                  showRate
                 />
               ))}
 
-              {favoriteMovies && favoriteMovies.length === 0 && (
+              {myReviews && ratedTitles.length === 0 && (
                 <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your favorite movies will appear here.
+                  Movies you rate will appear here, best rated first.
+                </p>
+              )}
+            </Section>
+
+            <Section sectionKey="profile-movie-reviews" title="Your Movie Reviews">
+              {writtenReviews.map(review => (
+                <ProfileReviewCard
+                  key={review.id}
+                  type="movie"
+                  tmdbId={review.tmdbId}
+                  title={review.name}
+                  rating={review.rating}
+                  content={review.content}
+                  poster={review.poster}
+                  backdrop={review.backdrop}
+                  upvoteCount={review.upvoteCount}
+                />
+              ))}
+
+              {myReviews && writtenReviews.length === 0 && (
+                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
+                  Reviews you write will appear here.
                 </p>
               )}
             </Section>

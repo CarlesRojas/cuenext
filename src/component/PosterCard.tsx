@@ -192,7 +192,9 @@ export function PosterCard(props: Props) {
         </Button>
       )}
 
-      {showRate && <PosterRateButton type={media} tmdbId={id} title={title} />}
+      {showRate && (
+        <PosterRateButton type={media} tmdbId={id} title={title} poster={imagePaths?.[0]} backdrop={imagePaths?.[1]} />
+      )}
     </div>
   )
 }

@@ -64,6 +64,9 @@ interface NewReview {
   tmdbId: number
   rating: number | null
   content: string
+  name?: string
+  poster?: string | null
+  backdrop?: string | null
   createdAt: number
   updatedAt: number
 }

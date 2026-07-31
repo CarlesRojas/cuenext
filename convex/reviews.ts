@@ -155,6 +155,39 @@ export const getMyRatings = query({
   },
 })
 
+// The signed-in user's own reviews with the title metadata needed to illustrate them,
+// best rated first. Feeds both profile sections: the rated titles grid reads the rated
+// rows, the reviews list reads the ones that were written.
+export const getMyReviews = query({
+  args: { type: mediaType },
+  handler: async (context, args) => {
+    const userId = await optionalUser(context)
+    if (!userId) return []
+
+    const reviews = await context.db
+      .query('review')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    return reviews
+      .filter(review => review.type === args.type)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.updatedAt - a.updatedAt)
+      .map(review => ({
+        id: review._id,
+        type: review.type,
+        tmdbId: review.tmdbId,
+        rating: review.rating,
+        content: review.content,
+        name: review.name ?? '',
+        poster: review.poster ?? null,
+        backdrop: review.backdrop ?? null,
+        upvoteCount: review.upvoteCount,
+        createdAt: review.createdAt,
+        updatedAt: review.updatedAt,
+      }))
+  },
+})
+
 // One row per user per title: rating a title you already reviewed edits that review instead
 // of adding a second one, so nobody can review the same title twice. A row with a rating and
 // no content is a rating-only row and stays out of the review list.
@@ -164,6 +197,11 @@ export const saveReview = mutation({
     tmdbId: v.number(),
     rating: v.union(v.number(), v.null()),
     content: v.optional(v.string()),
+    // Title metadata for the profile lists, copied in from whatever screen opened the
+    // dialog; a follow row for the same title fills the gaps.
+    name: v.optional(v.string()),
+    poster: v.optional(v.union(v.string(), v.null())),
+    backdrop: v.optional(v.union(v.string(), v.null())),
     // Only used when the auth provider does not put the name and picture claims in the
     // token; the identity always wins when it carries them.
     fallbackAuthorName: v.optional(v.string()),
@@ -189,12 +227,24 @@ export const saveReview = mutation({
       .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
 
+    const follow = await context.db
+      .query('follow')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
+      .unique()
+
+    const name = args.name ?? follow?.name ?? existing?.name
+    const poster = args.poster ?? follow?.poster ?? existing?.poster ?? null
+    const backdrop = args.backdrop ?? follow?.backdrop ?? existing?.backdrop ?? null
+
     const now = Date.now()
 
     if (existing) {
       await context.db.patch(existing._id, {
         rating: args.rating,
         content,
+        name,
+        poster,
+        backdrop,
         authorName,
         authorImage,
         updatedAt: now,
@@ -222,6 +272,9 @@ export const saveReview = mutation({
       tmdbId: args.tmdbId,
       rating: args.rating,
       content,
+      name,
+      poster,
+      backdrop,
       createdAt: now,
       updatedAt: now,
     })

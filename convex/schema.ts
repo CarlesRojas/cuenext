@@ -15,15 +15,6 @@ export default defineSchema({
     .index('by_user_type', ['userId', 'type'])
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
 
-  favorite: defineTable({
-    userId: v.string(),
-    type: v.union(v.literal('movie'), v.literal('tv')),
-    tmdbId: v.number(),
-    favoritedAt: v.number(),
-  })
-    .index('by_user_type', ['userId', 'type'])
-    .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
-
   stopped: defineTable({
     userId: v.string(),
     tmdbId: v.number(),
@@ -116,6 +107,11 @@ export default defineSchema({
     tmdbId: v.number(),
     rating: v.union(v.number(), v.null()),
     content: v.string(),
+    // Title metadata copied in at write time, the same way follow rows carry it, so the
+    // profile can list and illustrate what you rated without a TMDB round trip per row.
+    name: v.optional(v.string()),
+    poster: v.optional(v.union(v.string(), v.null())),
+    backdrop: v.optional(v.union(v.string(), v.null())),
     authorName: v.string(),
     authorImage: v.union(v.string(), v.null()),
     createdAt: v.number(),

@@ -29,16 +29,16 @@ export function RatingInput({ value, onChange, disabled = false, className }: Ra
             aria-label={`${rating} out of 10`}
             aria-pressed={value === rating}
             className="cursor-pointer p-0.5 transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-30"
+            // Only the pointer previews a rating. Focus must not: a dialog opens with its
+            // first focusable child focused, which would preview a 1 over your own rating.
             onPointerEnter={() => setHovered(rating)}
-            onFocus={() => setHovered(rating)}
-            onBlur={() => setHovered(null)}
             onClick={() => onChange(value === rating ? null : rating)}
           >
             <FontAwesomeIcon
               icon={faStar}
               className={cn(
                 'size-5 max-h-5 min-h-5 w-5 max-w-5 min-w-5 transition-colors',
-                shown !== null && rating <= shown ? 'text-sky-500' : 'text-white/20',
+                shown !== null && rating <= shown ? 'text-amber-400' : 'text-white/20',
               )}
             />
           </button>

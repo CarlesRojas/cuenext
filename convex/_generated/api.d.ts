@@ -10,7 +10,6 @@
 
 import type * as crons from "../crons.js";
 import type * as episodeInfo from "../episodeInfo.js";
-import type * as favorites from "../favorites.js";
 import type * as lib_nextEpisodeCompute from "../lib/nextEpisodeCompute.js";
 import type * as lib_reviewWrite from "../lib/reviewWrite.js";
 import type * as lib_statsDelta from "../lib/statsDelta.js";
@@ -40,7 +39,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   episodeInfo: typeof episodeInfo;
-  favorites: typeof favorites;
   "lib/nextEpisodeCompute": typeof lib_nextEpisodeCompute;
   "lib/reviewWrite": typeof lib_reviewWrite;
   "lib/statsDelta": typeof lib_statsDelta;
