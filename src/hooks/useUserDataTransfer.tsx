@@ -108,13 +108,14 @@ export function useUserDataTransfer() {
           episodeNumber,
           watchedAt,
         })),
+        reviews: snapshot.reviews,
       }
 
       const username = user?.username || user?.fullName || user?.primaryEmailAddress?.emailAddress.split('@')[0]
       downloadJsonFile(buildExportFilename(username ?? undefined), exportData)
 
       showSuccessToast(
-        `Exported ${exportData.follows.length} titles, ${exportData.watchedEpisodes.length} episodes and ${exportData.watchedMovies.length} movies`,
+        `Exported ${exportData.follows.length} titles, ${exportData.watchedEpisodes.length} episodes, ${exportData.watchedMovies.length} movies and ${exportData.reviews.length} ratings`,
       )
     } catch {
       showErrorToast('Export failed. Please try again.')
@@ -137,6 +138,7 @@ export function useUserDataTransfer() {
     pushChunks(data.stopped, stopped => ({ stopped }))
     pushChunks(data.watchedMovies, watchedMovies => ({ watchedMovies }))
     pushChunks(data.watchedEpisodes, watchedEpisodes => ({ watchedEpisodes }))
+    pushChunks(data.reviews, reviews => ({ reviews }))
 
     if (chunks.length === 0) {
       showErrorToast('This file contains no data to import.')

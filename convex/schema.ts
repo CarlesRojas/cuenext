@@ -127,6 +127,16 @@ export default defineSchema({
     // Reviews are listed most upvoted first, which is exactly this index read in reverse.
     .index('by_type_tmdbId_upvotes', ['type', 'tmdbId', 'upvoteCount']),
 
+  // The public author card (display name and avatar) for an account, kept in our own
+  // database so every reader sees it. Reviews fall back to the snapshot they stored, but
+  // this row is what keeps an author's picture current across all of their reviews.
+  userProfile: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    image: v.union(v.string(), v.null()),
+    updatedAt: v.number(),
+  }).index('by_user', ['userId']),
+
   // Upvote only, no downvotes. Authors start with a vote on their own review.
   reviewVote: defineTable({
     userId: v.string(),

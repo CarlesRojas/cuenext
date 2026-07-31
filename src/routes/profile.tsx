@@ -248,6 +248,7 @@ function ProfilePage() {
                   title={item.name}
                   media="tv"
                   imagePaths={[item.poster, item.backdrop]}
+                  showRate
                 />
               ))}
 
@@ -297,6 +298,7 @@ function ProfilePage() {
                   title={item.name}
                   media="movie"
                   imagePaths={[item.poster, item.backdrop]}
+                  showRate
                 />
               ))}
 

@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
 import { mutation, query } from './_generated/server'
+import { applySummaryDelta, insertReview, upsertProfile } from './lib/reviewWrite'
 import { optionalUser, requireIdentity } from './requireUser'
 
 const mediaType = v.union(v.literal('movie'), v.literal('tv'))
@@ -23,54 +24,24 @@ async function findVote(context: any, userId: string, reviewId: string) {
     .unique()
 }
 
-// The community average is materialized instead of recomputed, so every rating write moves
-// the count and the sum by the delta it causes.
-async function applySummaryDelta(
-  context: any,
-  type: 'movie' | 'tv',
-  tmdbId: number,
-  countDelta: number,
-  sumDelta: number,
-) {
-  if (countDelta === 0 && sumDelta === 0) return
-
-  const summary = await context.db
-    .query('reviewSummary')
-    .withIndex('by_type_tmdbId', (q: any) => q.eq('type', type).eq('tmdbId', tmdbId))
-    .unique()
-
-  const now = Date.now()
-
-  if (!summary) {
-    if (countDelta <= 0) return
-    await context.db.insert('reviewSummary', {
-      type,
-      tmdbId,
-      ratingCount: countDelta,
-      ratingSum: sumDelta,
-      updatedAt: now,
-    })
-    return
-  }
-
-  await context.db.patch(summary._id, {
-    ratingCount: Math.max(0, summary.ratingCount + countDelta),
-    ratingSum: Math.max(0, summary.ratingSum + sumDelta),
-    updatedAt: now,
-  })
-}
-
 // userId identifies a Clerk account and never leaves the backend. The client gets isOwn
-// instead, which is all the UI needs to decide whether to offer edit and delete.
-function reviewPayload(review: Doc<'review'>, userId: string | null, hasUpvoted: boolean) {
+// instead, which is all the UI needs to decide whether to offer edit and delete. The author
+// card comes from the profile row when there is one, so changing your picture updates every
+// review you ever wrote; the values stored on the review are the fallback.
+function reviewPayload(
+  review: Doc<'review'>,
+  userId: string | null,
+  hasUpvoted: boolean,
+  profile: Doc<'userProfile'> | null,
+) {
   return {
     id: review._id,
     type: review.type,
     tmdbId: review.tmdbId,
     rating: review.rating,
     content: review.content,
-    authorName: review.authorName,
-    authorImage: review.authorImage,
+    authorName: profile?.name ?? review.authorName,
+    authorImage: profile?.image ?? review.authorImage,
     createdAt: review.createdAt,
     updatedAt: review.updatedAt,
     upvoteCount: review.upvoteCount,
@@ -108,10 +79,23 @@ export const getTitleReviews = query({
           .unique()
       : null
 
+    // One profile read per distinct author, not per review.
+    const profiles = new Map<string, Doc<'userProfile'> | null>()
+    for (const review of reviews) {
+      if (profiles.has(review.userId)) continue
+
+      const profile = await context.db
+        .query('userProfile')
+        .withIndex('by_user', q => q.eq('userId', review.userId))
+        .unique()
+
+      profiles.set(review.userId, profile)
+    }
+
     const withVotes = []
     for (const review of reviews) {
       const vote = userId ? await findVote(context, userId, review._id) : null
-      withVotes.push(reviewPayload(review, userId, !!vote))
+      withVotes.push(reviewPayload(review, userId, !!vote, profiles.get(review.userId) ?? null))
     }
 
     return {
@@ -130,6 +114,44 @@ export const getTitleReviews = query({
         : null,
       reviews: withVotes,
     }
+  },
+})
+
+// Publishes the signed-in user's display name and picture into our own database, so every
+// reader of their reviews gets them from us and they stay current when the account picture
+// changes. Called on sign-in and before writing a review.
+export const syncProfile = mutation({
+  args: {
+    name: v.optional(v.string()),
+    image: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (context, args) => {
+    const identity = await requireIdentity(context)
+
+    const name = identity.hasName ? identity.authorName : args.name?.trim() || identity.authorName
+    const image = identity.authorImage ?? args.image ?? null
+
+    await upsertProfile(context, identity.userId, name, image)
+  },
+})
+
+// Every rating the signed-in user has given, so a grid of posters can show each cover's
+// rating from one subscription instead of one query per cover. Bounded by how many titles
+// the user has rated.
+export const getMyRatings = query({
+  args: {},
+  handler: async context => {
+    const userId = await optionalUser(context)
+    if (!userId) return []
+
+    const reviews = await context.db
+      .query('review')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    return reviews
+      .filter(review => review.rating !== null)
+      .map(review => ({ type: review.type, tmdbId: review.tmdbId, rating: review.rating as number }))
   },
 })
 
@@ -153,6 +175,8 @@ export const saveReview = mutation({
 
     const authorName = identity.hasName ? identity.authorName : (args.fallbackAuthorName ?? identity.authorName)
     const authorImage = identity.authorImage ?? args.fallbackAuthorImage ?? null
+
+    await upsertProfile(context, userId, authorName, authorImage)
 
     assertRating(args.rating)
 
@@ -190,26 +214,17 @@ export const saveReview = mutation({
       return existing._id
     }
 
-    // Posting a review counts as standing behind it, so it starts with the author's own
-    // upvote already cast. They can still take it back like any other upvote.
-    const reviewId = await context.db.insert('review', {
+    return await insertReview(context, {
       userId,
+      authorName,
+      authorImage,
       type: args.type,
       tmdbId: args.tmdbId,
       rating: args.rating,
       content,
-      authorName,
-      authorImage,
       createdAt: now,
       updatedAt: now,
-      upvoteCount: 1,
     })
-
-    await context.db.insert('reviewVote', { userId, reviewId, createdAt: now })
-
-    if (args.rating !== null) await applySummaryDelta(context, args.type, args.tmdbId, 1, args.rating)
-
-    return reviewId
   },
 })
 

@@ -6,7 +6,6 @@ import { Button } from '#/component/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogFooter } from '#/component/ui/dialog'
 import { ShowMore } from '#/component/ui/show-more'
 import { cn } from '#/lib/cn'
-import { useUser } from '@clerk/tanstack-react-start'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
@@ -19,7 +18,6 @@ interface UserReviewCardProps {
 // A review written on CueNext. Same card shape as the TMDB ones, plus the upvote count it
 // is sorted by; the reader's own review is tinted so it stands out in the list.
 export function UserReviewCard({ review, inDialog = false }: UserReviewCardProps) {
-  const { user } = useUser()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const reviewDate = new Date(review.createdAt).toLocaleDateString(undefined, {
@@ -27,10 +25,6 @@ export function UserReviewCard({ review, inDialog = false }: UserReviewCardProps
     month: 'short',
     day: 'numeric',
   })
-
-  // The stored avatar is whatever the account had when the review was written, so for the
-  // reader's own review the live Clerk picture is preferred.
-  const authorImage = review.isOwn ? (user?.imageUrl ?? review.authorImage) : review.authorImage
 
   return (
     <div
@@ -41,7 +35,7 @@ export function UserReviewCard({ review, inDialog = false }: UserReviewCardProps
       )}
     >
       <div className={cn('flex items-center gap-3', inDialog && 'px-4.5 pr-16.5')}>
-        <ReviewAvatar name={review.authorName} image={authorImage} className="size-12 min-h-12 min-w-12" />
+        <ReviewAvatar name={review.authorName} image={review.authorImage} className="size-12 min-h-12 min-w-12" />
 
         <div className="flex grow justify-between gap-3">
           <div className="flex flex-col">
