@@ -1,3 +1,4 @@
+import { PosterRateButton } from '#/component/PosterRateButton'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
@@ -35,6 +36,10 @@ interface LoadedProps extends CommonProps {
   isFollowed?: boolean
   onToggleFollow?: () => void
   isFollowLoading?: boolean
+
+  // Finished titles are the ones worth rating, so their covers carry the rate button in
+  // the same corner the watch and track buttons use elsewhere.
+  showRate?: boolean
 
   progressPercentage?: number
 }
@@ -78,6 +83,8 @@ export function PosterCard(props: Props) {
     isFollowed = false,
     onToggleFollow,
     isFollowLoading = false,
+
+    showRate = false,
 
     progressPercentage,
   } = props
@@ -183,6 +190,10 @@ export function PosterCard(props: Props) {
           {followButtonText && <span className="text-sm">{followButtonText}</span>}
           <FontAwesomeIcon icon={isFollowLoading ? faSpinner : faBookmark} spin={isFollowLoading} />
         </Button>
+      )}
+
+      {showRate && (
+        <PosterRateButton type={media} tmdbId={id} title={title} poster={imagePaths?.[0]} backdrop={imagePaths?.[1]} />
       )}
     </div>
   )

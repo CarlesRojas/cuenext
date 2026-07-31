@@ -27,20 +27,28 @@ const buttonVariants = cva(
         ],
         input: ['text-white/70 hover:text-white focus-visible:text-white'],
 
-        favorite: [
-          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
-          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
-
-          'data-[state=on]:border-rose-500/40 data-[state=on]:bg-rose-500/15 data-[state=on]:text-rose-500',
-          'data-[state=on]:hover:bg-rose-500/25 data-[state=on]:focus-visible:bg-rose-500/25',
-        ],
-
         watch: [
           'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
           'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
 
           'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/20 data-[state=on]:text-sky-500',
           'data-[state=on]:hover:bg-sky-500/40 data-[state=on]:focus-visible:bg-sky-500/40',
+        ],
+
+        rate: [
+          'border border-neutral-500/40 bg-black/50 text-white backdrop-blur-md backface-hidden',
+          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:focus-visible:bg-neutral-500/25',
+
+          'data-[state=on]:border-amber-400/40 data-[state=on]:bg-amber-400/20 data-[state=on]:text-amber-400',
+          'data-[state=on]:hover:bg-amber-400/40 data-[state=on]:focus-visible:bg-amber-400/40',
+        ],
+
+        upvote: [
+          'border border-neutral-500/40 bg-transparent text-white/60',
+          'data-[state=off]:hover:bg-neutral-500/25 data-[state=off]:hover:text-white data-[state=off]:focus-visible:bg-neutral-500/25',
+
+          'data-[state=on]:border-sky-500/40 data-[state=on]:bg-sky-500/15 data-[state=on]:text-sky-500',
+          'data-[state=on]:hover:bg-sky-500/30 data-[state=on]:focus-visible:bg-sky-500/30',
         ],
 
         showMore: [
@@ -53,6 +61,7 @@ const buttonVariants = cva(
         icon: 'size-11',
         iconSmall: 'size-9',
         small: 'm-1 h-9 w-fit gap-1 px-4',
+        pill: 'h-8 w-fit gap-1.5 px-3 text-sm',
         link: 'w-fit gap-2',
         input: 'size-8',
         showMore: 'h-fit w-fit p-0',

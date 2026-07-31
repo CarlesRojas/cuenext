@@ -1,14 +1,14 @@
+import { CombinedRating } from '#/component/CombinedRating'
 import { ProgressiveImage } from '#/component/ProgressiveImage'
-import { StarRating } from '#/component/StarRating'
+import { RateButton } from '#/component/RateButton'
 import { Button } from '#/component/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '#/component/ui/dropdown-menu'
 import { ShowMore } from '#/component/ui/show-more'
-import { useFavoriteEpisode } from '#/hooks/useFavoriteEpisode'
 import { useFollowEpisode } from '#/hooks/useFollowEpisode'
 import { useStopEpisode } from '#/hooks/useStopEpisode'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
-import { faBookmark, faEllipsis, faHeart, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faEllipsis, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
@@ -31,7 +31,6 @@ export function ShowDetails({ show }: ShowDetailsProps) {
   } = show
 
   const { isFollowed, isFollowedLoading, toggleFollow } = useFollowEpisode(show)
-  const { isFavorited, isFavoritedLoading, toggleFavorite } = useFavoriteEpisode(show)
   const { isStopped, isStoppedLoading, toggleStopped } = useStopEpisode(show)
 
   const seasons = seasonsWithSpecials?.filter(season => season.season_number !== 0)
@@ -88,7 +87,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
         </div>
 
         <div className="mb-2 flex w-full max-w-3xl items-start justify-between gap-2">
-          <StarRating voteAverage={show.vote_average} voteCount={show.vote_count} />
+          <CombinedRating type="tv" tmdbId={id} tmdbAverage={show.vote_average} tmdbCount={show.vote_count} />
 
           <div className="flex w-fit flex-row-reverse flex-wrap gap-2">
             <DropdownMenu>
@@ -128,15 +127,7 @@ export function ShowDetails({ show }: ShowDetailsProps) {
               </Button>
             )}
 
-            <Button
-              size="icon"
-              variant="favorite"
-              onClick={() => toggleFavorite(id, name)}
-              disabled={isFavoritedLoading}
-              data-state={!isFavoritedLoading && isFavorited ? 'on' : 'off'}
-            >
-              <FontAwesomeIcon icon={faHeart} className="size-5" />
-            </Button>
+            <RateButton type="tv" tmdbId={id} title={name} poster={poster_path} backdrop={backdrop_path} />
           </div>
         </div>
 

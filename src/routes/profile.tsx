@@ -1,5 +1,7 @@
 import { PosterCard } from '#/component/PosterCard'
+import { ProfileReviewCard } from '#/component/ProfileReviewCard'
 import { Section } from '#/component/Section'
+import { NativeSelect, NativeSelectOption } from '#/component/ui/native-select'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
@@ -12,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useAction } from 'convex/react'
 import type { ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../../convex/_generated/api'
 
 // Rebuild the materialized stats row when it doesn't exist yet or hasn't been fully
@@ -59,15 +61,57 @@ function StatCard({
 }) {
   return (
     <div
-      className={cn('flex flex-col gap-2 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-6', className)}
+      className={cn(
+        'flex flex-col gap-1 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-4 lg:gap-2 lg:p-5',
+        className,
+      )}
     >
-      <div className="relative isolate h-fit w-fit">
-        <span className={cn('absolute inset-0 text-4xl font-bold opacity-90 blur-lg', colorClassName)}>{value}</span>
-        <span className={cn('relative z-10 text-4xl font-bold', colorClassName)}>{value}</span>
+      {/* A watch time like "1y 2m 3d 4h" has to fit a narrow card, so the value wraps
+          inside the card instead of widening it. */}
+      <div className="relative isolate h-fit w-fit max-w-full">
+        <span
+          className={cn(
+            'absolute inset-0 text-xl font-bold break-words opacity-90 blur-lg sm:text-2xl lg:text-3xl',
+            colorClassName,
+          )}
+        >
+          {value}
+        </span>
+        <span className={cn('relative z-10 text-xl font-bold break-words sm:text-2xl lg:text-3xl', colorClassName)}>
+          {value}
+        </span>
       </div>
 
-      <span className="text-sm font-medium text-neutral-400">{name}</span>
+      <span className="text-xs leading-4 font-medium text-neutral-400 lg:text-sm">{name}</span>
     </div>
+  )
+}
+
+// 'all' and 'unrated' aside, a filter value is the exact score a title was given.
+type RatingFilter = 'all' | 'unrated' | number
+
+const RATING_OPTIONS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+function RatingFilterSelect({ value, onChange }: { value: RatingFilter; onChange: (value: RatingFilter) => void }) {
+  return (
+    <NativeSelect
+      size="sm"
+      aria-label="Filter by rating"
+      value={typeof value === 'number' ? String(value) : value}
+      onChange={event => {
+        const next = event.target.value
+        onChange(next === 'all' || next === 'unrated' ? next : Number(next))
+      }}
+    >
+      <NativeSelectOption value="all">{'All'}</NativeSelectOption>
+      <NativeSelectOption value="unrated">{'Unrated'}</NativeSelectOption>
+
+      {RATING_OPTIONS.map(rating => (
+        <NativeSelectOption key={rating} value={String(rating)}>
+          {`${rating} ★`}
+        </NativeSelectOption>
+      ))}
+    </NativeSelect>
   )
 }
 
@@ -79,6 +123,8 @@ export const Route = createFileRoute('/profile')({
 function ProfilePage() {
   const { media } = useSearchParams()
   const { isLoaded, isSignedIn, user } = useUser()
+
+  const [ratingFilter, setRatingFilter] = useState<RatingFilter>('all')
 
   const { data: stats } = useQuery({
     ...convexQuery(api.stats.getStats),
@@ -111,18 +157,65 @@ function ProfilePage() {
     enabled: media === 'movie' && !!isSignedIn,
   })
 
-  const { data: favoriteShows, isPending: favoriteShowsLoading } = useQuery({
-    ...convexQuery(api.favorites.getFavoriteShows),
-    enabled: media === 'tv' && !!isSignedIn,
+  // Both rating sections read the same list: the rated grid takes the rows with a rating,
+  // the reviews list takes the ones that were written. Already sorted best rated first.
+  const { data: myReviews, isPending: myReviewsLoading } = useQuery({
+    ...convexQuery(api.reviews.getMyReviews, { type: media ?? 'tv' }),
+    enabled: !!isSignedIn,
   })
 
-  const { data: favoriteMovies, isPending: favoriteMoviesLoading } = useQuery({
-    ...convexQuery(api.favorites.getFavoriteMovies),
-    enabled: media === 'movie' && !!isSignedIn,
-  })
+  const writtenReviews = (myReviews ?? []).filter(review => review.content !== '')
 
-  const isLoadingShows = tvSectionsLoading || favoriteShowsLoading
-  const isLoadingMovies = movieSectionsLoading || favoriteMoviesLoading
+  // Finished titles and rated ones are one library here: a title you rated but never
+  // finished belongs in the same place as one you finished but never rated, so the two
+  // lists are merged by tmdbId and the selector narrows them down.
+  const finishedItems =
+    media === 'tv'
+      ? (tvSections?.finished ?? []).map(item => ({
+          tmdbId: item.showTmdbId,
+          name: item.name,
+          poster: item.poster ?? null,
+          backdrop: item.backdrop ?? null,
+        }))
+      : (movieSections?.finished ?? []).map(item => ({
+          tmdbId: item.tmdbId,
+          name: item.name,
+          poster: item.poster ?? null,
+          backdrop: item.backdrop ?? null,
+        }))
+
+  const ratedByTmdbId = new Map((myReviews ?? []).filter(review => review.rating !== null).map(r => [r.tmdbId, r]))
+
+  const libraryByTmdbId = new Map<
+    number,
+    { tmdbId: number; name: string; poster: string | null; backdrop: string | null; rating: number | null }
+  >()
+
+  for (const item of finishedItems)
+    libraryByTmdbId.set(item.tmdbId, { ...item, rating: ratedByTmdbId.get(item.tmdbId)?.rating ?? null })
+
+  // Rated titles the finished list does not carry (rated while watching, or never tracked).
+  for (const review of ratedByTmdbId.values())
+    if (!libraryByTmdbId.has(review.tmdbId))
+      libraryByTmdbId.set(review.tmdbId, {
+        tmdbId: review.tmdbId,
+        name: review.name,
+        poster: review.poster,
+        backdrop: review.backdrop,
+        rating: review.rating,
+      })
+
+  const libraryItems = [...libraryByTmdbId.values()].sort(
+    (a, b) => (b.rating ?? -1) - (a.rating ?? -1) || a.name.localeCompare(b.name),
+  )
+
+  const filteredLibrary = libraryItems.filter(item =>
+    ratingFilter === 'all' ? true : ratingFilter === 'unrated' ? item.rating === null : item.rating === ratingFilter,
+  )
+
+  // Disabled queries stay pending forever, so a signed-out visitor is never "loading".
+  const isLoadingLibrary =
+    !!isSignedIn && ((media === 'tv' ? tvSectionsLoading : movieSectionsLoading) || myReviewsLoading)
 
   return (
     <div className="screen-py flex w-full flex-col gap-8">
@@ -150,11 +243,10 @@ function ProfilePage() {
       </header>
 
       <section className="screen-px">
-        <div className="page-width text- grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid w-full max-w-6xl grid-cols-2 gap-3 sm:grid-cols-3 lg:gap-4 xl:grid-cols-6">
           {user && media === 'tv' && (
             <>
               <StatCard
-                className="col-span-2"
                 colorClassName="text-sky-500"
                 value={
                   showStats ? formatWatchTime(showStats.showTimeMinutes) : <FontAwesomeIcon icon={faSpinner} spin />
@@ -175,13 +267,39 @@ function ProfilePage() {
                 }
                 name="Followed Shows"
               />
+              <StatCard
+                colorClassName="text-sky-500"
+                value={
+                  showStats ? (
+                    showStats.averageShowRating !== null ? (
+                      formatNumber(Math.round(showStats.averageShowRating * 10) / 10)
+                    ) : (
+                      '-'
+                    )
+                  ) : (
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  )
+                }
+                name="Average Rating"
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value={showStats ? formatNumber(showStats.ratedShowsCount) : <FontAwesomeIcon icon={faSpinner} spin />}
+                name="Rated Shows"
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value={
+                  showStats ? formatNumber(showStats.showUpvotesReceived) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Review Upvotes"
+              />
             </>
           )}
 
           {user && media === 'movie' && (
             <>
               <StatCard
-                className="col-span-2"
                 colorClassName="text-sky-500"
                 value={
                   movieStats ? formatWatchTime(movieStats.movieTimeMinutes) : <FontAwesomeIcon icon={faSpinner} spin />
@@ -202,17 +320,41 @@ function ProfilePage() {
                 }
                 name="Followed Movies"
               />
+              <StatCard
+                colorClassName="text-sky-500"
+                value={
+                  movieStats ? (
+                    movieStats.averageMovieRating !== null ? (
+                      formatNumber(Math.round(movieStats.averageMovieRating * 10) / 10)
+                    ) : (
+                      '-'
+                    )
+                  ) : (
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  )
+                }
+                name="Average Rating"
+              />
+              <StatCard
+                colorClassName="text-lime-500"
+                value={
+                  movieStats ? formatNumber(movieStats.ratedMoviesCount) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Rated Movies"
+              />
+              <StatCard
+                colorClassName="text-amber-500"
+                value={
+                  movieStats ? formatNumber(movieStats.movieUpvotesReceived) : <FontAwesomeIcon icon={faSpinner} spin />
+                }
+                name="Review Upvotes"
+              />
             </>
           )}
 
           {!user && (
             <>
-              <StatCard
-                colorClassName="text-sky-500"
-                className="col-span-2"
-                value="-"
-                name={media === 'tv' ? 'Show Time' : 'Movie Time'}
-              />
+              <StatCard colorClassName="text-sky-500" value="-" name={media === 'tv' ? 'Show Time' : 'Movie Time'} />
               <StatCard
                 colorClassName="text-lime-500"
                 value="-"
@@ -223,104 +365,80 @@ function ProfilePage() {
                 value="-"
                 name={media === 'tv' ? 'Followed Shows' : 'Followed Movies'}
               />
+              <StatCard colorClassName="text-sky-500" value="-" name="Average Rating" />
+              <StatCard
+                colorClassName="text-lime-500"
+                value="-"
+                name={media === 'tv' ? 'Rated Shows' : 'Rated Movies'}
+              />
+              <StatCard colorClassName="text-amber-500" value="-" name="Review Upvotes" />
             </>
           )}
         </div>
       </section>
 
       <div className="flex flex-col gap-6">
-        {media === 'tv' && (
-          <>
-            {isLoadingShows &&
-              ['Finished Shows', 'Favorite Shows'].map((title, i) => (
-                <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
-                  {Array.from({ length: 10 }).map((_, episodeIndex) => (
-                    <PosterCard key={episodeIndex} isLoading />
-                  ))}
-                </Section>
+        {isLoadingLibrary &&
+          [media === 'tv' ? 'Finished Shows' : 'Finished Movies', 'Your Reviews'].map((title, i) => (
+            <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
+              {Array.from({ length: 10 }).map((_, index) => (
+                <PosterCard key={index} isLoading />
               ))}
-
-            <Section sectionKey="profile-finished-shows" title="Finished Shows">
-              {tvSections?.finished.map(item => (
-                <PosterCard
-                  key={item.id}
-                  id={item.showTmdbId}
-                  title={item.name}
-                  media="tv"
-                  imagePaths={[item.poster, item.backdrop]}
-                />
-              ))}
-
-              {tvSections && tvSections.finished.length === 0 && (
-                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your finished shows will appear here.
-                </p>
-              )}
             </Section>
+          ))}
 
-            <Section sectionKey="profile-favorite-shows" title="Favorite Shows">
-              {favoriteShows?.map(item => (
-                <PosterCard
-                  key={item.id}
-                  id={item.showTmdbId}
-                  title={item.name}
-                  media="tv"
-                  imagePaths={[item.poster, item.backdrop]}
-                />
-              ))}
-
-              {favoriteShows && favoriteShows.length === 0 && (
-                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your favorite shows will appear here.
-                </p>
-              )}
-            </Section>
-          </>
-        )}
-
-        {media === 'movie' && (
+        {!isLoadingLibrary && (
           <>
-            {isLoadingMovies &&
-              ['Finished Movies', 'Favorite Movies'].map((title, i) => (
-                <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
-                  {Array.from({ length: 10 }).map((_, episodeIndex) => (
-                    <PosterCard key={episodeIndex} isLoading />
-                  ))}
-                </Section>
-              ))}
-
-            <Section sectionKey="profile-finished-movies" title="Finished Movies">
-              {movieSections?.finished.map(item => (
+            <Section
+              sectionKey={media === 'tv' ? 'profile-shows' : 'profile-movies'}
+              title={media === 'tv' ? 'Finished Shows' : 'Finished Movies'}
+              besidesTitle={<RatingFilterSelect value={ratingFilter} onChange={setRatingFilter} />}
+            >
+              {filteredLibrary.map(item => (
                 <PosterCard
                   key={item.tmdbId}
                   id={item.tmdbId}
                   title={item.name}
-                  media="movie"
+                  media={media === 'tv' ? 'tv' : 'movie'}
                   imagePaths={[item.poster, item.backdrop]}
+                  showRate
                 />
               ))}
 
-              {movieSections && movieSections.finished.length === 0 && (
+              {filteredLibrary.length === 0 && (
                 <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your finished movies will appear here.
+                  {libraryItems.length === 0
+                    ? media === 'tv'
+                      ? 'Shows you finish or rate will appear here.'
+                      : 'Movies you finish or rate will appear here.'
+                    : ratingFilter === 'unrated'
+                      ? 'Everything here is rated.'
+                      : `Nothing rated ${ratingFilter} ★ yet.`}
                 </p>
               )}
             </Section>
 
-            <Section sectionKey="profile-favorite-movies" title="Favorite Movies">
-              {favoriteMovies?.map(item => (
-                <PosterCard
-                  key={item.tmdbId}
-                  id={item.tmdbId}
-                  title={item.name}
-                  media="movie"
-                  imagePaths={[item.poster, item.backdrop]}
+            <Section
+              sectionKey={media === 'tv' ? 'profile-show-reviews' : 'profile-movie-reviews'}
+              title={media === 'tv' ? 'Your Show Reviews' : 'Your Movie Reviews'}
+            >
+              {writtenReviews.map(review => (
+                <ProfileReviewCard
+                  key={review.id}
+                  type={media === 'tv' ? 'tv' : 'movie'}
+                  tmdbId={review.tmdbId}
+                  title={review.name}
+                  rating={review.rating}
+                  content={review.content}
+                  poster={review.poster}
+                  backdrop={review.backdrop}
+                  upvoteCount={review.upvoteCount}
                 />
               ))}
 
-              {favoriteMovies && favoriteMovies.length === 0 && (
+              {writtenReviews.length === 0 && (
                 <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your favorite movies will appear here.
+                  Reviews you write will appear here.
                 </p>
               )}
             </Section>

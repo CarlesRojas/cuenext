@@ -3,8 +3,8 @@ import z from 'zod'
 export const USER_DATA_EXPORT_VERSION = 1
 
 // Shape of the cuenext_{username}_data.json file. Importing a file exported from another
-// account recreates the same follows, favorites, stopped titles and watch history; derived
-// data (next episodes, stats) is rebuilt on the importing account.
+// account recreates the same follows, stopped titles, watch history and ratings;
+// derived data (next episodes, stats) is rebuilt on the importing account.
 export const UserDataExportSchema = z.object({
   app: z.literal('cuenext'),
   version: z.literal(USER_DATA_EXPORT_VERSION),
@@ -18,13 +18,6 @@ export const UserDataExportSchema = z.object({
       backdrop: z.string().nullable(),
       releaseDate: z.number(),
       followedAt: z.number(),
-    }),
-  ),
-  favorites: z.array(
-    z.object({
-      type: z.enum(['movie', 'tv']),
-      tmdbId: z.number(),
-      favoritedAt: z.number(),
     }),
   ),
   stopped: z.array(
@@ -47,6 +40,19 @@ export const UserDataExportSchema = z.object({
       watchedAt: z.number(),
     }),
   ),
+  // Added after the first exports shipped, so files written before it still import.
+  reviews: z
+    .array(
+      z.object({
+        type: z.enum(['movie', 'tv']),
+        tmdbId: z.number(),
+        rating: z.number().nullable(),
+        content: z.string(),
+        createdAt: z.number(),
+        updatedAt: z.number(),
+      }),
+    )
+    .default([]),
 })
 
 export type UserDataExport = z.infer<typeof UserDataExportSchema>

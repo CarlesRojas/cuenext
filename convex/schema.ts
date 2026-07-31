@@ -15,15 +15,6 @@ export default defineSchema({
     .index('by_user_type', ['userId', 'type'])
     .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
 
-  favorite: defineTable({
-    userId: v.string(),
-    type: v.union(v.literal('movie'), v.literal('tv')),
-    tmdbId: v.number(),
-    favoritedAt: v.number(),
-  })
-    .index('by_user_type', ['userId', 'type'])
-    .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId']),
-
   stopped: defineTable({
     userId: v.string(),
     tmdbId: v.number(),
@@ -105,6 +96,61 @@ export default defineSchema({
     movieTimeMinutes: v.number(),
     recomputedAt: v.number(),
   }).index('by_user', ['userId']),
+
+  // CueNext-owned reviews. One row per user per title holding that user's rating (1-10)
+  // and/or written review, so nobody reviews the same title twice. Rows with an empty
+  // content are rating-only and never show up in the review list, they only feed the
+  // community average. Nothing here is sent to TMDB.
+  review: defineTable({
+    userId: v.string(),
+    type: v.union(v.literal('movie'), v.literal('tv')),
+    tmdbId: v.number(),
+    rating: v.union(v.number(), v.null()),
+    content: v.string(),
+    // Title metadata copied in at write time, the same way follow rows carry it, so the
+    // profile can list and illustrate what you rated without a TMDB round trip per row.
+    name: v.optional(v.string()),
+    poster: v.optional(v.union(v.string(), v.null())),
+    backdrop: v.optional(v.union(v.string(), v.null())),
+    authorName: v.string(),
+    authorImage: v.union(v.string(), v.null()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    upvoteCount: v.number(),
+  })
+    .index('by_user_type_tmdbId', ['userId', 'type', 'tmdbId'])
+    .index('by_user', ['userId'])
+    // Reviews are listed most upvoted first, which is exactly this index read in reverse.
+    .index('by_type_tmdbId_upvotes', ['type', 'tmdbId', 'upvoteCount']),
+
+  // The public author card (display name and avatar) for an account, kept in our own
+  // database so every reader sees it. Reviews fall back to the snapshot they stored, but
+  // this row is what keeps an author's picture current across all of their reviews.
+  userProfile: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    image: v.union(v.string(), v.null()),
+    updatedAt: v.number(),
+  }).index('by_user', ['userId']),
+
+  // Upvote only, no downvotes. Authors start with a vote on their own review.
+  reviewVote: defineTable({
+    userId: v.string(),
+    reviewId: v.id('review'),
+    createdAt: v.number(),
+  })
+    .index('by_user_review', ['userId', 'reviewId'])
+    .index('by_review', ['reviewId']),
+
+  // Materialized community rating per title, updated by the review mutations so the detail
+  // page never has to scan every review of a title to show an average.
+  reviewSummary: defineTable({
+    type: v.union(v.literal('movie'), v.literal('tv')),
+    tmdbId: v.number(),
+    ratingCount: v.number(),
+    ratingSum: v.number(),
+    updatedAt: v.number(),
+  }).index('by_type_tmdbId', ['type', 'tmdbId']),
 
   tmdbAccountLink: defineTable({
     userId: v.string(),

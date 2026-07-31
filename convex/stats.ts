@@ -41,16 +41,45 @@ export const getStats = query({
       .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))
       .collect()
 
+    // Rating stats are read live rather than materialized: a user's own reviews are bounded
+    // by how many titles they have rated, which is far smaller than their watch history.
+    const reviews = await context.db
+      .query('review')
+      .withIndex('by_user', q => q.eq('userId', userId))
+      .collect()
+
+    const ratingStats = (type: 'movie' | 'tv') => {
+      const ofType = reviews.filter(review => review.type === type)
+      const rated = ofType.filter(review => review.rating !== null)
+      const ratingSum = rated.reduce((sum, review) => sum + (review.rating ?? 0), 0)
+
+      return {
+        ratedCount: rated.length,
+        averageRating: rated.length > 0 ? ratingSum / rated.length : null,
+        // Upvotes an author gave their own reviews are not applause, so they do not count.
+        upvotesReceived: ofType.reduce((sum, review) => sum + Math.max(0, review.upvoteCount - 1), 0),
+      }
+    }
+
+    const showRatings = ratingStats('tv')
+    const movieRatings = ratingStats('movie')
+
     return {
       showStats: {
         episodesWatchedCount: stats.episodesWatchedCount,
         showTimeMinutes: stats.showTimeMinutes,
         followedShowsCount: tvFollows.length,
+        ratedShowsCount: showRatings.ratedCount,
+        averageShowRating: showRatings.averageRating,
+        showUpvotesReceived: showRatings.upvotesReceived,
       },
       movieStats: {
         moviesWatchedCount: stats.moviesWatchedCount,
         movieTimeMinutes: stats.movieTimeMinutes,
         followedMoviesCount: movieFollows.length,
+        ratedMoviesCount: movieRatings.ratedCount,
+        averageMovieRating: movieRatings.averageRating,
+        movieUpvotesReceived: movieRatings.upvotesReceived,
       },
       recomputedAt: stats.recomputedAt,
     }

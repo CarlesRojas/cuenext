@@ -1,5 +1,6 @@
 import AppShell from '#/component/AppShell'
 import { AuthCacheSync } from '#/component/AuthCacheSync'
+import { ProfileSync } from '#/component/ProfileSync'
 import { Toaster } from '#/component/ui/sonner'
 import { env } from '#/env'
 import { ToastProvider } from '#/hooks/useUndoToast'
@@ -104,6 +105,7 @@ function RootDocument({ children }: Props) {
 
           <body className="size-full max-h-full min-h-full max-w-full min-w-full overflow-x-hidden bg-neutral-950 font-sans wrap-anywhere text-white antialiased selection:bg-sky-500/30">
             <AuthCacheSync />
+            <ProfileSync />
             <ToastProvider>
               <AppShell>{children}</AppShell>
             </ToastProvider>
