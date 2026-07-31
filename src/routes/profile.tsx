@@ -1,6 +1,7 @@
 import { PosterCard } from '#/component/PosterCard'
 import { ProfileReviewCard } from '#/component/ProfileReviewCard'
 import { Section } from '#/component/Section'
+import { NativeSelect, NativeSelectOption } from '#/component/ui/native-select'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
@@ -13,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useAction } from 'convex/react'
 import type { ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../../convex/_generated/api'
 
 // Rebuild the materialized stats row when it doesn't exist yet or hasn't been fully
@@ -86,6 +87,34 @@ function StatCard({
   )
 }
 
+// 'all' and 'unrated' aside, a filter value is the exact score a title was given.
+type RatingFilter = 'all' | 'unrated' | number
+
+const RATING_OPTIONS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+function RatingFilterSelect({ value, onChange }: { value: RatingFilter; onChange: (value: RatingFilter) => void }) {
+  return (
+    <NativeSelect
+      size="sm"
+      aria-label="Filter by rating"
+      value={typeof value === 'number' ? String(value) : value}
+      onChange={event => {
+        const next = event.target.value
+        onChange(next === 'all' || next === 'unrated' ? next : Number(next))
+      }}
+    >
+      <NativeSelectOption value="all">{'All'}</NativeSelectOption>
+      <NativeSelectOption value="unrated">{'Unrated'}</NativeSelectOption>
+
+      {RATING_OPTIONS.map(rating => (
+        <NativeSelectOption key={rating} value={String(rating)}>
+          {`${rating} / 10`}
+        </NativeSelectOption>
+      ))}
+    </NativeSelect>
+  )
+}
+
 export const Route = createFileRoute('/profile')({
   component: ProfilePage,
   validateSearch: UrlParamsSchema,
@@ -94,6 +123,8 @@ export const Route = createFileRoute('/profile')({
 function ProfilePage() {
   const { media } = useSearchParams()
   const { isLoaded, isSignedIn, user } = useUser()
+
+  const [ratingFilter, setRatingFilter] = useState<RatingFilter>('all')
 
   const { data: stats } = useQuery({
     ...convexQuery(api.stats.getStats),
@@ -133,11 +164,58 @@ function ProfilePage() {
     enabled: !!isSignedIn,
   })
 
-  const ratedTitles = (myReviews ?? []).filter(review => review.rating !== null)
   const writtenReviews = (myReviews ?? []).filter(review => review.content !== '')
 
-  const isLoadingShows = tvSectionsLoading || myReviewsLoading
-  const isLoadingMovies = movieSectionsLoading || myReviewsLoading
+  // Finished titles and rated ones are one library here: a title you rated but never
+  // finished belongs in the same place as one you finished but never rated, so the two
+  // lists are merged by tmdbId and the selector narrows them down.
+  const finishedItems =
+    media === 'tv'
+      ? (tvSections?.finished ?? []).map(item => ({
+          tmdbId: item.showTmdbId,
+          name: item.name,
+          poster: item.poster ?? null,
+          backdrop: item.backdrop ?? null,
+        }))
+      : (movieSections?.finished ?? []).map(item => ({
+          tmdbId: item.tmdbId,
+          name: item.name,
+          poster: item.poster ?? null,
+          backdrop: item.backdrop ?? null,
+        }))
+
+  const ratedByTmdbId = new Map((myReviews ?? []).filter(review => review.rating !== null).map(r => [r.tmdbId, r]))
+
+  const libraryByTmdbId = new Map<
+    number,
+    { tmdbId: number; name: string; poster: string | null; backdrop: string | null; rating: number | null }
+  >()
+
+  for (const item of finishedItems)
+    libraryByTmdbId.set(item.tmdbId, { ...item, rating: ratedByTmdbId.get(item.tmdbId)?.rating ?? null })
+
+  // Rated titles the finished list does not carry (rated while watching, or never tracked).
+  for (const review of ratedByTmdbId.values())
+    if (!libraryByTmdbId.has(review.tmdbId))
+      libraryByTmdbId.set(review.tmdbId, {
+        tmdbId: review.tmdbId,
+        name: review.name,
+        poster: review.poster,
+        backdrop: review.backdrop,
+        rating: review.rating,
+      })
+
+  const libraryItems = [...libraryByTmdbId.values()].sort(
+    (a, b) => (b.rating ?? -1) - (a.rating ?? -1) || a.name.localeCompare(b.name),
+  )
+
+  const filteredLibrary = libraryItems.filter(item =>
+    ratingFilter === 'all' ? true : ratingFilter === 'unrated' ? item.rating === null : item.rating === ratingFilter,
+  )
+
+  // Disabled queries stay pending forever, so a signed-out visitor is never "loading".
+  const isLoadingLibrary =
+    !!isSignedIn && ((media === 'tv' ? tvSectionsLoading : movieSectionsLoading) || myReviewsLoading)
 
   return (
     <div className="screen-py flex w-full flex-col gap-8">
@@ -300,133 +378,54 @@ function ProfilePage() {
       </section>
 
       <div className="flex flex-col gap-6">
-        {media === 'tv' && (
+        {isLoadingLibrary &&
+          [media === 'tv' ? 'Finished & Rated Shows' : 'Finished & Rated Movies', 'Your Reviews'].map((title, i) => (
+            <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
+              {Array.from({ length: 10 }).map((_, index) => (
+                <PosterCard key={index} isLoading />
+              ))}
+            </Section>
+          ))}
+
+        {!isLoadingLibrary && (
           <>
-            {isLoadingShows &&
-              ['Finished Shows', 'Rated Shows'].map((title, i) => (
-                <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
-                  {Array.from({ length: 10 }).map((_, episodeIndex) => (
-                    <PosterCard key={episodeIndex} isLoading />
-                  ))}
-                </Section>
-              ))}
-
-            <Section sectionKey="profile-finished-shows" title="Finished Shows">
-              {tvSections?.finished.map(item => (
-                <PosterCard
-                  key={item.id}
-                  id={item.showTmdbId}
-                  title={item.name}
-                  media="tv"
-                  imagePaths={[item.poster, item.backdrop]}
-                  showRate
-                />
-              ))}
-
-              {tvSections && tvSections.finished.length === 0 && (
-                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your finished shows will appear here.
-                </p>
-              )}
-            </Section>
-
-            <Section sectionKey="profile-rated-shows" title="Rated Shows">
-              {ratedTitles.map(review => (
-                <PosterCard
-                  key={review.id}
-                  id={review.tmdbId}
-                  title={review.name}
-                  media="tv"
-                  imagePaths={[review.poster, review.backdrop]}
-                  showRate
-                />
-              ))}
-
-              {myReviews && ratedTitles.length === 0 && (
-                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Shows you rate will appear here, best rated first.
-                </p>
-              )}
-            </Section>
-
-            <Section sectionKey="profile-show-reviews" title="Your Show Reviews">
-              {writtenReviews.map(review => (
-                <ProfileReviewCard
-                  key={review.id}
-                  type="tv"
-                  tmdbId={review.tmdbId}
-                  title={review.name}
-                  rating={review.rating}
-                  content={review.content}
-                  poster={review.poster}
-                  backdrop={review.backdrop}
-                  upvoteCount={review.upvoteCount}
-                />
-              ))}
-
-              {myReviews && writtenReviews.length === 0 && (
-                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Reviews you write will appear here.
-                </p>
-              )}
-            </Section>
-          </>
-        )}
-
-        {media === 'movie' && (
-          <>
-            {isLoadingMovies &&
-              ['Finished Movies', 'Rated Movies'].map((title, i) => (
-                <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
-                  {Array.from({ length: 10 }).map((_, episodeIndex) => (
-                    <PosterCard key={episodeIndex} isLoading />
-                  ))}
-                </Section>
-              ))}
-
-            <Section sectionKey="profile-finished-movies" title="Finished Movies">
-              {movieSections?.finished.map(item => (
+            <Section
+              sectionKey={media === 'tv' ? 'profile-shows' : 'profile-movies'}
+              title={media === 'tv' ? 'Finished & Rated Shows' : 'Finished & Rated Movies'}
+              besidesTitle={<RatingFilterSelect value={ratingFilter} onChange={setRatingFilter} />}
+            >
+              {filteredLibrary.map(item => (
                 <PosterCard
                   key={item.tmdbId}
                   id={item.tmdbId}
                   title={item.name}
-                  media="movie"
+                  media={media === 'tv' ? 'tv' : 'movie'}
                   imagePaths={[item.poster, item.backdrop]}
                   showRate
                 />
               ))}
 
-              {movieSections && movieSections.finished.length === 0 && (
+              {filteredLibrary.length === 0 && (
                 <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Your finished movies will appear here.
+                  {libraryItems.length === 0
+                    ? media === 'tv'
+                      ? 'Shows you finish or rate will appear here.'
+                      : 'Movies you finish or rate will appear here.'
+                    : ratingFilter === 'unrated'
+                      ? 'Everything here is rated.'
+                      : `Nothing rated ${ratingFilter} / 10 yet.`}
                 </p>
               )}
             </Section>
 
-            <Section sectionKey="profile-rated-movies" title="Rated Movies">
-              {ratedTitles.map(review => (
-                <PosterCard
-                  key={review.id}
-                  id={review.tmdbId}
-                  title={review.name}
-                  media="movie"
-                  imagePaths={[review.poster, review.backdrop]}
-                  showRate
-                />
-              ))}
-
-              {myReviews && ratedTitles.length === 0 && (
-                <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
-                  Movies you rate will appear here, best rated first.
-                </p>
-              )}
-            </Section>
-
-            <Section sectionKey="profile-movie-reviews" title="Your Movie Reviews">
+            <Section
+              sectionKey={media === 'tv' ? 'profile-show-reviews' : 'profile-movie-reviews'}
+              title={media === 'tv' ? 'Your Show Reviews' : 'Your Movie Reviews'}
+            >
               {writtenReviews.map(review => (
                 <ProfileReviewCard
                   key={review.id}
-                  type="movie"
+                  type={media === 'tv' ? 'tv' : 'movie'}
                   tmdbId={review.tmdbId}
                   title={review.name}
                   rating={review.rating}
@@ -437,7 +436,7 @@ function ProfilePage() {
                 />
               ))}
 
-              {myReviews && writtenReviews.length === 0 && (
+              {writtenReviews.length === 0 && (
                 <p className="pointer-events-none mt-2 font-semibold tracking-wide text-neutral-500">
                   Reviews you write will appear here.
                 </p>
