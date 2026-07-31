@@ -108,7 +108,7 @@ function RatingFilterSelect({ value, onChange }: { value: RatingFilter; onChange
 
       {RATING_OPTIONS.map(rating => (
         <NativeSelectOption key={rating} value={String(rating)}>
-          {`${rating} / 10`}
+          {`${rating} ★`}
         </NativeSelectOption>
       ))}
     </NativeSelect>
@@ -413,7 +413,7 @@ function ProfilePage() {
                       : 'Movies you finish or rate will appear here.'
                     : ratingFilter === 'unrated'
                       ? 'Everything here is rated.'
-                      : `Nothing rated ${ratingFilter} / 10 yet.`}
+                      : `Nothing rated ${ratingFilter} ★ yet.`}
                 </p>
               )}
             </Section>
