@@ -85,8 +85,7 @@ export function ReviewDialog({ type, tmdbId, title, open, onOpenChange }: Review
             className="max-h-[35dvh] min-h-28 rounded-[18px] border-neutral-500/40 focus-visible:border-sky-500/50 focus-visible:ring-0"
           />
 
-          <div className="flex justify-between gap-2 text-xs tracking-wide text-white/40">
-            <span>{'One review per title. You can edit it any time.'}</span>
+          <div className="flex justify-end gap-2 text-xs tracking-wide text-white/40">
             <span className={cn('tabular-nums', isTooLong && 'text-red-400')}>
               {`${content.length} / ${MAX_REVIEW_LENGTH}`}
             </span>
