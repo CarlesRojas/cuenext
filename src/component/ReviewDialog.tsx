@@ -41,11 +41,12 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
     setContent(myReview?.content ?? '')
   }, [open, myReview?.rating, myReview?.content])
 
-  const isEmpty = rating === null && content.trim() === ''
+  // The score is what a review is built on, so writing without one is not a review to post.
+  const isMissingRating = rating === null
   const isTooLong = content.length > MAX_REVIEW_LENGTH
 
   const onSave = async () => {
-    if (isEmpty || isTooLong) return
+    if (rating === null || isTooLong) return
 
     setIsSaving(true)
     const saved = await saveReview({
@@ -101,7 +102,9 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
             disabled={isSaving}
             rows={5}
             maxLength={MAX_REVIEW_LENGTH}
-            placeholder="Write a review (optional)"
+            placeholder={
+              isMissingRating ? 'Rate it first, then write a review (optional)' : 'Write a review (optional)'
+            }
             className="max-h-[35dvh] min-h-28 rounded-[18px] border-neutral-500/40 focus-visible:border-sky-500/50 focus-visible:ring-0"
           />
 
@@ -113,7 +116,7 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
         </div>
 
         <DialogFooter>
-          <Button onClick={onSave} disabled={isEmpty || isTooLong || isSaving}>
+          <Button onClick={onSave} disabled={isMissingRating || isTooLong || isSaving}>
             {isSaving && <FontAwesomeIcon icon={faSpinner} className="size-4 animate-spin" />}
             <span>{myReview ? 'Save' : 'Post'}</span>
           </Button>

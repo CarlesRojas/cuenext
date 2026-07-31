@@ -6,14 +6,14 @@ import { optionalUser, requireIdentity } from './requireUser'
 
 const mediaType = v.union(v.literal('movie'), v.literal('tv'))
 
-export const MAX_REVIEW_LENGTH = 5000
+export const MAX_REVIEW_LENGTH = 2000
 
 // A title's review list is read in one shot, so it is capped. Titles never get anywhere
 // near this today; when they do, this is the read to turn into a paginated one.
 const REVIEW_PAGE_SIZE = 50
 
-function assertRating(rating: number | null) {
-  if (rating === null) return
+// A review is a rating first: the written part is optional, the score never is.
+function assertRating(rating: number) {
   if (!Number.isInteger(rating) || rating < 1 || rating > 10) throw new Error('A rating must be a whole 1 to 10')
 }
 
@@ -189,13 +189,13 @@ export const getMyReviews = query({
 })
 
 // One row per user per title: rating a title you already reviewed edits that review instead
-// of adding a second one, so nobody can review the same title twice. A row with a rating and
-// no content is a rating-only row and stays out of the review list.
+// of adding a second one, so nobody can review the same title twice. Every row carries a
+// rating; the ones without content are rating-only and stay out of the review list.
 export const saveReview = mutation({
   args: {
     type: mediaType,
     tmdbId: v.number(),
-    rating: v.union(v.number(), v.null()),
+    rating: v.number(),
     content: v.optional(v.string()),
     // Title metadata for the profile lists, copied in from whatever screen opened the
     // dialog; a follow row for the same title fills the gaps.
@@ -220,7 +220,6 @@ export const saveReview = mutation({
 
     const content = (args.content ?? '').trim()
     if (content.length > MAX_REVIEW_LENGTH) throw new Error(`A review can be at most ${MAX_REVIEW_LENGTH} characters`)
-    if (args.rating === null && content === '') throw new Error('Add a rating or write something first')
 
     const existing = await context.db
       .query('review')
@@ -250,16 +249,10 @@ export const saveReview = mutation({
         updatedAt: now,
       })
 
+      // An older row could predate mandatory ratings, so it may be joining the average now.
       const hadRating = existing.rating !== null
-      const hasRating = args.rating !== null
 
-      await applySummaryDelta(
-        context,
-        args.type,
-        args.tmdbId,
-        (hasRating ? 1 : 0) - (hadRating ? 1 : 0),
-        (args.rating ?? 0) - (existing.rating ?? 0),
-      )
+      await applySummaryDelta(context, args.type, args.tmdbId, hadRating ? 0 : 1, args.rating - (existing.rating ?? 0))
 
       return existing._id
     }

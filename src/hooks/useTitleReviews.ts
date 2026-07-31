@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useMutation as useDbMutation } from 'convex/react'
 import { toast } from 'sonner'
 
-export const MAX_REVIEW_LENGTH = 5000
+export const MAX_REVIEW_LENGTH = 2000
 
 export function titleReviewsQuery(type: MediaType, tmdbId: number) {
   return convexQuery(api.reviews.getTitleReviews, { type, tmdbId })

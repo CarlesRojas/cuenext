@@ -60,14 +60,28 @@ function StatCard({
 }) {
   return (
     <div
-      className={cn('flex flex-col gap-2 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-6', className)}
+      className={cn(
+        'flex flex-col gap-1 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-4 lg:gap-2 lg:p-5',
+        className,
+      )}
     >
-      <div className="relative isolate h-fit w-fit">
-        <span className={cn('absolute inset-0 text-4xl font-bold opacity-90 blur-lg', colorClassName)}>{value}</span>
-        <span className={cn('relative z-10 text-4xl font-bold', colorClassName)}>{value}</span>
+      {/* A watch time like "1y 2m 3d 4h" has to fit a narrow card, so the value wraps
+          inside the card instead of widening it. */}
+      <div className="relative isolate h-fit w-fit max-w-full">
+        <span
+          className={cn(
+            'absolute inset-0 text-xl font-bold break-words opacity-90 blur-lg sm:text-2xl lg:text-3xl',
+            colorClassName,
+          )}
+        >
+          {value}
+        </span>
+        <span className={cn('relative z-10 text-xl font-bold break-words sm:text-2xl lg:text-3xl', colorClassName)}>
+          {value}
+        </span>
       </div>
 
-      <span className="text-sm font-medium text-neutral-400">{name}</span>
+      <span className="text-xs leading-4 font-medium text-neutral-400 lg:text-sm">{name}</span>
     </div>
   )
 }
@@ -151,11 +165,10 @@ function ProfilePage() {
       </header>
 
       <section className="screen-px">
-        <div className="page-width text- grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid w-full max-w-6xl grid-cols-2 gap-3 sm:grid-cols-3 lg:gap-4 xl:grid-cols-6">
           {user && media === 'tv' && (
             <>
               <StatCard
-                className="col-span-2"
                 colorClassName="text-sky-500"
                 value={
                   showStats ? formatWatchTime(showStats.showTimeMinutes) : <FontAwesomeIcon icon={faSpinner} spin />
@@ -209,7 +222,6 @@ function ProfilePage() {
           {user && media === 'movie' && (
             <>
               <StatCard
-                className="col-span-2"
                 colorClassName="text-sky-500"
                 value={
                   movieStats ? formatWatchTime(movieStats.movieTimeMinutes) : <FontAwesomeIcon icon={faSpinner} spin />
@@ -264,12 +276,7 @@ function ProfilePage() {
 
           {!user && (
             <>
-              <StatCard
-                colorClassName="text-sky-500"
-                className="col-span-2"
-                value="-"
-                name={media === 'tv' ? 'Show Time' : 'Movie Time'}
-              />
+              <StatCard colorClassName="text-sky-500" value="-" name={media === 'tv' ? 'Show Time' : 'Movie Time'} />
               <StatCard
                 colorClassName="text-lime-500"
                 value="-"
