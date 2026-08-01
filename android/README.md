@@ -32,8 +32,9 @@ upload `app-release-bundle.aab` in Play Console under Production, Create new rel
 `splash/` holds the masters and `apply-splash.sh` copies them into
 `app/src/main/res/drawable-*/`. Edit `splash/`, never `res/`, which gets overwritten.
 
-The masters were rendered from `public/logo256.png`, the highest resolution copy of the
-mark in the repo. There is no vector source, so the largest density is upscaled slightly.
+The masters were rendered from `public/logo256.png`, the bare mark without padding. It
+carries the mark at 242px, so the largest density is upscaled to 369px. To sharpen that,
+export the mark larger from `public/logo.af` and re-render.
 
 ## Target API
 
