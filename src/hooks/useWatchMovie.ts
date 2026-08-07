@@ -1,5 +1,6 @@
 import { api } from '#/../convex/_generated/api'
-import { useMediaUserState } from '#/hooks/useMediaUserState'
+import { useFollowedIdsCache } from '#/hooks/useFollowedIds'
+import { useMediaUserState, useMediaUserStateCache } from '#/hooks/useMediaUserState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { MovieSectionItem } from '#/type/section'
 import { useClerk } from '@clerk/tanstack-react-start'
@@ -20,16 +21,25 @@ export function useWatchMovie(movie: MovieSectionItem, knownIsWatched?: boolean)
 
   const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
   const unmarkMovieWatched = useDbMutation(api.watch.unmarkMovieWatched)
+  const patchUserState = useMediaUserStateCache()
+  // Watching a movie follows it too when it was not already followed.
+  const patchFollowedIds = useFollowedIdsCache()
 
   const watch = useMutation({
     mutationFn: async (args: Parameters<typeof markMovieWatched>[0]) => {
-      return await markMovieWatched(args)
+      const result = await markMovieWatched(args)
+      patchUserState('movie', args.tmdbId, { isWatched: true })
+      patchFollowedIds('movie', args.tmdbId, true)
+
+      return result
     },
   })
 
   const unwatch = useMutation({
     mutationFn: async (args: { wasNotFollowed?: boolean } & Parameters<typeof unmarkMovieWatched>[0]) => {
       await unmarkMovieWatched(args)
+      patchUserState('movie', args.tmdbId, { isWatched: false })
+      if (args.wasNotFollowed) patchFollowedIds('movie', args.tmdbId, false)
     },
   })
 

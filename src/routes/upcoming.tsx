@@ -10,6 +10,7 @@ import { SignInButton, useAuth } from '@clerk/tanstack-react-start'
 import { faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { createFileRoute } from '@tanstack/react-router'
+import { useAction } from 'convex/react'
 
 export const Route = createFileRoute('/upcoming')({
   component: UpcomingPage,
@@ -19,6 +20,11 @@ export const Route = createFileRoute('/upcoming')({
 function UpcomingPage() {
   const { media } = useSearchParams()
   const { isLoaded, isSignedIn } = useAuth()
+
+  // These two stay Convex actions: they start from the signed-in user's watchlist, so unlike
+  // the rest of the TMDB reads they cannot be served from a shared public cache.
+  const getUpcomingMovies = useAction(api.tmdb.getUpcomingMovies)
+  const getUpcomingTv = useAction(api.tmdb.getUpcomingTv)
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
@@ -46,9 +52,8 @@ function UpcomingPage() {
           <div className="page-width">
             {media === 'movie' && (
               <InfiniteMediaList
-                action={api.tmdb.getUpcomingMovies}
-                actionKey="upcoming-movies"
-                params={{}}
+                queryKey={['upcoming', 'movie']}
+                fetchPage={page => getUpcomingMovies({ page })}
                 Component={UpcomingMovie}
                 LoadingComponent={<RowCard isLoading />}
                 emptyMessage="No upcoming movies found in your watchlist"
@@ -60,9 +65,8 @@ function UpcomingPage() {
 
             {media === 'tv' && (
               <InfiniteMediaList
-                action={api.tmdb.getUpcomingTv}
-                actionKey="upcoming-tv"
-                params={{}}
+                queryKey={['upcoming', 'tv']}
+                fetchPage={page => getUpcomingTv({ page })}
                 Component={UpcomingEpisode}
                 LoadingComponent={<RowCard isLoading />}
                 emptyMessage="No upcoming TV episodes found in your watchlist"

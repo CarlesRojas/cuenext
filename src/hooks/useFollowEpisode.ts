@@ -1,5 +1,6 @@
 import { api } from '#/../convex/_generated/api'
-import { useFollowedIds } from '#/hooks/useFollowedIds'
+import { useFollowedIds, useFollowedIdsCache } from '#/hooks/useFollowedIds'
+import { useShowWatchStateCache } from '#/hooks/useShowWatchState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbTvMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
@@ -12,6 +13,9 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
 
   const { followedIds, isFollowedLoading } = useFollowedIds('tv')
   const isFollowed = followedIds.has(episode.id)
+
+  const patchFollowedIds = useFollowedIdsCache()
+  const { applyNextEpisode } = useShowWatchStateCache()
 
   const markAsFollowed = useDbMutation(api.library.follow)
   const unmarkAsFollowed = useDbMutation(api.library.unfollow)
@@ -27,14 +31,22 @@ export function useFollowEpisode(episode: TmdbTvMinimal) {
         backdrop: episode.backdrop_path ?? null,
         releaseDate: 0,
       })
-      await updateNextEpisode({ tmdbId: id })
+      patchFollowedIds('tv', id, true)
+
+      // A show somebody else already tracks needs no TMDB work: the action finds the shared
+      // season layout and writes this user's row from it in a single mutation.
+      const refreshed = await updateNextEpisode({ tmdbId: id })
+      if (refreshed) applyNextEpisode(id, refreshed)
     },
   })
 
   const unfollow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'tv', tmdbId: id })
-      await updateNextEpisode({ tmdbId: id })
+      patchFollowedIds('tv', id, false)
+
+      const refreshed = await updateNextEpisode({ tmdbId: id })
+      if (refreshed) applyNextEpisode(id, refreshed)
     },
   })
 

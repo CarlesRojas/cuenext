@@ -1,5 +1,5 @@
 import { api } from '#/../convex/_generated/api'
-import { useFollowedIds } from '#/hooks/useFollowedIds'
+import { useFollowedIds, useFollowedIdsCache } from '#/hooks/useFollowedIds'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbMovieMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
@@ -12,6 +12,8 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
 
   const { followedIds, isFollowedLoading } = useFollowedIds('movie')
   const isFollowed = followedIds.has(movie.id)
+
+  const patchFollowedIds = useFollowedIdsCache()
 
   const markAsFollowed = useDbMutation(api.library.follow)
   const unmarkAsFollowed = useDbMutation(api.library.unfollow)
@@ -26,12 +28,14 @@ export function useFollowMovie(movie: TmdbMovieMinimal) {
         backdrop: movie.backdrop_path ?? null,
         releaseDate: new Date(movie.release_date).getTime(),
       })
+      patchFollowedIds('movie', id, true)
     },
   })
 
   const unfollow = useMutation({
     mutationFn: async ({ id }: { id: number }) => {
       await unmarkAsFollowed({ type: 'movie', tmdbId: id })
+      patchFollowedIds('movie', id, false)
     },
   })
 

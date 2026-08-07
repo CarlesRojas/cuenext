@@ -1,5 +1,5 @@
 import { StarRating } from '#/component/StarRating'
-import { combineRatings, useTitleReviews } from '#/hooks/useTitleReviews'
+import { combineRatings, useTitleRatingSummary } from '#/hooks/useTitleReviews'
 import type { MediaType } from '#/type/media'
 
 interface CombinedRatingProps {
@@ -13,7 +13,7 @@ interface CombinedRatingProps {
 // One score for a title: the TMDB votes and the CueNext ratings pooled together, so rating
 // something here moves the number shown on its page and adds to the vote count.
 export function CombinedRating({ type, tmdbId, tmdbAverage, tmdbCount, className }: CombinedRatingProps) {
-  const { ratingSum, ratingCount } = useTitleReviews(type, tmdbId)
+  const { ratingSum, ratingCount } = useTitleRatingSummary(type, tmdbId)
 
   const { voteAverage, voteCount } = combineRatings(tmdbAverage, tmdbCount, ratingSum, ratingCount)
 

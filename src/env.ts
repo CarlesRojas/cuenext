@@ -14,6 +14,9 @@ export const env = createEnv({
   client: {
     VITE_CLERK_PUBLISHABLE_KEY: z.string().min(1),
     VITE_CONVEX_URL: z.url(),
+    // Only needed when the HTTP actions origin is not the websocket URL with `.convex.cloud`
+    // swapped for `.convex.site`.
+    VITE_CONVEX_SITE_URL: z.url().optional(),
     VITE_DEPLOYMENT_URL: z.url().optional(),
   },
 
@@ -27,6 +30,7 @@ export const env = createEnv({
 
     VITE_CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
     VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
+    VITE_CONVEX_SITE_URL: import.meta.env.VITE_CONVEX_SITE_URL,
     VITE_DEPLOYMENT_URL: import.meta.env.VITE_DEPLOYMENT_URL,
   },
 

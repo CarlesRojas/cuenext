@@ -1,11 +1,12 @@
 import { api } from '#/../convex/_generated/api'
 import { Button } from '#/component/ui/button'
+import { findMovieByExternalId } from '#/lib/tmdb'
 import { useAuth } from '@clerk/tanstack-react-start'
 import { faFileImport, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { useAction, useMutation as useDbMutation } from 'convex/react'
+import { useMutation as useDbMutation } from 'convex/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -38,7 +39,6 @@ function ImportPage() {
   const [importing, setImporting] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
 
-  const findMovieByExternalId = useAction(api.tmdb.findMovieByExternalId)
   const followMovie = useDbMutation(api.library.follow)
   const markMovieWatched = useDbMutation(api.watch.markMovieWatched)
 
@@ -73,7 +73,7 @@ function ImportPage() {
           const watchedAtTimestamp = movieData.watched_at ? new Date(movieData.watched_at).getTime() : null
           const createdAtTimestamp = new Date(movieData.created_at).getTime()
 
-          const foundMovie = await findMovieByExternalId({ externalId: movieData.id.imdb })
+          const foundMovie = await findMovieByExternalId(movieData.id.imdb)
 
           if (!foundMovie) {
             return {

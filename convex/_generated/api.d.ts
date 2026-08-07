@@ -10,10 +10,15 @@
 
 import type * as crons from "../crons.js";
 import type * as episodeInfo from "../episodeInfo.js";
+import type * as http from "../http.js";
 import type * as lib_nextEpisodeCompute from "../lib/nextEpisodeCompute.js";
+import type * as lib_showSeasonsShared from "../lib/showSeasonsShared.js";
 import type * as lib_reviewWrite from "../lib/reviewWrite.js";
 import type * as lib_statsDelta from "../lib/statsDelta.js";
+import type * as lib_tmdbCacheTtl from "../lib/tmdbCacheTtl.js";
 import type * as lib_tmdbClient from "../lib/tmdbClient.js";
+import type * as lib_tmdbDerived from "../lib/tmdbDerived.js";
+import type * as lib_tmdbShowBundle from "../lib/tmdbShowBundle.js";
 import type * as library from "../library.js";
 import type * as media from "../media.js";
 import type * as movieInfo from "../movieInfo.js";
@@ -39,10 +44,15 @@ import type {
 declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   episodeInfo: typeof episodeInfo;
+  http: typeof http;
   "lib/nextEpisodeCompute": typeof lib_nextEpisodeCompute;
+  "lib/showSeasonsShared": typeof lib_showSeasonsShared;
   "lib/reviewWrite": typeof lib_reviewWrite;
   "lib/statsDelta": typeof lib_statsDelta;
+  "lib/tmdbCacheTtl": typeof lib_tmdbCacheTtl;
   "lib/tmdbClient": typeof lib_tmdbClient;
+  "lib/tmdbDerived": typeof lib_tmdbDerived;
+  "lib/tmdbShowBundle": typeof lib_tmdbShowBundle;
   library: typeof library;
   media: typeof media;
   movieInfo: typeof movieInfo;

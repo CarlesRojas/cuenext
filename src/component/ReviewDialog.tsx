@@ -3,7 +3,7 @@ import { RatingInput } from '#/component/RatingInput'
 import { Button } from '#/component/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '#/component/ui/dialog'
 import { Textarea } from '#/component/ui/textarea'
-import { MAX_REVIEW_LENGTH, useReviewActions, useTitleReviews } from '#/hooks/useTitleReviews'
+import { MAX_REVIEW_LENGTH, useMyTitleReview, useReviewActions } from '#/hooks/useTitleReviews'
 import { cn } from '#/lib/cn'
 import type { MediaType } from '#/type/media'
 import { faSpinner, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons'
@@ -25,7 +25,9 @@ interface ReviewDialogProps {
 // Rating and review are the same row, so this dialog covers both: rate without writing,
 // write without rating, or do both. None of it is sent to TMDB.
 export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOpenChange }: ReviewDialogProps) {
-  const { myReview } = useTitleReviews(type, tmdbId, open)
+  // Only read while the dialog is open: the written review is the one thing the rest of
+  // the page never shows.
+  const myReview = useMyTitleReview(type, tmdbId, open)
   const { saveReview, deleteReview } = useReviewActions()
 
   const [rating, setRating] = useState<number | null>(null)
@@ -67,7 +69,7 @@ export function ReviewDialog({ type, tmdbId, title, poster, backdrop, open, onOp
     if (!myReview) return
 
     setIsSaving(true)
-    await deleteReview({ reviewId: myReview.id })
+    await deleteReview({ reviewId: myReview.id, type, tmdbId })
     setIsSaving(false)
     onOpenChange(false)
   }

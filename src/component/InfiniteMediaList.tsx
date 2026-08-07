@@ -2,8 +2,6 @@ import { cn } from '#/lib/cn'
 import { categorizeDate, getGroupDisplayName, getGroupOrder } from '#/utils/dateCategory'
 import { tmdbStale } from '#/lib/tmdbQuery'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useAction } from 'convex/react'
-import type { FunctionReference } from 'convex/server'
 import type { ComponentType, ReactNode } from 'react'
 import { useIntersectionObserver } from 'usehooks-ts'
 
@@ -14,14 +12,12 @@ type PaginatedResult<T> = {
   total_results: number
 }
 
-type ActionParams = Record<string, string | number | boolean> & { page?: number }
-
-type PaginatedAction<T> = FunctionReference<'action', 'public', ActionParams, PaginatedResult<T>>
-
+// Pages are fetched by a plain function rather than a Convex action reference: most of
+// these lists are public TMDB reads served over cacheable HTTP now, and the two that are not
+// (the user's own upcoming lists) just pass their action in wrapped.
 interface InfiniteMediaListProps<TItem> {
-  action: PaginatedAction<TItem>
-  actionKey: string
-  params: Omit<ActionParams, 'page'>
+  fetchPage: (page: number) => Promise<PaginatedResult<TItem>>
+  queryKey: ReadonlyArray<unknown>
   Component: ComponentType<TItem>
   LoadingComponent: ReactNode
   className?: string
@@ -32,9 +28,8 @@ interface InfiniteMediaListProps<TItem> {
 }
 
 export function InfiniteMediaList<TItem>({
-  action,
-  actionKey,
-  params,
+  fetchPage,
+  queryKey,
   Component,
   LoadingComponent,
   className,
@@ -43,11 +38,9 @@ export function InfiniteMediaList<TItem>({
   groupBy,
   showTotalResults = true,
 }: InfiniteMediaListProps<TItem>) {
-  const convexAction = useAction(action)
-
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
-    queryKey: [actionKey, ...Object.entries(params).map(param => `${param[0]}=${param[1]}`)],
-    queryFn: async ({ pageParam = 1 }) => await convexAction({ ...params, page: pageParam }),
+    queryKey,
+    queryFn: async ({ pageParam = 1 }) => await fetchPage(pageParam),
     initialPageParam: 1,
     getNextPageParam: lastPage => {
       if (lastPage.page < lastPage.total_pages) return lastPage.page + 1

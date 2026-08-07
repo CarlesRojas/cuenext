@@ -1,8 +1,8 @@
-import { api } from '#/../convex/_generated/api'
 import BackButton from '#/component/BackButton'
 import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
+import { fetchSearchMovies, fetchSearchShows } from '#/lib/tmdb'
 import RowCard from '#/component/RowCard'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
@@ -53,9 +53,8 @@ function RouteComponent() {
         <div className="page-width relative w-full">
           {query && media === 'tv' && (
             <InfiniteMediaList
-              action={api.tmdb.searchTv}
-              actionKey={'searchTv'}
-              params={{ query: query }}
+              queryKey={['tmdb-search', 'tv', query]}
+              fetchPage={page => fetchSearchShows({ page, query })}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -63,9 +62,8 @@ function RouteComponent() {
 
           {query && media === 'movie' && (
             <InfiniteMediaList
-              action={api.tmdb.searchMovies}
-              actionKey={'searchMovies'}
-              params={{ query: query }}
+              queryKey={['tmdb-search', 'movie', query]}
+              fetchPage={page => fetchSearchMovies({ page, query })}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />

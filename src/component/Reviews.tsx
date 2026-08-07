@@ -1,19 +1,19 @@
-import { api } from '#/../convex/_generated/api'
 import ReviewCard from '#/component/ReviewCard'
 import { ReviewDialog } from '#/component/ReviewDialog'
 import { UserReviewCard } from '#/component/UserReviewCard'
 import { Button } from '#/component/ui/button'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
 import { movieExtrasQuery, showExtrasQuery } from '#/hooks/useMediaExtras'
-import { useReviewActions, useTitleReviews } from '#/hooks/useTitleReviews'
+import { useHasWrittenReview } from '#/hooks/useMyRatings'
+import { useReviewActions, useTitleReviewList } from '#/hooks/useTitleReviews'
 import { cn } from '#/lib/cn'
+import { fetchMovieReviews, fetchShowReviews } from '#/lib/tmdb'
 import { tmdbStale } from '#/lib/tmdbQuery'
 import type { MediaType } from '#/type/media'
 import type { TmdbReviewsResponse } from '#/type/tmdb'
 import { faChevronDown, faPen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useAction } from 'convex/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { useIntersectionObserver, useWindowSize } from 'usehooks-ts'
@@ -32,12 +32,24 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false)
 
-  const getReviews = useAction(media === 'movie' ? api.tmdb.getMovieReviews : api.tmdb.getTvReviews)
   const queryClient = useQueryClient()
+
+  // Nothing below the fold is loaded until it is close to being seen. This section sits
+  // after the seasons, providers, cast and videos, so most visits to a title never reach it,
+  // and its reviews were the single most-run query in the app.
+  const [hasBeenVisible, setHasBeenVisible] = useState(false)
+  const { ref: sectionRef } = useIntersectionObserver({
+    threshold: 0,
+    rootMargin: '400px',
+    onChange: isIntersecting => {
+      if (isIntersecting) setHasBeenVisible(true)
+    },
+  })
 
   // Reviews written on CueNext are ours: they live in our own tables, carry their upvotes,
   // and are listed ahead of the imported TMDB ones.
-  const { reviews: userReviews, myReview } = useTitleReviews(media, tmdbId)
+  const { reviews: userReviews } = useTitleReviewList(media, tmdbId, hasBeenVisible && !isCollapsed)
+  const hasWrittenReview = useHasWrittenReview(media, tmdbId)
   const { isSignedIn, requireSignIn } = useReviewActions()
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } = useInfiniteQuery({
@@ -52,7 +64,7 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
             : await queryClient.ensureQueryData(showExtrasQuery(tmdbId))
         if (extras.reviews) return extras.reviews
       }
-      return await getReviews({ tmdbId, page: pageParam })
+      return media === 'movie' ? await fetchMovieReviews(tmdbId, pageParam) : await fetchShowReviews(tmdbId, pageParam)
     },
     initialPageParam: 1,
     getNextPageParam: lastPage => {
@@ -60,7 +72,7 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
       return undefined
     },
     ...tmdbStale(),
-    enabled: !!tmdbId,
+    enabled: !!tmdbId && hasBeenVisible && !isCollapsed,
   })
 
   const { ref } = useIntersectionObserver({
@@ -84,7 +96,7 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
   }
 
   return (
-    <section className="flex flex-col">
+    <section ref={sectionRef} className="flex flex-col">
       <div
         className={cn(
           'flex items-center justify-between gap-2 px-4',
@@ -104,7 +116,7 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
 
         <Button variant="secondary" size="pill" onClick={onWrite}>
           <FontAwesomeIcon icon={faPen} className="size-3.5" />
-          <span>{myReview && myReview.content ? 'Edit your review' : 'Write a review'}</span>
+          <span>{hasWrittenReview ? 'Edit your review' : 'Write a review'}</span>
         </Button>
       </div>
 

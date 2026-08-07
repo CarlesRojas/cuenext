@@ -2,7 +2,6 @@ import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { requireUser } from './requireUser'
 
-// TODO optimistic update
 export const follow = mutation({
   args: {
     type: v.union(v.literal('movie'), v.literal('tv')),
@@ -37,7 +36,6 @@ export const follow = mutation({
   },
 })
 
-// TODO optimistic update
 export const unfollow = mutation({
   args: {
     type: v.union(v.literal('movie'), v.literal('tv')),

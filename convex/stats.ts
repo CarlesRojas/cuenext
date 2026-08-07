@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { tmdbMovieSchema } from '../src/type/tmdb'
+import { tmdbMovieSchema, tmdbSeasonSchema } from '../src/type/tmdb'
 import { getAllPages } from '../src/utils/getAllPages'
 import { processBatched } from '../src/utils/processBatched'
 import { api, internal } from './_generated/api'
@@ -133,10 +133,9 @@ async function computeMovieStats(context: ActionCtx) {
       }
     })
 
+    // The runtime rows these imply are written by the cache write itself, so there is no
+    // saveMovieInfo call to make here.
     const newMovieRuntimes = tmdbResults.filter((r): r is { tmdbId: number; runtime: number } => r.runtime !== null)
-
-    if (newMovieRuntimes.length > 0)
-      await context.runMutation(api.movieInfo.saveMovieInfo, { movies: newMovieRuntimes })
 
     newMovieRuntimes.forEach(item => cachedRuntimes.set(item.tmdbId, item.runtime))
   }
@@ -183,10 +182,13 @@ async function computeShowStats(context: ActionCtx) {
   if (uniqueSeasons.size > 0) {
     const seasonResults = await processBatched(Array.from(uniqueSeasons.values()), async season => {
       try {
-        const seasonDetails = await context.runAction(api.tmdb.getShowSeasonDetails, {
-          tmdbId: season.showTmdbId,
-          seasonNumber: season.seasonNumber + 1,
-        })
+        // Read straight from the cache helper rather than through the season action: a
+        // nested action is a billed call of its own for a fetch this can do itself.
+        const seasonDetails = await fetchTmdbCached(
+          context,
+          tmdbSeasonSchema,
+          `/tv/${season.showTmdbId}/season/${season.seasonNumber + 1}`,
+        )
         return { season, seasonDetails }
       } catch {
         return { season, seasonDetails: null }

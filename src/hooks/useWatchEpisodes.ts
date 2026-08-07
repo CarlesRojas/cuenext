@@ -1,4 +1,8 @@
 import { api } from '#/../convex/_generated/api'
+import { useFollowedIdsCache } from '#/hooks/useFollowedIds'
+import { useMediaUserStateCache } from '#/hooks/useMediaUserState'
+import type { EpisodeIdentifier } from '#/hooks/useShowWatchState'
+import { useShowWatchStateCache } from '#/hooks/useShowWatchState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { useMutation } from '@tanstack/react-query'
@@ -11,11 +15,6 @@ interface UseWatchEpisodesProps {
   showBackdrop?: string | null
 }
 
-interface EpisodeIdentifier {
-  seasonNumber: number
-  episodeNumber: number
-}
-
 export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }: UseWatchEpisodesProps) {
   const clerk = useClerk()
   const { showUndoToast } = useUndoToast()
@@ -23,6 +22,12 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
   const markEpisodesWatched = useDbMutation(api.watch.markMultipleEpisodesAsWatched)
   const unmarkEpisodesWatched = useDbMutation(api.watch.unmarkMultipleEpisodesAsWatched)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
+  const { applyEpisodes, applyNextEpisode } = useShowWatchStateCache()
+
+  // Marking a season watched also un-stops and follows the show, so the entries holding
+  // those two flags are corrected from what the mutation reports.
+  const patchUserState = useMediaUserStateCache()
+  const patchFollowedIds = useFollowedIdsCache()
 
   const watchEpisodes = useMutation({
     mutationFn: async ({ episodes }: { episodes: EpisodeIdentifier[] }) => {
@@ -35,8 +40,15 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
         releaseDate: 0,
       })
 
+      applyEpisodes(showId, episodes, true, result.nextEpisode)
+      patchUserState('tv', showId, { isStopped: false })
+      patchFollowedIds('tv', showId, true)
+
       // The mutation already recomputed the next episode unless its season data was stale.
-      if (!result.nextEpisodeRecomputed) await updateNextEpisode({ tmdbId: showId })
+      if (!result.nextEpisodeRecomputed) {
+        const refreshed = await updateNextEpisode({ tmdbId: showId })
+        if (refreshed) applyNextEpisode(showId, refreshed)
+      }
 
       return result
     },
@@ -59,7 +71,15 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
         wasNotFollowed,
       })
 
-      if (!result.nextEpisodeRecomputed) await updateNextEpisode({ tmdbId: showId })
+      applyEpisodes(showId, episodes, false, result.nextEpisode)
+      // Undoing restores whatever the mark had changed, and only that.
+      if (wasStopped) patchUserState('tv', showId, { isStopped: true })
+      if (wasNotFollowed) patchFollowedIds('tv', showId, false)
+
+      if (!result.nextEpisodeRecomputed) {
+        const refreshed = await updateNextEpisode({ tmdbId: showId })
+        if (refreshed) applyNextEpisode(showId, refreshed)
+      }
     },
   })
 
@@ -71,7 +91,12 @@ export function useWatchEpisodes({ showId, showName, showPoster, showBackdrop }:
       title,
       'watchMultiple',
       `tv-${showId}`,
-      async () => await unwatchEpisodes.mutateAsync({ episodes, ...result }),
+      async () =>
+        await unwatchEpisodes.mutateAsync({
+          episodes,
+          wasStopped: result.wasStopped,
+          wasNotFollowed: result.wasNotFollowed,
+        }),
     )
   }
 

@@ -1,30 +1,23 @@
 import { v } from 'convex/values'
 import type { z } from 'zod'
 import { api } from './_generated/api'
-import type { ActionCtx } from './_generated/server'
-import { mutation, query } from './_generated/server'
+import type { ActionCtx, MutationCtx } from './_generated/server'
+import { internalMutation, internalQuery, mutation, query } from './_generated/server'
+import { CACHE_DURATIONS, getTimeUntilNextDay, resolveCacheDuration } from './lib/tmdbCacheTtl'
+import type { DerivedRuntimes } from './lib/tmdbDerived'
+import { deriveRuntimes } from './lib/tmdbDerived'
 import { fetchTmdb } from './lib/tmdbClient'
 
-export const CACHE_DURATIONS = {
-  FIVE_MINUTES: 5 * 60 * 1000,
-  FIFTEEN_MINUTES: 15 * 60 * 1000,
-  THIRTY_MINUTES: 30 * 60 * 1000,
-  ONE_HOUR: 60 * 60 * 1000,
-  SIX_HOURS: 6 * 60 * 60 * 1000,
-  TWELVE_HOURS: 12 * 60 * 60 * 1000,
-  ONE_DAY: 24 * 60 * 60 * 1000,
-  THREE_DAYS: 3 * 24 * 60 * 60 * 1000,
-  ONE_WEEK: 7 * 24 * 60 * 60 * 1000,
-  ONE_MONTH: 30 * 24 * 60 * 60 * 1000,
-  MIDNIGHT: 'MIDNIGHT' as const, // Special value that expires at start of next day
-} as const
+export { CACHE_DURATIONS, getTimeUntilNextDay }
 
-export function getTimeUntilNextDay(): number {
-  const now = new Date()
-  const nextDay = new Date(now)
-  nextDay.setDate(nextDay.getDate() + 1)
-  nextDay.setHours(0, 0, 0, 0) // Set to start of day (midnight)
-  return nextDay.getTime() - now.getTime()
+// Parameters are sorted so the same request always produces the same key regardless of the
+// order the caller happened to build them in - the action helper and the HTTP proxy would
+// otherwise cache the identical response under two rows.
+export function cacheKeyFor(path: string, params: Record<string, string> = {}): string {
+  const entries = Object.entries(params).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  const paramsString = entries.length > 0 ? `?${new URLSearchParams(entries).toString()}` : ''
+
+  return `${path}${paramsString}`
 }
 
 async function getCachedTmdbData(context: ActionCtx, endpoint: string): Promise<any | null> {
@@ -41,24 +34,15 @@ async function getCachedTmdbData(context: ActionCtx, endpoint: string): Promise<
 
 async function setCachedTmdbData(
   context: ActionCtx,
+  path: string,
   endpoint: string,
   data: any,
   customDuration?: number | typeof CACHE_DURATIONS.MIDNIGHT,
 ): Promise<void> {
   const now = Date.now()
-  let duration: number
+  const expiresAt = now + resolveCacheDuration(path, data, customDuration, now)
 
-  if (customDuration === CACHE_DURATIONS.MIDNIGHT) duration = getTimeUntilNextDay()
-  else duration = customDuration ?? getTimeUntilNextDay()
-
-  const expiresAt = now + duration
-
-  await context.runMutation(api.tmdbCache.setCachedData, {
-    endpoint,
-    data,
-    createdAt: now,
-    expiresAt,
-  })
+  await context.runMutation(api.tmdbCache.setCachedData, { path, endpoint, data, createdAt: now, expiresAt })
 }
 
 export async function fetchTmdbCached<T extends z.ZodTypeAny>(
@@ -72,9 +56,9 @@ export async function fetchTmdbCached<T extends z.ZodTypeAny>(
   return data
 }
 
-// Reports whether the data came from the cache so callers that persist derived rows
-// (episode/movie runtimes) can skip the write on a hit: those rows were already saved
-// when the response first entered the cache.
+// Reports whether the data came from the cache. The derived runtime rows are now written by
+// setCachedData itself, so callers no longer need this to decide whether to persist them;
+// it is kept for callers that want to know whether they paid for a TMDB round trip.
 export async function fetchTmdbCachedWithMeta<T extends z.ZodTypeAny>(
   context: ActionCtx,
   schema: T,
@@ -82,15 +66,14 @@ export async function fetchTmdbCachedWithMeta<T extends z.ZodTypeAny>(
   params: Record<string, string> = {},
   cacheDurationMs?: number | typeof CACHE_DURATIONS.MIDNIGHT,
 ): Promise<{ data: z.infer<T>; fromCache: boolean }> {
-  const paramsString = Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''
-  const cacheKey = `${endpoint}${paramsString}`
+  const cacheKey = cacheKeyFor(endpoint, params)
 
   const cachedData = await getCachedTmdbData(context, cacheKey)
   if (cachedData) return { data: schema.parse(cachedData), fromCache: true }
 
   const freshData = await fetchTmdb(schema, endpoint, params)
 
-  await setCachedTmdbData(context, cacheKey, freshData, cacheDurationMs)
+  await setCachedTmdbData(context, endpoint, cacheKey, freshData, cacheDurationMs)
 
   return { data: freshData, fromCache: false }
 }
@@ -105,22 +88,86 @@ export const getCachedData = query({
   },
 })
 
+// Same read for the HTTP proxy, which is not a public entry point of its own.
+export const readCache = internalQuery({
+  args: { endpoint: v.string() },
+  handler: async (context, { endpoint }) => {
+    return await context.db
+      .query('tmdbCache')
+      .withIndex('by_endpoint', q => q.eq('endpoint', endpoint))
+      .unique()
+  },
+})
+
+// The runtime rows a cached payload implies, written in the same transaction as the cache
+// row so a miss costs one mutation instead of one per derived table.
+async function writeDerivedRuntimes(context: MutationCtx, { episodes, movies }: DerivedRuntimes) {
+  for (const episode of episodes) {
+    const existing = await context.db
+      .query('episodeInfo')
+      .withIndex('by_showTmdbId_season_episode', q =>
+        q
+          .eq('showTmdbId', episode.showTmdbId)
+          .eq('seasonNumber', episode.seasonNumber)
+          .eq('episodeNumber', episode.episodeNumber),
+      )
+      .unique()
+
+    if (!existing) await context.db.insert('episodeInfo', { ...episode, updatedAt: Date.now() })
+  }
+
+  for (const movie of movies) {
+    const existing = await context.db
+      .query('movieInfo')
+      .withIndex('by_tmdbId', q => q.eq('tmdbId', movie.tmdbId))
+      .unique()
+
+    if (!existing) await context.db.insert('movieInfo', { ...movie, updatedAt: Date.now() })
+  }
+}
+
+async function upsertCache(
+  context: MutationCtx,
+  args: { path?: string; endpoint: string; data: any; createdAt: number; expiresAt: number },
+) {
+  const existing = await context.db
+    .query('tmdbCache')
+    .withIndex('by_endpoint', q => q.eq('endpoint', args.endpoint))
+    .unique()
+
+  const row = { endpoint: args.endpoint, data: args.data, createdAt: args.createdAt, expiresAt: args.expiresAt }
+
+  if (existing) await context.db.patch(existing._id, row)
+  else await context.db.insert('tmdbCache', row)
+
+  // `path` is the endpoint without its query string; fall back to the key for callers that
+  // predate it (a rescheduled call queued by the previous version).
+  await writeDerivedRuntimes(context, deriveRuntimes(args.path ?? args.endpoint.split('?')[0], args.data))
+}
+
 export const setCachedData = mutation({
   args: {
+    path: v.optional(v.string()),
     endpoint: v.string(),
     data: v.any(),
     createdAt: v.number(),
     expiresAt: v.number(),
   },
   handler: async (context, args) => {
-    const existing = await context.db
-      .query('tmdbCache')
-      .withIndex('by_endpoint', q => q.eq('endpoint', args.endpoint))
-      .unique()
+    await upsertCache(context, args)
+  },
+})
 
-    if (existing)
-      await context.db.patch(existing._id, { data: args.data, createdAt: args.createdAt, expiresAt: args.expiresAt })
-    else await context.db.insert('tmdbCache', args)
+export const writeCache = internalMutation({
+  args: {
+    path: v.string(),
+    endpoint: v.string(),
+    data: v.any(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  },
+  handler: async (context, args) => {
+    await upsertCache(context, args)
   },
 })
 
