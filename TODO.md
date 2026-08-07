@@ -3,9 +3,37 @@
 Steps to ship the branch that moves TMDB off the websocket, shares season layouts
 between users, and stops subscribing to data only the browser itself writes.
 
+## Test on dev first
+
+Nothing here needs a new environment variable, so the dev deployment works as-is.
+
+- [ ] **`npx convex dev`** — pushes the schema and functions to dev, regenerates
+      `convex/_generated` properly (replacing the hand-edit), and registers the `/tmdb`
+      route and the cron there. The schema change is additive only — one new table,
+      three new indexes, no existing field touched — so there is no migration prompt
+      and no backfill.
+- [ ] **`npx convex env list`** — confirm `TMDB_READ_ACCESS_TOKEN` and
+      `CLERK_FRONTEND_API_URL` are set on dev. Both already exist if you have been
+      developing against it; `http.ts` reads the same TMDB token the old actions did.
+- [ ] **Smoke-test the proxy against dev** — `curl "https://<dev>.convex.site/tmdb?path=/tv/1396"`.
+      That origin is the dev `VITE_CONVEX_URL` with `.convex.cloud` swapped for
+      `.convex.site`, which is exactly what the client derives, so a working curl means
+      a working app.
+- [ ] **`pnpm dev`** and walk the Verify list below.
+- [ ] **Trigger the cron by hand** rather than waiting six hours: run
+      `internal.nextEpisode.refreshStaleShowSeasons` from the dashboard function
+      runner. Open a show page or follow something first, otherwise `showSeasons` is
+      empty and it correctly does nothing.
+
+Two things dev cannot tell you. It has its own data, so it will not exercise the
+migration path — existing `nextEpisode` rows falling back to their own season copy for
+up to a week before the shared table takes over. That is the lowest-risk part of the
+change (it is today's behaviour, unchanged) but it stays untested until deploy. And
+stale-client breakage is prod-only by nature.
+
 ## Deploy
 
-- [ ] **Deploy Convex** — `npx convex deploy` (or `npx convex dev` locally first).
+- [ ] **Deploy Convex** — `npx convex deploy`.
 
   This regenerates `convex/_generated` (the module map there was hand-edited so
   typecheck would pass; Convex will rewrite it), creates the `showSeasons` table and
