@@ -1,8 +1,8 @@
-import { api } from '#/../convex/_generated/api'
 import BackButton from '#/component/BackButton'
 import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { InfiniteMediaList } from '#/component/InfiniteMediaList'
+import { fetchDiscoverMovies, fetchDiscoverShows, fetchTrendingMovies, fetchTrendingShows } from '#/lib/tmdb'
 import RowCard from '#/component/RowCard'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
@@ -81,13 +81,15 @@ function RouteComponent() {
         <div className="page-width relative w-full">
           {media === 'tv' && list === SeeAllList.UPCOMING && (
             <InfiniteMediaList
-              action={api.tmdb.getDiscoverShows}
-              actionKey={`tv-${list}`}
-              params={{
-                sort_by: 'popularity.desc',
-                air_date_gte: minDate,
-                air_date_lte: maxDate,
-              }}
+              queryKey={['tmdb-list', 'tv', list]}
+              fetchPage={page =>
+                fetchDiscoverShows({
+                  page,
+                  sort_by: 'popularity.desc',
+                  'air_date.gte': minDate,
+                  'air_date.lte': maxDate,
+                })
+              }
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -95,9 +97,8 @@ function RouteComponent() {
 
           {media === 'tv' && list === SeeAllList.TRENDING && (
             <InfiniteMediaList
-              action={api.tmdb.getTrendingTv}
-              actionKey={`tv-${list}`}
-              params={{ time_window: 'week' }}
+              queryKey={['tmdb-list', 'tv', list]}
+              fetchPage={page => fetchTrendingShows({ page, time_window: 'week' })}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -105,12 +106,8 @@ function RouteComponent() {
 
           {media === 'tv' && list === SeeAllList.TOP && (
             <InfiniteMediaList
-              action={api.tmdb.getDiscoverShows}
-              actionKey={`tv-${list}`}
-              params={{
-                sort_by: 'vote_average.desc',
-                vote_count_gte: 200,
-              }}
+              queryKey={['tmdb-list', 'tv', list]}
+              fetchPage={page => fetchDiscoverShows({ page, sort_by: 'vote_average.desc', 'vote_count.gte': 200 })}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -118,16 +115,18 @@ function RouteComponent() {
 
           {media === 'movie' && list === SeeAllList.UPCOMING && (
             <InfiniteMediaList
-              action={api.tmdb.getDiscoverMovies}
-              actionKey={`movie-${list}`}
-              params={{
-                sort_by: 'popularity.desc',
-                with_release_type: '2|3',
-                release_date_gte: minDateMovie,
-                release_date_lte: maxDateMovie,
-                include_adult: false,
-                include_video: false,
-              }}
+              queryKey={['tmdb-list', 'movie', list]}
+              fetchPage={page =>
+                fetchDiscoverMovies({
+                  page,
+                  sort_by: 'popularity.desc',
+                  with_release_type: '2|3',
+                  'release_date.gte': minDateMovie,
+                  'release_date.lte': maxDateMovie,
+                  include_adult: false,
+                  include_video: false,
+                })
+              }
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -135,9 +134,8 @@ function RouteComponent() {
 
           {media === 'movie' && list === SeeAllList.TRENDING && (
             <InfiniteMediaList
-              action={api.tmdb.getTrendingMovies}
-              actionKey={`movie-${list}`}
-              params={{ time_window: 'week' }}
+              queryKey={['tmdb-list', 'movie', list]}
+              fetchPage={page => fetchTrendingMovies({ page, time_window: 'week' })}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -145,12 +143,8 @@ function RouteComponent() {
 
           {media === 'movie' && list === SeeAllList.TOP && (
             <InfiniteMediaList
-              action={api.tmdb.getDiscoverMovies}
-              actionKey={`movie-${list}`}
-              params={{
-                sort_by: 'vote_average.desc',
-                vote_count_gte: 200,
-              }}
+              queryKey={['tmdb-list', 'movie', list]}
+              fetchPage={page => fetchDiscoverMovies({ page, sort_by: 'vote_average.desc', 'vote_count.gte': 200 })}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />

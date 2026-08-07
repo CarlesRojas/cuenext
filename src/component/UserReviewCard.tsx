@@ -59,7 +59,13 @@ export function UserReviewCard({ review, inDialog = false }: UserReviewCardProps
 
       {!inDialog && (
         <div className="flex flex-wrap items-center gap-2">
-          <UpvoteButton reviewId={review.id} upvoteCount={review.upvoteCount} hasUpvoted={review.hasUpvoted} />
+          <UpvoteButton
+            reviewId={review.id}
+            type={review.type}
+            tmdbId={review.tmdbId}
+            upvoteCount={review.upvoteCount}
+            hasUpvoted={review.hasUpvoted}
+          />
         </div>
       )}
 

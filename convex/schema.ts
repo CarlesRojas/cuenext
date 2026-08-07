@@ -54,7 +54,32 @@ export default defineSchema({
     seasonDataUpdatedAt: v.union(v.number(), v.null()),
     watchedPercentage: v.number(),
     status: v.string(),
-  }).index('by_user_show', ['userId', 'showTmdbId']),
+  })
+    .index('by_user_show', ['userId', 'showTmdbId'])
+    // Lets the refresh cron find everyone tracking a show whose season layout just moved,
+    // without scanning the table.
+    .index('by_show', ['showTmdbId']),
+
+  // The season layout of a show, which is the same for everybody watching it. It used to be
+  // fetched and stored per user, so a show followed by a hundred people had its seasons
+  // pulled from TMDB a hundred times over. Now the first user to need it fills this in and
+  // the rest read it.
+  showSeasons: defineTable({
+    tmdbId: v.number(),
+    // Aired episode count per season, and the episode number the season starts at (shows
+    // that number continuously across seasons do not start at 1).
+    seasonEpisodeCounts: v.array(v.number()),
+    seasonFirstEpisodeIndex: v.array(v.number()),
+    numberOfSeasons: v.number(),
+    status: v.string(),
+    // The air date of the next episode TMDB knows about, so the refresh cron can skip shows
+    // that cannot have changed yet.
+    nextEpisodeAirDate: v.union(v.number(), v.null()),
+    updatedAt: v.number(),
+  })
+    .index('by_tmdbId', ['tmdbId'])
+    // The refresh cron walks these oldest-first, so it never scans the whole table.
+    .index('by_updatedAt', ['updatedAt']),
 
   tmdbCache: defineTable({
     endpoint: v.string(),
@@ -140,7 +165,10 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index('by_user_review', ['userId', 'reviewId'])
-    .index('by_review', ['reviewId']),
+    .index('by_review', ['reviewId'])
+    // A title's review list marks which of them the reader upvoted. Reading the reader's
+    // votes once beats one point lookup per review on the page.
+    .index('by_user', ['userId']),
 
   // Materialized community rating per title, updated by the review mutations so the detail
   // page never has to scan every review of a title to show an average.

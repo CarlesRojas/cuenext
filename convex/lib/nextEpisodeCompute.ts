@@ -1,4 +1,5 @@
 import type { MutationCtx } from '../_generated/server'
+import { isLayoutUsable, isShowSeasonsFresh, readShowSeasons } from './showSeasonsShared'
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -54,31 +55,94 @@ export function isSeasonDataFresh(seasonDataUpdatedAt: number | null | undefined
   return !!seasonDataUpdatedAt && seasonDataUpdatedAt >= now - ONE_WEEK_MS
 }
 
+// What the client keeps for a show. The full row carries the season layout the recompute
+// needs, none of which the UI reads, so only these fields are sent.
+export interface NextEpisodeState {
+  seasonNumber: number
+  episodeNumber: number
+  watchedPercentage: number
+  numberOfSeasons: number
+  status: string
+  lastWatchedAt: number | null
+}
+
+export function toNextEpisodeState(row: {
+  seasonNumber: number
+  episodeNumber: number
+  watchedPercentage: number
+  numberOfSeasons: number
+  status: string
+  lastWatchedAt: number | null
+}): NextEpisodeState {
+  return {
+    seasonNumber: row.seasonNumber,
+    episodeNumber: row.episodeNumber,
+    watchedPercentage: row.watchedPercentage,
+    numberOfSeasons: row.numberOfSeasons,
+    status: row.status,
+    lastWatchedAt: row.lastWatchedAt,
+  }
+}
+
 // Recomputes the nextEpisode row inside the calling mutation's transaction when the cached
 // season layout is still fresh, so the common watch/unwatch toggle needs no follow-up
 // updateNextEpisode action (which costs an action call plus its internal query and
-// mutation). Returns false when the season data is missing or stale - then the caller's
-// client must run the TMDB-fetching action as before.
+// mutation). `recomputed: false` means the season data is missing or stale - then the
+// caller's client must run the TMDB-fetching action as before.
+//
+// The recomputed state is returned so the mutation can hand it back to the client, which
+// writes it straight into its cache. Without that the client would have to re-read the show
+// state after every toggle, which is what a live subscription was silently doing.
 export async function recomputeNextEpisodeInDb(
   context: MutationCtx,
   userId: string,
   showTmdbId: number,
-): Promise<boolean> {
+  // Set only by the mutations that just fetched the layout from TMDB: an empty layout from
+  // them is a show that genuinely has nothing aired, while an empty layout found in storage
+  // is refused so a bad write can never stick until its TTL expires.
+  options: { trustEmptyLayout?: boolean } = {},
+): Promise<{ recomputed: boolean; nextEpisode: NextEpisodeState | null }> {
+  const now = Date.now()
+
   const existing = await context.db
     .query('nextEpisode')
     .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', showTmdbId))
     .unique()
 
-  if (!existing || !isSeasonDataFresh(existing.seasonDataUpdatedAt, Date.now())) return false
+  // The shared layout is preferred over the user's own copy, so following a show somebody
+  // else already tracks needs no TMDB work at all: the first user's refresh serves everyone.
+  const shared = await readShowSeasons(context, showTmdbId)
+
+  const usable = (layout: { seasonEpisodeCounts: number[] } | null) =>
+    options.trustEmptyLayout || isLayoutUsable(layout)
+
+  const layout =
+    isShowSeasonsFresh(shared, now) && usable(shared)
+      ? { ...shared!, seasonDataUpdatedAt: shared!.updatedAt }
+      : existing && isSeasonDataFresh(existing.seasonDataUpdatedAt, now) && usable(existing)
+        ? existing
+        : null
+
+  if (!layout) return { recomputed: false, nextEpisode: existing ? toNextEpisodeState(existing) : null }
 
   const watchedEpisodes = await context.db
     .query('episode')
     .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', showTmdbId))
     .collect()
 
-  const computed = computeNextEpisode(watchedEpisodes, existing.seasonEpisodeCounts, existing.seasonFirstEpisodeIndex)
+  const computed = computeNextEpisode(watchedEpisodes, layout.seasonEpisodeCounts, layout.seasonFirstEpisodeIndex)
 
-  await context.db.patch(existing._id, computed)
+  const updateData = {
+    seasonEpisodeCounts: layout.seasonEpisodeCounts,
+    seasonFirstEpisodeIndex: layout.seasonFirstEpisodeIndex,
+    numberOfSeasons: layout.numberOfSeasons,
+    status: layout.status,
+    seasonDataUpdatedAt: layout.seasonDataUpdatedAt,
+    ...computed,
+  }
 
-  return true
+  if (existing) await context.db.patch(existing._id, updateData)
+  else await context.db.insert('nextEpisode', { userId, showTmdbId, ...updateData })
+
+  return { recomputed: true, nextEpisode: toNextEpisodeState(updateData) }
 }

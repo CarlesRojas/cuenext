@@ -1,6 +1,7 @@
 import { ReviewDialog } from '#/component/ReviewDialog'
 import { Button } from '#/component/ui/button'
-import { useReviewActions, useTitleReviews } from '#/hooks/useTitleReviews'
+import { useMyRating } from '#/hooks/useMyRatings'
+import { useReviewActions } from '#/hooks/useTitleReviews'
 import type { MediaType } from '#/type/media'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -17,7 +18,9 @@ interface RateButtonProps {
 // Sits with the other title actions and opens the rate + review dialog. Once rated it
 // shows the score the signed-in user gave.
 export function RateButton({ type, tmdbId, title, poster, backdrop }: RateButtonProps) {
-  const { myRating } = useTitleReviews(type, tmdbId)
+  // One shared subscription covers every rating this user has given, so the button needs
+  // no query of its own.
+  const myRating = useMyRating(type, tmdbId)
   const { isSignedIn, requireSignIn } = useReviewActions()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 

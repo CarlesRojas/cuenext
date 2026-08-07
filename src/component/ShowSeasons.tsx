@@ -1,13 +1,10 @@
-import { TMDB_STALE_TIME, tmdbStale } from '#/lib/tmdbQuery'
-import { api } from '#/../convex/_generated/api'
 import ShowEpisode from '#/component/ShowEpisode'
 import { ShowSeason } from '#/component/ShowSeason'
-import useShowInfo from '#/hooks/useShowInfo'
+import { useShowBundle } from '#/hooks/useShowBundle'
+import { useShowWatchState } from '#/hooks/useShowWatchState'
 import { cn } from '#/lib/cn'
 import type { TmdbTv } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
-import { convexAction, convexQuery } from '@convex-dev/react-query'
-import { useQueries, useQuery } from '@tanstack/react-query'
 
 interface Props {
   show: TmdbTv
@@ -16,52 +13,24 @@ interface Props {
 export function ShowSeasons({ show }: Props) {
   const clerk = useClerk()
 
-  const seasonQueries = useQueries({
-    queries: (show.seasons || []).map(season => ({
-      ...convexAction(api.tmdb.getShowSeasonDetails, {
-        tmdbId: show.id,
-        seasonNumber: season.season_number,
-      }),
-      ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
-      enabled: !!show.seasons?.length,
-    })),
-  })
+  // One request carrying the show and every season, rather than one request per season. It
+  // also carries the episode numbering the page needs, so there is no separate showInfo
+  // lookup here either.
+  const { regularSeasons, continuousEpisodeNumbers } = useShowBundle(show.id)
 
-  const watchedEpisodes = useQuery({
-    ...convexQuery(api.watch.getWatchedEpisodesForShow, { showTmdbId: show.id }),
-    enabled: clerk.isSignedIn,
-  })
+  const { watchedEpisodes, nextEpisode } = useShowWatchState(show.id, clerk.isSignedIn)
 
-  const showInfo = useShowInfo({ showId: show.id })
+  if (regularSeasons.length === 0) return null
 
-  const nextEpisode = useQuery({
-    ...convexQuery(api.watch.getNextEpisode, { tmdbId: show.id }),
-  })
-
-  const seasons = seasonQueries
-    .map(query => query.data)
-    .filter((season): season is NonNullable<typeof season> => season != null)
-
-  // const specials = seasons.find(season => season.season_number === 0)
-  const regularSeasons = seasons.filter(season => season.season_number !== 0)
-
-  const allSeasonsLoaded = seasonQueries.every(query => !query.isPending)
-  if (allSeasonsLoaded && seasons.length === 0) return null
-
-  const completeNextEpisode = nextEpisode.data
+  const completeNextEpisode = nextEpisode
     ? regularSeasons
         .flatMap(season => season.episodes || [])
         .find(
           episode =>
-            nextEpisode.data &&
-            episode.season_number - 1 === nextEpisode.data.seasonNumber &&
-            episode.episode_number - 1 === nextEpisode.data.episodeNumber,
+            episode.season_number - 1 === nextEpisode.seasonNumber &&
+            episode.episode_number - 1 === nextEpisode.episodeNumber,
         )
     : null
-
-  if (regularSeasons.length <= 0) return null
-
-  const continuousEpisodeNumbers = showInfo.data?.continuousEpisodeNumbers || regularSeasons.length === 1
 
   return (
     <div className="screen-px pb-8">
@@ -92,15 +61,15 @@ export function ShowSeasons({ show }: Props) {
             showName={show.name}
             showPoster={show.poster_path}
             showBackdrop={show.backdrop_path}
-            seasonWatchedEpisodes={watchedEpisodes.data?.filter(we => we.seasonNumber === season.season_number - 1)}
+            seasonWatchedEpisodes={watchedEpisodes?.filter(we => we.seasonNumber === season.season_number - 1)}
             previousUnwatchedEpisodes={
-              watchedEpisodes.data
+              watchedEpisodes
                 ? regularSeasons
                     .slice(0, index)
                     .flatMap(s => s.episodes || [])
                     .filter(
                       ep =>
-                        !watchedEpisodes.data.some(
+                        !watchedEpisodes.some(
                           we => we.seasonNumber === ep.season_number - 1 && we.episodeNumber === ep.episode_number - 1,
                         ),
                     )
@@ -108,31 +77,6 @@ export function ShowSeasons({ show }: Props) {
             }
           />
         ))}
-
-        {/* {specials && (
-          <h2
-            className={cn(
-              'tracking mt-4 text-lg font-semibold opacity-80',
-              (completeNextEpisode || regularSeasons.length > 0) && 'mt-4',
-            )}
-          >
-            Specials
-          </h2>
-        )}
-
-        {specials && (
-          <ShowSeason
-            key={specials.id}
-            showId={show.id}
-            season={specials}
-            isSpecials
-            continuousEpisodeNumbers={continuousEpisodeNumbers}
-            showName={show.name}
-            showPoster={show.poster_path}
-            showBackdrop={show.backdrop_path}
-            previousUnwatchedEpisodes={[]}
-          />
-        )} */}
       </div>
     </div>
   )

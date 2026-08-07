@@ -35,7 +35,9 @@ function App() {
     enabled: media === 'movie' && !!isSignedIn,
   })
 
-  useCheckForNewEpisodes({ waitingForEpisodes: tvSections?.waitingForEpisodes })
+  // The server knows which shows are waiting on an episode, so this no longer walks them
+  // from here.
+  useCheckForNewEpisodes()
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">

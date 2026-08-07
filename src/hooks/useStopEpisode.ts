@@ -1,5 +1,5 @@
 import { api } from '#/../convex/_generated/api'
-import { useMediaUserState } from '#/hooks/useMediaUserState'
+import { useMediaUserState, useMediaUserStateCache } from '#/hooks/useMediaUserState'
 import { useUndoToast } from '#/hooks/useUndoToast'
 import type { TmdbTvMinimal } from '#/type/tmdb'
 import { useClerk } from '@clerk/tanstack-react-start'
@@ -16,13 +16,20 @@ export function useStopEpisode(episode: TmdbTvMinimal) {
 
   const setStopped = useDbMutation(api.stopped.setStopped)
   const setUnstopped = useDbMutation(api.stopped.setUnstopped)
+  const patchUserState = useMediaUserStateCache()
 
   const stopItem = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await setStopped({ tmdbId: id }),
+    mutationFn: async ({ id }: { id: number }) => {
+      await setStopped({ tmdbId: id })
+      patchUserState('tv', id, { isStopped: true })
+    },
   })
 
   const unstopItem = useMutation({
-    mutationFn: async ({ id }: { id: number }) => await setUnstopped({ tmdbId: id }),
+    mutationFn: async ({ id }: { id: number }) => {
+      await setUnstopped({ tmdbId: id })
+      patchUserState('tv', id, { isStopped: false })
+    },
   })
 
   const toggleStopped = async (id: number, title: string) => {

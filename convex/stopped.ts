@@ -2,7 +2,6 @@ import { v } from 'convex/values'
 import { mutation } from './_generated/server'
 import { requireUser } from './requireUser'
 
-// TODO optimistic update
 export const setStopped = mutation({
   args: {
     tmdbId: v.number(),
@@ -19,7 +18,6 @@ export const setStopped = mutation({
   },
 })
 
-// TODO optimistic update
 export const setUnstopped = mutation({
   args: {
     tmdbId: v.number(),

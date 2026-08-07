@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { recomputeNextEpisodeInDb } from './lib/nextEpisodeCompute'
+import { recomputeNextEpisodeInDb, toNextEpisodeState } from './lib/nextEpisodeCompute'
 import { applyStatsDelta, getEpisodeRuntime, getMovieRuntime } from './lib/statsDelta'
 import { requireUser } from './requireUser'
 
@@ -19,7 +19,6 @@ export const getWatchedMovies = query({
   },
 })
 
-// TODO optimistic update
 export const markMovieWatched = mutation({
   args: {
     tmdbId: v.number(),
@@ -68,7 +67,6 @@ export const markMovieWatched = mutation({
   },
 })
 
-// TODO optimistic update
 export const unmarkMovieWatched = mutation({
   args: {
     tmdbId: v.number(),
@@ -115,7 +113,14 @@ export const getWatchedEpisodes = query({
   },
 })
 
-export const getWatchedEpisodesForShow = query({
+// Everything the show page needs about one show for the signed-in user, in one read: which
+// episodes are watched and where they are up to. These were two separate subscriptions
+// (getWatchedEpisodesForShow and getNextEpisode), both of which re-ran on every episode
+// toggled.
+//
+// Only the season and episode numbers are returned, not whole episode rows: a show can hold
+// hundreds of them, and the UI never looks at anything else.
+export const getShowWatchState = query({
   args: { showTmdbId: v.number() },
   handler: async (context, args) => {
     const userId = await requireUser(context)
@@ -125,11 +130,21 @@ export const getWatchedEpisodesForShow = query({
       .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
       .collect()
 
-    return episodes
+    const nextEpisode = await context.db
+      .query('nextEpisode')
+      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.showTmdbId))
+      .unique()
+
+    return {
+      watched: episodes.map(episode => ({
+        seasonNumber: episode.seasonNumber,
+        episodeNumber: episode.episodeNumber,
+      })),
+      nextEpisode: nextEpisode ? toNextEpisodeState(nextEpisode) : null,
+    }
   },
 })
 
-// TODO optimistic update
 export const markEpisodeWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -197,13 +212,12 @@ export const markEpisodeWatched = mutation({
         releaseDate: args.releaseDate,
       })
 
-    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+    const { recomputed, nextEpisode } = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
 
-    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed }
+    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed: recomputed, nextEpisode }
   },
 })
 
-// TODO optimistic update
 export const unmarkEpisodeWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -226,7 +240,7 @@ export const unmarkEpisodeWatched = mutation({
       )
       .unique()
 
-    if (!existing) return { nextEpisodeRecomputed: true }
+    if (!existing) return { nextEpisodeRecomputed: true, nextEpisode: null }
 
     await context.db.delete(existing._id)
 
@@ -251,27 +265,12 @@ export const unmarkEpisodeWatched = mutation({
       if (followEntry) await context.db.delete(followEntry._id)
     }
 
-    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+    const { recomputed, nextEpisode } = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
 
-    return { nextEpisodeRecomputed }
+    return { nextEpisodeRecomputed: recomputed, nextEpisode }
   },
 })
 
-export const getNextEpisode = query({
-  args: { tmdbId: v.number() },
-  handler: async (context, args) => {
-    const userId = await requireUser(context)
-
-    const nextEpisode = await context.db
-      .query('nextEpisode')
-      .withIndex('by_user_show', q => q.eq('userId', userId).eq('showTmdbId', args.tmdbId))
-      .unique()
-
-    return nextEpisode
-  },
-})
-
-// TODO optimistic update
 export const markMultipleEpisodesAsWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -356,13 +355,12 @@ export const markMultipleEpisodesAsWatched = mutation({
         releaseDate: args.releaseDate,
       })
 
-    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+    const { recomputed, nextEpisode } = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
 
-    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed }
+    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed: recomputed, nextEpisode }
   },
 })
 
-// TODO optimistic update
 export const unmarkMultipleEpisodesAsWatched = mutation({
   args: {
     showTmdbId: v.number(),
@@ -422,8 +420,8 @@ export const unmarkMultipleEpisodesAsWatched = mutation({
       if (followEntry) await context.db.delete(followEntry._id)
     }
 
-    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+    const { recomputed, nextEpisode } = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
 
-    return { nextEpisodeRecomputed }
+    return { nextEpisodeRecomputed: recomputed, nextEpisode }
   },
 })

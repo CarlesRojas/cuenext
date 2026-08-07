@@ -1,4 +1,3 @@
-import { api } from '#/../convex/_generated/api'
 import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { PosterCard } from '#/component/PosterCard'
@@ -7,10 +6,9 @@ import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
 import { SeeAllList } from '#/routes/see-all/$list'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
-import { TMDB_STALE_TIME, tmdbStale } from '#/lib/tmdbQuery'
+import { discoverMoviesQuery, discoverShowsQuery, trendingMoviesQuery, trendingShowsQuery } from '#/lib/tmdbQuery'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useAuth } from '@clerk/tanstack-react-start'
-import { convexAction } from '@convex-dev/react-query'
 import { faForward, faSignIn } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
@@ -35,25 +33,22 @@ function RouteComponent() {
   // SHOWS
 
   const { data: onTheAirShows, isPending: onTheAirShowsLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverShows, {
+    ...discoverShowsQuery({
       page: 1,
       sort_by: 'popularity.desc',
-      air_date_gte: minDate,
-      air_date_lte: maxDate,
+      'air_date.gte': minDate,
+      'air_date.lte': maxDate,
     }),
-    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
 
   const { data: trendingShows, isPending: trendingShowsLoading } = useQuery({
-    ...convexAction(api.tmdb.getTrendingTv, { page: 1, time_window: 'week' }),
-    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
+    ...trendingShowsQuery({ page: 1, time_window: 'week' }),
     enabled: media === 'tv',
   })
 
   const { data: topRatedShows, isPending: topRatedShowsLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
-    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
+    ...discoverShowsQuery({ page: 1, sort_by: 'vote_average.desc', 'vote_count.gte': 200 }),
     enabled: media === 'tv',
   })
 
@@ -68,28 +63,25 @@ function RouteComponent() {
   const maxDateMovie = nextMonth.toISOString().split('T')[0]
 
   const { data: upcomingMovies, isPending: upcomingMoviesLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverMovies, {
+    ...discoverMoviesQuery({
       page: 1,
       sort_by: 'popularity.desc',
       with_release_type: '2|3',
-      release_date_gte: minDateMovie,
-      release_date_lte: maxDateMovie,
+      'release_date.gte': minDateMovie,
+      'release_date.lte': maxDateMovie,
       include_adult: false,
       include_video: false,
     }),
-    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 
   const { data: trendingMovies, isPending: trendingMoviesLoading } = useQuery({
-    ...convexAction(api.tmdb.getTrendingMovies, { page: 1, time_window: 'week' }),
-    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
+    ...trendingMoviesQuery({ page: 1, time_window: 'week' }),
     enabled: media === 'movie',
   })
 
   const { data: topRatedMovies, isPending: topRatedMoviesLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
-    ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
+    ...discoverMoviesQuery({ page: 1, sort_by: 'vote_average.desc', 'vote_count.gte': 200 }),
     enabled: media === 'movie',
   })
 

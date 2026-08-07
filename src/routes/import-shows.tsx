@@ -5,6 +5,7 @@ import { faFileImport, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { findEpisodeByExternalId, findShowByExternalId } from '#/lib/tmdb'
 import { useAction, useMutation as useDbMutation } from 'convex/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -60,8 +61,6 @@ function ImportPage() {
   const followShow = useDbMutation(api.library.follow)
   const setStopped = useDbMutation(api.stopped.setStopped)
   const markMultipleEpisodesAsWatched = useDbMutation(api.watch.markMultipleEpisodesAsWatched)
-  const findByExternalId = useAction(api.tmdb.findShowByExternalId)
-  const findEpisodeByExternalId = useAction(api.tmdb.findEpisodeByExternalId)
   const updateNextEpisode = useAction(api.nextEpisode.updateNextEpisode)
 
   const followShowMutation = useMutation({
@@ -104,7 +103,7 @@ function ImportPage() {
           const createdAtTimestamp = new Date(showData.created_at).getTime()
 
           let foundShow = null
-          if (showData.id.tvdb) foundShow = await findByExternalId({ externalId: showData.id.tvdb })
+          if (showData.id.tvdb) foundShow = await findShowByExternalId(showData.id.tvdb)
 
           if (!foundShow)
             return {
@@ -174,7 +173,7 @@ function ImportPage() {
 
             const episodeBatchPromises = episodeBatch.map(async episodeData => {
               try {
-                const tmdbEpisode = await findEpisodeByExternalId({ externalId: episodeData.externalId })
+                const tmdbEpisode = await findEpisodeByExternalId(episodeData.externalId)
                 return { episodeData, tmdbEpisode }
               } catch (error) {
                 return { episodeData, tmdbEpisode: null, error }

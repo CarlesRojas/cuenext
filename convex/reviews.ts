@@ -52,18 +52,55 @@ function reviewPayload(
 
 export type ReviewPayload = ReturnType<typeof reviewPayload>
 
-// Everything the reviews section of a detail page needs: the community rating totals, the
-// signed-in user's own row (rating included, even when they never wrote a review) and the
-// written reviews, most upvoted first.
-export const getTitleReviews = query({
+// The community rating totals for a title, and nothing else.
+//
+// This used to be bundled with the review list and the reader's own row into one query that
+// every detail page ran, so opening any title read up to fifty reviews, their authors and a
+// vote row each - to show a star and a number. The list below is now only loaded by the
+// section that displays it, which most visits never scroll to.
+export const getTitleRatingSummary = query({
   args: { type: mediaType, tmdbId: v.number() },
   handler: async (context, args) => {
-    const userId = await optionalUser(context)
-
     const summary = await context.db
       .query('reviewSummary')
       .withIndex('by_type_tmdbId', q => q.eq('type', args.type).eq('tmdbId', args.tmdbId))
       .unique()
+
+    // The count and the sum are both returned so the client can fold the TMDB votes into
+    // the same average instead of showing two competing scores.
+    return { ratingCount: summary?.ratingCount ?? 0, ratingSum: summary?.ratingSum ?? 0 }
+  },
+})
+
+// The signed-in user's own row for one title, read only when the rate dialog opens. The
+// rating alone is already on the client via getMyRatings; this adds the written part.
+export const getMyTitleReview = query({
+  args: { type: mediaType, tmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await optionalUser(context)
+    if (!userId) return null
+
+    const myReview = await context.db
+      .query('review')
+      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
+      .unique()
+
+    if (!myReview) return null
+
+    return {
+      id: myReview._id,
+      rating: myReview.rating,
+      content: myReview.content,
+      updatedAt: myReview.updatedAt,
+    }
+  },
+})
+
+// The written reviews of a title, most upvoted first.
+export const getTitleReviews = query({
+  args: { type: mediaType, tmdbId: v.number() },
+  handler: async (context, args) => {
+    const userId = await optionalUser(context)
 
     const reviews = await context.db
       .query('review')
@@ -71,13 +108,6 @@ export const getTitleReviews = query({
       .order('desc')
       .filter(q => q.neq(q.field('content'), ''))
       .take(REVIEW_PAGE_SIZE)
-
-    const myReview = userId
-      ? await context.db
-          .query('review')
-          .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', args.type).eq('tmdbId', args.tmdbId))
-          .unique()
-      : null
 
     // One profile read per distinct author, not per review.
     const profiles = new Map<string, Doc<'userProfile'> | null>()
@@ -92,28 +122,21 @@ export const getTitleReviews = query({
       profiles.set(review.userId, profile)
     }
 
-    const withVotes = []
-    for (const review of reviews) {
-      const vote = userId ? await findVote(context, userId, review._id) : null
-      withVotes.push(reviewPayload(review, userId, !!vote, profiles.get(review.userId) ?? null))
+    // The reader's votes are read once over their own index, rather than one point lookup
+    // per review on the page.
+    const upvotedIds = new Set<string>()
+    if (userId) {
+      const votes = await context.db
+        .query('reviewVote')
+        .withIndex('by_user', q => q.eq('userId', userId))
+        .collect()
+
+      for (const vote of votes) upvotedIds.add(vote.reviewId)
     }
 
-    return {
-      // The count and the sum are both returned so the client can fold the TMDB votes into
-      // the same average instead of showing two competing scores.
-      ratingCount: summary?.ratingCount ?? 0,
-      ratingSum: summary?.ratingSum ?? 0,
-      myRating: myReview?.rating ?? null,
-      myReview: myReview
-        ? {
-            id: myReview._id,
-            rating: myReview.rating,
-            content: myReview.content,
-            updatedAt: myReview.updatedAt,
-          }
-        : null,
-      reviews: withVotes,
-    }
+    return reviews.map(review =>
+      reviewPayload(review, userId, upvotedIds.has(review._id), profiles.get(review.userId) ?? null),
+    )
   },
 })
 
@@ -136,8 +159,9 @@ export const syncProfile = mutation({
 })
 
 // Every rating the signed-in user has given, so a grid of posters can show each cover's
-// rating from one subscription instead of one query per cover. Bounded by how many titles
-// the user has rated.
+// rating from one read instead of one query per cover, and so the rate button on a detail
+// page needs no per-title query at all. `hasContent` says whether the row is a bare rating
+// or a written review, which is the only other thing the buttons need to know.
 export const getMyRatings = query({
   args: {},
   handler: async context => {
@@ -151,7 +175,12 @@ export const getMyRatings = query({
 
     return reviews
       .filter(review => review.rating !== null)
-      .map(review => ({ type: review.type, tmdbId: review.tmdbId, rating: review.rating as number }))
+      .map(review => ({
+        type: review.type,
+        tmdbId: review.tmdbId,
+        rating: review.rating as number,
+        hasContent: review.content.length > 0,
+      }))
   },
 })
 
