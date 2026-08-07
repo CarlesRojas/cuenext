@@ -40,13 +40,17 @@ export async function fetchShowBundle(
   const show = tmdbTvSchema.parse(raw)
   const seasons = appendedSeasons(raw)
 
-  for (const chunk of remainingSeasonChunks(show.seasons)) {
-    const extra = await fetchTmdbCached(context, showBundleSchema, `/tv/${tmdbId}`, {
-      append_to_response: seasonAppendParam(chunk),
-    })
+  // Chunks are independent requests, so a long-running show pays one round trip, not one
+  // per chunk.
+  const extras = await Promise.all(
+    remainingSeasonChunks(show.seasons).map(chunk =>
+      fetchTmdbCached(context, showBundleSchema, `/tv/${tmdbId}`, {
+        append_to_response: seasonAppendParam(chunk),
+      }),
+    ),
+  )
 
-    seasons.push(...appendedSeasons(extra))
-  }
+  for (const extra of extras) seasons.push(...appendedSeasons(extra))
 
   // An empty bundle here is far more damaging than a failed request: the layout below would
   // come out with no seasons and no episodes, and computeNextEpisode reads that as "nothing

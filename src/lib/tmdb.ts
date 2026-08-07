@@ -116,11 +116,15 @@ export async function fetchShowBundle(tmdbId: number): Promise<ShowBundle> {
   const show = tmdbTvSchema.parse(raw)
   const seasons = appendedSeasons(raw)
 
-  for (const chunk of remainingSeasonChunks(show.seasons)) {
-    const extra = await fetchTmdbJson(`/tv/${tmdbId}`, { append_to_response: seasonAppendParam(chunk) })
+  // Chunks are independent requests, so a long-running show pays one round trip, not one
+  // per chunk.
+  const extras = await Promise.all(
+    remainingSeasonChunks(show.seasons).map(chunk =>
+      fetchTmdbJson(`/tv/${tmdbId}`, { append_to_response: seasonAppendParam(chunk) }),
+    ),
+  )
 
-    seasons.push(...appendedSeasons(extra))
-  }
+  for (const extra of extras) seasons.push(...appendedSeasons(extra))
 
   assertSeasonsAppended(tmdbId, show, seasons)
 
