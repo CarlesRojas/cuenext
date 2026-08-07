@@ -1,6 +1,6 @@
 import { env } from '#/env'
 import { idbStorage } from '#/lib/idbStorage'
-import { QUERY_CACHE_MAX_AGE, QUERY_CACHE_STORAGE_KEY, QUERY_GC_TIME } from '#/lib/queryCache'
+import { QUERY_CACHE_BUSTER, QUERY_CACHE_MAX_AGE, QUERY_CACHE_STORAGE_KEY, QUERY_GC_TIME } from '#/lib/queryCache'
 import { routeTree } from '#/routeTree.gen'
 import { ConvexQueryClient } from '@convex-dev/react-query'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
@@ -59,6 +59,7 @@ export function getRouter() {
         persistOptions={{
           persister,
           maxAge: QUERY_CACHE_MAX_AGE,
+          buster: QUERY_CACHE_BUSTER,
         }}
       >
         <ConvexProvider client={convexQueryClient.convexClient}>{children}</ConvexProvider>

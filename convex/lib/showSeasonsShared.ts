@@ -28,6 +28,14 @@ export function shortestShowSeasonsTtl(): number {
   return CACHE_DURATIONS.ONE_DAY
 }
 
+// A stored layout with no seasons is refused at read time and only accepted when it comes
+// straight from TMDB: a show that genuinely has no aired seasons produces one legitimately,
+// but so did a bug that built the season request wrong - and a poisoned row otherwise reads
+// as "nothing left to watch" for everyone until its TTL runs out.
+export function isLayoutUsable(layout: { seasonEpisodeCounts: number[] } | null): boolean {
+  return !!layout && layout.seasonEpisodeCounts.length > 0
+}
+
 export function isShowSeasonsFresh(row: { status: string; updatedAt: number } | null, now: number): boolean {
   if (!row) return false
 

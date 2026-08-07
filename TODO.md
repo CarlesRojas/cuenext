@@ -24,13 +24,12 @@ Nothing here needs a new environment variable, so the dev deployment works as-is
       not cached, which would mean hitting TMDB every time. Load something with a lot of
       episodes (Grey's Anatomy is `1416`, Supernatural `1622`) and confirm no
       `Not caching ...` warning appears in the Convex logs.
-- [ ] **Clear the poisoned dev rows once, after pulling the URL-encoding fix.** An
-      earlier build sent `append_to_response` with its slashes percent-encoded, which TMDB
-      ignores silently, so any `showSeasons` row written before the fix has an empty
-      season layout and reads as "nothing left to watch". Delete every row in
-      `showSeasons` from the dashboard data view; `nextEpisode` rows repair themselves
-      on the next recompute. The `tmdbCache` rows orphan themselves, because the cache
-      key changed with the encoding.
+- [ ] **Rows poisoned by the pre-fix build heal themselves - no dashboard cleanup.**
+      An earlier build sent `append_to_response` percent-encoded, which TMDB silently
+      ignores, so `showSeasons`/`nextEpisode` rows written then hold empty layouts. An
+      empty stored layout is now refused at read time, so the next watch toggle, follow,
+      or hourly check refetches and overwrites it. The browser-side cache of those
+      responses is invalidated by a persist buster on the next reload.
 - [ ] **`pnpm dev`** and walk the Verify list below.
 - [ ] **Trigger the cron by hand** rather than waiting six hours: run
       `internal.nextEpisode.refreshStaleShowSeasons` from the dashboard function

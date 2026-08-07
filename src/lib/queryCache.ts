@@ -11,3 +11,8 @@ export const LAST_USER_ID_STORAGE_KEY = 'CUENEXT_LAST_USER_ID'
 export const QUERY_CACHE_MAX_AGE = 1000 * 60 * 60 * 24 * 7 // 7 days
 
 export const QUERY_GC_TIME = QUERY_CACHE_MAX_AGE
+
+// Rejects any cache persisted before this value changed. Bump it when a bug has written
+// wrong data under keys that still look fresh - a build once cached shows with their
+// seasons missing, and no staleTime would ever have refetched them.
+export const QUERY_CACHE_BUSTER = 'tmdb-url-encoding-fix'

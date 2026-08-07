@@ -1,5 +1,5 @@
 import type { MutationCtx } from '../_generated/server'
-import { isShowSeasonsFresh, readShowSeasons } from './showSeasonsShared'
+import { isLayoutUsable, isShowSeasonsFresh, readShowSeasons } from './showSeasonsShared'
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -97,6 +97,10 @@ export async function recomputeNextEpisodeInDb(
   context: MutationCtx,
   userId: string,
   showTmdbId: number,
+  // Set only by the mutations that just fetched the layout from TMDB: an empty layout from
+  // them is a show that genuinely has nothing aired, while an empty layout found in storage
+  // is refused so a bad write can never stick until its TTL expires.
+  options: { trustEmptyLayout?: boolean } = {},
 ): Promise<{ recomputed: boolean; nextEpisode: NextEpisodeState | null }> {
   const now = Date.now()
 
@@ -109,11 +113,15 @@ export async function recomputeNextEpisodeInDb(
   // else already tracks needs no TMDB work at all: the first user's refresh serves everyone.
   const shared = await readShowSeasons(context, showTmdbId)
 
-  const layout = isShowSeasonsFresh(shared, now)
-    ? { ...shared!, seasonDataUpdatedAt: shared!.updatedAt }
-    : existing && isSeasonDataFresh(existing.seasonDataUpdatedAt, now)
-      ? existing
-      : null
+  const usable = (layout: { seasonEpisodeCounts: number[] } | null) =>
+    options.trustEmptyLayout || isLayoutUsable(layout)
+
+  const layout =
+    isShowSeasonsFresh(shared, now) && usable(shared)
+      ? { ...shared!, seasonDataUpdatedAt: shared!.updatedAt }
+      : existing && isSeasonDataFresh(existing.seasonDataUpdatedAt, now) && usable(existing)
+        ? existing
+        : null
 
   if (!layout) return { recomputed: false, nextEpisode: existing ? toNextEpisodeState(existing) : null }
 

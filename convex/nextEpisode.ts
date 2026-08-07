@@ -4,7 +4,13 @@ import { action, internalAction, internalMutation, internalQuery } from './_gene
 import type { NextEpisodeState } from './lib/nextEpisodeCompute'
 import { computeNextEpisode, recomputeNextEpisodeInDb } from './lib/nextEpisodeCompute'
 import type { ShowSeasonsLayout } from './lib/showSeasonsShared'
-import { isShowSeasonsFresh, readShowSeasons, shortestShowSeasonsTtl, writeShowSeasons } from './lib/showSeasonsShared'
+import {
+  isLayoutUsable,
+  isShowSeasonsFresh,
+  readShowSeasons,
+  shortestShowSeasonsTtl,
+  writeShowSeasons,
+} from './lib/showSeasonsShared'
 import { fetchShowSeasonsLayout } from './lib/tmdbShowBundle'
 import { requireUser } from './requireUser'
 
@@ -37,7 +43,7 @@ export const saveLayoutAndApply = internalMutation({
 
     await writeShowSeasons(context, args.showTmdbId, args.layout)
 
-    return await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
+    return await recomputeNextEpisodeInDb(context, userId, args.showTmdbId, { trustEmptyLayout: true })
   },
 })
 
@@ -202,7 +208,7 @@ export const listStaleWaitingShows = internalQuery({
       if (!isWaiting) continue
 
       const shared = await readShowSeasons(context, row.showTmdbId)
-      if (isShowSeasonsFresh(shared, now)) continue
+      if (isShowSeasonsFresh(shared, now) && isLayoutUsable(shared)) continue
 
       stale.push(row.showTmdbId)
     }
