@@ -48,6 +48,19 @@ export async function fetchShowBundle(
     seasons.push(...appendedSeasons(extra))
   }
 
+  // An empty bundle here is far more damaging than a failed request: the layout below would
+  // come out with no seasons and no episodes, and computeNextEpisode reads that as "nothing
+  // left to watch" for every viewer of the show. Refusing to return is what keeps a bad
+  // request from being written to shared state.
+  const expectedSeasons = (show.seasons ?? []).filter(season => season.season_number > 0).length
+  const receivedSeasons = seasons.filter(season => season.season_number > 0).length
+
+  if (expectedSeasons > 0 && receivedSeasons === 0)
+    throw new Error(`TMDB returned no appended seasons for show ${tmdbId} (expected ${expectedSeasons})`)
+
+  if (receivedSeasons < expectedSeasons)
+    console.warn(`Show ${tmdbId}: TMDB appended ${receivedSeasons} of ${expectedSeasons} seasons`)
+
   seasons.sort((a, b) => a.season_number - b.season_number)
 
   return { show, seasons }

@@ -1,5 +1,6 @@
 import { env } from '#/env'
 import { initialSeasonNumbers, remainingSeasonChunks, seasonAppendParam } from '#/lib/showBundleChunks'
+import { tmdbQueryString } from '#/lib/tmdbUrl'
 import {
   paginated,
   tmdbEpisodeMinimalSchema,
@@ -30,15 +31,7 @@ const TMDB_ENDPOINT = `${CONVEX_SITE_URL}/tmdb`
 export type TmdbParams = Record<string, string | number | boolean | undefined>
 
 function buildUrl(path: string, params: TmdbParams): string {
-  const url = new URL(TMDB_ENDPOINT)
-  url.searchParams.set('path', path)
-
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === '') continue
-    url.searchParams.set(key, String(value))
-  }
-
-  return url.toString()
+  return `${TMDB_ENDPOINT}?${tmdbQueryString({ ...params, path })}`
 }
 
 // No custom headers, so this stays a "simple" cross-origin GET: no preflight, and the
@@ -97,6 +90,21 @@ function appendedSeasons(raw: any): TmdbSeason[] {
   return seasons
 }
 
+// TMDB drops an append it cannot parse without saying so, which reads downstream as a show
+// that simply has no seasons. Anything that silently empties this bundle empties the show
+// page and, on the Convex side, the season layout every viewer's progress is computed from,
+// so a show that claims seasons and returned none is treated as a failure rather than a
+// result.
+function assertSeasonsAppended(tmdbId: number, show: TmdbTv, appended: TmdbSeason[]) {
+  const expected = (show.seasons ?? []).filter(season => season.season_number > 0).length
+  if (expected === 0) return
+
+  const received = appended.filter(season => season.season_number > 0).length
+  if (received === 0) throw new Error(`TMDB returned no appended seasons for show ${tmdbId} (expected ${expected})`)
+
+  if (received < expected) console.warn(`Show ${tmdbId}: TMDB appended ${received} of ${expected} seasons`)
+}
+
 // The first request asks blindly for the opening seasons - TMDB omits the ones that do not
 // exist - so most shows cost exactly one request. Its response carries every season's
 // episode count, which is what sizes any further requests.
@@ -113,6 +121,8 @@ export async function fetchShowBundle(tmdbId: number): Promise<ShowBundle> {
 
     seasons.push(...appendedSeasons(extra))
   }
+
+  assertSeasonsAppended(tmdbId, show, seasons)
 
   seasons.sort((a, b) => a.season_number - b.season_number)
 

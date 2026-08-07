@@ -6,18 +6,18 @@ import { internalMutation, internalQuery, mutation, query } from './_generated/s
 import { CACHE_DURATIONS, getTimeUntilNextDay, resolveCacheDuration } from './lib/tmdbCacheTtl'
 import type { DerivedRuntimes } from './lib/tmdbDerived'
 import { deriveRuntimes } from './lib/tmdbDerived'
+import { tmdbQueryString } from '../src/lib/tmdbUrl'
 import { fetchTmdb } from './lib/tmdbClient'
 
 export { CACHE_DURATIONS, getTimeUntilNextDay }
 
-// Parameters are sorted so the same request always produces the same key regardless of the
-// order the caller happened to build them in - the action helper and the HTTP proxy would
-// otherwise cache the identical response under two rows.
+// The key mirrors the request URL, so the action helper and the HTTP proxy cache the same
+// response under the same row rather than one each. Parameters are sorted for that reason
+// too: the caller's key order must not matter.
 export function cacheKeyFor(path: string, params: Record<string, string> = {}): string {
-  const entries = Object.entries(params).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-  const paramsString = entries.length > 0 ? `?${new URLSearchParams(entries).toString()}` : ''
+  const queryString = tmdbQueryString(params)
 
-  return `${path}${paramsString}`
+  return `${path}${queryString ? `?${queryString}` : ''}`
 }
 
 async function getCachedTmdbData(context: ActionCtx, endpoint: string): Promise<any | null> {

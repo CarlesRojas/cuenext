@@ -1,7 +1,7 @@
 import { httpRouter } from 'convex/server'
 import { internal } from './_generated/api'
 import { httpAction } from './_generated/server'
-import { TMDB_API_URL } from './lib/tmdbClient'
+import { tmdbRequestUrl } from './lib/tmdbClient'
 import { cacheTtlFor } from './lib/tmdbCacheTtl'
 import { cacheKeyFor } from './tmdbCache'
 
@@ -79,10 +79,7 @@ const tmdbProxy = httpAction(async (context, request) => {
   if (cached && cached.expiresAt > now)
     return jsonResponse(cached.data, Math.max(0, Math.floor((cached.expiresAt - now) / 1000)))
 
-  const tmdbUrl = new URL(`${TMDB_API_URL}${path}`)
-  for (const [key, value] of Object.entries(params)) tmdbUrl.searchParams.append(key, value)
-
-  const response = await fetch(tmdbUrl.toString(), {
+  const response = await fetch(tmdbRequestUrl(path, params), {
     headers: {
       Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
       'Content-Type': 'application/json',
