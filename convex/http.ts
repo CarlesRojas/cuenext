@@ -115,6 +115,9 @@ const tmdbProxy = httpAction(async (context, request) => {
       createdAt: now,
       expiresAt: now + ttl,
     })
+  // Uncached responses go back to TMDB on every request, so this must not pass unnoticed:
+  // it means a request is being built too large and its chunking needs revisiting.
+  else console.warn(`Not caching ${cacheKey}: ${body.length} bytes exceeds ${MAX_CACHED_BYTES}`)
 
   return jsonResponse(data, Math.floor(ttl / 1000))
 })

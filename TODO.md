@@ -19,6 +19,11 @@ Nothing here needs a new environment variable, so the dev deployment works as-is
       That origin is the dev `VITE_CONVEX_URL` with `.convex.cloud` swapped for
       `.convex.site`, which is exactly what the client derives, so a working curl means
       a working app.
+- [ ] **Check a long-running show gets cached.** Bundled requests are chunked to stay
+      inside Convex's 1 MiB document limit, and an oversized one is served through but
+      not cached, which would mean hitting TMDB every time. Load something with a lot of
+      episodes (Grey's Anatomy is `1416`, Supernatural `1622`) and confirm no
+      `Not caching ...` warning appears in the Convex logs.
 - [ ] **`pnpm dev`** and walk the Verify list below.
 - [ ] **Trigger the cron by hand** rather than waiting six hours: run
       `internal.nextEpisode.refreshStaleShowSeasons` from the dashboard function

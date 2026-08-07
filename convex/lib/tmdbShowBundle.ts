@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { TmdbEpisode, TmdbSeason, TmdbTv } from '../../src/type/tmdb'
 import { tmdbSeasonSchema, tmdbTvSchema } from '../../src/type/tmdb'
+import { initialSeasonNumbers, remainingSeasonChunks, seasonAppendParam } from '../../src/lib/showBundleChunks'
 import type { ActionCtx } from '../_generated/server'
 import { fetchTmdbCached } from '../tmdbCache'
 import type { ShowSeasonsLayout } from './showSeasonsShared'
@@ -9,16 +10,11 @@ import type { ShowSeasonsLayout } from './showSeasonsShared'
 // seasons, instead of the show plus one request per season. The season layout refresh used
 // to run a separate cached action for every season of the show.
 //
-// Ten is under TMDB's limit of twenty appended requests and keeps the joined payload inside
-// Convex's 1 MiB document limit, which is what the response is cached as.
-const SEASONS_PER_REQUEST = 10
+// The chunking is shared with the browser so both build the same request and read the same
+// cache row.
 
 // catchall keeps the appended `season/N` keys, which a plain object schema would strip.
 const showBundleSchema = tmdbTvSchema.catchall(z.unknown())
-
-function seasonAppendParam(seasonNumbers: number[]): string {
-  return seasonNumbers.map(seasonNumber => `season/${seasonNumber}`).join(',')
-}
 
 function appendedSeasons(raw: Record<string, unknown>): TmdbSeason[] {
   const seasons: TmdbSeason[] = []
@@ -37,23 +33,14 @@ export async function fetchShowBundle(
   context: ActionCtx,
   tmdbId: number,
 ): Promise<{ show: TmdbTv; seasons: TmdbSeason[] }> {
-  const firstBatch = Array.from({ length: SEASONS_PER_REQUEST }, (_, index) => index + 1)
-
   const raw = await fetchTmdbCached(context, showBundleSchema, `/tv/${tmdbId}`, {
-    append_to_response: seasonAppendParam(firstBatch),
+    append_to_response: seasonAppendParam(initialSeasonNumbers()),
   })
 
   const show = tmdbTvSchema.parse(raw)
   const seasons = appendedSeasons(raw)
 
-  const remaining = (show.seasons ?? [])
-    .map(season => season.season_number)
-    .filter(seasonNumber => seasonNumber > SEASONS_PER_REQUEST)
-    .sort((a, b) => a - b)
-
-  for (let index = 0; index < remaining.length; index += SEASONS_PER_REQUEST) {
-    const chunk = remaining.slice(index, index + SEASONS_PER_REQUEST)
-
+  for (const chunk of remainingSeasonChunks(show.seasons)) {
     const extra = await fetchTmdbCached(context, showBundleSchema, `/tv/${tmdbId}`, {
       append_to_response: seasonAppendParam(chunk),
     })
