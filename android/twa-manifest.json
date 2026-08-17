@@ -20,8 +20,8 @@
     "path": "/Users/carles.rojas/Documents/Repos/cuenext/android/android.keystore",
     "alias": "cuenext_key_store"
   },
-  "appVersionName": "9",
-  "appVersionCode": 9,
+  "appVersionName": "10",
+  "appVersionCode": 10,
   "shortcuts": [
     {
       "name": "Watchlist",
@@ -74,5 +74,5 @@
     "window-controls-overlay",
     "browser"
   ],
-  "appVersion": "9"
+  "appVersion": "10"
 }
