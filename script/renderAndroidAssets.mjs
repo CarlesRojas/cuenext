@@ -65,11 +65,12 @@ const LAYER_DP = 108
 const VISIBLE_DP = 72
 const BUBBLEWRAP_INSET_DP = 8.5
 
-/* How much of the 91dp the artwork is drawn into. At 1 the icon is full bleed, which is what
- * `maskableIcon512.png` is drawn for: a maskable icon carries its own safe-zone padding, 26.6% a
- * side here, and the crop down to the visible 72dp leaves the mark at a little under 60% of it.
- * Lower this to pad the mark further; the figures printed below say where it lands. */
-const ICON_SCALE = 1
+/* How much of the 91dp the artwork is drawn into. At 72/91 the part that survives the mask is
+ * exactly the icon as drawn, safe zone included, which puts the mark at the 46.9% of the visible
+ * 72dp it occupies in `maskableIcon512.png` rather than the 59.2% Bubblewrap's crop magnifies it
+ * to. Raise it towards 1 to give the mark more of the circle; the figures printed below say where
+ * it lands. */
+const ICON_SCALE = VISIBLE_DP / (LAYER_DP - 2 * BUBBLEWRAP_INSET_DP)
 
 /* Alpha at or above which a pixel of the transparent master counts as drawn, so a mark with a soft
  * edge is measured by its body rather than by the faintest pixel of its falloff. */

@@ -101,11 +101,12 @@ downloads `maskableIconUrl` from the live site at update time. Rendering the lay
 `public/maskableIcon512.png` instead, so a change to the deployed icon cannot quietly reshape the
 launcher icon in a release that was not about icons at all.
 
-`maskableIcon512.png` is drawn with the safe-zone padding a maskable icon is meant to have, 26.6% a
-side, which after the crop leaves the mark at 59.2% of the visible 72dp. That is what `ICON_SCALE`
-of 1 in `script/renderAndroidAssets.mjs` means: full bleed, the padding coming from the artwork. If
-the mark ever wants more room than the artwork gives it, lower that constant; the script prints
-where the mark lands for whatever value it is set to.
+The layers are also shrunk to 72/91, the `ICON_SCALE` in `script/renderAndroidAssets.mjs`, so that
+what survives the crop is exactly the icon as drawn, on its own border colour. `maskableIcon512.png`
+carries the safe-zone padding a maskable icon is meant to have, 26.6% a side, and that puts the mark
+at 46.9% of the visible 72dp instead of the 59.2% the crop would otherwise magnify it to. Raise the
+constant towards 1 to give the mark more of the circle; the script prints where it lands for
+whatever value it is set to.
 
 The layers are also drawn at one pixel per pixel of the 91dp they are displayed in, where
 Bubblewrap's own are smaller than that and get magnified at draw time.
@@ -119,7 +120,7 @@ image and either would do; `maskableIcon512.png` would not, as its background is
 
 The icon layers take the opposite input, the opaque icon with its background, and read the padding
 colour from the top-left pixel. Both figures the script prints are worth a glance after a redraw: the
-splash mark at 30.67% of the canvas, and the launcher mark near 59% of the visible 72dp.
+splash mark at 30.67% of the canvas, and the launcher mark near 47% of the visible 72dp.
 
 ## Digital Asset Links
 
