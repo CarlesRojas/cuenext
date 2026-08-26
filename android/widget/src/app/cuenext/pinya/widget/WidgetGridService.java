@@ -3,7 +3,6 @@ package app.cuenext.pinya.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -98,23 +97,23 @@ public class WidgetGridService extends RemoteViewsService {
                     + " took=" + (System.currentTimeMillis() - start) + "ms");
         }
 
-        // Cells reference their poster by content URI instead of carrying the bitmap:
-        // the launcher caps a collection's cached RemoteViews at ~2MB of bitmap memory,
-        // and parcelled covers thrashed that cache on every scroll.
+        // Cells carry their poster as a small RGB_565 bitmap, sized so the whole list
+        // fits the launcher's ~2MB RemoteViews cache: with every cell cached, recycling
+        // a row while scrolling is a plain setImageBitmap - no file read, no decode.
         private RemoteViews buildCell(JSONObject item) throws Exception {
             RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item);
 
             pinHeight(cell, R.id.item_poster);
 
-            Uri poster = WidgetApi.posterUri(context, item.optString("posterUrl", null));
+            android.graphics.Bitmap poster = WidgetApi.posterBitmap(context, item.optString("posterUrl", null));
 
             if (poster != null) {
-                cell.setImageViewUri(R.id.item_poster, poster);
+                cell.setImageViewBitmap(R.id.item_poster, poster);
                 cell.setViewVisibility(R.id.item_fallback, View.GONE);
             } else {
                 // Same fallback the app's PosterCard has: the title on the card
                 // background. The placeholder card keeps the cell's 2:3 shape.
-                cell.setImageViewUri(R.id.item_poster, WidgetApi.placeholderUri(context));
+                cell.setImageViewBitmap(R.id.item_poster, WidgetApi.placeholderBitmap(context));
                 cell.setViewVisibility(R.id.item_fallback, View.VISIBLE);
                 cell.setTextViewText(R.id.item_fallback, item.getString("name"));
             }
@@ -137,7 +136,7 @@ public class WidgetGridService extends RemoteViewsService {
         private RemoteViews skeletonCell() {
             RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item_skeleton);
             pinHeight(cell, R.id.skeleton_poster);
-            cell.setImageViewUri(R.id.skeleton_poster, WidgetApi.placeholderUri(context));
+            cell.setImageViewBitmap(R.id.skeleton_poster, WidgetApi.placeholderBitmap(context));
             return cell;
         }
 

@@ -9,7 +9,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,22 +27,22 @@ import java.security.MessageDigest;
  * Plain-framework networking for the widget (HttpURLConnection + org.json), so no
  * dependency has to be patched into the Bubblewrap-generated build.gradle.
  *
- * Posters are downloaded once and pre-rendered to disk as rounded 2:3 PNGs; cells then
- * reference them by content URI (served by WidgetPosterProvider) instead of carrying
- * bitmaps. That keeps each cell's RemoteViews tiny: the launcher caps a collection's
- * cached RemoteViews at ~2MB of bitmap memory, and parcelled bitmaps blow through it
- * after a couple of covers, which made scrolling re-fetch and re-inflate cells
- * constantly.
+ * Posters are downloaded once, pre-rendered to disk as rounded 2:3 cards, and shipped to
+ * the launcher as in-cell bitmaps sized so the WHOLE list fits the launcher's ~2MB
+ * RemoteViews cache (12 cells + the loading view at RGB_565 216x324 is ~1.9MB). With
+ * every cell cached, recycling a row during scroll is a plain setImageBitmap - no file
+ * read, no decode - which is what earlier URI- and full-size-bitmap approaches lacked.
+ * RGB_565 has no alpha, so the rounded corners are composited over the widget's
+ * background color at render time.
  */
 public final class WidgetApi {
-    public static final String POSTER_AUTHORITY = "app.cuenext.pinya.widgetposters";
-
-    // The card's 2:3 shape with the app's 22/144 corner ratio. Rendered small on purpose:
-    // the launcher re-decodes a cell's PNG synchronously on its UI thread every time it
-    // recycles a row, so decode cost is what scroll smoothness is made of.
-    private static final int POSTER_WIDTH_PX = 250;
-    private static final int POSTER_HEIGHT_PX = 375;
+    // The card's 2:3 shape with the app's 22/144 corner ratio.
+    private static final int POSTER_WIDTH_PX = 216;
+    private static final int POSTER_HEIGHT_PX = 324;
     private static final float POSTER_RADIUS_PX = POSTER_WIDTH_PX * 22f / 144f;
+
+    // What the corners blend into: the widget background's color, opaque.
+    private static final int CORNER_COLOR = 0xFF0A0A0A;
 
     private static final String RENDERED_DIR = "widget_posters_rendered";
     private static final String PLACEHOLDER_NAME = "placeholder_" + POSTER_WIDTH_PX + ".png";
@@ -101,10 +100,10 @@ public final class WidgetApi {
     // --- Posters -----------------------------------------------------------------------
 
     /**
-     * Render the posters of the given sections to disk, so building cells is URI lookups
-     * only. Limited to the sections some widget actually displays - the payload carries
-     * every list of the app, and pre-rendering all of them would be ~100 downloads.
-     * Other sections fill in lazily if a widget is reconfigured to them.
+     * Render the posters of the given sections to disk, so building cells only decodes
+     * local files. Limited to the sections some widget actually displays - the payload
+     * carries every list of the app, and pre-rendering all of them would be ~100
+     * downloads. Other sections fill in lazily if a widget is reconfigured to them.
      */
     public static void prefetchPosters(Context context, String sectionsJson, java.util.Set<String> sectionKeys) {
         try {
@@ -123,42 +122,39 @@ public final class WidgetApi {
         }
     }
 
-    /** The content URI of a poster's rendered card, downloading and rendering on a miss. */
-    public static Uri posterUri(Context context, String url) {
+    /** The cell bitmap of a poster's rendered card, downloading and rendering on a miss. */
+    public static Bitmap posterBitmap(Context context, String url) {
         if (url == null || url.isEmpty()) return null;
 
-        File file = renderedPosterFile(context, url);
-        return file == null ? null : uriFor(file.getName());
+        return decode565(renderedPosterFile(context, url));
     }
 
-    /** The content URI of the gray placeholder card (skeletons and imageless titles). */
-    public static Uri placeholderUri(Context context) {
+    /** The gray placeholder card's bitmap (skeleton cells and imageless titles). */
+    public static Bitmap placeholderBitmap(Context context) {
         try {
             File file = new File(renderedDir(context), PLACEHOLDER_NAME);
 
             if (!file.exists()) {
                 Bitmap placeholder = renderPlaceholder();
-                if (!writePng(file, placeholder)) return null;
+                boolean written = writePng(file, placeholder);
                 placeholder.recycle();
+                if (!written) return null;
             }
 
-            return uriFor(file.getName());
+            return decode565(file);
         } catch (Exception e) {
             return null;
         }
     }
 
-    /** Resolves a served filename to its file, for WidgetPosterProvider. Null if invalid. */
-    static File servedFile(Context context, String name) {
-        if (name == null) return null;
-        if (!name.equals(PLACEHOLDER_NAME) && !name.matches("[0-9a-f]{40}\\.png")) return null;
+    // RGB_565 halves the launcher-cache cost of every cell; the rendered files carry no
+    // alpha, so nothing is lost beyond color depth.
+    private static Bitmap decode565(File file) {
+        if (file == null) return null;
 
-        File file = new File(renderedDir(context), name);
-        return file.exists() ? file : null;
-    }
-
-    private static Uri uriFor(String name) {
-        return Uri.parse("content://" + POSTER_AUTHORITY + "/" + name);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
     }
 
     private static File renderedDir(Context context) {
@@ -224,6 +220,7 @@ public final class WidgetApi {
     private static Bitmap roundedCenterCrop(Bitmap source, int width, int height, float radius) {
         Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
+        canvas.drawColor(CORNER_COLOR);
 
         float scale = Math.max((float) width / source.getWidth(), (float) height / source.getHeight());
         Matrix matrix = new Matrix();
@@ -244,6 +241,7 @@ public final class WidgetApi {
     private static Bitmap renderPlaceholder() {
         Bitmap output = Bitmap.createBitmap(POSTER_WIDTH_PX, POSTER_HEIGHT_PX, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
+        canvas.drawColor(CORNER_COLOR);
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(0xFF262626);
