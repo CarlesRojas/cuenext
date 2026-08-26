@@ -4,9 +4,9 @@ import type { QueryCtx } from './_generated/server'
 import { query } from './_generated/server'
 import { requireUser } from './requireUser'
 
-// Plain helpers shared by the full-sections queries and the paginated ones, so the
-// paginated queries don't pay a nested runQuery (which bills as a second function call).
-async function buildTvSections(context: QueryCtx, userId: string) {
+// Plain helpers shared by the full-sections queries, the paginated ones and the widget
+// endpoint, so none of them pays a nested runQuery (which bills as a second function call).
+export async function buildTvSections(context: QueryCtx, userId: string) {
   const tvFollows = await context.db
     .query('follow')
     .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'tv'))
@@ -69,7 +69,7 @@ async function buildTvSections(context: QueryCtx, userId: string) {
   return { watchNext, haventStarted, stoppedWatching, finished, waitingForEpisodes }
 }
 
-async function buildMovieSections(context: QueryCtx, userId: string) {
+export async function buildMovieSections(context: QueryCtx, userId: string) {
   const movieFollows = await context.db
     .query('follow')
     .withIndex('by_user_type', q => q.eq('userId', userId).eq('type', 'movie'))

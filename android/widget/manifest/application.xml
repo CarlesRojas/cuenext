@@ -1,0 +1,38 @@
+        <!-- cuenext-widget: home-screen watchlist widget. Injected into the generated
+             manifest by apply-widget.sh after every `bubblewrap update`. -->
+        <receiver
+            android:name="app.cuenext.pinya.widget.WatchlistWidgetProvider"
+            android:exported="false"
+            android:label="@string/widgetName">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/watchlist_widget_info" />
+        </receiver>
+
+        <activity
+            android:name="app.cuenext.pinya.widget.WidgetConfigActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="app.cuenext.pinya.widget.WidgetTokenActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="widget-setup"
+                    android:scheme="cuenext" />
+            </intent-filter>
+        </activity>

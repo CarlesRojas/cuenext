@@ -152,6 +152,19 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index('by_type_tmdbId', ['type', 'tmdbId']),
 
+  // Long-lived credentials for the Android home-screen widget. The widget runs native
+  // code, so it can't reuse the Clerk session living in Chrome's cookie jar; instead the
+  // web app mints a token and hands it to the app through a cuenext:// deep link. Only a
+  // SHA-256 hash is stored, the plaintext token exists nowhere but on the device.
+  widgetToken: defineTable({
+    userId: v.string(),
+    tokenHash: v.string(),
+    createdAt: v.number(),
+    lastUsedAt: v.union(v.number(), v.null()),
+  })
+    .index('by_user', ['userId'])
+    .index('by_tokenHash', ['tokenHash']),
+
   tmdbAccountLink: defineTable({
     userId: v.string(),
     tmdbAccountId: v.number(),

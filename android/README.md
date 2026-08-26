@@ -1,8 +1,8 @@
 # CueNext for Android
 
-A Bubblewrap TWA wrapping `https://www.cuenext.app`. There is no app code here, so deploying the
-site is what updates the app. You only need a release when something in this folder changes, or when
-Play asks for one.
+A Bubblewrap TWA wrapping `https://www.cuenext.app`, plus one piece of native code: the home-screen
+watchlist widget in `widget/` (see below). Deploying the site is what updates the app itself; you
+only need a release when something in this folder changes, or when Play asks for one.
 
 The app is on Play as `app.cuenext.pinya`, signed with the upload key at `android/android.keystore`
 (alias `cuenext_key_store`). Play rejects a bundle signed with any other key, so that keystore is the
@@ -122,6 +122,34 @@ The icon layers take the opposite input, the opaque icon with its background, an
 colour from the top-left pixel. Both figures the script prints are worth a glance after a redraw: the
 splash mark at 30.67% of the canvas, and the launcher mark near 47% of the visible 72dp.
 
+## The home-screen widget
+
+`widget/` holds the one native feature of the app: an AppWidget that renders the watchlist's
+horizontal lists (configurable per widget, with the Shows/Movies toggle in its corner) and can mark
+titles watched in place. `bubblewrap update` deletes `app/` wholesale and its templates know nothing
+about the widget, so nothing widget-related lives in `app/` as a source of truth:
+
+- `widget/src/` are the Java sources, copied into `app/src/main/java/` by `apply-widget.sh`.
+- `widget/res/` are its layouts, drawables and strings, merged into `app/src/main/res/`. Every file
+  is widget-prefixed so it can never collide with what Bubblewrap generates.
+- `widget/manifest/` are the two snippets `apply-widget.sh` splices into the regenerated
+  `AndroidManifest.xml`: the `INTERNET` permission (the TWA itself never needed it, Chrome does its
+  networking) and the widget's receiver plus its two activities.
+
+`apply-assets.sh` runs `apply-widget.sh`, so the release steps above are unchanged. The script is
+idempotent and fails loudly if the manifest patch does not land, which is the thing to check first
+if a new Bubblewrap CLI ever reshapes the manifest.
+
+The widget is deliberately plain-framework Java (HttpURLConnection, org.json, RemoteViews) so
+`build.gradle` never needs patching. If you ever add a dependency to it, `apply-widget.sh` has to
+learn to patch `build.gradle` too.
+
+How it gets data: the widget can't reuse the web session (that lives inside Chrome), so the profile
+page mints a long-lived token in Convex (`convex/widget.ts`) and hands it over through the
+`cuenext://widget-setup` deep link, which `WidgetTokenActivity` catches and stores. The widget then
+calls the Convex HTTP endpoints in `convex/http.ts`. Revoking from the profile page 401s the token
+and the widget shows its reconnect message.
+
 ## Digital Asset Links
 
 The TWA only opens without a browser address bar while `public/.well-known/assetlinks.json` lists the
@@ -137,9 +165,10 @@ the app still runs, it just shows the address bar.
 
 ## What is generated and what is not
 
-Everything here except this README, `apply-assets.sh`, `splash/`, `icon/` and `.gitignore` is
-generated output. Edit `twa-manifest.json` and re-run the release steps rather than editing `app/`
-directly, since `bubblewrap update` overwrites all of it.
+Everything here except this README, `apply-assets.sh`, `apply-widget.sh`, `widget/`, `splash/`,
+`icon/` and `.gitignore` is generated output. Edit `twa-manifest.json` and re-run the release steps
+rather than editing `app/` directly, since `bubblewrap update` overwrites all of it. The widget
+files inside `app/` are copies too: edit them in `widget/` and re-run `apply-widget.sh`.
 
 ## Target API level
 

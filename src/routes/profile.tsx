@@ -1,3 +1,4 @@
+import { AndroidWidgetSetup } from '#/component/AndroidWidgetSetup'
 import { PosterCard } from '#/component/PosterCard'
 import { ProfileReviewCard } from '#/component/ProfileReviewCard'
 import { Section } from '#/component/Section'
@@ -376,6 +377,8 @@ function ProfilePage() {
           )}
         </div>
       </section>
+
+      <AndroidWidgetSetup />
 
       <div className="flex flex-col gap-6">
         {isLoadingLibrary &&

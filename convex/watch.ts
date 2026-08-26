@@ -3,6 +3,7 @@ import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { recomputeNextEpisodeInDb } from './lib/nextEpisodeCompute'
 import { applyStatsDelta, getEpisodeRuntime, getMovieRuntime } from './lib/statsDelta'
+import { markEpisodeWatchedForUser, markMovieWatchedForUser } from './lib/watchWrite'
 import { requireUser } from './requireUser'
 
 export const getWatchedMovies = query({
@@ -29,42 +30,10 @@ export const markMovieWatched = mutation({
     releaseDate: v.number(),
     watchedAt: v.optional(v.number()),
   },
-  handler: async (context, { name, poster, backdrop, watchedAt, ...args }) => {
+  handler: async (context, args) => {
     const userId = await requireUser(context)
-    const watchTimestamp = watchedAt ?? Date.now()
 
-    const existing = await context.db
-      .query('movie')
-      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.tmdbId))
-      .unique()
-
-    if (!existing) {
-      await context.db.insert('movie', { userId, tmdbId: args.tmdbId, watchedAt: watchTimestamp })
-
-      const runtime = await getMovieRuntime(context, args.tmdbId)
-      await applyStatsDelta(context, userId, { moviesWatchedCount: 1, movieTimeMinutes: runtime })
-    }
-
-    const followEntry = await context.db
-      .query('follow')
-      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'movie').eq('tmdbId', args.tmdbId))
-      .unique()
-
-    const wasNotFollowed = !followEntry
-
-    if (wasNotFollowed)
-      await context.db.insert('follow', {
-        userId,
-        type: 'movie' as const,
-        tmdbId: args.tmdbId,
-        name,
-        poster,
-        backdrop,
-        followedAt: watchTimestamp,
-        releaseDate: args.releaseDate,
-      })
-
-    return { wasNotFollowed }
+    return await markMovieWatchedForUser(context, userId, args)
   },
 })
 
@@ -141,65 +110,10 @@ export const markEpisodeWatched = mutation({
     releaseDate: v.number(),
     watchedAt: v.optional(v.number()),
   },
-  handler: async (context, { showName, showPoster, showBackdrop, watchedAt, ...args }) => {
+  handler: async (context, args) => {
     const userId = await requireUser(context)
-    const watchTimestamp = watchedAt ?? Date.now()
 
-    const existing = await context.db
-      .query('episode')
-      .withIndex('by_user_show_season_episode', q =>
-        q
-          .eq('userId', userId)
-          .eq('showTmdbId', args.showTmdbId)
-          .eq('seasonNumber', args.seasonNumber)
-          .eq('episodeNumber', args.episodeNumber),
-      )
-      .unique()
-
-    if (!existing) {
-      await context.db.insert('episode', {
-        userId,
-        watchedAt: watchTimestamp,
-        showTmdbId: args.showTmdbId,
-        seasonNumber: args.seasonNumber,
-        episodeNumber: args.episodeNumber,
-      })
-
-      const runtime = await getEpisodeRuntime(context, args.showTmdbId, args.seasonNumber, args.episodeNumber)
-      await applyStatsDelta(context, userId, { episodesWatchedCount: 1, showTimeMinutes: runtime })
-    }
-
-    const stoppedEntry = await context.db
-      .query('stopped')
-      .withIndex('by_user_tmdbId', q => q.eq('userId', userId).eq('tmdbId', args.showTmdbId))
-      .unique()
-
-    const wasStopped = !!stoppedEntry
-
-    if (stoppedEntry) await context.db.delete(stoppedEntry._id)
-
-    const followEntry = await context.db
-      .query('follow')
-      .withIndex('by_user_type_tmdbId', q => q.eq('userId', userId).eq('type', 'tv').eq('tmdbId', args.showTmdbId))
-      .unique()
-
-    const wasNotFollowed = !followEntry
-
-    if (wasNotFollowed)
-      await context.db.insert('follow', {
-        userId,
-        type: 'tv' as const,
-        tmdbId: args.showTmdbId,
-        name: showName,
-        poster: showPoster,
-        backdrop: showBackdrop,
-        followedAt: watchTimestamp,
-        releaseDate: args.releaseDate,
-      })
-
-    const nextEpisodeRecomputed = await recomputeNextEpisodeInDb(context, userId, args.showTmdbId)
-
-    return { wasStopped, wasNotFollowed, nextEpisodeRecomputed }
+    return await markEpisodeWatchedForUser(context, userId, args)
   },
 })
 

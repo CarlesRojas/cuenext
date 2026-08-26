@@ -10,10 +10,12 @@
 
 import type * as crons from "../crons.js";
 import type * as episodeInfo from "../episodeInfo.js";
+import type * as http from "../http.js";
 import type * as lib_nextEpisodeCompute from "../lib/nextEpisodeCompute.js";
 import type * as lib_reviewWrite from "../lib/reviewWrite.js";
 import type * as lib_statsDelta from "../lib/statsDelta.js";
 import type * as lib_tmdbClient from "../lib/tmdbClient.js";
+import type * as lib_watchWrite from "../lib/watchWrite.js";
 import type * as library from "../library.js";
 import type * as media from "../media.js";
 import type * as movieInfo from "../movieInfo.js";
@@ -29,6 +31,7 @@ import type * as upcoming from "../upcoming.js";
 import type * as userData from "../userData.js";
 import type * as watch from "../watch.js";
 import type * as watchlist from "../watchlist.js";
+import type * as widget from "../widget.js";
 
 import type {
   ApiFromModules,
@@ -39,10 +42,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   episodeInfo: typeof episodeInfo;
+  http: typeof http;
   "lib/nextEpisodeCompute": typeof lib_nextEpisodeCompute;
   "lib/reviewWrite": typeof lib_reviewWrite;
   "lib/statsDelta": typeof lib_statsDelta;
   "lib/tmdbClient": typeof lib_tmdbClient;
+  "lib/watchWrite": typeof lib_watchWrite;
   library: typeof library;
   media: typeof media;
   movieInfo: typeof movieInfo;
@@ -58,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   userData: typeof userData;
   watch: typeof watch;
   watchlist: typeof watchlist;
+  widget: typeof widget;
 }>;
 
 /**
