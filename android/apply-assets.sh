@@ -32,3 +32,7 @@ for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
 done
 
 echo "Splash screens and adaptive icon layers restored."
+
+# The home-screen widget lives in widget/ for the same reason the masters above live
+# outside app/: `bubblewrap update` deletes app/ wholesale.
+./apply-widget.sh
