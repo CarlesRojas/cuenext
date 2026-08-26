@@ -1,0 +1,36 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="app staging" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="true">
+    <!-- STAGING URL: edit the -d value in ACTIVITY_EXTRA_FLAGS below (or via Run > Edit
+         Configurations > app staging > Launch Flags) to this branch's staging deploy.
+
+         Why this works: the flags are appended to the `am start` call Android Studio
+         uses to launch the app, and the TWA's LauncherActivity opens the intent's data
+         URL when one is present, falling back to the production launchUrl otherwise.
+         Launch flags never enter the APK/AAB, and `bubblewrap build` doesn't read run
+         configurations at all, so packaged releases always use the production URL from
+         twa-manifest.json. -->
+    <module name="android.app" />
+    <option name="DEPLOY" value="true" />
+    <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+    <option name="DEPLOY_AS_INSTANT" value="false" />
+    <option name="ARTIFACT_NAME" value="" />
+    <option name="PM_INSTALL_OPTIONS" value="" />
+    <option name="ALL_USERS" value="false" />
+    <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+    <option name="CLEAR_APP_STORAGE" value="false" />
+    <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+    <option name="ACTIVITY_EXTRA_FLAGS" value="-d https://staging.cuenext.app/" />
+    <option name="MODE" value="default_activity" />
+    <option name="CLEAR_LOGCAT" value="false" />
+    <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+    <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+    <option name="DEBUGGER_TYPE" value="auto" />
+    <option name="DEEP_LINK" value="" />
+    <option name="ACTIVITY_CLASS" value="" />
+    <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+    <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+    <method v="2">
+      <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

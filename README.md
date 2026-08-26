@@ -54,6 +54,10 @@ bubblewrap install
 
 5. Commit the version bump in `twa-manifest.json`, `manifest-checksum.txt` and any changed resources. The `.aab` and `.apk` are gitignored.
 
+### Run against staging
+
+In Android Studio, run the `app staging` configuration instead of `app`. The staging URL lives in `android/.run/app staging.run.xml` (the `-d` value in `ACTIVITY_EXTRA_FLAGS`) — edit it per branch. It only affects that launch; packaged releases always use the production URL from `twa-manifest.json`.
+
 ### Notes
 
 - `android/android.keystore` (alias `cuenext_key_store`) is gitignored and cannot be regenerated. Keep it safe. Play rejects bundles signed with any other key.
