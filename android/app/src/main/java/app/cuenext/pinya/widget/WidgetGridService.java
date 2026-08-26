@@ -48,6 +48,7 @@ public class WidgetGridService extends RemoteViewsService {
         private final Context context;
         private final int widgetId;
         private final List<RemoteViews> cells = new ArrayList<>();
+        private int cellHeightDp;
 
         GridFactory(Context context, int widgetId) {
             this.context = context;
@@ -58,6 +59,8 @@ public class WidgetGridService extends RemoteViewsService {
         @Override
         public void onDataSetChanged() {
             long start = System.currentTimeMillis();
+
+            cellHeightDp = WidgetRenderer.cellHeightDp(AppWidgetManager.getInstance(context), widgetId);
 
             List<RemoteViews> built = new ArrayList<>();
 
@@ -101,6 +104,8 @@ public class WidgetGridService extends RemoteViewsService {
         private RemoteViews buildCell(JSONObject item) throws Exception {
             RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item);
 
+            pinHeight(cell, R.id.item_poster);
+
             Uri poster = WidgetApi.posterUri(context, item.optString("posterUrl", null));
 
             if (poster != null) {
@@ -131,8 +136,17 @@ public class WidgetGridService extends RemoteViewsService {
         // and out - RemoteViews can't run property animations, but flippers auto-start).
         private RemoteViews skeletonCell() {
             RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item_skeleton);
+            pinHeight(cell, R.id.skeleton_poster);
             cell.setImageViewUri(R.id.skeleton_poster, WidgetApi.placeholderUri(context));
             return cell;
+        }
+
+        // Fixed cell heights keep the grid's measurement independent of the images (see
+        // WidgetRenderer.cellHeightDp). Pre-Android 12 keeps the adjustViewBounds
+        // fallback, since setViewLayoutHeight doesn't exist there.
+        private void pinHeight(RemoteViews cell, int viewId) {
+            if (android.os.Build.VERSION.SDK_INT >= 31 && cellHeightDp > 0)
+                cell.setViewLayoutHeight(viewId, cellHeightDp, android.util.TypedValue.COMPLEX_UNIT_DIP);
         }
 
         @Override

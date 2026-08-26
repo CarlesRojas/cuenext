@@ -38,13 +38,15 @@ import java.security.MessageDigest;
 public final class WidgetApi {
     public static final String POSTER_AUTHORITY = "app.cuenext.pinya.widgetposters";
 
-    // The card's 2:3 shape at the w342 source size, with the app's 22/144 corner ratio.
-    private static final int POSTER_WIDTH_PX = 342;
-    private static final int POSTER_HEIGHT_PX = 513;
+    // The card's 2:3 shape with the app's 22/144 corner ratio. Rendered small on purpose:
+    // the launcher re-decodes a cell's PNG synchronously on its UI thread every time it
+    // recycles a row, so decode cost is what scroll smoothness is made of.
+    private static final int POSTER_WIDTH_PX = 250;
+    private static final int POSTER_HEIGHT_PX = 375;
     private static final float POSTER_RADIUS_PX = POSTER_WIDTH_PX * 22f / 144f;
 
     private static final String RENDERED_DIR = "widget_posters_rendered";
-    private static final String PLACEHOLDER_NAME = "placeholder.png";
+    private static final String PLACEHOLDER_NAME = "placeholder_" + POSTER_WIDTH_PX + ".png";
 
     private static final int CONNECT_TIMEOUT_MS = 5000;
     private static final int READ_TIMEOUT_MS = 8000;
@@ -167,7 +169,9 @@ public final class WidgetApi {
 
     private static File renderedPosterFile(Context context, String url) {
         try {
-            File file = new File(renderedDir(context), sha1(WidgetPrefs.getPosterSalt(context) + url) + ".png");
+            // The render size is part of the name, so a size change invalidates old files.
+            File file = new File(renderedDir(context),
+                    sha1(WidgetPrefs.getPosterSalt(context) + url + "@" + POSTER_WIDTH_PX) + ".png");
             if (file.exists() && file.length() > 0) return file;
 
             Bitmap source = download(url);

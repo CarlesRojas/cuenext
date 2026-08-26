@@ -77,10 +77,10 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int widgetId, Bundle newOptions) {
-        // A resize can change the column count, which is baked into the layout choice.
-        // Same data, so the grid is not poked.
+        // A resize can change the column count (baked into the layout choice) and the
+        // pinned cell height (baked into the cells), so the grid is poked too.
         Log.d(WidgetLog.TAG, "onAppWidgetOptionsChanged widget=" + widgetId);
-        WidgetRenderer.updateWidget(context, manager, widgetId);
+        renderAndNotify(context, new int[] { widgetId });
     }
 
     @Override

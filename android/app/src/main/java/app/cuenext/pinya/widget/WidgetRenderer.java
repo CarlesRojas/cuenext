@@ -99,16 +99,41 @@ public final class WidgetRenderer {
     // up shows three. The reported width maps back to cells with the platform's sizing
     // formula (n cells make 70n-30dp available), which tracks launchers whose cells are
     // wider than 70dp better than raw dp thresholds would.
-    private static int gridLayout(AppWidgetManager manager, int widgetId) {
+    public static int widgetWidthDp(AppWidgetManager manager, int widgetId) {
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int minWidthDp = options != null ? options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) : 0;
-        if (minWidthDp <= 0) minWidthDp = 250; // a typical 4-cell widget when unknown
+        return minWidthDp > 0 ? minWidthDp : 250; // a typical 4-cell widget when unknown
+    }
 
-        int cells = (minWidthDp + 30) / 70;
+    public static int columnsFor(AppWidgetManager manager, int widgetId) {
+        int cells = (widgetWidthDp(manager, widgetId) + 30) / 70;
 
-        if (cells <= 2) return R.layout.widget_watchlist_1col;
-        if (cells == 3) return R.layout.widget_watchlist_2col;
-        return R.layout.widget_watchlist_3col;
+        if (cells <= 2) return 1;
+        if (cells == 3) return 2;
+        return 3;
+    }
+
+    /**
+     * The cover height in dp for one grid cell: the estimated column width (widget width
+     * minus the root's side padding and the grid's spacing, split between columns) at
+     * the card's 2:3 aspect. Used by the factory to pin cell heights on Android 12+, so
+     * the grid's measurement never depends on the loaded image - image-driven heights
+     * made every image load re-measure the grid, which re-applied every visible cell and
+     * re-decoded every poster on each scroll.
+     */
+    public static int cellHeightDp(AppWidgetManager manager, int widgetId) {
+        int columns = columnsFor(manager, widgetId);
+        int innerWidth = widgetWidthDp(manager, widgetId) - 24;
+        int columnWidth = (innerWidth - 8 * (columns - 1)) / columns;
+        return columnWidth * 3 / 2;
+    }
+
+    private static int gridLayout(AppWidgetManager manager, int widgetId) {
+        switch (columnsFor(manager, widgetId)) {
+            case 1: return R.layout.widget_watchlist_1col;
+            case 2: return R.layout.widget_watchlist_2col;
+            default: return R.layout.widget_watchlist_3col;
+        }
     }
 
     private static void renderToggle(Context context, RemoteViews views, int widgetId, String media) {
