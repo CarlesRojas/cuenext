@@ -55,7 +55,15 @@ strip_markers components
 insert_before "<application" widget/manifest/permissions.xml
 insert_before "</application>" widget/manifest/application.xml
 
+# Swap the application class for WidgetApplication (a subclass of the generated one),
+# which watches the TWA's LauncherActivity to refresh the widget when the app is opened
+# or exited. No-op when already swapped.
+sed 's/android:name="Application"/android:name="app.cuenext.pinya.widget.WidgetApplication"/' \
+    "$MANIFEST" > "$MANIFEST.tmp"
+mv "$MANIFEST.tmp" "$MANIFEST"
+
 grep -q "WatchlistWidgetProvider" "$MANIFEST" || { echo "widget components did not land in $MANIFEST" >&2; exit 1; }
 grep -q "android.permission.INTERNET" "$MANIFEST" || { echo "INTERNET permission did not land in $MANIFEST" >&2; exit 1; }
+grep -q "widget.WidgetApplication" "$MANIFEST" || { echo "WidgetApplication swap did not land in $MANIFEST" >&2; exit 1; }
 
 echo "Widget sources, resources and manifest entries applied."

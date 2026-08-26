@@ -9,6 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,7 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,11 +26,26 @@ import java.security.MessageDigest;
 
 /**
  * Plain-framework networking for the widget (HttpURLConnection + org.json), so no
- * dependency has to be patched into the Bubblewrap-generated build.gradle. Talks to the
- * Convex HTTP endpoints in convex/http.ts using the paired widget token, and keeps a
- * small poster cache on disk so repaints don't re-download images.
+ * dependency has to be patched into the Bubblewrap-generated build.gradle.
+ *
+ * Posters are downloaded once and pre-rendered to disk as rounded 2:3 PNGs; cells then
+ * reference them by content URI (served by WidgetPosterProvider) instead of carrying
+ * bitmaps. That keeps each cell's RemoteViews tiny: the launcher caps a collection's
+ * cached RemoteViews at ~2MB of bitmap memory, and parcelled bitmaps blow through it
+ * after a couple of covers, which made scrolling re-fetch and re-inflate cells
+ * constantly.
  */
 public final class WidgetApi {
+    public static final String POSTER_AUTHORITY = "app.cuenext.pinya.widgetposters";
+
+    // The card's 2:3 shape at the w342 source size, with the app's 22/144 corner ratio.
+    private static final int POSTER_WIDTH_PX = 342;
+    private static final int POSTER_HEIGHT_PX = 513;
+    private static final float POSTER_RADIUS_PX = POSTER_WIDTH_PX * 22f / 144f;
+
+    private static final String RENDERED_DIR = "widget_posters_rendered";
+    private static final String PLACEHOLDER_NAME = "placeholder.png";
+
     private static final int CONNECT_TIMEOUT_MS = 5000;
     private static final int READ_TIMEOUT_MS = 8000;
 
@@ -41,46 +56,24 @@ public final class WidgetApi {
         String apiBase = WidgetPrefs.getApiBase(context);
         if (apiBase == null) return null;
 
-        return request(context, apiBase + "/widget/sections?media=" + media, null);
-    }
-
-    /**
-     * POST /widget/watch with the `watch` object the sections payload carried for the
-     * item. The backend answers with the refreshed sections for that media type.
-     */
-    public static String postWatch(Context context, String watchJson) {
-        String apiBase = WidgetPrefs.getApiBase(context);
-        if (apiBase == null) return null;
-
-        return request(context, apiBase + "/widget/watch", watchJson);
-    }
-
-    private static String request(Context context, String url, String postBody) {
         String token = WidgetPrefs.getToken(context);
         if (token == null) return null;
 
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection = (HttpURLConnection) new URL(apiBase + "/widget/sections?media=" + media).openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
             connection.setReadTimeout(READ_TIMEOUT_MS);
             connection.setRequestProperty("Authorization", "Bearer " + token);
-
-            if (postBody != null) {
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setDoOutput(true);
-                OutputStream out = connection.getOutputStream();
-                out.write(postBody.getBytes(StandardCharsets.UTF_8));
-                out.close();
-            }
 
             int status = connection.getResponseCode();
 
             if (status == 401) {
                 // The token was revoked from the profile page: remember it so the widget
-                // can tell the user to reconnect instead of silently showing stale data.
+                // can show its reconnect state, and drop the cached payloads so no
+                // covers survive the revocation.
                 WidgetPrefs.setTokenRejected(context, true);
+                WidgetPrefs.clearCachedSections(context);
                 return null;
             }
 
@@ -105,71 +98,123 @@ public final class WidgetApi {
 
     // --- Posters -----------------------------------------------------------------------
 
-    /** Download every poster of the payload into the disk cache, so rendering is I/O only. */
-    public static void prefetchPosters(Context context, String sectionsJson) {
+    /**
+     * Render the posters of the given sections to disk, so building cells is URI lookups
+     * only. Limited to the sections some widget actually displays - the payload carries
+     * every list of the app, and pre-rendering all of them would be ~100 downloads.
+     * Other sections fill in lazily if a widget is reconfigured to them.
+     */
+    public static void prefetchPosters(Context context, String sectionsJson, java.util.Set<String> sectionKeys) {
         try {
             JSONArray sections = new JSONObject(sectionsJson).getJSONArray("sections");
             for (int s = 0; s < sections.length(); s++) {
-                JSONArray items = sections.getJSONObject(s).getJSONArray("items");
+                JSONObject section = sections.getJSONObject(s);
+                if (sectionKeys != null && !sectionKeys.contains(section.getString("key"))) continue;
+
+                JSONArray items = section.getJSONArray("items");
                 for (int i = 0; i < items.length(); i++) {
                     String url = items.getJSONObject(i).optString("posterUrl", "");
-                    if (!url.isEmpty()) posterFile(context, url);
+                    if (!url.isEmpty()) renderedPosterFile(context, url);
                 }
             }
         } catch (Exception ignored) {
         }
     }
 
-    /**
-     * The poster for a cell: read from the disk cache (downloading on a miss), scaled and
-     * center-cropped to the cell, with the same rounded corners the app's cards have.
-     * Returns null when the image can't be obtained, and the cell falls back to the title.
-     */
-    public static Bitmap loadPoster(Context context, String url, int widthPx, int heightPx, float radiusPx) {
+    /** The content URI of a poster's rendered card, downloading and rendering on a miss. */
+    public static Uri posterUri(Context context, String url) {
         if (url == null || url.isEmpty()) return null;
 
+        File file = renderedPosterFile(context, url);
+        return file == null ? null : uriFor(file.getName());
+    }
+
+    /** The content URI of the gray placeholder card (skeletons and imageless titles). */
+    public static Uri placeholderUri(Context context) {
         try {
-            File file = posterFile(context, url);
-            if (file == null) return null;
+            File file = new File(renderedDir(context), PLACEHOLDER_NAME);
 
-            BitmapFactory.Options bounds = new BitmapFactory.Options();
-            bounds.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(file.getAbsolutePath(), bounds);
+            if (!file.exists()) {
+                Bitmap placeholder = renderPlaceholder();
+                if (!writePng(file, placeholder)) return null;
+                placeholder.recycle();
+            }
 
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 1;
-            while (bounds.outWidth / (options.inSampleSize * 2) >= widthPx) options.inSampleSize *= 2;
-
-            Bitmap source = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-            if (source == null) return null;
-
-            Bitmap rounded = roundedCenterCrop(source, widthPx, heightPx, radiusPx);
-            if (rounded != source) source.recycle();
-            return rounded;
+            return uriFor(file.getName());
         } catch (Exception e) {
             return null;
         }
     }
 
-    /**
-     * A rounded neutral-800 card for items without an image; the title TextView overlays
-     * it. Also what gives such cells their 2:3 height, since the poster bitmap drives the
-     * cell size.
-     */
-    public static Bitmap placeholder(int widthPx, int heightPx, float radiusPx) {
-        Bitmap output = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
+    /** Resolves a served filename to its file, for WidgetPosterProvider. Null if invalid. */
+    static File servedFile(Context context, String name) {
+        if (name == null) return null;
+        if (!name.equals(PLACEHOLDER_NAME) && !name.matches("[0-9a-f]{40}\\.png")) return null;
 
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(0xFF262626);
-        canvas.drawRoundRect(new RectF(0, 0, widthPx, heightPx), radiusPx, radiusPx, paint);
+        File file = new File(renderedDir(context), name);
+        return file.exists() ? file : null;
+    }
 
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(2);
-        paint.setColor(0x66737373);
-        canvas.drawRoundRect(new RectF(1, 1, widthPx - 1, heightPx - 1), radiusPx, radiusPx, paint);
+    private static Uri uriFor(String name) {
+        return Uri.parse("content://" + POSTER_AUTHORITY + "/" + name);
+    }
 
-        return output;
+    private static File renderedDir(Context context) {
+        File dir = new File(context.getCacheDir(), RENDERED_DIR);
+        if (!dir.exists()) dir.mkdirs();
+        return dir;
+    }
+
+    private static File renderedPosterFile(Context context, String url) {
+        try {
+            File file = new File(renderedDir(context), sha1(WidgetPrefs.getPosterSalt(context) + url) + ".png");
+            if (file.exists() && file.length() > 0) return file;
+
+            Bitmap source = download(url);
+            if (source == null) return null;
+
+            Bitmap card = roundedCenterCrop(source, POSTER_WIDTH_PX, POSTER_HEIGHT_PX, POSTER_RADIUS_PX);
+            source.recycle();
+
+            boolean written = writePng(file, card);
+            card.recycle();
+
+            return written ? file : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Bitmap download(String url) {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            connection.setReadTimeout(READ_TIMEOUT_MS);
+
+            if (connection.getResponseCode() != 200) return null;
+
+            InputStream in = connection.getInputStream();
+            Bitmap bitmap = BitmapFactory.decodeStream(in);
+            in.close();
+            return bitmap;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private static boolean writePng(File file, Bitmap bitmap) {
+        try {
+            File temp = new File(file.getParentFile(), file.getName() + ".tmp");
+            FileOutputStream out = new FileOutputStream(temp);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.close();
+            return temp.renameTo(file) || file.exists();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static Bitmap roundedCenterCrop(Bitmap source, int width, int height, float radius) {
@@ -191,39 +236,23 @@ public final class WidgetApi {
         return output;
     }
 
-    /** The cached file for a poster URL, downloading it on a miss. Null when unavailable. */
-    private static File posterFile(Context context, String url) {
-        try {
-            File dir = new File(context.getCacheDir(), "widget_posters");
-            if (!dir.exists() && !dir.mkdirs()) return null;
+    /** A rounded neutral-800 card, the base of skeleton cells and imageless titles. */
+    private static Bitmap renderPlaceholder() {
+        Bitmap output = Bitmap.createBitmap(POSTER_WIDTH_PX, POSTER_HEIGHT_PX, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
 
-            File file = new File(dir, sha1(url));
-            if (file.exists() && file.length() > 0) return file;
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(0xFF262626);
+        canvas.drawRoundRect(new RectF(0, 0, POSTER_WIDTH_PX, POSTER_HEIGHT_PX), POSTER_RADIUS_PX,
+                POSTER_RADIUS_PX, paint);
 
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-            connection.setReadTimeout(READ_TIMEOUT_MS);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2);
+        paint.setColor(0x66737373);
+        canvas.drawRoundRect(new RectF(1, 1, POSTER_WIDTH_PX - 1, POSTER_HEIGHT_PX - 1), POSTER_RADIUS_PX,
+                POSTER_RADIUS_PX, paint);
 
-            try {
-                if (connection.getResponseCode() != 200) return null;
-
-                InputStream in = connection.getInputStream();
-                File temp = new File(dir, file.getName() + ".tmp");
-                FileOutputStream out = new FileOutputStream(temp);
-                byte[] buffer = new byte[8192];
-                int read;
-                while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
-                out.close();
-                in.close();
-
-                if (!temp.renameTo(file)) return temp;
-                return file;
-            } finally {
-                connection.disconnect();
-            }
-        } catch (Exception e) {
-            return null;
-        }
+        return output;
     }
 
     private static String sha1(String value) throws Exception {

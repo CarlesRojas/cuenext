@@ -38,7 +38,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- cuenext-widget:permissions:end -->
     <application
-        android:name="Application"
+        android:name="app.cuenext.pinya.widget.WidgetApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
@@ -233,6 +233,15 @@
             android:name="app.cuenext.pinya.widget.WidgetGridService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- Serves the pre-rendered poster cards to the launcher by content URI, which
+             keeps the grid's RemoteViews under the launcher's bitmap-memory cache cap.
+             Exported by necessity (collection RemoteViews have no grant mechanism); it
+             only serves public TMDB artwork under salted unguessable names. -->
+        <provider
+            android:name="app.cuenext.pinya.widget.WidgetPosterProvider"
+            android:authorities="app.cuenext.pinya.widgetposters"
+            android:exported="true" />
 
         <activity
             android:name="app.cuenext.pinya.widget.WidgetActionActivity"

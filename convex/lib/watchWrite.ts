@@ -2,10 +2,9 @@ import type { MutationCtx } from '../_generated/server'
 import { recomputeNextEpisodeInDb } from './nextEpisodeCompute'
 import { applyStatsDelta, getEpisodeRuntime, getMovieRuntime } from './statsDelta'
 
-// The mark-watched bodies of the watch mutations, parameterized by userId so the widget's
-// HTTP actions (which authenticate with a widget token instead of a Clerk identity) can
-// run the exact same logic. The public mutations resolve the user with requireUser and
-// delegate here, so the two paths can't drift.
+// The mark-watched bodies of the watch mutations, parameterized by userId. The public
+// mutations resolve the user with requireUser and delegate here, so any future caller
+// that resolves its user differently runs the exact same logic.
 
 export interface MarkEpisodeWatchedArgs {
   showTmdbId: number

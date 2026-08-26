@@ -75,7 +75,9 @@ export function AndroidWidgetSetup() {
   const isConnected = (status?.tokenCount ?? 0) > 0
 
   return (
-    <section className="screen-px" id="widget">
+    // The screen-height bottom margin leaves room for the widget's "Grant access" deep
+    // link to scroll this card fully into view at the end of the page.
+    <section className="screen-px mb-[100dvh]" id="widget">
       <div
         ref={cardRef}
         className={cn(

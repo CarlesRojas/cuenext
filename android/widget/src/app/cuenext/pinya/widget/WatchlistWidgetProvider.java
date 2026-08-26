@@ -7,26 +7,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * The CueNext watchlist widget. The provider only paints the RemoteViews shell and pokes
- * the grid; the actual data fetching lives in WidgetGridService's factory, whose
- * onDataSetChanged is allowed to block on the network. The one network call made here is
- * the mark-watched POST, run on an executor inside goAsync()'s window.
+ * The CueNext watchlist widget. The provider paints the RemoteViews shell and owns ALL
+ * networking, so the widget's traffic is easy to reason about: one sections fetch per
+ * displayed media type, only when its cache is older than STALE_AFTER_MS, on launcher
+ * updates (every updatePeriodMillis), a toggle to an uncached media, or a pairing/config
+ * refresh. Scrolling never touches the network - the grid factory renders purely from
+ * the cache and shows pulsing skeleton cells until the first payload lands.
  */
 public class WatchlistWidgetProvider extends AppWidgetProvider {
     public static final String ACTION_SET_MEDIA = "app.cuenext.pinya.widget.SET_MEDIA";
-    public static final String ACTION_WATCH = "app.cuenext.pinya.widget.WATCH";
     public static final String ACTION_REFRESH = "app.cuenext.pinya.widget.REFRESH";
-    // Repaint the shells without poking the grid; sent by the factory after a fetch that
-    // changed what the shell should say (first payload, or a rejected token).
-    public static final String ACTION_HEADER_SYNC = "app.cuenext.pinya.widget.HEADER_SYNC";
 
     public static final String EXTRA_MEDIA = "media";
-    public static final String EXTRA_WATCH_JSON = "watchJson";
     public static final String EXTRA_URL = "url";
+
+    // Fresh enough for a watchlist that changes a few times a day, while a toggle back
+    // and forth within the window repaints instantly with no request at all.
+    private static final long STALE_AFTER_MS = 10 * 60 * 1000;
 
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
@@ -41,52 +44,21 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
 
             if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID && media != null) {
                 WidgetPrefs.setMedia(context, widgetId, media);
-                render(context, new int[] { widgetId }, true);
+                // Repaint right away: cached covers if the media was seen recently,
+                // skeleton cells otherwise while the fetch below fills the cache.
+                renderAndNotify(context, new int[] { widgetId });
+                fetchStaleThenRepaint(context, new int[] { widgetId });
             }
             return;
         }
 
-        if (ACTION_WATCH.equals(action)) {
-            final String watchJson = intent.getStringExtra(EXTRA_WATCH_JSON);
-            if (watchJson == null) return;
-
-            final Context app = context.getApplicationContext();
-            final PendingResult result = goAsync();
-
-            EXECUTOR.execute(() -> {
-                try {
-                    String media = "tv";
-                    try {
-                        media = new org.json.JSONObject(watchJson).optString("media", "tv");
-                    } catch (Exception ignored) {
-                    }
-
-                    // The POST answers with the refreshed sections, so the repaint below
-                    // already shows the item gone (or the show's next episode).
-                    String refreshed = WidgetApi.postWatch(app, watchJson);
-
-                    if (refreshed != null) {
-                        WidgetPrefs.setCachedSections(app, media, refreshed);
-                        WidgetApi.prefetchPosters(app, refreshed);
-                    }
-
-                    render(app, allWidgetIds(app), true);
-                } finally {
-                    result.finish();
-                }
-            });
-            return;
-        }
-
         if (ACTION_REFRESH.equals(action)) {
-            // Aging out the cache makes the factories refetch on the poke below.
+            // Pairing and (re)configuration want fresh data: age the cache out so the
+            // fetch below actually runs.
             WidgetPrefs.invalidateCache(context);
-            render(context, allWidgetIds(context), true);
-            return;
-        }
-
-        if (ACTION_HEADER_SYNC.equals(action)) {
-            render(context, allWidgetIds(context), false);
+            int[] widgetIds = allWidgetIds(context);
+            renderAndNotify(context, widgetIds);
+            fetchStaleThenRepaint(context, widgetIds);
             return;
         }
 
@@ -95,15 +67,15 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] widgetIds) {
-        // Poking the grid makes each factory refresh its data when the cache has aged;
-        // this is also the periodic (updatePeriodMillis) refresh path.
-        render(context, widgetIds, true);
+        renderAndNotify(context, widgetIds);
+        fetchStaleThenRepaint(context, widgetIds);
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int widgetId, Bundle newOptions) {
         // A resize can change the column count, which is baked into the layout choice.
-        render(context, new int[] { widgetId }, false);
+        // Same data, so the grid is not poked.
+        WidgetRenderer.updateWidget(context, manager, widgetId);
     }
 
     @Override
@@ -116,14 +88,54 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
         context.sendBroadcast(new Intent(context, WatchlistWidgetProvider.class).setAction(ACTION_REFRESH));
     }
 
-    private static void render(Context context, int[] widgetIds, boolean notifyData) {
+    /** Repaints the shells and pokes the grids so their factories rebuild from the cache. */
+    private static void renderAndNotify(Context context, int[] widgetIds) {
         if (widgetIds == null || widgetIds.length == 0) return;
 
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
 
         for (int widgetId : widgetIds) WidgetRenderer.updateWidget(context, manager, widgetId);
 
-        if (notifyData) manager.notifyAppWidgetViewDataChanged(widgetIds, app.cuenext.pinya.R.id.widget_grid);
+        manager.notifyAppWidgetViewDataChanged(widgetIds, app.cuenext.pinya.R.id.widget_grid);
+    }
+
+    /**
+     * The one network path. Fetches the sections of each displayed media type whose
+     * cache has aged out, pre-downloads the posters, and repaints. Runs inside
+     * goAsync()'s window because the process may be torn down after onReceive returns.
+     */
+    private void fetchStaleThenRepaint(Context context, int[] widgetIds) {
+        if (widgetIds == null || widgetIds.length == 0 || !WidgetPrefs.isConnected(context)) return;
+
+        final Context app = context.getApplicationContext();
+        final PendingResult result = goAsync();
+
+        EXECUTOR.execute(() -> {
+            try {
+                Set<String> medias = new HashSet<>();
+                Set<String> sectionsInUse = new HashSet<>();
+                for (int widgetId : widgetIds) {
+                    medias.add(WidgetPrefs.getMedia(app, widgetId));
+                    sectionsInUse.add(WidgetPrefs.getSection(app, widgetId));
+                }
+
+                boolean changed = false;
+                for (String media : medias) {
+                    if (WidgetPrefs.getCachedSectionsAge(app, media) <= STALE_AFTER_MS) continue;
+
+                    String json = WidgetApi.fetchSections(app, media);
+                    if (json != null) {
+                        WidgetPrefs.setCachedSections(app, media, json);
+                        WidgetApi.prefetchPosters(app, json, sectionsInUse);
+                        changed = true;
+                    }
+                }
+
+                if (changed || WidgetPrefs.isTokenRejected(app)) renderAndNotify(app, widgetIds);
+            } finally {
+                result.finish();
+            }
+        });
     }
 
     private static int[] allWidgetIds(Context context) {

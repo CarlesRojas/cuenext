@@ -378,8 +378,6 @@ function ProfilePage() {
         </div>
       </section>
 
-      <AndroidWidgetSetup />
-
       <div className="flex flex-col gap-6">
         {isLoadingLibrary &&
           [media === 'tv' ? 'Finished Shows' : 'Finished Movies', 'Your Reviews'].map((title, i) => (
@@ -448,6 +446,8 @@ function ProfilePage() {
           </>
         )}
       </div>
+
+      <AndroidWidgetSetup />
     </div>
   )
 }

@@ -32,8 +32,8 @@ const airedEpisodes = (episode: TmdbEpisode) => {
 
 // Reads the watched episodes and writes the recomputed row in one transaction, so the
 // action above it only pays one internal call instead of a read query plus a write
-// mutation. Takes the userId explicitly (instead of requireUser) so the widget's
-// token-authenticated HTTP path can share it with the Clerk-authenticated action.
+// mutation. Takes the userId explicitly (instead of requireUser) so callers that resolve
+// their user differently can share it with the Clerk-authenticated action.
 export const applyNextEpisode = internalMutation({
   args: {
     userId: v.string(),
@@ -78,8 +78,8 @@ export const getNextEpisodeRow = internalQuery({
   },
 })
 
-// Shared by the public action below and the widget HTTP endpoint, which resolves its user
-// from a widget token instead of the request's Clerk identity.
+// The action's body with the user resolved by the caller, so it stays shareable with
+// paths that don't carry a Clerk identity.
 export async function updateNextEpisodeForUser(
   context: ActionCtx,
   userId: string,

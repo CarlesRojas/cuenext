@@ -23,16 +23,9 @@ import app.cuenext.pinya.R;
 public final class WidgetRenderer {
     public static final String SITE_URL = "https://www.cuenext.app";
 
-    // The app's palette: sky-500 for the active media type, amber-500 for a given rating.
+    // The app's palette: sky-500 for the active media type.
     public static final int COLOR_ACCENT = 0xFF0EA5E9;
     public static final int COLOR_ICON = 0xB3FFFFFF;
-    public static final int COLOR_RATED = 0xFFF59E0B;
-
-    // Poster bitmaps are produced at the w342 source size in the card's 2:3 shape, with
-    // the app's 22/144 corner ratio; cells then scale them to the column width.
-    public static final int POSTER_WIDTH_PX = 342;
-    public static final int POSTER_HEIGHT_PX = 513;
-    public static final float POSTER_RADIUS_PX = POSTER_WIDTH_PX * 22f / 144f;
 
     private WidgetRenderer() {}
 
@@ -52,29 +45,34 @@ public final class WidgetRenderer {
         }
 
         views.setTextViewText(R.id.widget_title, sectionTitle(media, section));
+        // Open the page the list lives on, on the media the toggle is on.
+        views.setOnClickPendingIntent(R.id.widget_title,
+                openAppIntent(context, SITE_URL + sectionPage(section) + "?media=" + media, requestCode(widgetId, 2)));
 
         boolean connected = WidgetPrefs.isConnected(context) && !WidgetPrefs.isTokenRejected(context);
 
         if (!connected) {
             // The app's primary-button CTA instead of a bare instruction; it opens the
-            // profile page anchored to the widget card, where access is granted.
+            // profile page anchored to the widget card, where access is granted. The
+            // grid is hidden explicitly - the launcher keeps its previously bound cells
+            // otherwise, and revoked access must not keep showing covers.
+            views.setViewVisibility(R.id.widget_grid, View.GONE);
             views.setViewVisibility(R.id.widget_connect, View.VISIBLE);
             views.setViewVisibility(R.id.widget_message, View.GONE);
             views.setOnClickPendingIntent(R.id.widget_connect,
-                    openAppIntent(context, SITE_URL + "/profile?media=" + media + "#widget", widgetId));
+                    openAppIntent(context, SITE_URL + "/profile?media=" + media + "#widget", requestCode(widgetId, 3)));
             manager.updateAppWidget(widgetId, views);
             return;
         }
 
+        views.setViewVisibility(R.id.widget_grid, View.VISIBLE);
         views.setViewVisibility(R.id.widget_connect, View.GONE);
 
-        // The message doubles as the grid's empty view: "loading" until a payload ever
-        // arrived, "nothing here" when the chosen list is genuinely empty.
-        boolean hasPayload = WidgetPrefs.getCachedSections(context, media) != null;
-        views.setTextViewText(R.id.widget_message, context.getString(
-                hasPayload ? R.string.widgetEmptyMessage : R.string.widgetLoadingMessage));
+        // The grid's empty view; while a payload is missing the factory fills the grid
+        // with skeleton cells instead, so this only shows for a genuinely empty list.
+        views.setTextViewText(R.id.widget_message, context.getString(R.string.widgetEmptyMessage));
         views.setOnClickPendingIntent(R.id.widget_message,
-                openAppIntent(context, SITE_URL + "/?media=" + media, widgetId));
+                openAppIntent(context, SITE_URL + "/?media=" + media, requestCode(widgetId, 4)));
 
         Intent adapter = new Intent(context, WidgetGridService.class)
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
@@ -85,8 +83,8 @@ public final class WidgetRenderer {
         views.setRemoteAdapter(R.id.widget_grid, adapter);
         views.setEmptyView(R.id.widget_grid, R.id.widget_message);
 
-        // One template for every cell tap; cells fill in either a url to open or the
-        // watch payload. It has to stay mutable so the launcher can apply the fill-ins.
+        // One template for every cell tap; cells fill in the title url to open. It has
+        // to stay mutable so the launcher can apply the fill-ins.
         Intent template = new Intent(context, WidgetActionActivity.class)
                 .setData(Uri.parse("cuenext://widget-action/" + widgetId));
         views.setPendingIntentTemplate(R.id.widget_grid,
@@ -95,13 +93,19 @@ public final class WidgetRenderer {
         manager.updateAppWidget(widgetId, views);
     }
 
+    // 2 launcher cells wide (or less) shows one cover per row, 3 cells shows two, 4 and
+    // up shows three. The reported width maps back to cells with the platform's sizing
+    // formula (n cells make 70n-30dp available), which tracks launchers whose cells are
+    // wider than 70dp better than raw dp thresholds would.
     private static int gridLayout(AppWidgetManager manager, int widgetId) {
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int minWidthDp = options != null ? options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) : 0;
-        if (minWidthDp <= 0) minWidthDp = 276; // a typical 4-column widget when unknown
+        if (minWidthDp <= 0) minWidthDp = 250; // a typical 4-cell widget when unknown
 
-        if (minWidthDp < 170) return R.layout.widget_watchlist_1col;
-        if (minWidthDp < 260) return R.layout.widget_watchlist_2col;
+        int cells = (minWidthDp + 30) / 70;
+
+        if (cells <= 2) return R.layout.widget_watchlist_1col;
+        if (cells == 3) return R.layout.widget_watchlist_2col;
         return R.layout.widget_watchlist_3col;
     }
 
@@ -139,6 +143,10 @@ public final class WidgetRenderer {
         return PendingIntent.getActivity(context, code, intent, immutableFlags());
     }
 
+    private static int requestCode(int widgetId, int kind) {
+        return widgetId * 10 + kind;
+    }
+
     private static int immutableFlags() {
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= 23) flags |= PendingIntent.FLAG_IMMUTABLE;
@@ -159,6 +167,10 @@ public final class WidgetRenderer {
                 case "waiting": return "Waiting for episodes";
                 case "stopped": return "Stopped watching";
                 case "finished": return "Finished";
+                case "upcoming": return "Upcoming";
+                case "discover-upcoming": return "Dropping This Week";
+                case "trending": return "Trending Shows";
+                case "top": return "Top Rated Shows";
                 default: return "Watch next";
             }
         }
@@ -166,7 +178,22 @@ public final class WidgetRenderer {
         switch (key) {
             case "waiting": return "Not released yet";
             case "finished": return "Finished";
+            case "upcoming": return "Upcoming";
+            case "discover-upcoming": return "Upcoming Movies";
+            case "trending": return "Trending Movies";
+            case "top": return "Top Rated Movies";
             default: return "Watch next";
+        }
+    }
+
+    /** The app page a list lives on, for the title's tap target. */
+    private static String sectionPage(String key) {
+        switch (key) {
+            case "upcoming": return "/upcoming";
+            case "discover-upcoming":
+            case "trending":
+            case "top": return "/discover";
+            default: return "/";
         }
     }
 }
