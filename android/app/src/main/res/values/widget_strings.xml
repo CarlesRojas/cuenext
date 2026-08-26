@@ -4,7 +4,8 @@
 <resources>
     <string name="widgetName">Watchlist</string>
     <string name="widgetDescription">Your CueNext lists: see what to watch next and mark it watched.</string>
-    <string name="widgetConnectMessage">Open CueNext and tap \'Connect widget\' on your Profile</string>
+    <string name="widgetConnectMessage">See your watchlist right here</string>
+    <string name="widgetGrantAccess">Grant access</string>
     <string name="widgetLoadingMessage">Loading your watchlist…</string>
     <string name="widgetEmptyMessage">Nothing here yet. Tap to open CueNext</string>
     <string name="widgetConnectedToast">CueNext widget connected. Add or refresh the widget on your home screen.</string>

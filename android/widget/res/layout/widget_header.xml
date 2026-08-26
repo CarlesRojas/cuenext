@@ -20,12 +20,12 @@
             android:id="@+id/toggle_tv_wrap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="6dp">
+            android:padding="7dp">
 
             <ImageView
                 android:id="@+id/toggle_tv"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="@string/widgetToggleShows"
                 android:src="@drawable/ic_widget_tv" />
         </FrameLayout>
@@ -35,12 +35,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="2dp"
-            android:padding="6dp">
+            android:padding="7dp">
 
             <ImageView
                 android:id="@+id/toggle_movie"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="@string/widgetToggleMovies"
                 android:src="@drawable/ic_widget_clapperboard" />
         </FrameLayout>

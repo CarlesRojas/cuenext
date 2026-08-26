@@ -86,7 +86,7 @@ public class WidgetGridService extends RemoteViewsService {
             try {
                 JSONArray sections = new JSONObject(json).getJSONArray("sections");
 
-                String sectionKey = WidgetPrefs.getSection(context, widgetId, media);
+                String sectionKey = WidgetPrefs.getSection(context, widgetId);
                 JSONObject section = sections.getJSONObject(0);
                 for (int i = 0; i < sections.length(); i++) {
                     if (sections.getJSONObject(i).getString("key").equals(sectionKey)) {

@@ -38,23 +38,35 @@ public final class WidgetRenderer {
 
     public static void updateWidget(Context context, AppWidgetManager manager, int widgetId) {
         String media = WidgetPrefs.getMedia(context, widgetId);
-        String section = WidgetPrefs.getSection(context, widgetId, media);
+        String section = WidgetPrefs.getSection(context, widgetId);
 
         RemoteViews views = new RemoteViews(context.getPackageName(), gridLayout(manager, widgetId));
 
-        renderToggle(context, views, widgetId, media);
+        // Only lists that exist for Shows & Movies carry the toggle; a single-media list
+        // pins the widget and the toggle would be dead weight.
+        if (WidgetPrefs.isBothMedia(context, widgetId)) {
+            views.setViewVisibility(R.id.widget_toggle, View.VISIBLE);
+            renderToggle(context, views, widgetId, media);
+        } else {
+            views.setViewVisibility(R.id.widget_toggle, View.GONE);
+        }
+
         views.setTextViewText(R.id.widget_title, sectionTitle(media, section));
 
         boolean connected = WidgetPrefs.isConnected(context) && !WidgetPrefs.isTokenRejected(context);
 
         if (!connected) {
-            views.setViewVisibility(R.id.widget_message, View.VISIBLE);
-            views.setTextViewText(R.id.widget_message, context.getString(R.string.widgetConnectMessage));
-            views.setOnClickPendingIntent(R.id.widget_message,
-                    openAppIntent(context, SITE_URL + "/profile?media=" + media, widgetId));
+            // The app's primary-button CTA instead of a bare instruction; it opens the
+            // profile page anchored to the widget card, where access is granted.
+            views.setViewVisibility(R.id.widget_connect, View.VISIBLE);
+            views.setViewVisibility(R.id.widget_message, View.GONE);
+            views.setOnClickPendingIntent(R.id.widget_connect,
+                    openAppIntent(context, SITE_URL + "/profile?media=" + media + "#widget", widgetId));
             manager.updateAppWidget(widgetId, views);
             return;
         }
+
+        views.setViewVisibility(R.id.widget_connect, View.GONE);
 
         // The message doubles as the grid's empty view: "loading" until a payload ever
         // arrived, "nothing here" when the chosen list is genuinely empty.

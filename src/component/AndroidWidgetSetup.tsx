@@ -7,7 +7,8 @@ import { faLinkSlash, faSpinner, faTableCellsLarge } from '@fortawesome/free-sol
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
 import { useAction, useMutation } from 'convex/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { cn } from '#/lib/cn'
 
 // The home-screen widget is native Android code, so it can't reuse the session living in
 // Chrome's cookie jar and there is no JS bridge inside a TWA. Pairing works by minting a
@@ -19,10 +20,24 @@ export function AndroidWidgetSetup() {
   const [isAndroid, setIsAndroid] = useState(false)
   const [deepLink, setDeepLink] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isHighlighted, setIsHighlighted] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setIsAndroid(navigator.userAgent.includes('Android'))
   }, [])
+
+  // The widget's "Grant access" button opens /profile#widget: scroll the card into view
+  // and flash it so the user lands on the right control.
+  useEffect(() => {
+    if (!isAndroid || window.location.hash !== '#widget') return
+
+    cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setIsHighlighted(true)
+
+    const timeout = setTimeout(() => setIsHighlighted(false), 2500)
+    return () => clearTimeout(timeout)
+  }, [isAndroid])
 
   const { data: status } = useQuery({
     ...convexQuery(api.widget.getWidgetTokenStatus, {}),
@@ -60,8 +75,14 @@ export function AndroidWidgetSetup() {
   const isConnected = (status?.tokenCount ?? 0) > 0
 
   return (
-    <section className="screen-px">
-      <div className="flex w-full max-w-2xl flex-col gap-3 rounded-[22px] border border-neutral-500/40 bg-neutral-800 p-4 lg:p-5">
+    <section className="screen-px" id="widget">
+      <div
+        ref={cardRef}
+        className={cn(
+          'duration-slow flex w-full max-w-2xl flex-col gap-3 rounded-[22px] border bg-neutral-800 p-4 transition-colors lg:p-5',
+          isHighlighted ? 'border-sky-500' : 'border-neutral-500/40',
+        )}
+      >
         <div className="flex items-center gap-3">
           <FontAwesomeIcon icon={faTableCellsLarge} className="text-sky-500" size="lg" />
           <h2 className="text-lg font-semibold text-white">Home screen widget</h2>

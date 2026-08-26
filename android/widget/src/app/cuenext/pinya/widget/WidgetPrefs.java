@@ -51,6 +51,10 @@ public final class WidgetPrefs {
 
     // --- Per-widget configuration ------------------------------------------------------
 
+    // A widget shows one list (section key). Lists that exist for both media types
+    // (Watch next, Finished) carry the Shows/Movies toggle, which flips `media`; a
+    // single-media list pins `media` and the widget hides the toggle.
+
     public static void setMedia(Context context, int widgetId, String media) {
         prefs(context).edit().putString("widget_" + widgetId + "_media", media).apply();
     }
@@ -59,21 +63,26 @@ public final class WidgetPrefs {
         return prefs(context).getString("widget_" + widgetId + "_media", "tv");
     }
 
-    // The chosen list is remembered per media type, so toggling movie -> tv -> movie
-    // brings back the same movie list.
-    public static void setSection(Context context, int widgetId, String media, String section) {
-        prefs(context).edit().putString("widget_" + widgetId + "_section_" + media, section).apply();
+    public static void setSection(Context context, int widgetId, String section, boolean bothMedia) {
+        prefs(context).edit()
+                .putString("widget_" + widgetId + "_section", section)
+                .putBoolean("widget_" + widgetId + "_both", bothMedia)
+                .apply();
     }
 
-    public static String getSection(Context context, int widgetId, String media) {
-        return prefs(context).getString("widget_" + widgetId + "_section_" + media, "next");
+    public static String getSection(Context context, int widgetId) {
+        return prefs(context).getString("widget_" + widgetId + "_section", "next");
+    }
+
+    public static boolean isBothMedia(Context context, int widgetId) {
+        return prefs(context).getBoolean("widget_" + widgetId + "_both", true);
     }
 
     public static void deleteWidget(Context context, int widgetId) {
         prefs(context).edit()
                 .remove("widget_" + widgetId + "_media")
-                .remove("widget_" + widgetId + "_section_tv")
-                .remove("widget_" + widgetId + "_section_movie")
+                .remove("widget_" + widgetId + "_section")
+                .remove("widget_" + widgetId + "_both")
                 .apply();
     }
 
