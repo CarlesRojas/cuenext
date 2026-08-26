@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One poster cell, the widget's PosterCard: rounded poster (the bitmap is pre-rounded
-     by WidgetApi), the watch/rate corner button, and the watch-progress bar. -->
+<!-- One poster cell of the grid, the widget's PosterCard. The poster bitmap (pre-rounded
+     by WidgetApi, always 2:3 - a placeholder when there is no image) drives the cell
+     height via adjustViewBounds, so cells keep the card aspect at any column width. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_root"
-    android:layout_width="96dp"
-    android:layout_height="144dp"
-    android:layout_marginEnd="8dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/item_poster"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
         android:contentDescription="@string/widgetPosterDescription"
         android:scaleType="fitXY" />
 
@@ -18,7 +19,6 @@
         android:id="@+id/item_fallback"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/widget_cell_background"
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="4"

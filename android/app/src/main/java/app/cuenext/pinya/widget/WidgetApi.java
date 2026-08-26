@@ -151,6 +151,27 @@ public final class WidgetApi {
         }
     }
 
+    /**
+     * A rounded neutral-800 card for items without an image; the title TextView overlays
+     * it. Also what gives such cells their 2:3 height, since the poster bitmap drives the
+     * cell size.
+     */
+    public static Bitmap placeholder(int widthPx, int heightPx, float radiusPx) {
+        Bitmap output = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(0xFF262626);
+        canvas.drawRoundRect(new RectF(0, 0, widthPx, heightPx), radiusPx, radiusPx, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2);
+        paint.setColor(0x66737373);
+        canvas.drawRoundRect(new RectF(1, 1, widthPx - 1, heightPx - 1), radiusPx, radiusPx, paint);
+
+        return output;
+    }
+
     private static Bitmap roundedCenterCrop(Bitmap source, int width, int height, float radius) {
         Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);

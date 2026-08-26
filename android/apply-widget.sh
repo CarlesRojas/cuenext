@@ -31,18 +31,29 @@ for dir in widget/res/*; do
 done
 
 # Manifest: insert the INTERNET permission before <application> and the widget components
-# before </application>. Skipped when a previous run already inserted them.
-if ! grep -q "WatchlistWidgetProvider" "$MANIFEST"; then
-    awk 'NR==FNR { lines[++n]=$0; next }
-         !done && /<application/ { for (i = 1; i <= n; i++) print lines[i]; done = 1 }
-         { print }' widget/manifest/permissions.xml "$MANIFEST" > "$MANIFEST.tmp"
+# before </application>. Both snippets are wrapped in cuenext-widget marker comments, and
+# anything between markers from a previous run is stripped first, so re-running (or
+# changing the snippets) always converges on the current widget/manifest/ contents.
+strip_markers() {
+    awk -v tag="$1" '
+        $0 ~ "cuenext-widget:" tag ":begin" { skipping = 1; next }
+        $0 ~ "cuenext-widget:" tag ":end" { skipping = 0; next }
+        !skipping { print }' "$MANIFEST" > "$MANIFEST.tmp"
     mv "$MANIFEST.tmp" "$MANIFEST"
+}
 
-    awk 'NR==FNR { lines[++n]=$0; next }
-         !done && /<\/application>/ { for (i = 1; i <= n; i++) print lines[i]; done = 1 }
-         { print }' widget/manifest/application.xml "$MANIFEST" > "$MANIFEST.tmp"
+insert_before() {
+    awk -v marker="$1" '
+        NR==FNR { lines[++n] = $0; next }
+        !done && $0 ~ marker { for (i = 1; i <= n; i++) print lines[i]; done = 1 }
+        { print }' "$2" "$MANIFEST" > "$MANIFEST.tmp"
     mv "$MANIFEST.tmp" "$MANIFEST"
-fi
+}
+
+strip_markers permissions
+strip_markers components
+insert_before "<application" widget/manifest/permissions.xml
+insert_before "</application>" widget/manifest/application.xml
 
 grep -q "WatchlistWidgetProvider" "$MANIFEST" || { echo "widget components did not land in $MANIFEST" >&2; exit 1; }
 grep -q "android.permission.INTERNET" "$MANIFEST" || { echo "INTERNET permission did not land in $MANIFEST" >&2; exit 1; }

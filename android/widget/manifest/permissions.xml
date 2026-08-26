@@ -1,3 +1,5 @@
-    <!-- cuenext-widget: the widget fetches watchlist data and posters itself; the TWA
-         alone doesn't need this because Chrome does its networking. -->
+    <!-- cuenext-widget:permissions:begin -->
+    <!-- The widget fetches watchlist data and posters itself; the TWA alone doesn't need
+         this because Chrome does its networking. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- cuenext-widget:permissions:end -->

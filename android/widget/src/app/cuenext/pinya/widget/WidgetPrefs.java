@@ -94,4 +94,9 @@ public final class WidgetPrefs {
         long at = prefs(context).getLong("cache_" + media + "_at", 0);
         return at == 0 ? Long.MAX_VALUE : System.currentTimeMillis() - at;
     }
+
+    /** Ages both payloads out so the grid factories refetch on their next poke. */
+    public static void invalidateCache(Context context) {
+        prefs(context).edit().remove("cache_tv_at").remove("cache_movie_at").apply();
+    }
 }

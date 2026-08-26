@@ -1,5 +1,6 @@
-        <!-- cuenext-widget: home-screen watchlist widget. Injected into the generated
-             manifest by apply-widget.sh after every `bubblewrap update`. -->
+        <!-- cuenext-widget:components:begin -->
+        <!-- Home-screen watchlist widget. Injected into the generated manifest by
+             apply-widget.sh after every `bubblewrap update`. -->
         <receiver
             android:name="app.cuenext.pinya.widget.WatchlistWidgetProvider"
             android:exported="false"
@@ -21,6 +22,18 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name="app.cuenext.pinya.widget.WidgetGridService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <activity
+            android:name="app.cuenext.pinya.widget.WidgetActionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <activity
             android:name="app.cuenext.pinya.widget.WidgetTokenActivity"
             android:excludeFromRecents="true"
@@ -36,3 +49,4 @@
                     android:scheme="cuenext" />
             </intent-filter>
         </activity>
+        <!-- cuenext-widget:components:end -->
