@@ -113,7 +113,11 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
         EXECUTOR.execute(() -> {
             try {
                 Set<String> medias = new HashSet<>();
-                for (int widgetId : widgetIds) medias.add(WidgetPrefs.getMedia(app, widgetId));
+                Set<String> sectionsInUse = new HashSet<>();
+                for (int widgetId : widgetIds) {
+                    medias.add(WidgetPrefs.getMedia(app, widgetId));
+                    sectionsInUse.add(WidgetPrefs.getSection(app, widgetId));
+                }
 
                 boolean changed = false;
                 for (String media : medias) {
@@ -122,7 +126,7 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
                     String json = WidgetApi.fetchSections(app, media);
                     if (json != null) {
                         WidgetPrefs.setCachedSections(app, media, json);
-                        WidgetApi.prefetchPosters(app, json);
+                        WidgetApi.prefetchPosters(app, json, sectionsInUse);
                         changed = true;
                     }
                 }

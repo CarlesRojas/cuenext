@@ -1,7 +1,9 @@
 import { v } from 'convex/values'
-import { internal } from './_generated/api'
+import { api, internal } from './_generated/api'
+import type { ActionCtx } from './_generated/server'
 import { action, internalMutation, internalQuery, mutation, query } from './_generated/server'
 import { requireUser } from './requireUser'
+import { buildUpcomingMovies, buildUpcomingTv } from './upcoming'
 import { buildMovieSections, buildTvSections } from './watchlist'
 
 // Everything the Android home-screen widget talks to. The widget is native code, so it
@@ -189,6 +191,16 @@ export const getWidgetSections = internalQuery({
             title: 'Finished',
             items: sections.finished.slice(0, MAX_WIDGET_SECTION_ITEMS).map(item => tvItem(item, false)),
           },
+          {
+            key: 'upcoming',
+            title: 'Upcoming',
+            items: (await buildUpcomingTv(context, userId)).slice(0, MAX_WIDGET_SECTION_ITEMS).map(item => ({
+              tmdbId: item.tmdbId,
+              name: item.name,
+              posterUrl: imageUrl(item.poster, item.backdrop),
+              appUrl: appUrl('tv', item.tmdbId),
+            })),
+          },
         ],
       }
     }
@@ -220,7 +232,87 @@ export const getWidgetSections = internalQuery({
           title: 'Finished',
           items: sections.finished.slice(0, MAX_WIDGET_SECTION_ITEMS).map(movieItem),
         },
+        {
+          key: 'upcoming',
+          title: 'Upcoming',
+          items: (await buildUpcomingMovies(context, userId)).slice(0, MAX_WIDGET_SECTION_ITEMS).map(item => ({
+            tmdbId: item.tmdbId,
+            name: item.name,
+            posterUrl: imageUrl(item.poster, item.backdrop),
+            appUrl: appUrl('movie', item.tmdbId),
+          })),
+        },
       ],
     }
   },
 })
+
+// --- Discover sections -----------------------------------------------------------------
+
+// The Discover tab's lists, with the exact requests discover.tsx makes. TMDB is only
+// reachable from actions, so this runs in the HTTP endpoint (http.ts) and its result is
+// appended to the query-built payload above. fetchTmdbCached keeps the underlying
+// requests shared and cached across users.
+
+const isoDate = (daysFromNow: number) => {
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromNow)
+  return date.toISOString().split('T')[0]
+}
+
+interface TmdbListEntry {
+  id: number
+  name?: string
+  title?: string
+  poster_path?: string | null
+  backdrop_path?: string | null
+}
+
+export async function buildDiscoverSections(context: ActionCtx, media: 'tv' | 'movie'): Promise<WidgetSection[]> {
+  const toItems = (results: TmdbListEntry[]): WidgetItem[] =>
+    results.slice(0, MAX_WIDGET_SECTION_ITEMS).map(entry => ({
+      tmdbId: entry.id,
+      name: entry.name ?? entry.title ?? '',
+      posterUrl: imageUrl(entry.poster_path, entry.backdrop_path),
+      appUrl: appUrl(media, entry.id),
+    }))
+
+  if (media === 'tv') {
+    const [onTheAir, trending, topRated] = await Promise.all([
+      context.runAction(api.tmdb.getDiscoverShows, {
+        page: 1,
+        sort_by: 'popularity.desc',
+        air_date_gte: isoDate(0),
+        air_date_lte: isoDate(7),
+      }),
+      context.runAction(api.tmdb.getTrendingTv, { page: 1, time_window: 'week' }),
+      context.runAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+    ])
+
+    return [
+      { key: 'discover-upcoming', title: 'Dropping This Week', items: toItems(onTheAir.results) },
+      { key: 'trending', title: 'Trending Shows', items: toItems(trending.results) },
+      { key: 'top', title: 'Top Rated Shows', items: toItems(topRated.results) },
+    ]
+  }
+
+  const [upcomingMovies, trending, topRated] = await Promise.all([
+    context.runAction(api.tmdb.getDiscoverMovies, {
+      page: 1,
+      sort_by: 'popularity.desc',
+      with_release_type: '2|3',
+      release_date_gte: isoDate(1),
+      release_date_lte: isoDate(35),
+      include_adult: false,
+      include_video: false,
+    }),
+    context.runAction(api.tmdb.getTrendingMovies, { page: 1, time_window: 'week' }),
+    context.runAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+  ])
+
+  return [
+    { key: 'discover-upcoming', title: 'Upcoming Movies', items: toItems(upcomingMovies.results) },
+    { key: 'trending', title: 'Trending Movies', items: toItems(trending.results) },
+    { key: 'top', title: 'Top Rated Movies', items: toItems(topRated.results) },
+  ]
+}

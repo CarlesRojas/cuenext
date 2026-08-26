@@ -109,6 +109,16 @@ public final class WidgetPrefs {
         prefs(context).edit().remove("cache_tv_at").remove("cache_movie_at").apply();
     }
 
+    /** Drops the payloads entirely; a revoked token must not keep showing covers. */
+    public static void clearCachedSections(Context context) {
+        prefs(context).edit()
+                .remove("cache_tv")
+                .remove("cache_tv_at")
+                .remove("cache_movie")
+                .remove("cache_movie_at")
+                .apply();
+    }
+
     /**
      * Per-install salt for the rendered poster filenames, so the content URIs the poster
      * provider serves can't be guessed by hashing a known poster URL.

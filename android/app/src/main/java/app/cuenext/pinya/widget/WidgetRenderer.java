@@ -45,15 +45,18 @@ public final class WidgetRenderer {
         }
 
         views.setTextViewText(R.id.widget_title, sectionTitle(media, section));
-        // The list lives on the watchlist page; open it on the media the toggle is on.
+        // Open the page the list lives on, on the media the toggle is on.
         views.setOnClickPendingIntent(R.id.widget_title,
-                openAppIntent(context, SITE_URL + "/?media=" + media, requestCode(widgetId, 2)));
+                openAppIntent(context, SITE_URL + sectionPage(section) + "?media=" + media, requestCode(widgetId, 2)));
 
         boolean connected = WidgetPrefs.isConnected(context) && !WidgetPrefs.isTokenRejected(context);
 
         if (!connected) {
             // The app's primary-button CTA instead of a bare instruction; it opens the
-            // profile page anchored to the widget card, where access is granted.
+            // profile page anchored to the widget card, where access is granted. The
+            // grid is hidden explicitly - the launcher keeps its previously bound cells
+            // otherwise, and revoked access must not keep showing covers.
+            views.setViewVisibility(R.id.widget_grid, View.GONE);
             views.setViewVisibility(R.id.widget_connect, View.VISIBLE);
             views.setViewVisibility(R.id.widget_message, View.GONE);
             views.setOnClickPendingIntent(R.id.widget_connect,
@@ -62,6 +65,7 @@ public final class WidgetRenderer {
             return;
         }
 
+        views.setViewVisibility(R.id.widget_grid, View.VISIBLE);
         views.setViewVisibility(R.id.widget_connect, View.GONE);
 
         // The grid's empty view; while a payload is missing the factory fills the grid
@@ -163,6 +167,10 @@ public final class WidgetRenderer {
                 case "waiting": return "Waiting for episodes";
                 case "stopped": return "Stopped watching";
                 case "finished": return "Finished";
+                case "upcoming": return "Upcoming";
+                case "discover-upcoming": return "Dropping This Week";
+                case "trending": return "Trending Shows";
+                case "top": return "Top Rated Shows";
                 default: return "Watch next";
             }
         }
@@ -170,7 +178,22 @@ public final class WidgetRenderer {
         switch (key) {
             case "waiting": return "Not released yet";
             case "finished": return "Finished";
+            case "upcoming": return "Upcoming";
+            case "discover-upcoming": return "Upcoming Movies";
+            case "trending": return "Trending Movies";
+            case "top": return "Top Rated Movies";
             default: return "Watch next";
+        }
+    }
+
+    /** The app page a list lives on, for the title's tap target. */
+    private static String sectionPage(String key) {
+        switch (key) {
+            case "upcoming": return "/upcoming";
+            case "discover-upcoming":
+            case "trending":
+            case "top": return "/discover";
+            default: return "/";
         }
     }
 }

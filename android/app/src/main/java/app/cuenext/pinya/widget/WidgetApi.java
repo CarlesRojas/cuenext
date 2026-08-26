@@ -70,8 +70,10 @@ public final class WidgetApi {
 
             if (status == 401) {
                 // The token was revoked from the profile page: remember it so the widget
-                // can show its reconnect state instead of silently going stale.
+                // can show its reconnect state, and drop the cached payloads so no
+                // covers survive the revocation.
                 WidgetPrefs.setTokenRejected(context, true);
+                WidgetPrefs.clearCachedSections(context);
                 return null;
             }
 
@@ -96,12 +98,20 @@ public final class WidgetApi {
 
     // --- Posters -----------------------------------------------------------------------
 
-    /** Render every poster of the payload to disk, so building cells is URI lookups only. */
-    public static void prefetchPosters(Context context, String sectionsJson) {
+    /**
+     * Render the posters of the given sections to disk, so building cells is URI lookups
+     * only. Limited to the sections some widget actually displays - the payload carries
+     * every list of the app, and pre-rendering all of them would be ~100 downloads.
+     * Other sections fill in lazily if a widget is reconfigured to them.
+     */
+    public static void prefetchPosters(Context context, String sectionsJson, java.util.Set<String> sectionKeys) {
         try {
             JSONArray sections = new JSONObject(sectionsJson).getJSONArray("sections");
             for (int s = 0; s < sections.length(); s++) {
-                JSONArray items = sections.getJSONObject(s).getJSONArray("items");
+                JSONObject section = sections.getJSONObject(s);
+                if (sectionKeys != null && !sectionKeys.contains(section.getString("key"))) continue;
+
+                JSONArray items = section.getJSONArray("items");
                 for (int i = 0; i < items.length(); i++) {
                     String url = items.getJSONObject(i).optString("posterUrl", "");
                     if (!url.isEmpty()) renderedPosterFile(context, url);

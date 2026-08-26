@@ -2,7 +2,7 @@ import { httpRouter } from 'convex/server'
 import { internal } from './_generated/api'
 import type { ActionCtx } from './_generated/server'
 import { httpAction } from './_generated/server'
-import { hashWidgetToken } from './widget'
+import { buildDiscoverSections, hashWidgetToken } from './widget'
 
 // HTTP endpoints for the Android home-screen widget, served on the deployment's
 // .convex.site domain. Authentication is a widget token minted by widget.mintWidgetToken
@@ -39,9 +39,15 @@ const getSections = httpAction(async (context, request) => {
   if (!userId) return jsonResponse(401, { error: 'Invalid or revoked widget token' })
 
   const media = new URL(request.url).searchParams.get('media') === 'movie' ? ('movie' as const) : ('tv' as const)
-  const sections = await context.runQuery(internal.widget.getWidgetSections, { userId, media })
 
-  return jsonResponse(200, sections)
+  // The user's lists come from the database query; the Discover lists need TMDB, which
+  // only actions can reach, so they are built here and appended.
+  const [payload, discoverSections] = await Promise.all([
+    context.runQuery(internal.widget.getWidgetSections, { userId, media }),
+    buildDiscoverSections(context, media),
+  ])
+
+  return jsonResponse(200, { ...payload, sections: [...payload.sections, ...discoverSections] })
 })
 
 const http = httpRouter()

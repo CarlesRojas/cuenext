@@ -24,7 +24,8 @@ import android.widget.TextView;
  * own are needed.
  */
 public class WidgetConfigActivity extends Activity {
-    // key, title, media ("both", "tv" or "movie"). Same order as the app's watchlist.
+    // key, title, media ("both", "tv" or "movie"). The watchlist's lists first (in the
+    // app's order), then the Upcoming page, then the Discover tab's lists.
     private static final String[][] SECTIONS = {
             { "next", "Watch next", "both" },
             { "unstarted", "Haven't started", "tv" },
@@ -32,6 +33,11 @@ public class WidgetConfigActivity extends Activity {
             { "waiting", "Not released yet", "movie" },
             { "stopped", "Stopped watching", "tv" },
             { "finished", "Finished", "both" },
+            { "upcoming", "Upcoming", "both" },
+            { "discover-upcoming", "Dropping this week", "tv" },
+            { "discover-upcoming", "Upcoming movies", "movie" },
+            { "trending", "Trending", "both" },
+            { "top", "Top rated", "both" },
     };
 
     private static final int COLOR_BACKGROUND = 0xFF0A0A0A;
