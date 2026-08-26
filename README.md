@@ -54,9 +54,17 @@ bubblewrap install
 
 5. Commit the version bump in `twa-manifest.json`, `manifest-checksum.txt` and any changed resources. The `.aab` and `.apk` are gitignored.
 
-### Run against staging
+### Run the app against local dev
 
-In Android Studio, run the `app staging` configuration instead of `app`. The staging URL lives in `android/.run/app staging.run.xml` (the `-d` value in `ACTIVITY_EXTRA_FLAGS`) — edit it per branch. It only affects that launch; packaged releases always use the production URL from `twa-manifest.json`.
+In Android Studio, run the `app staging` configuration instead of `app`. It launches the app on the URL in `android/.run/app staging.run.xml` (the `-d` value in `ACTIVITY_EXTRA_FLAGS`) instead of production. It only affects that launch; packaged releases always use the production URL from `twa-manifest.json`.
+
+With `pnpm dev` running, on a USB device (`http://localhost:3000/`, the default):
+
+```sh
+adb reverse tcp:3000 tcp:3000
+```
+
+On an emulator, set the URL to `http://10.0.2.2:3000/` — no tunnel needed. The widget works against local dev too: `npx convex dev` runs in Convex's cloud, and pairing from the local profile page points the widget there.
 
 ### Notes
 
