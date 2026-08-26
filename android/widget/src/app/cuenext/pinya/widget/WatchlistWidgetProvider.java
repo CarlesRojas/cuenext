@@ -6,6 +6,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+
+import java.util.Arrays;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +39,7 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        Log.d(WidgetLog.TAG, "provider onReceive " + action);
 
         if (ACTION_SET_MEDIA.equals(action)) {
             int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -75,6 +79,7 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int widgetId, Bundle newOptions) {
         // A resize can change the column count, which is baked into the layout choice.
         // Same data, so the grid is not poked.
+        Log.d(WidgetLog.TAG, "onAppWidgetOptionsChanged widget=" + widgetId);
         WidgetRenderer.updateWidget(context, manager, widgetId);
     }
 
@@ -91,6 +96,8 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
     /** Repaints the shells and pokes the grids so their factories rebuild from the cache. */
     private static void renderAndNotify(Context context, int[] widgetIds) {
         if (widgetIds == null || widgetIds.length == 0) return;
+
+        Log.d(WidgetLog.TAG, "renderAndNotify widgets=" + Arrays.toString(widgetIds));
 
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
 
@@ -123,10 +130,19 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
                 for (String media : medias) {
                     if (WidgetPrefs.getCachedSectionsAge(app, media) <= STALE_AFTER_MS) continue;
 
+                    long start = System.currentTimeMillis();
                     String json = WidgetApi.fetchSections(app, media);
+                    Log.d(WidgetLog.TAG, "fetchSections media=" + media + " ok=" + (json != null)
+                            + " took=" + (System.currentTimeMillis() - start) + "ms");
+
                     if (json != null) {
                         WidgetPrefs.setCachedSections(app, media, json);
+
+                        start = System.currentTimeMillis();
                         WidgetApi.prefetchPosters(app, json, sectionsInUse);
+                        Log.d(WidgetLog.TAG, "prefetchPosters media=" + media
+                                + " took=" + (System.currentTimeMillis() - start) + "ms");
+
                         changed = true;
                     }
                 }

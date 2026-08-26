@@ -30,6 +30,9 @@ public class WidgetPosterProvider extends ContentProvider {
         File file = WidgetApi.servedFile(getContext(), uri.getLastPathSegment());
         if (file == null) throw new FileNotFoundException(uri.toString());
 
+        android.util.Log.d(WidgetLog.TAG, "provider openFile " + uri.getLastPathSegment()
+                + " (" + file.length() / 1024 + "KB)");
+
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
     }
 

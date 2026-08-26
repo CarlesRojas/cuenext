@@ -30,6 +30,8 @@ public final class WidgetRenderer {
     private WidgetRenderer() {}
 
     public static void updateWidget(Context context, AppWidgetManager manager, int widgetId) {
+        android.util.Log.d(WidgetLog.TAG, "updateWidget widget=" + widgetId);
+
         String media = WidgetPrefs.getMedia(context, widgetId);
         String section = WidgetPrefs.getSection(context, widgetId);
 

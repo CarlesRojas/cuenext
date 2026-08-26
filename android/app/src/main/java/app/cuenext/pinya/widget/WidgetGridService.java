@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -51,10 +52,13 @@ public class WidgetGridService extends RemoteViewsService {
         GridFactory(Context context, int widgetId) {
             this.context = context;
             this.widgetId = widgetId;
+            Log.d(WidgetLog.TAG, "factory created for widget " + widgetId);
         }
 
         @Override
         public void onDataSetChanged() {
+            long start = System.currentTimeMillis();
+
             List<RemoteViews> built = new ArrayList<>();
 
             String media = WidgetPrefs.getMedia(context, widgetId);
@@ -85,6 +89,10 @@ public class WidgetGridService extends RemoteViewsService {
 
             cells.clear();
             cells.addAll(built);
+
+            Log.d(WidgetLog.TAG, "onDataSetChanged widget=" + widgetId + " media=" + media
+                    + " payload=" + (json != null) + " cells=" + cells.size()
+                    + " took=" + (System.currentTimeMillis() - start) + "ms");
         }
 
         // Cells reference their poster by content URI instead of carrying the bitmap:
@@ -129,13 +137,21 @@ public class WidgetGridService extends RemoteViewsService {
 
         @Override
         public RemoteViews getViewAt(int position) {
-            if (position < 0 || position >= cells.size()) return skeletonCell();
-            return cells.get(position);
+            long start = System.currentTimeMillis();
+
+            RemoteViews cell = position < 0 || position >= cells.size() ? skeletonCell() : cells.get(position);
+
+            long took = System.currentTimeMillis() - start;
+            Log.d(WidgetLog.TAG, "getViewAt widget=" + widgetId + " position=" + position
+                    + (took > 1 ? " took=" + took + "ms" : ""));
+
+            return cell;
         }
 
         @Override
         public RemoteViews getLoadingView() {
             // Only ever visible for the instant before onDataSetChanged first completes.
+            Log.d(WidgetLog.TAG, "getLoadingView widget=" + widgetId);
             return skeletonCell();
         }
 
@@ -161,9 +177,13 @@ public class WidgetGridService extends RemoteViewsService {
         }
 
         @Override
-        public void onCreate() {}
+        public void onCreate() {
+            Log.d(WidgetLog.TAG, "factory onCreate widget=" + widgetId);
+        }
 
         @Override
-        public void onDestroy() {}
+        public void onDestroy() {
+            Log.d(WidgetLog.TAG, "factory onDestroy widget=" + widgetId);
+        }
     }
 }
