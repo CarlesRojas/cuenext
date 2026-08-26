@@ -35,7 +35,7 @@ Only needed when something in `android/` changes or Play asks for a new release.
 npm install -g @bubblewrap/cli@latest
 ```
 
-2. Build (set `BUBBLEWRAP_KEYSTORE_PASSWORD` and `BUBBLEWRAP_KEY_PASSWORD` to skip the prompts):
+2. Build (set `BUBBLEWRAP_KEYSTORE_PASSWORD` and `BUBBLEWRAP_KEY_PASSWORD` to skip the prompts). `bubblewrap update` deletes the widget along with the rest of `app/`; `apply-assets.sh` puts it back, so never skip it:
 
 ```sh
 cd android
