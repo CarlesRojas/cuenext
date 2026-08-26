@@ -23,10 +23,9 @@ import app.cuenext.pinya.R;
 public final class WidgetRenderer {
     public static final String SITE_URL = "https://www.cuenext.app";
 
-    // The app's palette: sky-500 for the active media type, amber-500 for a given rating.
+    // The app's palette: sky-500 for the active media type.
     public static final int COLOR_ACCENT = 0xFF0EA5E9;
     public static final int COLOR_ICON = 0xB3FFFFFF;
-    public static final int COLOR_RATED = 0xFFF59E0B;
 
     // Poster bitmaps are produced at the w342 source size in the card's 2:3 shape, with
     // the app's 22/144 corner ratio; cells then scale them to the column width.
@@ -52,6 +51,9 @@ public final class WidgetRenderer {
         }
 
         views.setTextViewText(R.id.widget_title, sectionTitle(media, section));
+        // The list lives on the watchlist page; open it on the media the toggle is on.
+        views.setOnClickPendingIntent(R.id.widget_title,
+                openAppIntent(context, SITE_URL + "/?media=" + media, requestCode(widgetId, 2)));
 
         boolean connected = WidgetPrefs.isConnected(context) && !WidgetPrefs.isTokenRejected(context);
 
@@ -61,20 +63,18 @@ public final class WidgetRenderer {
             views.setViewVisibility(R.id.widget_connect, View.VISIBLE);
             views.setViewVisibility(R.id.widget_message, View.GONE);
             views.setOnClickPendingIntent(R.id.widget_connect,
-                    openAppIntent(context, SITE_URL + "/profile?media=" + media + "#widget", widgetId));
+                    openAppIntent(context, SITE_URL + "/profile?media=" + media + "#widget", requestCode(widgetId, 3)));
             manager.updateAppWidget(widgetId, views);
             return;
         }
 
         views.setViewVisibility(R.id.widget_connect, View.GONE);
 
-        // The message doubles as the grid's empty view: "loading" until a payload ever
-        // arrived, "nothing here" when the chosen list is genuinely empty.
-        boolean hasPayload = WidgetPrefs.getCachedSections(context, media) != null;
-        views.setTextViewText(R.id.widget_message, context.getString(
-                hasPayload ? R.string.widgetEmptyMessage : R.string.widgetLoadingMessage));
+        // The grid's empty view; while a payload is missing the factory fills the grid
+        // with skeleton cells instead, so this only shows for a genuinely empty list.
+        views.setTextViewText(R.id.widget_message, context.getString(R.string.widgetEmptyMessage));
         views.setOnClickPendingIntent(R.id.widget_message,
-                openAppIntent(context, SITE_URL + "/?media=" + media, widgetId));
+                openAppIntent(context, SITE_URL + "/?media=" + media, requestCode(widgetId, 4)));
 
         Intent adapter = new Intent(context, WidgetGridService.class)
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
@@ -85,8 +85,8 @@ public final class WidgetRenderer {
         views.setRemoteAdapter(R.id.widget_grid, adapter);
         views.setEmptyView(R.id.widget_grid, R.id.widget_message);
 
-        // One template for every cell tap; cells fill in either a url to open or the
-        // watch payload. It has to stay mutable so the launcher can apply the fill-ins.
+        // One template for every cell tap; cells fill in the title url to open. It has
+        // to stay mutable so the launcher can apply the fill-ins.
         Intent template = new Intent(context, WidgetActionActivity.class)
                 .setData(Uri.parse("cuenext://widget-action/" + widgetId));
         views.setPendingIntentTemplate(R.id.widget_grid,
@@ -95,13 +95,15 @@ public final class WidgetRenderer {
         manager.updateAppWidget(widgetId, views);
     }
 
+    // Thresholds in launcher terms: ~2 cells wide shows one cover per row, 3 cells wide
+    // shows two, 4 cells and up shows three.
     private static int gridLayout(AppWidgetManager manager, int widgetId) {
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int minWidthDp = options != null ? options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) : 0;
         if (minWidthDp <= 0) minWidthDp = 276; // a typical 4-column widget when unknown
 
         if (minWidthDp < 170) return R.layout.widget_watchlist_1col;
-        if (minWidthDp < 260) return R.layout.widget_watchlist_2col;
+        if (minWidthDp < 240) return R.layout.widget_watchlist_2col;
         return R.layout.widget_watchlist_3col;
     }
 
@@ -137,6 +139,10 @@ public final class WidgetRenderer {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         return PendingIntent.getActivity(context, code, intent, immutableFlags());
+    }
+
+    private static int requestCode(int widgetId, int kind) {
+        return widgetId * 10 + kind;
     }
 
     private static int immutableFlags() {

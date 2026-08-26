@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One poster cell of the grid, the widget's PosterCard. The poster bitmap (pre-rounded
-     by WidgetApi, always 2:3 - a placeholder when there is no image) drives the cell
-     height via adjustViewBounds, so cells keep the card aspect at any column width. -->
+<!-- One poster cell of the grid, the widget's read-only PosterCard. The poster bitmap
+     (pre-rounded by WidgetApi, always 2:3 - a placeholder when there is no image) drives
+     the cell height via adjustViewBounds, so cells keep the card aspect at any column
+     width. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_root"
     android:layout_width="match_parent"
@@ -39,34 +40,4 @@
         android:max="100"
         android:progressDrawable="@drawable/widget_progress"
         android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/item_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="4dp"
-        android:background="@drawable/widget_button_background"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="5dp"
-        android:paddingEnd="7dp"
-        android:paddingStart="7dp"
-        android:paddingTop="5dp">
-
-        <TextView
-            android:id="@+id/item_button_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:textColor="#FFFFFFFF"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/item_button_icon"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
-            android:contentDescription="@string/widgetButtonDescription" />
-    </LinearLayout>
 </FrameLayout>

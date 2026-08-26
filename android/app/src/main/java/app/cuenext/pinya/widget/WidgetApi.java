@@ -44,17 +44,6 @@ public final class WidgetApi {
         return request(context, apiBase + "/widget/sections?media=" + media, null);
     }
 
-    /**
-     * POST /widget/watch with the `watch` object the sections payload carried for the
-     * item. The backend answers with the refreshed sections for that media type.
-     */
-    public static String postWatch(Context context, String watchJson) {
-        String apiBase = WidgetPrefs.getApiBase(context);
-        if (apiBase == null) return null;
-
-        return request(context, apiBase + "/widget/watch", watchJson);
-    }
-
     private static String request(Context context, String url, String postBody) {
         String token = WidgetPrefs.getToken(context);
         if (token == null) return null;
