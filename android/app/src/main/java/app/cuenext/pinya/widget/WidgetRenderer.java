@@ -27,12 +27,6 @@ public final class WidgetRenderer {
     public static final int COLOR_ACCENT = 0xFF0EA5E9;
     public static final int COLOR_ICON = 0xB3FFFFFF;
 
-    // Poster bitmaps are produced at the w342 source size in the card's 2:3 shape, with
-    // the app's 22/144 corner ratio; cells then scale them to the column width.
-    public static final int POSTER_WIDTH_PX = 342;
-    public static final int POSTER_HEIGHT_PX = 513;
-    public static final float POSTER_RADIUS_PX = POSTER_WIDTH_PX * 22f / 144f;
-
     private WidgetRenderer() {}
 
     public static void updateWidget(Context context, AppWidgetManager manager, int widgetId) {
@@ -95,15 +89,19 @@ public final class WidgetRenderer {
         manager.updateAppWidget(widgetId, views);
     }
 
-    // Thresholds in launcher terms: ~2 cells wide shows one cover per row, 3 cells wide
-    // shows two, 4 cells and up shows three.
+    // 2 launcher cells wide (or less) shows one cover per row, 3 cells shows two, 4 and
+    // up shows three. The reported width maps back to cells with the platform's sizing
+    // formula (n cells make 70n-30dp available), which tracks launchers whose cells are
+    // wider than 70dp better than raw dp thresholds would.
     private static int gridLayout(AppWidgetManager manager, int widgetId) {
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int minWidthDp = options != null ? options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) : 0;
-        if (minWidthDp <= 0) minWidthDp = 276; // a typical 4-column widget when unknown
+        if (minWidthDp <= 0) minWidthDp = 250; // a typical 4-cell widget when unknown
 
-        if (minWidthDp < 170) return R.layout.widget_watchlist_1col;
-        if (minWidthDp < 240) return R.layout.widget_watchlist_2col;
+        int cells = (minWidthDp + 30) / 70;
+
+        if (cells <= 2) return R.layout.widget_watchlist_1col;
+        if (cells == 3) return R.layout.widget_watchlist_2col;
         return R.layout.widget_watchlist_3col;
     }
 

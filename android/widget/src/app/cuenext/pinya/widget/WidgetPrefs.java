@@ -108,4 +108,25 @@ public final class WidgetPrefs {
     public static void invalidateCache(Context context) {
         prefs(context).edit().remove("cache_tv_at").remove("cache_movie_at").apply();
     }
+
+    /**
+     * Per-install salt for the rendered poster filenames, so the content URIs the poster
+     * provider serves can't be guessed by hashing a known poster URL.
+     */
+    public static String getPosterSalt(Context context) {
+        String salt = prefs(context).getString("posterSalt", null);
+
+        if (salt == null) {
+            byte[] bytes = new byte[16];
+            new java.security.SecureRandom().nextBytes(bytes);
+
+            StringBuilder hex = new StringBuilder();
+            for (byte b : bytes) hex.append(String.format("%02x", b));
+            salt = hex.toString();
+
+            prefs(context).edit().putString("posterSalt", salt).apply();
+        }
+
+        return salt;
+    }
 }

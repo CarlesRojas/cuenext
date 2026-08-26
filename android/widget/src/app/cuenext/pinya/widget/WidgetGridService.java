@@ -3,7 +3,7 @@ package app.cuenext.pinya.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -87,20 +87,21 @@ public class WidgetGridService extends RemoteViewsService {
             cells.addAll(built);
         }
 
+        // Cells reference their poster by content URI instead of carrying the bitmap:
+        // the launcher caps a collection's cached RemoteViews at ~2MB of bitmap memory,
+        // and parcelled covers thrashed that cache on every scroll.
         private RemoteViews buildCell(JSONObject item) throws Exception {
             RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item);
 
-            Bitmap poster = WidgetApi.loadPoster(context, item.optString("posterUrl", null),
-                    WidgetRenderer.POSTER_WIDTH_PX, WidgetRenderer.POSTER_HEIGHT_PX,
-                    WidgetRenderer.POSTER_RADIUS_PX);
+            Uri poster = WidgetApi.posterUri(context, item.optString("posterUrl", null));
 
             if (poster != null) {
-                cell.setImageViewBitmap(R.id.item_poster, poster);
+                cell.setImageViewUri(R.id.item_poster, poster);
                 cell.setViewVisibility(R.id.item_fallback, View.GONE);
             } else {
                 // Same fallback the app's PosterCard has: the title on the card
-                // background. The placeholder bitmap keeps the cell's 2:3 shape.
-                cell.setImageViewBitmap(R.id.item_poster, placeholder());
+                // background. The placeholder card keeps the cell's 2:3 shape.
+                cell.setImageViewUri(R.id.item_poster, WidgetApi.placeholderUri(context));
                 cell.setViewVisibility(R.id.item_fallback, View.VISIBLE);
                 cell.setTextViewText(R.id.item_fallback, item.getString("name"));
             }
@@ -122,13 +123,8 @@ public class WidgetGridService extends RemoteViewsService {
         // and out - RemoteViews can't run property animations, but flippers auto-start).
         private RemoteViews skeletonCell() {
             RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item_skeleton);
-            cell.setImageViewBitmap(R.id.skeleton_poster, placeholder());
+            cell.setImageViewUri(R.id.skeleton_poster, WidgetApi.placeholderUri(context));
             return cell;
-        }
-
-        private Bitmap placeholder() {
-            return WidgetApi.placeholder(WidgetRenderer.POSTER_WIDTH_PX, WidgetRenderer.POSTER_HEIGHT_PX,
-                    WidgetRenderer.POSTER_RADIUS_PX);
         }
 
         @Override
