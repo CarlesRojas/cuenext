@@ -16,28 +16,33 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 /**
- * The widget's configuration screen: pick which of the app's lists the widget shows. One
- * flat list of every list the watchlist renders, each labelled with the media it exists
- * for; picking one that works for Shows & Movies gives the widget its toggle, a
- * single-media list pins the widget to that media and hides the toggle. Built
+ * The widget's configuration screen: pick which of the app's lists the widget shows.
+ * Grouped by the media each list exists for - the lists that work for both first, since
+ * those are the ones that give the widget its Shows/Movies toggle, then the show-only and
+ * movie-only lists, which pin the widget to that media and hide the toggle. Built
  * programmatically in the app's dark palette so no layout resources beyond the widget's
  * own are needed.
  */
 public class WidgetConfigActivity extends Activity {
-    // key, title, media ("both", "tv" or "movie"). The watchlist's lists first (in the
-    // app's order), then the Upcoming page, then the Discover tab's lists.
-    private static final String[][] SECTIONS = {
-            { "next", "Watch next", "both" },
-            { "unstarted", "Haven't started", "tv" },
-            { "waiting", "Waiting for episodes", "tv" },
-            { "waiting", "Not released yet", "movie" },
-            { "stopped", "Stopped watching", "tv" },
-            { "finished", "Finished", "both" },
-            { "upcoming", "Upcoming", "both" },
-            { "discover-upcoming", "Dropping this week", "tv" },
-            { "discover-upcoming", "Upcoming movies", "movie" },
-            { "trending", "Trending", "both" },
-            { "top", "Top rated", "both" },
+    // key, title. Lists that exist for Shows & Movies; picking one keeps the toggle.
+    private static final String[][] BOTH_SECTIONS = {
+            { "next", "Watch next" },
+            { "finished", "Finished" },
+            { "upcoming", "Upcoming" },
+            { "trending", "Trending" },
+            { "top", "Top rated" },
+    };
+
+    private static final String[][] TV_SECTIONS = {
+            { "unstarted", "Haven't started" },
+            { "waiting", "Waiting for episodes" },
+            { "stopped", "Stopped watching" },
+            { "discover-upcoming", "Dropping this week" },
+    };
+
+    private static final String[][] MOVIE_SECTIONS = {
+            { "waiting", "Not released yet" },
+            { "discover-upcoming", "Upcoming movies" },
     };
 
     private static final int COLOR_BACKGROUND = 0xFF0A0A0A;
@@ -85,24 +90,16 @@ public class WidgetConfigActivity extends Activity {
         subtitle.setText("Lists available for Shows & Movies get a toggle on the widget.");
         subtitle.setTextColor(COLOR_MUTED);
         subtitle.setTextSize(14);
-        subtitle.setPadding(0, Math.round(6 * density), 0, Math.round(16 * density));
+        subtitle.setPadding(0, Math.round(6 * density), 0, 0);
         column.addView(subtitle);
 
         String currentMedia = WidgetPrefs.getMedia(this, widgetId);
         String currentSection = WidgetPrefs.getSection(this, widgetId);
         boolean currentBoth = WidgetPrefs.isBothMedia(this, widgetId);
 
-        for (String[] section : SECTIONS) {
-            final String key = section[0];
-            final String media = section[2];
-            boolean both = media.equals("both");
-
-            boolean selected = key.equals(currentSection)
-                    && (both ? currentBoth : !currentBoth && media.equals(currentMedia));
-
-            column.addView(buildRow(density, section[1], both ? "Shows & Movies" : media.equals("tv") ? "Shows" : "Movies",
-                    selected, v -> select(key, media)));
-        }
+        addGroup(column, density, "Shows & Movies", BOTH_SECTIONS, "both", currentMedia, currentSection, currentBoth);
+        addGroup(column, density, "Shows", TV_SECTIONS, "tv", currentMedia, currentSection, currentBoth);
+        addGroup(column, density, "Movies", MOVIE_SECTIONS, "movie", currentMedia, currentSection, currentBoth);
 
         ScrollView scroll = new ScrollView(this);
         scroll.setBackgroundColor(COLOR_BACKGROUND);
@@ -130,10 +127,34 @@ public class WidgetConfigActivity extends Activity {
         return scroll;
     }
 
-    private View buildRow(float density, String title, String mediaLabel, boolean selected,
-            View.OnClickListener onClick) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
+    private void addGroup(LinearLayout column, float density, String label, String[][] sections, final String media,
+            String currentMedia, String currentSection, boolean currentBoth) {
+        TextView header = new TextView(this);
+        header.setText(label);
+        header.setTextColor(COLOR_MUTED);
+        header.setTextSize(13);
+        header.setTypeface(Typeface.DEFAULT_BOLD);
+        header.setAllCaps(true);
+        header.setPadding(0, Math.round(20 * density), 0, Math.round(8 * density));
+        column.addView(header);
+
+        boolean both = media.equals("both");
+
+        for (String[] section : sections) {
+            final String key = section[0];
+            boolean selected = key.equals(currentSection)
+                    && (both ? currentBoth : !currentBoth && media.equals(currentMedia));
+
+            column.addView(buildRow(density, section[1], selected, v -> select(key, media)));
+        }
+    }
+
+    private View buildRow(float density, String title, boolean selected, View.OnClickListener onClick) {
+        TextView row = new TextView(this);
+        row.setText(title);
+        row.setTextColor(selected ? COLOR_ACCENT : Color.WHITE);
+        row.setTextSize(16);
+        row.setTypeface(selected ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(Math.round(16 * density), Math.round(14 * density), Math.round(16 * density),
                 Math.round(14 * density));
@@ -143,20 +164,6 @@ public class WidgetConfigActivity extends Activity {
         background.setCornerRadius(16 * density);
         background.setStroke(Math.max(1, Math.round(density)), selected ? COLOR_ACCENT : COLOR_CARD_BORDER);
         row.setBackground(background);
-
-        TextView name = new TextView(this);
-        name.setText(title);
-        name.setTextColor(selected ? COLOR_ACCENT : Color.WHITE);
-        name.setTextSize(16);
-        name.setTypeface(selected ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
-        name.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        row.addView(name);
-
-        TextView label = new TextView(this);
-        label.setText(mediaLabel);
-        label.setTextColor(COLOR_MUTED);
-        label.setTextSize(13);
-        row.addView(label);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);

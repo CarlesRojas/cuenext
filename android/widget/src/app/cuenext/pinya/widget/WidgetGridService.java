@@ -3,28 +3,21 @@ package app.cuenext.pinya.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.view.View;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import app.cuenext.pinya.R;
-
 /**
- * Backs the widget's scrolling grid. Every cell is built up front in onDataSetChanged
- * (a dozen items at most), so getViewAt is a plain list lookup and scrolling never
- * decodes bitmaps, hits the disk, or shows the launcher's loading view. The factory
- * never touches the network - the provider owns fetching - and renders pulsing skeleton
- * cards while its media type has no cached payload yet.
+ * Legacy adapter for pre-Android 12 launchers only. From API 31 on, WidgetRenderer hands
+ * the launcher the whole collection with RemoteCollectionItems instead, which is what
+ * keeps scrolling free of IPC and loading; this path virtualizes, so it asks for cells
+ * one at a time. Either way the cells come from WidgetCells, prebuilt with their poster
+ * bitmaps, and nothing here touches the network.
  */
 public class WidgetGridService extends RemoteViewsService {
-    private static final int SKELETON_CELLS = 6;
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -55,88 +48,26 @@ public class WidgetGridService extends RemoteViewsService {
 
         @Override
         public void onDataSetChanged() {
-            List<RemoteViews> built = new ArrayList<>();
-
-            String media = WidgetPrefs.getMedia(context, widgetId);
-            String json = WidgetPrefs.getCachedSections(context, media);
-
-            if (json == null) {
-                // No payload yet (first placement, or the toggle moved to a media that
-                // was never fetched): pulse skeletons until the provider's fetch lands.
-                for (int i = 0; i < SKELETON_CELLS; i++) built.add(skeletonCell());
-            } else {
-                try {
-                    JSONArray sections = new JSONObject(json).getJSONArray("sections");
-
-                    String sectionKey = WidgetPrefs.getSection(context, widgetId);
-                    JSONObject section = sections.getJSONObject(0);
-                    for (int i = 0; i < sections.length(); i++) {
-                        if (sections.getJSONObject(i).getString("key").equals(sectionKey)) {
-                            section = sections.getJSONObject(i);
-                            break;
-                        }
-                    }
-
-                    JSONArray items = section.getJSONArray("items");
-                    for (int i = 0; i < items.length(); i++) built.add(buildCell(items.getJSONObject(i)));
-                } catch (Exception ignored) {
-                }
-            }
-
             cells.clear();
-            cells.addAll(built);
-        }
-
-        // Cells reference their poster by content URI instead of carrying the bitmap:
-        // the launcher caps a collection's cached RemoteViews at ~2MB of bitmap memory,
-        // and parcelled covers thrashed that cache on every scroll.
-        private RemoteViews buildCell(JSONObject item) throws Exception {
-            RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item);
-
-            Uri poster = WidgetApi.posterUri(context, item.optString("posterUrl", null));
-
-            if (poster != null) {
-                cell.setImageViewUri(R.id.item_poster, poster);
-                cell.setViewVisibility(R.id.item_fallback, View.GONE);
-            } else {
-                // Same fallback the app's PosterCard has: the title on the card
-                // background. The placeholder card keeps the cell's 2:3 shape.
-                cell.setImageViewUri(R.id.item_poster, WidgetApi.placeholderUri(context));
-                cell.setViewVisibility(R.id.item_fallback, View.VISIBLE);
-                cell.setTextViewText(R.id.item_fallback, item.getString("name"));
-            }
-
-            if (item.has("progress")) {
-                cell.setViewVisibility(R.id.item_progress, View.VISIBLE);
-                cell.setProgressBar(R.id.item_progress, 100, item.getInt("progress"), false);
-            } else {
-                cell.setViewVisibility(R.id.item_progress, View.GONE);
-            }
-
-            cell.setOnClickFillInIntent(R.id.item_root,
-                    new Intent().putExtra(WatchlistWidgetProvider.EXTRA_URL, item.getString("appUrl")));
-
-            return cell;
-        }
-
-        // A card-shaped gray cell that pulses (a ViewFlipper fading a soft highlight in
-        // and out - RemoteViews can't run property animations, but flippers auto-start).
-        private RemoteViews skeletonCell() {
-            RemoteViews cell = new RemoteViews(context.getPackageName(), R.layout.widget_item_skeleton);
-            cell.setImageViewUri(R.id.skeleton_poster, WidgetApi.placeholderUri(context));
-            return cell;
+            cells.addAll(WidgetCells.build(context, AppWidgetManager.getInstance(context), widgetId));
+            Log.d(WidgetLog.TAG, "legacy factory rebuilt widget=" + widgetId + " cells=" + cells.size());
         }
 
         @Override
         public RemoteViews getViewAt(int position) {
-            if (position < 0 || position >= cells.size()) return skeletonCell();
+            if (position < 0 || position >= cells.size()) return loadingCell();
             return cells.get(position);
         }
 
         @Override
         public RemoteViews getLoadingView() {
-            // Only ever visible for the instant before onDataSetChanged first completes.
-            return skeletonCell();
+            return loadingCell();
+        }
+
+        private RemoteViews loadingCell() {
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            int widthPx = WidgetRenderer.cellWidthPx(context, manager, widgetId);
+            return WidgetCells.skeletonCell(context, widthPx, widthPx * 3 / 2);
         }
 
         @Override
@@ -146,8 +77,7 @@ public class WidgetGridService extends RemoteViewsService {
 
         @Override
         public int getViewTypeCount() {
-            // Poster cells and skeleton cells inflate different layouts.
-            return 2;
+            return 1;
         }
 
         @Override
@@ -157,7 +87,7 @@ public class WidgetGridService extends RemoteViewsService {
 
         @Override
         public boolean hasStableIds() {
-            return false;
+            return true;
         }
 
         @Override

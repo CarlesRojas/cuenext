@@ -1,43 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One poster cell of the grid, the widget's read-only PosterCard. The poster bitmap
-     (pre-rounded by WidgetApi, always 2:3 - a placeholder when there is no image) drives
-     the cell height via adjustViewBounds, so cells keep the card aspect at any column
-     width. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- One grid cell: a single ImageView showing a ready-made card bitmap (poster, rounded
+     corners, progress bar and title fallback are all composited by WidgetCardRenderer).
+     The launcher inflates and binds this on its UI thread for every row that appears, so
+     the cell is kept to one view - extra views, a ProgressBar above all, cost real
+     inflation time per row. The bitmap carries no density and is drawn at its exact
+     display size, so wrap_content sizes the cell with no scaling or measure passes. -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_root"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <ImageView
-        android:id="@+id/item_poster"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/widgetPosterDescription"
-        android:scaleType="fitXY" />
-
-    <TextView
-        android:id="@+id/item_fallback"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="4"
-        android:padding="8dp"
-        android:textColor="#FF737373"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
-    <ProgressBar
-        android:id="@+id/item_progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginStart="10dp"
-        android:max="100"
-        android:progressDrawable="@drawable/widget_progress"
-        android:visibility="gone" />
-</FrameLayout>
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:contentDescription="@string/widgetPosterDescription"
+    android:scaleType="center" />
