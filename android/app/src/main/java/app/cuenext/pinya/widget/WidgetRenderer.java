@@ -17,10 +17,10 @@ import app.cuenext.pinya.R;
 /**
  * Builds the RemoteViews shell of one widget instance: the header (section title plus the
  * Shows/Movies toggle, the collapsed sidebar's MediaTypeSelector laid out horizontally),
- * the vertically scrolling poster grid bound to WidgetGridService, and the message shown
- * when there is nothing to render. The grid shows 1, 2 or 3 covers per row depending on
- * the width the widget was given; GridView.setNumColumns is not remotable, so the count
- * is picked by choosing between three otherwise identical layouts.
+ * the vertically scrolling poster grid, and the message shown when there is nothing to
+ * render. The grid shows 1, 2 or 3 covers per row depending on the width the widget was
+ * given; GridView.setNumColumns is not remotable, so the count is picked by choosing
+ * between three otherwise identical layouts.
  */
 public final class WidgetRenderer {
     public static final String SITE_URL = "https://www.cuenext.app";
@@ -72,8 +72,8 @@ public final class WidgetRenderer {
         views.setViewVisibility(R.id.widget_grid, View.VISIBLE);
         views.setViewVisibility(R.id.widget_connect, View.GONE);
 
-        // The grid's empty view; while a payload is missing the factory fills the grid
-        // with skeleton cells instead, so this only shows for a genuinely empty list.
+        // The grid's empty view; while a payload is missing the grid is filled with
+        // empty cards instead, so this only shows for a genuinely empty list.
         views.setTextViewText(R.id.widget_message, context.getString(R.string.widgetEmptyMessage));
         views.setOnClickPendingIntent(R.id.widget_message,
                 openAppIntent(context, SITE_URL + "/?media=" + media, requestCode(widgetId, 4)));
@@ -91,10 +91,6 @@ public final class WidgetRenderer {
         manager.updateAppWidget(widgetId, views);
     }
 
-    // 2 launcher cells wide (or less) shows one cover per row, 3 cells shows two, 4 and
-    // up shows three. The reported width maps back to cells with the platform's sizing
-    // formula (n cells make 70n-30dp available), which tracks launchers whose cells are
-    // wider than 70dp better than raw dp thresholds would.
     /**
      * Hands the launcher the entire list in one go on Android 12+
      * (RemoteCollectionItems), which is what makes scrolling free: the launcher holds
@@ -118,8 +114,9 @@ public final class WidgetRenderer {
 
         RemoteViews.RemoteCollectionItems.Builder builder = new RemoteViews.RemoteCollectionItems.Builder()
                 .setHasStableIds(true)
-                // Poster cells and skeleton cells inflate different layouts.
-                .setViewTypeCount(2);
+                // Every cell is the same one-ImageView layout, so the launcher can
+                // recycle any row into any other without re-inflating.
+                .setViewTypeCount(1);
 
         for (int i = 0; i < cells.size(); i++) builder.addItem(i, cells.get(i));
 
@@ -132,6 +129,10 @@ public final class WidgetRenderer {
         return minWidthDp > 0 ? minWidthDp : 250; // a typical 4-cell widget when unknown
     }
 
+    // 2 launcher cells wide (or less) shows one cover per row, 3 cells shows two, 4 and
+    // up shows three. The reported width maps back to cells with the platform's sizing
+    // formula (n cells make 70n-30dp available), which tracks launchers whose cells are
+    // wider than 70dp better than raw dp thresholds would.
     public static int columnsFor(AppWidgetManager manager, int widgetId) {
         int cells = (widgetWidthDp(manager, widgetId) + 30) / 70;
 
@@ -141,18 +142,19 @@ public final class WidgetRenderer {
     }
 
     /**
-     * The cover height in dp for one grid cell: the estimated column width (widget width
-     * minus the root's side padding and the grid's spacing, split between columns) at
-     * the card's 2:3 aspect. Used by the factory to pin cell heights on Android 12+, so
-     * the grid's measurement never depends on the loaded image - image-driven heights
-     * made every image load re-measure the grid, which re-applied every visible cell and
-     * re-decoded every poster on each scroll.
+     * The pixel width of one grid cell: the widget's width minus the root's side padding
+     * and the grid's spacing, split between the columns. Cards are drawn at exactly this
+     * size so the launcher never scales or re-measures them while scrolling.
      */
-    public static int cellHeightDp(AppWidgetManager manager, int widgetId) {
+    public static int cellWidthPx(Context context, AppWidgetManager manager, int widgetId) {
         int columns = columnsFor(manager, widgetId);
-        int innerWidth = widgetWidthDp(manager, widgetId) - 24;
-        int columnWidth = (innerWidth - 8 * (columns - 1)) / columns;
-        return columnWidth * 3 / 2;
+        int innerWidthDp = widgetWidthDp(manager, widgetId) - 24;
+        int columnWidthDp = (innerWidthDp - 8 * (columns - 1)) / columns;
+
+        int widthPx = Math.round(columnWidthDp * context.getResources().getDisplayMetrics().density);
+
+        // Guard against a launcher reporting a nonsense width before the first layout.
+        return Math.max(120, Math.min(widthPx, 420));
     }
 
     private static int gridLayout(AppWidgetManager manager, int widgetId) {

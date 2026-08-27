@@ -65,8 +65,9 @@ public class WidgetGridService extends RemoteViewsService {
         }
 
         private RemoteViews loadingCell() {
-            return WidgetCells.skeletonCell(context,
-                    WidgetRenderer.cellHeightDp(AppWidgetManager.getInstance(context), widgetId));
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            int widthPx = WidgetRenderer.cellWidthPx(context, manager, widgetId);
+            return WidgetCells.skeletonCell(context, widthPx, widthPx * 3 / 2);
         }
 
         @Override
@@ -76,7 +77,7 @@ public class WidgetGridService extends RemoteViewsService {
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 1;
         }
 
         @Override
