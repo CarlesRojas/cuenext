@@ -1,4 +1,3 @@
-import { AndroidWidgetSetup } from '#/component/AndroidWidgetSetup'
 import { PosterCard } from '#/component/PosterCard'
 import { ProfileReviewCard } from '#/component/ProfileReviewCard'
 import { Section } from '#/component/Section'
@@ -9,10 +8,10 @@ import { cn } from '#/lib/cn'
 import { UrlParamsSchema } from '#/type/url'
 import { SignInButton, useUser } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
-import { faSignIn, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faSignIn, faSpinner, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useAction } from 'convex/react'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -447,7 +446,14 @@ function ProfilePage() {
         )}
       </div>
 
-      <AndroidWidgetSetup />
+      <section className="screen-px">
+        <Button variant="secondary" asChild>
+          <Link to="/widget" search={{ media }}>
+            <FontAwesomeIcon icon={faTableCellsLarge} />
+            <span>Home screen widget</span>
+          </Link>
+        </Button>
+      </section>
     </div>
   )
 }

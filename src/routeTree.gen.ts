@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WidgetRouteImport } from './routes/widget'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SearchRouteImport } from './routes/search'
@@ -23,6 +24,11 @@ import { Route as LegalTermsAndConditionsIndexRouteImport } from './routes/legal
 import { Route as LegalPrivacyPolicyIndexRouteImport } from './routes/legal/privacy-policy/index'
 import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmdbId'
 
+const WidgetRoute = WidgetRouteImport.update({
+  id: '/widget',
+  path: '/widget',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
   path: '/upcoming',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
+  '/widget': typeof WidgetRoute
   '/list/$list': typeof ListListRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
+  '/widget': typeof WidgetRoute
   '/list/$list': typeof ListListRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
+  '/widget': typeof WidgetRoute
   '/list/$list': typeof ListListRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/support'
     | '/upcoming'
+    | '/widget'
     | '/list/$list'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/support'
     | '/upcoming'
+    | '/widget'
     | '/list/$list'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/support'
     | '/upcoming'
+    | '/widget'
     | '/list/$list'
     | '/see-all/$list'
     | '/media/$media/$tmdbId'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SupportRoute: typeof SupportRoute
   UpcomingRoute: typeof UpcomingRoute
+  WidgetRoute: typeof WidgetRoute
   ListListRoute: typeof ListListRoute
   SeeAllListRoute: typeof SeeAllListRoute
   MediaMediaTmdbIdRoute: typeof MediaMediaTmdbIdRoute
@@ -202,6 +215,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/widget': {
+      id: '/widget'
+      path: '/widget'
+      fullPath: '/widget'
+      preLoaderRoute: typeof WidgetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upcoming': {
       id: '/upcoming'
       path: '/upcoming'
@@ -305,6 +325,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SupportRoute: SupportRoute,
   UpcomingRoute: UpcomingRoute,
+  WidgetRoute: WidgetRoute,
   ListListRoute: ListListRoute,
   SeeAllListRoute: SeeAllListRoute,
   MediaMediaTmdbIdRoute: MediaMediaTmdbIdRoute,
