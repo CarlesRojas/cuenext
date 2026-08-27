@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import java.util.List;
+
 import app.cuenext.pinya.R;
 
 /**
@@ -76,13 +78,7 @@ public final class WidgetRenderer {
         views.setOnClickPendingIntent(R.id.widget_message,
                 openAppIntent(context, SITE_URL + "/?media=" + media, requestCode(widgetId, 4)));
 
-        Intent adapter = new Intent(context, WidgetGridService.class)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-                // Launchers cache adapter connections by filterEquals, which ignores
-                // extras; the widget id in the data URI keeps instances separate.
-                .setData(Uri.parse("cuenext://widget-grid/" + widgetId));
-
-        views.setRemoteAdapter(R.id.widget_grid, adapter);
+        attachCells(context, manager, views, widgetId);
         views.setEmptyView(R.id.widget_grid, R.id.widget_message);
 
         // One template for every cell tap; cells fill in the title url to open. It has
@@ -99,6 +95,37 @@ public final class WidgetRenderer {
     // up shows three. The reported width maps back to cells with the platform's sizing
     // formula (n cells make 70n-30dp available), which tracks launchers whose cells are
     // wider than 70dp better than raw dp thresholds would.
+    /**
+     * Hands the launcher the entire list in one go on Android 12+
+     * (RemoteCollectionItems), which is what makes scrolling free: the launcher holds
+     * every cell locally, so there is no adapter connection, no IPC per row, and nothing
+     * to load while scrolling. Older releases fall back to the legacy
+     * RemoteViewsService adapter, which virtualizes and fetches rows on demand.
+     */
+    private static void attachCells(Context context, AppWidgetManager manager, RemoteViews views, int widgetId) {
+        if (Build.VERSION.SDK_INT < 31) {
+            Intent adapter = new Intent(context, WidgetGridService.class)
+                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                    // Launchers cache adapter connections by filterEquals, which ignores
+                    // extras; the widget id in the data URI keeps instances separate.
+                    .setData(Uri.parse("cuenext://widget-grid/" + widgetId));
+
+            views.setRemoteAdapter(R.id.widget_grid, adapter);
+            return;
+        }
+
+        List<RemoteViews> cells = WidgetCells.build(context, manager, widgetId);
+
+        RemoteViews.RemoteCollectionItems.Builder builder = new RemoteViews.RemoteCollectionItems.Builder()
+                .setHasStableIds(true)
+                // Poster cells and skeleton cells inflate different layouts.
+                .setViewTypeCount(2);
+
+        for (int i = 0; i < cells.size(); i++) builder.addItem(i, cells.get(i));
+
+        views.setRemoteAdapter(R.id.widget_grid, builder.build());
+    }
+
     public static int widgetWidthDp(AppWidgetManager manager, int widgetId) {
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int minWidthDp = options != null ? options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) : 0;

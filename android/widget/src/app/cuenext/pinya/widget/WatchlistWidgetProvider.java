@@ -78,7 +78,7 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int widgetId, Bundle newOptions) {
         // A resize can change the column count (baked into the layout choice) and the
-        // pinned cell height (baked into the cells), so the grid is poked too.
+        // pinned cell height (baked into the cells), so the cells are rebuilt too.
         Log.d(WidgetLog.TAG, "onAppWidgetOptionsChanged widget=" + widgetId);
         renderAndNotify(context, new int[] { widgetId });
     }
@@ -93,7 +93,11 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
         context.sendBroadcast(new Intent(context, WatchlistWidgetProvider.class).setAction(ACTION_REFRESH));
     }
 
-    /** Repaints the shells and pokes the grids so their factories rebuild from the cache. */
+    /**
+     * Repaints the widgets from the cache. On Android 12+ the cells travel inside the
+     * update itself (RemoteCollectionItems), so there is nothing to poke; older
+     * launchers need their legacy factories told the data changed.
+     */
     private static void renderAndNotify(Context context, int[] widgetIds) {
         if (widgetIds == null || widgetIds.length == 0) return;
 
@@ -103,7 +107,8 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
 
         for (int widgetId : widgetIds) WidgetRenderer.updateWidget(context, manager, widgetId);
 
-        manager.notifyAppWidgetViewDataChanged(widgetIds, app.cuenext.pinya.R.id.widget_grid);
+        if (android.os.Build.VERSION.SDK_INT < 31)
+            manager.notifyAppWidgetViewDataChanged(widgetIds, app.cuenext.pinya.R.id.widget_grid);
     }
 
     /**
