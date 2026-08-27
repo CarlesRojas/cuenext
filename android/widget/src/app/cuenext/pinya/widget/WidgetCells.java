@@ -65,6 +65,7 @@ final class WidgetCells {
 
         Log.d(WidgetLog.TAG, "buildCells widget=" + widgetId + " media=" + media + " payload=" + (json != null)
                 + " cells=" + cells.size() + " card=" + widthPx + "x" + heightPx
+                + " bitmaps=" + (cells.size() * widthPx * heightPx * 2 / 1024) + "KB"
                 + " took=" + (System.currentTimeMillis() - start) + "ms");
 
         return cells;

@@ -61,8 +61,16 @@ final class WidgetCardRenderer {
         Bitmap cached = CACHE.get(key);
         if (cached != null && !cached.isRecycled()) return cached;
 
-        Bitmap card = draw(context, posterUrl, title, progress, widthPx, heightPx);
-        if (card != null) CACHE.put(key, card);
+        boolean hasArtwork = posterUrl != null && !posterUrl.isEmpty()
+                && WidgetApi.cachedPoster(context, posterUrl) != null;
+
+        Bitmap card = draw(context, hasArtwork ? posterUrl : null, title, progress, widthPx, heightPx);
+
+        // A card drawn while its artwork was still downloading shows the title fallback,
+        // so it must not be cached under the artwork's key - the next render, once the
+        // file has landed, has to draw the real cover.
+        boolean expectingArtwork = posterUrl != null && !posterUrl.isEmpty() && !hasArtwork;
+        if (card != null && !expectingArtwork) CACHE.put(key, card);
 
         return card;
     }
@@ -183,7 +191,7 @@ final class WidgetCardRenderer {
     private static Bitmap loadPoster(Context context, String posterUrl, int widthPx, int heightPx) {
         if (posterUrl == null || posterUrl.isEmpty()) return null;
 
-        File file = WidgetApi.posterFile(context, posterUrl);
+        File file = WidgetApi.cachedPoster(context, posterUrl);
         if (file == null) return null;
 
         try {

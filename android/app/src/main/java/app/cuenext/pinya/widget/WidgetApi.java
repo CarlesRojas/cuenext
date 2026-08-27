@@ -94,32 +94,47 @@ public final class WidgetApi {
                 JSONArray items = section.getJSONArray("items");
                 for (int i = 0; i < items.length(); i++) {
                     String url = items.getJSONObject(i).optString("posterUrl", "");
-                    if (!url.isEmpty()) posterFile(context, url);
+                    if (!url.isEmpty()) downloadPoster(context, url);
                 }
             }
         } catch (Exception ignored) {
         }
     }
 
-    /** The cached artwork file for a poster URL, downloading it on a miss. */
-    static File posterFile(Context context, String url) {
+    /**
+     * The cached artwork file for a poster URL, or null when it has not been downloaded
+     * yet. Deliberately never hits the network: cards are drawn wherever a widget is
+     * rendered, and only prefetchPosters (which the provider runs in the background) is
+     * allowed to download.
+     */
+    static File cachedPoster(Context context, String url) {
         try {
-            File dir = new File(context.getCacheDir(), POSTER_DIR);
-            if (!dir.exists() && !dir.mkdirs()) return null;
-
-            File file = new File(dir, sha1(url) + ".jpg");
-            if (file.exists() && file.length() > 0) return file;
-
-            Bitmap source = download(url);
-            if (source == null) return null;
-
-            boolean written = writeJpeg(file, source);
-            source.recycle();
-
-            return written ? file : null;
+            File file = posterFile(context, url);
+            return file != null && file.exists() && file.length() > 0 ? file : null;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private static void downloadPoster(Context context, String url) {
+        try {
+            File file = posterFile(context, url);
+            if (file == null || (file.exists() && file.length() > 0)) return;
+
+            Bitmap source = download(url);
+            if (source == null) return;
+
+            writeJpeg(file, source);
+            source.recycle();
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static File posterFile(Context context, String url) throws Exception {
+        File dir = new File(context.getCacheDir(), POSTER_DIR);
+        if (!dir.exists() && !dir.mkdirs()) return null;
+
+        return new File(dir, sha1(url) + ".jpg");
     }
 
     private static Bitmap download(String url) {

@@ -148,13 +148,18 @@ public final class WidgetRenderer {
      */
     public static int cellWidthPx(Context context, AppWidgetManager manager, int widgetId) {
         int columns = columnsFor(manager, widgetId);
-        int innerWidthDp = widgetWidthDp(manager, widgetId) - 24;
+        // The root's 12dp of side padding, the grid's 8dp between columns, and 2dp of
+        // slack so a launcher whose column is a hair narrower than this cannot clip the
+        // card (cells are centred in their column, so a hair of slack just shows).
+        int innerWidthDp = widgetWidthDp(manager, widgetId) - 24 - 2;
         int columnWidthDp = (innerWidthDp - 8 * (columns - 1)) / columns;
 
         int widthPx = Math.round(columnWidthDp * context.getResources().getDisplayMetrics().density);
 
-        // Guard against a launcher reporting a nonsense width before the first layout.
-        return Math.max(120, Math.min(widthPx, 420));
+        // Guard against a launcher reporting a nonsense width before the first layout,
+        // and keep a dozen cards well inside the memory a widget update may carry
+        // (roughly 6 bytes per screen pixel).
+        return Math.max(120, Math.min(widthPx, 360));
     }
 
     private static int gridLayout(AppWidgetManager manager, int widgetId) {

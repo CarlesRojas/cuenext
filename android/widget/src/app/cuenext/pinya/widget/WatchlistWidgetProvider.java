@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.Arrays;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -20,8 +19,8 @@ import java.util.concurrent.Executors;
  * networking, so the widget's traffic is easy to reason about: one sections fetch per
  * displayed media type, only when its cache is older than STALE_AFTER_MS, on launcher
  * updates (every updatePeriodMillis), a toggle to an uncached media, or a pairing/config
- * refresh. Scrolling never touches the network - the grid factory renders purely from
- * the cache and shows pulsing skeleton cells until the first payload lands.
+ * refresh. Rendering and fetching both run on the executor: cards are built from the
+ * artwork cache on disk, which must not happen on the main thread either.
  */
 public class WatchlistWidgetProvider extends AppWidgetProvider {
     public static final String ACTION_SET_MEDIA = "app.cuenext.pinya.widget.SET_MEDIA";
@@ -49,9 +48,8 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
             if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID && media != null) {
                 WidgetPrefs.setMedia(context, widgetId, media);
                 // Repaint right away: cached covers if the media was seen recently,
-                // skeleton cells otherwise while the fetch below fills the cache.
-                renderAndNotify(context, new int[] { widgetId });
-                fetchStaleThenRepaint(context, new int[] { widgetId });
+                // empty cards otherwise while the fetch below fills the cache.
+                renderThenFetch(context, new int[] { widgetId });
             }
             return;
         }
@@ -60,9 +58,7 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
             // Pairing and (re)configuration want fresh data: age the cache out so the
             // fetch below actually runs.
             WidgetPrefs.invalidateCache(context);
-            int[] widgetIds = allWidgetIds(context);
-            renderAndNotify(context, widgetIds);
-            fetchStaleThenRepaint(context, widgetIds);
+            renderThenFetch(context, allWidgetIds(context));
             return;
         }
 
@@ -71,16 +67,15 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] widgetIds) {
-        renderAndNotify(context, widgetIds);
-        fetchStaleThenRepaint(context, widgetIds);
+        renderThenFetch(context, widgetIds);
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int widgetId, Bundle newOptions) {
-        // A resize can change the column count (baked into the layout choice) and the
-        // pinned cell height (baked into the cells), so the cells are rebuilt too.
+        // A resize changes the column count and the size the cards are drawn at, so the
+        // cells are rebuilt - off the main thread, like every other render.
         Log.d(WidgetLog.TAG, "onAppWidgetOptionsChanged widget=" + widgetId);
-        renderAndNotify(context, new int[] { widgetId });
+        renderThenFetch(context, new int[] { widgetId });
     }
 
     @Override
@@ -112,18 +107,26 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * The one network path. Fetches the sections of each displayed media type whose
-     * cache has aged out, pre-downloads the posters, and repaints. Runs inside
-     * goAsync()'s window because the process may be torn down after onReceive returns.
+     * Paints the widgets from what is cached, then - the one network path - fetches the
+     * sections of each displayed media type whose cache has aged out, downloads their
+     * artwork and repaints with it.
+     *
+     * All of it runs on the executor, inside goAsync()'s window: rendering reads the
+     * artwork cache and fetching hits the network, neither of which may happen on the
+     * main thread the broadcast arrives on.
      */
-    private void fetchStaleThenRepaint(Context context, int[] widgetIds) {
-        if (widgetIds == null || widgetIds.length == 0 || !WidgetPrefs.isConnected(context)) return;
+    private void renderThenFetch(Context context, int[] widgetIds) {
+        if (widgetIds == null || widgetIds.length == 0) return;
 
         final Context app = context.getApplicationContext();
         final PendingResult result = goAsync();
 
         EXECUTOR.execute(() -> {
             try {
+                renderAndNotify(app, widgetIds);
+
+                if (!WidgetPrefs.isConnected(app)) return;
+
                 Set<String> medias = new HashSet<>();
                 Set<String> sectionsInUse = new HashSet<>();
                 for (int widgetId : widgetIds) {
