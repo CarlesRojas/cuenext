@@ -79,4 +79,4 @@ bubblewrap fingerprint generateAssetLinks
 
 ## Android widget
 
-The home-screen widget is native Java in `android/widget/` (no dependencies, on purpose). It talks to the Convex HTTP endpoints in `convex/http.ts` with a token minted from Profile → Connect widget, handed over via the `cuenext://widget-setup` deep link. Edit it in `android/widget/` and re-run `android/apply-widget.sh`.
+The home-screen widget is native Java in `android/widget/` (no dependencies, on purpose). It talks to the Convex HTTP endpoints in `convex/http.ts` with a token minted from the /widget page → Connect widget, handed over via the `cuenext://widget-setup` deep link. Edit it in `android/widget/` and re-run `android/apply-widget.sh`.

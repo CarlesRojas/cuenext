@@ -57,14 +57,14 @@ public final class WidgetRenderer {
 
         if (!connected) {
             // The app's primary-button CTA instead of a bare instruction; it opens the
-            // profile page anchored to the widget card, where access is granted. The
-            // grid is hidden explicitly - the launcher keeps its previously bound cells
-            // otherwise, and revoked access must not keep showing covers.
+            // widget page, where access is granted. The grid is hidden explicitly - the
+            // launcher keeps its previously bound cells otherwise, and revoked access
+            // must not keep showing covers.
             views.setViewVisibility(R.id.widget_grid, View.GONE);
             views.setViewVisibility(R.id.widget_connect, View.VISIBLE);
             views.setViewVisibility(R.id.widget_message, View.GONE);
             views.setOnClickPendingIntent(R.id.widget_connect,
-                    openAppIntent(context, SITE_URL + "/profile?media=" + media + "#widget", requestCode(widgetId, 3)));
+                    openAppIntent(context, SITE_URL + "/widget?media=" + media, requestCode(widgetId, 3)));
             manager.updateAppWidget(widgetId, views);
             return;
         }
