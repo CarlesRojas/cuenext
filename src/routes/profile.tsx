@@ -160,7 +160,7 @@ function ProfilePage() {
   // Both rating sections read the same list: the rated grid takes the rows with a rating,
   // the reviews list takes the ones that were written. Already sorted best rated first.
   const { data: myReviews, isPending: myReviewsLoading } = useQuery({
-    ...convexQuery(api.reviews.getMyReviews, { type: media ?? 'tv' }),
+    ...convexQuery(api.reviews.getMyReviews, { type: media }),
     enabled: !!isSignedIn,
   })
 

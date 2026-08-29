@@ -6,6 +6,8 @@ import { InfiniteMediaList } from '#/component/InfiniteMediaList'
 import RowCard from '#/component/RowCard'
 import useSearchParams from '#/hooks/useSearchParams'
 import { cn } from '#/lib/cn'
+import { getCategory } from '#/type/category'
+import { getListTitle, SeeAllList } from '#/type/discover'
 import type { TmdbMovieMinimal, TmdbTvMinimal } from '#/type/tmdb'
 import { UrlParamsSchema } from '#/type/url'
 import { createFileRoute } from '@tanstack/react-router'
@@ -15,12 +17,6 @@ export const Route = createFileRoute('/see-all/$list')({
   component: RouteComponent,
   validateSearch: UrlParamsSchema,
 })
-
-export enum SeeAllList {
-  UPCOMING = 'upcoming',
-  TOP = 'top',
-  TRENDING = 'trending',
-}
 
 function EpisodeWrapper(props: TmdbTvMinimal) {
   return <FollowEpisode episode={props} variant="row" followButtonText="Track" />
@@ -32,7 +28,11 @@ function MovieWrapper(props: TmdbMovieMinimal) {
 
 function RouteComponent() {
   const { list } = Route.useParams()
-  const { media } = useSearchParams()
+  const { media, category: categorySlug } = useSearchParams()
+
+  const category = getCategory(categorySlug, media)
+  const withGenres = category?.genres[media]
+  const genreParams: Record<string, string> = withGenres ? { with_genres: withGenres } : {}
 
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
@@ -52,12 +52,6 @@ function RouteComponent() {
   nextMonth.setDate(today.getDate() + 35)
   const maxDateMovie = nextMonth.toISOString().split('T')[0]
 
-  const getTitle = () => {
-    if (list === SeeAllList.UPCOMING) return media === 'tv' ? 'Dropping This Week' : 'Upcoming Movies'
-    else if (list === SeeAllList.TRENDING) return media === 'tv' ? 'Trending Shows' : 'Trending Movies'
-    else return media === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'
-  }
-
   return (
     <div className="screen-py relative flex w-full flex-col pt-0!">
       <header
@@ -72,7 +66,7 @@ function RouteComponent() {
           <BackButton />
 
           <h1 className="line-clamp-2 text-3xl leading-8 font-extrabold tracking-tight text-white md:text-4xl md:leading-10">
-            {getTitle()}
+            {getListTitle(list, media, category?.label)}
           </h1>
         </div>
       </header>
@@ -87,17 +81,30 @@ function RouteComponent() {
                 sort_by: 'popularity.desc',
                 air_date_gte: minDate,
                 air_date_lte: maxDate,
+                ...genreParams,
               }}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
           )}
 
-          {media === 'tv' && list === SeeAllList.TRENDING && (
+          {/* TMDB's trending endpoints take no genre filter, so the two blocks below hand a
+              picked category to the closest thing discover offers: popularity sorted. */}
+          {media === 'tv' && list === SeeAllList.TRENDING && !withGenres && (
             <InfiniteMediaList
               action={api.tmdb.getTrendingTv}
               actionKey={`tv-${list}`}
               params={{ time_window: 'week' }}
+              Component={EpisodeWrapper}
+              LoadingComponent={<RowCard isLoading />}
+            />
+          )}
+
+          {media === 'tv' && list === SeeAllList.TRENDING && !!withGenres && (
+            <InfiniteMediaList
+              action={api.tmdb.getDiscoverShows}
+              actionKey={`tv-${list}`}
+              params={{ sort_by: 'popularity.desc', with_genres: withGenres }}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -110,6 +117,7 @@ function RouteComponent() {
               params={{
                 sort_by: 'vote_average.desc',
                 vote_count_gte: 200,
+                ...genreParams,
               }}
               Component={EpisodeWrapper}
               LoadingComponent={<RowCard isLoading />}
@@ -127,17 +135,28 @@ function RouteComponent() {
                 release_date_lte: maxDateMovie,
                 include_adult: false,
                 include_video: false,
+                ...genreParams,
               }}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
           )}
 
-          {media === 'movie' && list === SeeAllList.TRENDING && (
+          {media === 'movie' && list === SeeAllList.TRENDING && !withGenres && (
             <InfiniteMediaList
               action={api.tmdb.getTrendingMovies}
               actionKey={`movie-${list}`}
               params={{ time_window: 'week' }}
+              Component={MovieWrapper}
+              LoadingComponent={<RowCard isLoading />}
+            />
+          )}
+
+          {media === 'movie' && list === SeeAllList.TRENDING && !!withGenres && (
+            <InfiniteMediaList
+              action={api.tmdb.getDiscoverMovies}
+              actionKey={`movie-${list}`}
+              params={{ sort_by: 'popularity.desc', with_genres: withGenres }}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
             />
@@ -150,6 +169,7 @@ function RouteComponent() {
               params={{
                 sort_by: 'vote_average.desc',
                 vote_count_gte: 200,
+                ...genreParams,
               }}
               Component={MovieWrapper}
               LoadingComponent={<RowCard isLoading />}
