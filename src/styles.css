@@ -33,6 +33,10 @@
   .page-width {
     @apply w-full max-w-3xl;
   }
+
+  .no-scrollbar {
+    @apply [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+  }
 }
 
 @layer base {

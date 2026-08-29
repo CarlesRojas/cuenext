@@ -1,11 +1,13 @@
 import { api } from '#/../convex/_generated/api'
+import { CategorySelector } from '#/component/CategorySelector'
 import FollowEpisode from '#/component/FollowEpisode'
 import FollowMovie from '#/component/FollowMovie'
 import { PosterCard } from '#/component/PosterCard'
 import { Section } from '#/component/Section'
 import { Button } from '#/component/ui/button'
 import useSearchParams from '#/hooks/useSearchParams'
-import { SeeAllList } from '#/routes/see-all/$list'
+import { getCategory } from '#/type/category'
+import { getListTitle, SeeAllList } from '#/type/discover'
 import type { TmdbMovie, TmdbTv } from '#/type/tmdb'
 import { TMDB_STALE_TIME, tmdbStale } from '#/lib/tmdbQuery'
 import { UrlParamsSchema } from '#/type/url'
@@ -23,7 +25,14 @@ export const Route = createFileRoute('/discover')({
 
 function RouteComponent() {
   const { isLoaded, isSignedIn } = useAuth()
-  const { media } = useSearchParams()
+  const { media, category: categorySlug } = useSearchParams()
+
+  const category = getCategory(categorySlug, media)
+  const withGenres = category?.genres[media]
+
+  // Every list links to its see all page with the category that produced it, so the page
+  // opens on the same filter the carousel was showing.
+  const seeAllSearch = { media, category: category?.slug }
 
   const today = new Date()
   const nextWeek = new Date(today)
@@ -40,19 +49,29 @@ function RouteComponent() {
       sort_by: 'popularity.desc',
       air_date_gte: minDate,
       air_date_lte: maxDate,
+      with_genres: withGenres,
     }),
     ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
 
+  // TMDB's trending endpoints take no genre filter, so a picked category swaps them for the
+  // closest thing discover offers: the same catalogue sorted by popularity.
   const { data: trendingShows, isPending: trendingShowsLoading } = useQuery({
-    ...convexAction(api.tmdb.getTrendingTv, { page: 1, time_window: 'week' }),
+    ...(withGenres
+      ? convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'popularity.desc', with_genres: withGenres })
+      : convexAction(api.tmdb.getTrendingTv, { page: 1, time_window: 'week' })),
     ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
 
   const { data: topRatedShows, isPending: topRatedShowsLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverShows, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+    ...convexAction(api.tmdb.getDiscoverShows, {
+      page: 1,
+      sort_by: 'vote_average.desc',
+      vote_count_gte: 200,
+      with_genres: withGenres,
+    }),
     ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'tv',
   })
@@ -76,27 +95,37 @@ function RouteComponent() {
       release_date_lte: maxDateMovie,
       include_adult: false,
       include_video: false,
+      with_genres: withGenres,
     }),
     ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 
   const { data: trendingMovies, isPending: trendingMoviesLoading } = useQuery({
-    ...convexAction(api.tmdb.getTrendingMovies, { page: 1, time_window: 'week' }),
+    ...(withGenres
+      ? convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'popularity.desc', with_genres: withGenres })
+      : convexAction(api.tmdb.getTrendingMovies, { page: 1, time_window: 'week' })),
     ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 
   const { data: topRatedMovies, isPending: topRatedMoviesLoading } = useQuery({
-    ...convexAction(api.tmdb.getDiscoverMovies, { page: 1, sort_by: 'vote_average.desc', vote_count_gte: 200 }),
+    ...convexAction(api.tmdb.getDiscoverMovies, {
+      page: 1,
+      sort_by: 'vote_average.desc',
+      vote_count_gte: 200,
+      with_genres: withGenres,
+    }),
     ...tmdbStale(TMDB_STALE_TIME.SIX_HOURS),
     enabled: media === 'movie',
   })
 
   return (
     <div className="screen-py flex w-full flex-col gap-2">
-      <header className="screen-px mb-8">
+      <header className="screen-px mb-8 flex flex-col gap-6">
         <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Discover</h1>
+
+        <CategorySelector />
       </header>
 
       {isLoaded && !isSignedIn && (
@@ -116,14 +145,18 @@ function RouteComponent() {
 
       {media === 'tv' && (
         <>
-          <Section sectionKey="dropping-this-week" title="Dropping This Week" key="dropping-this-week">
+          <Section
+            sectionKey="dropping-this-week"
+            title={getListTitle(SeeAllList.UPCOMING, media, category?.label)}
+            key="dropping-this-week"
+          >
             {onTheAirShows &&
               onTheAirShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
 
             {onTheAirShows && (
               <div className="flex h-full w-fit items-center justify-center">
                 <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={{ media: 'tv' }}>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={seeAllSearch}>
                     <FontAwesomeIcon icon={faForward} className="size-4" />
                     <span>See all</span>
                   </Link>
@@ -136,7 +169,11 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section sectionKey="trending-shows" title="Trending Shows" key="trending-shows">
+          <Section
+            sectionKey="trending-shows"
+            title={getListTitle(SeeAllList.TRENDING, media, category?.label)}
+            key="trending-shows"
+          >
             {trendingShows &&
               trendingShows.results.map((tv: TmdbTv, index: number) => (
                 <FollowEpisode key={tv.id} episode={tv} number={index + 1} variant="poster" />
@@ -145,7 +182,7 @@ function RouteComponent() {
             {trendingShows && (
               <div className="flex h-full w-fit items-center justify-center">
                 <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={{ media: 'tv' }}>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={seeAllSearch}>
                     <FontAwesomeIcon icon={faForward} className="size-4" />
                     <span>See all</span>
                   </Link>
@@ -158,14 +195,18 @@ function RouteComponent() {
               Array.from({ length: 20 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section sectionKey="top-rated-shows" title="Top Rated Shows" key="top-rated-shows">
+          <Section
+            sectionKey="top-rated-shows"
+            title={getListTitle(SeeAllList.TOP, media, category?.label)}
+            key="top-rated-shows"
+          >
             {topRatedShows &&
               topRatedShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
 
             {topRatedShows && (
               <div className="flex h-full w-fit items-center justify-center">
                 <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={{ media: 'tv' }}>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={seeAllSearch}>
                     <FontAwesomeIcon icon={faForward} className="size-4" />
                     <span>See all</span>
                   </Link>
@@ -182,7 +223,11 @@ function RouteComponent() {
 
       {media === 'movie' && (
         <>
-          <Section sectionKey="upcoming-movies" title="Upcoming Movies" key="upcoming-movies">
+          <Section
+            sectionKey="upcoming-movies"
+            title={getListTitle(SeeAllList.UPCOMING, media, category?.label)}
+            key="upcoming-movies"
+          >
             {upcomingMovies &&
               upcomingMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
@@ -191,7 +236,7 @@ function RouteComponent() {
             {upcomingMovies && (
               <div className="flex h-full w-fit items-center justify-center">
                 <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={{ media: 'movie' }}>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={seeAllSearch}>
                     <FontAwesomeIcon icon={faForward} className="size-4" />
                     <span>See all</span>
                   </Link>
@@ -204,7 +249,11 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section sectionKey="trending-movies" title="Trending Movies" key="trending-movies">
+          <Section
+            sectionKey="trending-movies"
+            title={getListTitle(SeeAllList.TRENDING, media, category?.label)}
+            key="trending-movies"
+          >
             {trendingMovies &&
               trendingMovies.results.map((movie: TmdbMovie, index: number) => (
                 <FollowMovie key={movie.id} movie={movie} number={index + 1} variant="poster" />
@@ -213,7 +262,7 @@ function RouteComponent() {
             {trendingMovies && (
               <div className="flex h-full w-fit items-center justify-center">
                 <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={{ media: 'movie' }}>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={seeAllSearch}>
                     <FontAwesomeIcon icon={faForward} className="size-4" />
                     <span>See all</span>
                   </Link>
@@ -226,7 +275,11 @@ function RouteComponent() {
               Array.from({ length: 10 }).map((_, i) => <PosterCard key={i} isLoading />)}
           </Section>
 
-          <Section sectionKey="top-rated-movies" title="Top Rated Movies" key="top-rated-movies">
+          <Section
+            sectionKey="top-rated-movies"
+            title={getListTitle(SeeAllList.TOP, media, category?.label)}
+            key="top-rated-movies"
+          >
             {topRatedMovies &&
               topRatedMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
@@ -235,7 +288,7 @@ function RouteComponent() {
             {topRatedMovies && (
               <div className="flex h-full w-fit items-center justify-center">
                 <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={{ media: 'movie' }}>
+                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={seeAllSearch}>
                     <FontAwesomeIcon icon={faForward} className="size-4" />
                     <span>See all</span>
                   </Link>
