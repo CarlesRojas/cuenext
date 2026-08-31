@@ -7,17 +7,17 @@ import { ShowMore } from '#/component/ui/show-more'
 import { useFollowMovie } from '#/hooks/useFollowMovie'
 import { useWatchMovie } from '#/hooks/useWatchMovie'
 import { cn } from '#/lib/cn'
-import type { TmdbMovie } from '#/type/tmdb'
+import type { TmdbMovieExtras } from '#/type/tmdb'
 import { faBookmark, faEllipsis, faEye, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
 interface MovieDetailsProps {
-  movie: TmdbMovie
+  movie: TmdbMovieExtras
 }
 
 export function MovieDetails({ movie }: MovieDetailsProps) {
-  const { id, title, poster_path, backdrop_path, release_date, runtime, overview, status, genres } = movie
+  const { id, title, poster_path, backdrop_path, release_date, runtime, overview, status, genres, credits } = movie
 
   const { isFollowed, isFollowedLoading, toggleFollow } = useFollowMovie(movie)
   const { isWatched, isWatchedLoading, onToggleWatch } = useWatchMovie({
@@ -38,6 +38,9 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
         return `${minutes}min`
       })()
     : null
+
+  const directors = credits?.crew.filter(member => member.job === 'Director').map(member => member.name) ?? []
+  const directorText = directors.length > 0 ? directors.join(', ') : null
 
   const [hasImage, setHasImage] = useState(true)
 
@@ -87,7 +90,7 @@ export function MovieDetails({ movie }: MovieDetailsProps) {
           <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-5xl">{title}</h1>
 
           <p className="leading-snug font-medium tracking-wide text-white/60">
-            {[formattedReleaseDate, runtimeText].filter(Boolean).join(' • ')}
+            {[formattedReleaseDate, directorText, runtimeText].filter(Boolean).join(' • ')}
           </p>
         </div>
 
