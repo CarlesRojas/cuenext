@@ -127,10 +127,19 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
 
         if let requestUrl = navigationAction.request.url{
             if let requestHost = requestUrl.host {
-                // Google sign in breaks inside the web view, so it runs in a system sign in sheet instead
+                // Google sign in breaks inside the web view, so it runs in a system sign in sheet instead.
+                // Signed in users reach Google to connect an account in Manage account, which stays in the web view.
                 if requestHost.hasPrefix(googleSignInHostPrefix) && navigationAction.targetFrame?.isMainFrame != false {
-                    decisionHandler(.cancel)
-                    startNativeSignIn(returnTo: webView.backForwardList.currentItem?.url)
+                    let returnTo = webView.backForwardList.currentItem?.url
+                    isSignedIn(webView: webView) { signedIn in
+                        if signedIn {
+                            decisionHandler(.allow)
+                            self.showAuthToolbar(webView: webView)
+                        } else {
+                            decisionHandler(.cancel)
+                            self.startNativeSignIn(returnTo: returnTo)
+                        }
+                    }
                     return
                 }
 
@@ -138,10 +147,7 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
                 let matchingAuthOrigin = authOrigins.first(where: { requestHost.range(of: $0) != nil })
                 if (matchingAuthOrigin != nil) {
                     decisionHandler(.allow)
-                    if (toolbarView.isHidden) {
-                        toolbarView.isHidden = false
-                        webView.frame = calcWebviewFrame(webviewView: webviewView, toolbarView: toolbarView)
-                    }
+                    showAuthToolbar(webView: webView)
                     return
                 }
 
@@ -430,6 +436,25 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         session.prefersEphemeralWebBrowserSession = true
         nativeSignInSession = session
         session.start()
+    }
+
+    func showAuthToolbar(webView: WKWebView) {
+        if (toolbarView.isHidden) {
+            toolbarView.isHidden = false
+            webView.frame = calcWebviewFrame(webviewView: webviewView, toolbarView: toolbarView)
+        }
+    }
+
+    // Clerk keeps __client_uat at "0" while signed out and at the last sign in time while signed in
+    func isSignedIn(webView: WKWebView, completion: @escaping (Bool) -> Void) {
+        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+            let signedIn = cookies.contains { cookie in
+                cookie.name.hasPrefix("__client_uat") &&
+                cookie.domain.hasSuffix(rootUrl.host!.replacingOccurrences(of: "www.", with: "")) &&
+                !cookie.value.isEmpty && cookie.value != "0"
+            }
+            DispatchQueue.main.async { completion(signedIn) }
+        }
     }
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
