@@ -127,19 +127,10 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
 
         if let requestUrl = navigationAction.request.url{
             if let requestHost = requestUrl.host {
-                // Google sign in breaks inside the web view, so it runs in a system sign in sheet instead.
-                // Signed in users reach Google to connect an account in Manage account, which stays in the web view.
+                // Google breaks inside the web view, so it runs in a system sign in sheet instead
                 if requestHost.hasPrefix(googleSignInHostPrefix) && navigationAction.targetFrame?.isMainFrame != false {
-                    let returnTo = webView.backForwardList.currentItem?.url
-                    isSignedIn(webView: webView) { signedIn in
-                        if signedIn {
-                            decisionHandler(.allow)
-                            self.showAuthToolbar(webView: webView)
-                        } else {
-                            decisionHandler(.cancel)
-                            self.startNativeSignIn(returnTo: returnTo)
-                        }
-                    }
+                    decisionHandler(.cancel)
+                    startNativeGoogle(webView: webView)
                     return
                 }
 
@@ -396,39 +387,81 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
     }
 }
 
-// Google sign in runs in ASWebAuthenticationSession: the page at /native-sign-in signs in with Clerk there and
-// returns a one time sign in ticket, which /native-sign-in/complete redeems inside the app's web view.
+// Google runs in ASWebAuthenticationSession instead of the web view. One time Clerk sign in tickets move the session
+// between the two:
+// - Sign in: /native-sign-in signs in with Google and returns a ticket, redeemed by /native-sign-in/complete.
+// - Connect a Google account from Manage account: a ticket from /api/native-sign-in-ticket signs the user in at
+//   /native-sign-in/connect, which connects Google. The web view then reloads to show the new account.
 extension ViewController: ASWebAuthenticationPresentationContextProviding {
-    func startNativeSignIn(returnTo: URL?) {
+    func startNativeGoogle(webView: WKWebView) {
         guard nativeSignInSession == nil else { return }
 
+        let returnTo = webView.backForwardList.currentItem?.url
+        isSignedIn(webView: webView) { signedIn in
+            if signedIn {
+                self.startNativeConnect(webView: webView)
+            } else {
+                self.startNativeSignIn(returnTo: returnTo)
+            }
+        }
+    }
+
+    func startNativeSignIn(returnTo: URL?) {
         let state = UUID().uuidString
+        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)]) { items in
+            guard items.first(where: { $0.name == "state" })?.value == state,
+                  let ticket = items.first(where: { $0.name == "ticket" })?.value
+            else { return }
+
+            var completeUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
+            completeUrl.path = nativeSignInPath + "/complete"
+            completeUrl.queryItems = [URLQueryItem(name: "ticket", value: ticket)]
+            if let returnTo = returnTo, returnTo.host == rootUrl.host {
+                var redirect = returnTo.path.isEmpty ? "/" : returnTo.path
+                if let query = returnTo.query { redirect += "?" + query }
+                completeUrl.queryItems?.append(URLQueryItem(name: "redirect", value: redirect))
+            }
+            CueNext.webView.load(URLRequest(url: completeUrl.url!))
+        }
+    }
+
+    func startNativeConnect(webView: WKWebView) {
+        let script = """
+            const response = await fetch('/api/native-sign-in-ticket', { method: 'POST', headers: { 'X-CueNext-Native': '1' } })
+            if (!response.ok) throw new Error('No sign in ticket')
+            return (await response.json()).ticket
+            """
+        webView.callAsyncJavaScript(script, arguments: [:], in: nil, in: .page) { result in
+            guard case .success(let value) = result, let ticket = value as? String else {
+                CueNext.webView.reload()
+                return
+            }
+
+            let query = [URLQueryItem(name: "state", value: UUID().uuidString), URLQueryItem(name: "ticket", value: ticket)]
+            self.startNativeAuth(path: nativeSignInPath + "/connect", query: query) { _ in
+                CueNext.webView.reload()
+            }
+        }
+    }
+
+    func startNativeAuth(path: String, query: [URLQueryItem], onCallback: @escaping ([URLQueryItem]) -> Void) {
+        guard nativeSignInSession == nil else { return }
+
         var startUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
-        startUrl.path = nativeSignInPath
-        startUrl.queryItems = [URLQueryItem(name: "state", value: state)]
+        startUrl.path = path
+        startUrl.queryItems = query
 
         let session = ASWebAuthenticationSession(url: startUrl.url!, callbackURLScheme: nativeSignInCallbackScheme) { [weak self] callbackUrl, _ in
             DispatchQueue.main.async {
                 self?.nativeSignInSession = nil
-                // Cancelled or failed: reload so the sign in modal does not stay stuck waiting for Google
-                guard let callbackUrl = callbackUrl else {
+                // Cancelled or failed: reload so Clerk's modal does not stay stuck waiting for Google
+                guard let callbackUrl = callbackUrl,
+                      let items = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)?.queryItems
+                else {
                     CueNext.webView.reload()
                     return
                 }
-                guard let items = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)?.queryItems,
-                      items.first(where: { $0.name == "state" })?.value == state,
-                      let ticket = items.first(where: { $0.name == "ticket" })?.value
-                else { return }
-
-                var completeUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
-                completeUrl.path = nativeSignInPath + "/complete"
-                completeUrl.queryItems = [URLQueryItem(name: "ticket", value: ticket)]
-                if let returnTo = returnTo, returnTo.host == rootUrl.host {
-                    var redirect = returnTo.path.isEmpty ? "/" : returnTo.path
-                    if let query = returnTo.query { redirect += "?" + query }
-                    completeUrl.queryItems?.append(URLQueryItem(name: "redirect", value: redirect))
-                }
-                CueNext.webView.load(URLRequest(url: completeUrl.url!))
+                onCallback(items)
             }
         }
         session.presentationContextProvider = self

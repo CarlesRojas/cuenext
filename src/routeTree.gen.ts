@@ -18,9 +18,12 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as WidgetRouteImport } from './routes/widget'
+import { Route as ApiNativeSignInTicketRouteImport } from './routes/api/native-sign-in-ticket'
 import { Route as ListListRouteImport } from './routes/list/$list'
 import { Route as NativeSignInIndexRouteImport } from './routes/native-sign-in/index'
 import { Route as NativeSignInCompleteRouteImport } from './routes/native-sign-in/complete'
+import { Route as NativeSignInConnectRouteImport } from './routes/native-sign-in/connect'
+import { Route as NativeSignInConnectedRouteImport } from './routes/native-sign-in/connected'
 import { Route as NativeSignInDoneRouteImport } from './routes/native-sign-in/done'
 import { Route as NativeSignInSsoCallbackRouteImport } from './routes/native-sign-in/sso-callback'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
@@ -73,6 +76,11 @@ const WidgetRoute = WidgetRouteImport.update({
   path: '/widget',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNativeSignInTicketRoute = ApiNativeSignInTicketRouteImport.update({
+  id: '/api/native-sign-in-ticket',
+  path: '/api/native-sign-in-ticket',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListListRoute = ListListRouteImport.update({
   id: '/list/$list',
   path: '/list/$list',
@@ -86,6 +94,16 @@ const NativeSignInIndexRoute = NativeSignInIndexRouteImport.update({
 const NativeSignInCompleteRoute = NativeSignInCompleteRouteImport.update({
   id: '/native-sign-in/complete',
   path: '/native-sign-in/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NativeSignInConnectRoute = NativeSignInConnectRouteImport.update({
+  id: '/native-sign-in/connect',
+  path: '/native-sign-in/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NativeSignInConnectedRoute = NativeSignInConnectedRouteImport.update({
+  id: '/native-sign-in/connected',
+  path: '/native-sign-in/connected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NativeSignInDoneRoute = NativeSignInDoneRouteImport.update({
@@ -130,8 +148,11 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
+  '/api/native-sign-in-ticket': typeof ApiNativeSignInTicketRoute
   '/list/$list': typeof ListListRoute
   '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/connect': typeof NativeSignInConnectRoute
+  '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
@@ -150,8 +171,11 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
+  '/api/native-sign-in-ticket': typeof ApiNativeSignInTicketRoute
   '/list/$list': typeof ListListRoute
   '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/connect': typeof NativeSignInConnectRoute
+  '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
@@ -171,8 +195,11 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
+  '/api/native-sign-in-ticket': typeof ApiNativeSignInTicketRoute
   '/list/$list': typeof ListListRoute
   '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/connect': typeof NativeSignInConnectRoute
+  '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
@@ -193,8 +220,11 @@ export interface FileRouteTypes {
     | '/support'
     | '/upcoming'
     | '/widget'
+    | '/api/native-sign-in-ticket'
     | '/list/$list'
     | '/native-sign-in/complete'
+    | '/native-sign-in/connect'
+    | '/native-sign-in/connected'
     | '/native-sign-in/done'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
@@ -213,8 +243,11 @@ export interface FileRouteTypes {
     | '/support'
     | '/upcoming'
     | '/widget'
+    | '/api/native-sign-in-ticket'
     | '/list/$list'
     | '/native-sign-in/complete'
+    | '/native-sign-in/connect'
+    | '/native-sign-in/connected'
     | '/native-sign-in/done'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
@@ -233,8 +266,11 @@ export interface FileRouteTypes {
     | '/support'
     | '/upcoming'
     | '/widget'
+    | '/api/native-sign-in-ticket'
     | '/list/$list'
     | '/native-sign-in/complete'
+    | '/native-sign-in/connect'
+    | '/native-sign-in/connected'
     | '/native-sign-in/done'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
@@ -254,8 +290,11 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   UpcomingRoute: typeof UpcomingRoute
   WidgetRoute: typeof WidgetRoute
+  ApiNativeSignInTicketRoute: typeof ApiNativeSignInTicketRoute
   ListListRoute: typeof ListListRoute
   NativeSignInCompleteRoute: typeof NativeSignInCompleteRoute
+  NativeSignInConnectRoute: typeof NativeSignInConnectRoute
+  NativeSignInConnectedRoute: typeof NativeSignInConnectedRoute
   NativeSignInDoneRoute: typeof NativeSignInDoneRoute
   NativeSignInSsoCallbackRoute: typeof NativeSignInSsoCallbackRoute
   SeeAllListRoute: typeof SeeAllListRoute
@@ -330,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WidgetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/native-sign-in-ticket': {
+      id: '/api/native-sign-in-ticket'
+      path: '/api/native-sign-in-ticket'
+      fullPath: '/api/native-sign-in-ticket'
+      preLoaderRoute: typeof ApiNativeSignInTicketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/list/$list': {
       id: '/list/$list'
       path: '/list/$list'
@@ -349,6 +395,20 @@ declare module '@tanstack/react-router' {
       path: '/native-sign-in/complete'
       fullPath: '/native-sign-in/complete'
       preLoaderRoute: typeof NativeSignInCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/connect': {
+      id: '/native-sign-in/connect'
+      path: '/native-sign-in/connect'
+      fullPath: '/native-sign-in/connect'
+      preLoaderRoute: typeof NativeSignInConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/connected': {
+      id: '/native-sign-in/connected'
+      path: '/native-sign-in/connected'
+      fullPath: '/native-sign-in/connected'
+      preLoaderRoute: typeof NativeSignInConnectedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/native-sign-in/done': {
@@ -406,8 +466,11 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   UpcomingRoute: UpcomingRoute,
   WidgetRoute: WidgetRoute,
+  ApiNativeSignInTicketRoute: ApiNativeSignInTicketRoute,
   ListListRoute: ListListRoute,
   NativeSignInCompleteRoute: NativeSignInCompleteRoute,
+  NativeSignInConnectRoute: NativeSignInConnectRoute,
+  NativeSignInConnectedRoute: NativeSignInConnectedRoute,
   NativeSignInDoneRoute: NativeSignInDoneRoute,
   NativeSignInSsoCallbackRoute: NativeSignInSsoCallbackRoute,
   SeeAllListRoute: SeeAllListRoute,
