@@ -17,13 +17,17 @@ let allowedOrigins: [String] = ["www.cuenext.app"]
 // auth origins will open in modal and show toolbar for back into the main origin.
 // These should also appear in Info.plist
 let authOrigins: [String] = [
-    "account.google.com",
     "accounts.dev",
     "clerk.accounts.dev",
     "clerk.cuenext.app",
     "clerk.dev"
 ]
 // allowedOrigins + authOrigins <= 10
+
+// Google sign in is moved out of the web view into a system sign in sheet (see startNativeSignIn)
+let googleSignInHostPrefix = "accounts.google."
+let nativeSignInPath = "/native-sign-in"
+let nativeSignInCallbackScheme = "cuenext"
 
 let platformCookie = Cookie(name: "app-platform", value: "iOS App Store")
 

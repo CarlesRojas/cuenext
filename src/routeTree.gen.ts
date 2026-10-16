@@ -18,7 +18,11 @@ import { Route as ImportShowsRouteImport } from './routes/import-shows'
 import { Route as ImportMoviesRouteImport } from './routes/import-movies'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NativeSignInIndexRouteImport } from './routes/native-sign-in/index'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
+import { Route as NativeSignInSsoCallbackRouteImport } from './routes/native-sign-in/sso-callback'
+import { Route as NativeSignInDoneRouteImport } from './routes/native-sign-in/done'
+import { Route as NativeSignInCompleteRouteImport } from './routes/native-sign-in/complete'
 import { Route as ListListRouteImport } from './routes/list/$list'
 import { Route as LegalTermsAndConditionsIndexRouteImport } from './routes/legal/terms-and-conditions/index'
 import { Route as LegalPrivacyPolicyIndexRouteImport } from './routes/legal/privacy-policy/index'
@@ -69,9 +73,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NativeSignInIndexRoute = NativeSignInIndexRouteImport.update({
+  id: '/native-sign-in/',
+  path: '/native-sign-in/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeeAllListRoute = SeeAllListRouteImport.update({
   id: '/see-all/$list',
   path: '/see-all/$list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NativeSignInSsoCallbackRoute = NativeSignInSsoCallbackRouteImport.update({
+  id: '/native-sign-in/sso-callback',
+  path: '/native-sign-in/sso-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NativeSignInDoneRoute = NativeSignInDoneRouteImport.update({
+  id: '/native-sign-in/done',
+  path: '/native-sign-in/done',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NativeSignInCompleteRoute = NativeSignInCompleteRouteImport.update({
+  id: '/native-sign-in/complete',
+  path: '/native-sign-in/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListListRoute = ListListRouteImport.update({
@@ -107,7 +131,11 @@ export interface FileRoutesByFullPath {
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
   '/list/$list': typeof ListListRoute
+  '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/done': typeof NativeSignInDoneRoute
+  '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
+  '/native-sign-in/': typeof NativeSignInIndexRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
   '/legal/privacy-policy/': typeof LegalPrivacyPolicyIndexRoute
   '/legal/terms-and-conditions/': typeof LegalTermsAndConditionsIndexRoute
@@ -123,7 +151,11 @@ export interface FileRoutesByTo {
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
   '/list/$list': typeof ListListRoute
+  '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/done': typeof NativeSignInDoneRoute
+  '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
+  '/native-sign-in': typeof NativeSignInIndexRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
   '/legal/privacy-policy': typeof LegalPrivacyPolicyIndexRoute
   '/legal/terms-and-conditions': typeof LegalTermsAndConditionsIndexRoute
@@ -140,7 +172,11 @@ export interface FileRoutesById {
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
   '/list/$list': typeof ListListRoute
+  '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/done': typeof NativeSignInDoneRoute
+  '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
+  '/native-sign-in/': typeof NativeSignInIndexRoute
   '/media/$media/$tmdbId': typeof MediaMediaTmdbIdRoute
   '/legal/privacy-policy/': typeof LegalPrivacyPolicyIndexRoute
   '/legal/terms-and-conditions/': typeof LegalTermsAndConditionsIndexRoute
@@ -158,7 +194,11 @@ export interface FileRouteTypes {
     | '/upcoming'
     | '/widget'
     | '/list/$list'
+    | '/native-sign-in/complete'
+    | '/native-sign-in/done'
+    | '/native-sign-in/sso-callback'
     | '/see-all/$list'
+    | '/native-sign-in/'
     | '/media/$media/$tmdbId'
     | '/legal/privacy-policy/'
     | '/legal/terms-and-conditions/'
@@ -174,7 +214,11 @@ export interface FileRouteTypes {
     | '/upcoming'
     | '/widget'
     | '/list/$list'
+    | '/native-sign-in/complete'
+    | '/native-sign-in/done'
+    | '/native-sign-in/sso-callback'
     | '/see-all/$list'
+    | '/native-sign-in'
     | '/media/$media/$tmdbId'
     | '/legal/privacy-policy'
     | '/legal/terms-and-conditions'
@@ -190,7 +234,11 @@ export interface FileRouteTypes {
     | '/upcoming'
     | '/widget'
     | '/list/$list'
+    | '/native-sign-in/complete'
+    | '/native-sign-in/done'
+    | '/native-sign-in/sso-callback'
     | '/see-all/$list'
+    | '/native-sign-in/'
     | '/media/$media/$tmdbId'
     | '/legal/privacy-policy/'
     | '/legal/terms-and-conditions/'
@@ -207,7 +255,11 @@ export interface RootRouteChildren {
   UpcomingRoute: typeof UpcomingRoute
   WidgetRoute: typeof WidgetRoute
   ListListRoute: typeof ListListRoute
+  NativeSignInCompleteRoute: typeof NativeSignInCompleteRoute
+  NativeSignInDoneRoute: typeof NativeSignInDoneRoute
+  NativeSignInSsoCallbackRoute: typeof NativeSignInSsoCallbackRoute
   SeeAllListRoute: typeof SeeAllListRoute
+  NativeSignInIndexRoute: typeof NativeSignInIndexRoute
   MediaMediaTmdbIdRoute: typeof MediaMediaTmdbIdRoute
   LegalPrivacyPolicyIndexRoute: typeof LegalPrivacyPolicyIndexRoute
   LegalTermsAndConditionsIndexRoute: typeof LegalTermsAndConditionsIndexRoute
@@ -278,11 +330,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/native-sign-in/': {
+      id: '/native-sign-in/'
+      path: '/native-sign-in'
+      fullPath: '/native-sign-in/'
+      preLoaderRoute: typeof NativeSignInIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/see-all/$list': {
       id: '/see-all/$list'
       path: '/see-all/$list'
       fullPath: '/see-all/$list'
       preLoaderRoute: typeof SeeAllListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/sso-callback': {
+      id: '/native-sign-in/sso-callback'
+      path: '/native-sign-in/sso-callback'
+      fullPath: '/native-sign-in/sso-callback'
+      preLoaderRoute: typeof NativeSignInSsoCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/done': {
+      id: '/native-sign-in/done'
+      path: '/native-sign-in/done'
+      fullPath: '/native-sign-in/done'
+      preLoaderRoute: typeof NativeSignInDoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/complete': {
+      id: '/native-sign-in/complete'
+      path: '/native-sign-in/complete'
+      fullPath: '/native-sign-in/complete'
+      preLoaderRoute: typeof NativeSignInCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/list/$list': {
@@ -327,7 +407,11 @@ const rootRouteChildren: RootRouteChildren = {
   UpcomingRoute: UpcomingRoute,
   WidgetRoute: WidgetRoute,
   ListListRoute: ListListRoute,
+  NativeSignInCompleteRoute: NativeSignInCompleteRoute,
+  NativeSignInDoneRoute: NativeSignInDoneRoute,
+  NativeSignInSsoCallbackRoute: NativeSignInSsoCallbackRoute,
   SeeAllListRoute: SeeAllListRoute,
+  NativeSignInIndexRoute: NativeSignInIndexRoute,
   MediaMediaTmdbIdRoute: MediaMediaTmdbIdRoute,
   LegalPrivacyPolicyIndexRoute: LegalPrivacyPolicyIndexRoute,
   LegalTermsAndConditionsIndexRoute: LegalTermsAndConditionsIndexRoute,

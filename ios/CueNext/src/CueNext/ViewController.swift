@@ -1,5 +1,6 @@
 import UIKit
 import WebKit
+import AuthenticationServices
 
 var webView: WKWebView! = nil
 
@@ -19,6 +20,7 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
     @IBOutlet weak var connectionProblemView: UIImageView!
     @IBOutlet weak var webviewView: UIView!
     var toolbarView: UIToolbar!
+    var nativeSignInSession: ASWebAuthenticationSession?
     
     var htmlIsLoaded = false;
     private var loadingMode = LoadingMode.defaultCachePolicy
