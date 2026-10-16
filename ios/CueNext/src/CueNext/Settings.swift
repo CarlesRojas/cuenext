@@ -18,6 +18,7 @@ let allowedOrigins: [String] = ["www.cuenext.app"]
 // These should also appear in Info.plist
 let authOrigins: [String] = [
     "accounts.google.com",
+    "accounts.youtube.com",
     "accounts.dev",
     "clerk.accounts.dev",
     "clerk.cuenext.app",
