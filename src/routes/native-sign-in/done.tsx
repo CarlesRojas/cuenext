@@ -1,4 +1,4 @@
-import { NativeSignInStatus } from '#/component/NativeSignInStatus'
+import { ClerkReady, NativeSignInStatus } from '#/component/NativeSignInStatus'
 import { useAuth } from '@clerk/tanstack-react-start'
 import { NATIVE_CALLBACK_URL } from '#/lib/nativeSignIn'
 import { createSignInTicket } from '#/lib/signInTicket'
@@ -28,6 +28,14 @@ export const Route = createFileRoute('/native-sign-in/done')({
 })
 
 function Done() {
+  return (
+    <ClerkReady>
+      <DoneFlow />
+    </ClerkReady>
+  )
+}
+
+function DoneFlow() {
   const { state } = Route.useSearch()
   const { isLoaded, isSignedIn } = useAuth()
   const [failed, setFailed] = useState(false)

@@ -1,4 +1,4 @@
-import { NativeSignInStatus } from '#/component/NativeSignInStatus'
+import { ClerkReady, NativeSignInStatus } from '#/component/NativeSignInStatus'
 import { useAuth, useClerk } from '@clerk/tanstack-react-start'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
@@ -13,6 +13,14 @@ export const Route = createFileRoute('/native-sign-in/complete')({
 const isSafeRedirect = (path?: string): path is string => !!path && path.startsWith('/') && !path.startsWith('//')
 
 function Complete() {
+  return (
+    <ClerkReady>
+      <CompleteFlow />
+    </ClerkReady>
+  )
+}
+
+function CompleteFlow() {
   const { ticket, redirect } = Route.useSearch()
   const { isLoaded, isSignedIn } = useAuth()
   const clerk = useClerk()
