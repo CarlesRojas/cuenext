@@ -127,6 +127,13 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
 
         if let requestUrl = navigationAction.request.url{
             if let requestHost = requestUrl.host {
+                // Google sign in breaks inside the web view, so it runs in a system sign in sheet instead
+                if requestHost.hasPrefix(googleSignInHostPrefix) && navigationAction.targetFrame?.isMainFrame != false {
+                    decisionHandler(.cancel)
+                    startNativeSignIn(returnTo: webView.backForwardList.currentItem?.url)
+                    return
+                }
+
                 // NOTE: Match auth origin first, because host origin may be a subset of auth origin and may therefore always match
                 let matchingAuthOrigin = authOrigins.first(where: { requestHost.range(of: $0) != nil })
                 if (matchingAuthOrigin != nil) {
@@ -380,5 +387,52 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
 
         self.openFile(url: fileURL)
         completionHandler(fileURL)
+    }
+}
+
+// Google sign in runs in ASWebAuthenticationSession: the page at /native-sign-in signs in with Clerk there and
+// returns a one time sign in ticket, which /native-sign-in/complete redeems inside the app's web view.
+extension ViewController: ASWebAuthenticationPresentationContextProviding {
+    func startNativeSignIn(returnTo: URL?) {
+        guard nativeSignInSession == nil else { return }
+
+        let state = UUID().uuidString
+        var startUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
+        startUrl.path = nativeSignInPath
+        startUrl.queryItems = [URLQueryItem(name: "state", value: state)]
+
+        let session = ASWebAuthenticationSession(url: startUrl.url!, callbackURLScheme: nativeSignInCallbackScheme) { [weak self] callbackUrl, _ in
+            DispatchQueue.main.async {
+                self?.nativeSignInSession = nil
+                // Cancelled or failed: reload so the sign in modal does not stay stuck waiting for Google
+                guard let callbackUrl = callbackUrl else {
+                    CueNext.webView.reload()
+                    return
+                }
+                guard let items = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)?.queryItems,
+                      items.first(where: { $0.name == "state" })?.value == state,
+                      let ticket = items.first(where: { $0.name == "ticket" })?.value
+                else { return }
+
+                var completeUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
+                completeUrl.path = nativeSignInPath + "/complete"
+                completeUrl.queryItems = [URLQueryItem(name: "ticket", value: ticket)]
+                if let returnTo = returnTo, returnTo.host == rootUrl.host {
+                    var redirect = returnTo.path.isEmpty ? "/" : returnTo.path
+                    if let query = returnTo.query { redirect += "?" + query }
+                    completeUrl.queryItems?.append(URLQueryItem(name: "redirect", value: redirect))
+                }
+                CueNext.webView.load(URLRequest(url: completeUrl.url!))
+            }
+        }
+        session.presentationContextProvider = self
+        // A fresh browser session every time, so signing out in the app really lets you pick another account
+        session.prefersEphemeralWebBrowserSession = true
+        nativeSignInSession = session
+        session.start()
+    }
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        return view.window ?? ASPresentationAnchor()
     }
 }
