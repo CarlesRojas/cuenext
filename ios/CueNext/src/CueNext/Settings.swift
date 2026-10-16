@@ -17,7 +17,7 @@ let allowedOrigins: [String] = ["www.cuenext.app"]
 // auth origins will open in modal and show toolbar for back into the main origin.
 // These should also appear in Info.plist
 let authOrigins: [String] = [
-    "accounts.google.com",
+    "accounts.google.", // any country domain: accounts.google.com, accounts.google.es...
     "accounts.youtube.com",
     "accounts.dev",
     "clerk.accounts.dev",
