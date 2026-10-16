@@ -9,58 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WidgetRouteImport } from './routes/widget'
-import { Route as UpcomingRouteImport } from './routes/upcoming'
-import { Route as SupportRouteImport } from './routes/support'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as ImportShowsRouteImport } from './routes/import-shows'
-import { Route as ImportMoviesRouteImport } from './routes/import-movies'
-import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NativeSignInIndexRouteImport } from './routes/native-sign-in/index'
-import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
-import { Route as NativeSignInSsoCallbackRouteImport } from './routes/native-sign-in/sso-callback'
-import { Route as NativeSignInDoneRouteImport } from './routes/native-sign-in/done'
-import { Route as NativeSignInCompleteRouteImport } from './routes/native-sign-in/complete'
+import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as ImportMoviesRouteImport } from './routes/import-movies'
+import { Route as ImportShowsRouteImport } from './routes/import-shows'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SupportRouteImport } from './routes/support'
+import { Route as UpcomingRouteImport } from './routes/upcoming'
+import { Route as WidgetRouteImport } from './routes/widget'
+import { Route as ApiNativeSignInTicketRouteImport } from './routes/api/native-sign-in-ticket'
 import { Route as ListListRouteImport } from './routes/list/$list'
-import { Route as LegalTermsAndConditionsIndexRouteImport } from './routes/legal/terms-and-conditions/index'
+import { Route as NativeSignInIndexRouteImport } from './routes/native-sign-in/index'
+import { Route as NativeSignInCompleteRouteImport } from './routes/native-sign-in/complete'
+import { Route as NativeSignInConnectRouteImport } from './routes/native-sign-in/connect'
+import { Route as NativeSignInConnectedRouteImport } from './routes/native-sign-in/connected'
+import { Route as NativeSignInDoneRouteImport } from './routes/native-sign-in/done'
+import { Route as NativeSignInSsoCallbackRouteImport } from './routes/native-sign-in/sso-callback'
+import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
 import { Route as LegalPrivacyPolicyIndexRouteImport } from './routes/legal/privacy-policy/index'
+import { Route as LegalTermsAndConditionsIndexRouteImport } from './routes/legal/terms-and-conditions/index'
 import { Route as MediaMediaTmdbIdRouteImport } from './routes/media/$media/$tmdbId'
 
-const WidgetRoute = WidgetRouteImport.update({
-  id: '/widget',
-  path: '/widget',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UpcomingRoute = UpcomingRouteImport.update({
-  id: '/upcoming',
-  path: '/upcoming',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SupportRoute = SupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImportShowsRoute = ImportShowsRouteImport.update({
-  id: '/import-shows',
-  path: '/import-shows',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImportMoviesRoute = ImportMoviesRouteImport.update({
-  id: '/import-movies',
-  path: '/import-movies',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverRoute = DiscoverRouteImport.update({
@@ -68,9 +41,49 @@ const DiscoverRoute = DiscoverRouteImport.update({
   path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ImportMoviesRoute = ImportMoviesRouteImport.update({
+  id: '/import-movies',
+  path: '/import-movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportShowsRoute = ImportShowsRouteImport.update({
+  id: '/import-shows',
+  path: '/import-shows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpcomingRoute = UpcomingRouteImport.update({
+  id: '/upcoming',
+  path: '/upcoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WidgetRoute = WidgetRouteImport.update({
+  id: '/widget',
+  path: '/widget',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNativeSignInTicketRoute = ApiNativeSignInTicketRouteImport.update({
+  id: '/api/native-sign-in-ticket',
+  path: '/api/native-sign-in-ticket',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListListRoute = ListListRouteImport.update({
+  id: '/list/$list',
+  path: '/list/$list',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NativeSignInIndexRoute = NativeSignInIndexRouteImport.update({
@@ -78,14 +91,19 @@ const NativeSignInIndexRoute = NativeSignInIndexRouteImport.update({
   path: '/native-sign-in/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SeeAllListRoute = SeeAllListRouteImport.update({
-  id: '/see-all/$list',
-  path: '/see-all/$list',
+const NativeSignInCompleteRoute = NativeSignInCompleteRouteImport.update({
+  id: '/native-sign-in/complete',
+  path: '/native-sign-in/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NativeSignInSsoCallbackRoute = NativeSignInSsoCallbackRouteImport.update({
-  id: '/native-sign-in/sso-callback',
-  path: '/native-sign-in/sso-callback',
+const NativeSignInConnectRoute = NativeSignInConnectRouteImport.update({
+  id: '/native-sign-in/connect',
+  path: '/native-sign-in/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NativeSignInConnectedRoute = NativeSignInConnectedRouteImport.update({
+  id: '/native-sign-in/connected',
+  path: '/native-sign-in/connected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NativeSignInDoneRoute = NativeSignInDoneRouteImport.update({
@@ -93,14 +111,19 @@ const NativeSignInDoneRoute = NativeSignInDoneRouteImport.update({
   path: '/native-sign-in/done',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NativeSignInCompleteRoute = NativeSignInCompleteRouteImport.update({
-  id: '/native-sign-in/complete',
-  path: '/native-sign-in/complete',
+const NativeSignInSsoCallbackRoute = NativeSignInSsoCallbackRouteImport.update({
+  id: '/native-sign-in/sso-callback',
+  path: '/native-sign-in/sso-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ListListRoute = ListListRouteImport.update({
-  id: '/list/$list',
-  path: '/list/$list',
+const SeeAllListRoute = SeeAllListRouteImport.update({
+  id: '/see-all/$list',
+  path: '/see-all/$list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyPolicyIndexRoute = LegalPrivacyPolicyIndexRouteImport.update({
+  id: '/legal/privacy-policy/',
+  path: '/legal/privacy-policy/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LegalTermsAndConditionsIndexRoute =
@@ -109,11 +132,6 @@ const LegalTermsAndConditionsIndexRoute =
     path: '/legal/terms-and-conditions/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LegalPrivacyPolicyIndexRoute = LegalPrivacyPolicyIndexRouteImport.update({
-  id: '/legal/privacy-policy/',
-  path: '/legal/privacy-policy/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MediaMediaTmdbIdRoute = MediaMediaTmdbIdRouteImport.update({
   id: '/media/$media/$tmdbId',
   path: '/media/$media/$tmdbId',
@@ -130,8 +148,11 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
+  '/api/native-sign-in-ticket': typeof ApiNativeSignInTicketRoute
   '/list/$list': typeof ListListRoute
   '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/connect': typeof NativeSignInConnectRoute
+  '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
@@ -150,8 +171,11 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
+  '/api/native-sign-in-ticket': typeof ApiNativeSignInTicketRoute
   '/list/$list': typeof ListListRoute
   '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/connect': typeof NativeSignInConnectRoute
+  '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
@@ -171,8 +195,11 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/upcoming': typeof UpcomingRoute
   '/widget': typeof WidgetRoute
+  '/api/native-sign-in-ticket': typeof ApiNativeSignInTicketRoute
   '/list/$list': typeof ListListRoute
   '/native-sign-in/complete': typeof NativeSignInCompleteRoute
+  '/native-sign-in/connect': typeof NativeSignInConnectRoute
+  '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
@@ -193,8 +220,11 @@ export interface FileRouteTypes {
     | '/support'
     | '/upcoming'
     | '/widget'
+    | '/api/native-sign-in-ticket'
     | '/list/$list'
     | '/native-sign-in/complete'
+    | '/native-sign-in/connect'
+    | '/native-sign-in/connected'
     | '/native-sign-in/done'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
@@ -213,8 +243,11 @@ export interface FileRouteTypes {
     | '/support'
     | '/upcoming'
     | '/widget'
+    | '/api/native-sign-in-ticket'
     | '/list/$list'
     | '/native-sign-in/complete'
+    | '/native-sign-in/connect'
+    | '/native-sign-in/connected'
     | '/native-sign-in/done'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
@@ -233,8 +266,11 @@ export interface FileRouteTypes {
     | '/support'
     | '/upcoming'
     | '/widget'
+    | '/api/native-sign-in-ticket'
     | '/list/$list'
     | '/native-sign-in/complete'
+    | '/native-sign-in/connect'
+    | '/native-sign-in/connected'
     | '/native-sign-in/done'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
@@ -254,8 +290,11 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   UpcomingRoute: typeof UpcomingRoute
   WidgetRoute: typeof WidgetRoute
+  ApiNativeSignInTicketRoute: typeof ApiNativeSignInTicketRoute
   ListListRoute: typeof ListListRoute
   NativeSignInCompleteRoute: typeof NativeSignInCompleteRoute
+  NativeSignInConnectRoute: typeof NativeSignInConnectRoute
+  NativeSignInConnectedRoute: typeof NativeSignInConnectedRoute
   NativeSignInDoneRoute: typeof NativeSignInDoneRoute
   NativeSignInSsoCallbackRoute: typeof NativeSignInSsoCallbackRoute
   SeeAllListRoute: typeof SeeAllListRoute
@@ -267,53 +306,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/widget': {
-      id: '/widget'
-      path: '/widget'
-      fullPath: '/widget'
-      preLoaderRoute: typeof WidgetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/upcoming': {
-      id: '/upcoming'
-      path: '/upcoming'
-      fullPath: '/upcoming'
-      preLoaderRoute: typeof UpcomingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/support': {
-      id: '/support'
-      path: '/support'
-      fullPath: '/support'
-      preLoaderRoute: typeof SupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/import-shows': {
-      id: '/import-shows'
-      path: '/import-shows'
-      fullPath: '/import-shows'
-      preLoaderRoute: typeof ImportShowsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/import-movies': {
-      id: '/import-movies'
-      path: '/import-movies'
-      fullPath: '/import-movies'
-      preLoaderRoute: typeof ImportMoviesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover': {
@@ -323,46 +320,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/import-movies': {
+      id: '/import-movies'
+      path: '/import-movies'
+      fullPath: '/import-movies'
+      preLoaderRoute: typeof ImportMoviesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/native-sign-in/': {
-      id: '/native-sign-in/'
-      path: '/native-sign-in'
-      fullPath: '/native-sign-in/'
-      preLoaderRoute: typeof NativeSignInIndexRouteImport
+    '/import-shows': {
+      id: '/import-shows'
+      path: '/import-shows'
+      fullPath: '/import-shows'
+      preLoaderRoute: typeof ImportShowsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/see-all/$list': {
-      id: '/see-all/$list'
-      path: '/see-all/$list'
-      fullPath: '/see-all/$list'
-      preLoaderRoute: typeof SeeAllListRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/native-sign-in/sso-callback': {
-      id: '/native-sign-in/sso-callback'
-      path: '/native-sign-in/sso-callback'
-      fullPath: '/native-sign-in/sso-callback'
-      preLoaderRoute: typeof NativeSignInSsoCallbackRouteImport
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/native-sign-in/done': {
-      id: '/native-sign-in/done'
-      path: '/native-sign-in/done'
-      fullPath: '/native-sign-in/done'
-      preLoaderRoute: typeof NativeSignInDoneRouteImport
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/native-sign-in/complete': {
-      id: '/native-sign-in/complete'
-      path: '/native-sign-in/complete'
-      fullPath: '/native-sign-in/complete'
-      preLoaderRoute: typeof NativeSignInCompleteRouteImport
+    '/upcoming': {
+      id: '/upcoming'
+      path: '/upcoming'
+      fullPath: '/upcoming'
+      preLoaderRoute: typeof UpcomingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/widget': {
+      id: '/widget'
+      path: '/widget'
+      fullPath: '/widget'
+      preLoaderRoute: typeof WidgetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/native-sign-in-ticket': {
+      id: '/api/native-sign-in-ticket'
+      path: '/api/native-sign-in-ticket'
+      fullPath: '/api/native-sign-in-ticket'
+      preLoaderRoute: typeof ApiNativeSignInTicketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/list/$list': {
@@ -372,11 +383,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListListRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/legal/terms-and-conditions/': {
-      id: '/legal/terms-and-conditions/'
-      path: '/legal/terms-and-conditions'
-      fullPath: '/legal/terms-and-conditions/'
-      preLoaderRoute: typeof LegalTermsAndConditionsIndexRouteImport
+    '/native-sign-in/': {
+      id: '/native-sign-in/'
+      path: '/native-sign-in'
+      fullPath: '/native-sign-in/'
+      preLoaderRoute: typeof NativeSignInIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/complete': {
+      id: '/native-sign-in/complete'
+      path: '/native-sign-in/complete'
+      fullPath: '/native-sign-in/complete'
+      preLoaderRoute: typeof NativeSignInCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/connect': {
+      id: '/native-sign-in/connect'
+      path: '/native-sign-in/connect'
+      fullPath: '/native-sign-in/connect'
+      preLoaderRoute: typeof NativeSignInConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/connected': {
+      id: '/native-sign-in/connected'
+      path: '/native-sign-in/connected'
+      fullPath: '/native-sign-in/connected'
+      preLoaderRoute: typeof NativeSignInConnectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/done': {
+      id: '/native-sign-in/done'
+      path: '/native-sign-in/done'
+      fullPath: '/native-sign-in/done'
+      preLoaderRoute: typeof NativeSignInDoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/native-sign-in/sso-callback': {
+      id: '/native-sign-in/sso-callback'
+      path: '/native-sign-in/sso-callback'
+      fullPath: '/native-sign-in/sso-callback'
+      preLoaderRoute: typeof NativeSignInSsoCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/see-all/$list': {
+      id: '/see-all/$list'
+      path: '/see-all/$list'
+      fullPath: '/see-all/$list'
+      preLoaderRoute: typeof SeeAllListRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/legal/privacy-policy/': {
@@ -384,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/legal/privacy-policy'
       fullPath: '/legal/privacy-policy/'
       preLoaderRoute: typeof LegalPrivacyPolicyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms-and-conditions/': {
+      id: '/legal/terms-and-conditions/'
+      path: '/legal/terms-and-conditions'
+      fullPath: '/legal/terms-and-conditions/'
+      preLoaderRoute: typeof LegalTermsAndConditionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/media/$media/$tmdbId': {
@@ -406,8 +466,11 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   UpcomingRoute: UpcomingRoute,
   WidgetRoute: WidgetRoute,
+  ApiNativeSignInTicketRoute: ApiNativeSignInTicketRoute,
   ListListRoute: ListListRoute,
   NativeSignInCompleteRoute: NativeSignInCompleteRoute,
+  NativeSignInConnectRoute: NativeSignInConnectRoute,
+  NativeSignInConnectedRoute: NativeSignInConnectedRoute,
   NativeSignInDoneRoute: NativeSignInDoneRoute,
   NativeSignInSsoCallbackRoute: NativeSignInSsoCallbackRoute,
   SeeAllListRoute: SeeAllListRoute,

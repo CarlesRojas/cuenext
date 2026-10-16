@@ -24,7 +24,7 @@ let authOrigins: [String] = [
 ]
 // allowedOrigins + authOrigins <= 10
 
-// Google sign in is moved out of the web view into a system sign in sheet (see startNativeSignIn)
+// Google sign in is moved out of the web view into a system sign in sheet (see startNativeGoogle)
 let googleSignInHostPrefix = "accounts.google."
 let nativeSignInPath = "/native-sign-in"
 let nativeSignInCallbackScheme = "cuenext"
