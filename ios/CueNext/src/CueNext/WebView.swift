@@ -395,8 +395,6 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
 //   /native-sign-in/connect, which connects Google. The web view then refreshes the user in place.
 extension ViewController: ASWebAuthenticationPresentationContextProviding {
     func startNativeGoogle(webView: WKWebView) {
-        guard nativeSignInSession == nil else { return }
-
         let returnTo = webView.backForwardList.currentItem?.url
         isSignedIn(webView: webView) { signedIn in
             if signedIn {
@@ -470,7 +468,10 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
     }
 
     func startNativeAuth(path: String, query: [URLQueryItem], waitingMessage: String, onCancel: @escaping () -> Void, onCallback: @escaping ([URLQueryItem]) -> Void) {
-        guard nativeSignInSession == nil else { return }
+        // A new press replaces a sheet that is still open, e.g. one left behind other windows on Mac
+        nativeSignInSession?.cancel()
+        let sessionId = UUID()
+        nativeSignInSessionId = sessionId
 
         var startUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
         startUrl.path = path
@@ -478,8 +479,11 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
 
         let session = ASWebAuthenticationSession(url: startUrl.url!, callbackURLScheme: nativeSignInCallbackScheme) { [weak self] callbackUrl, _ in
             DispatchQueue.main.async {
-                self?.nativeSignInSession = nil
-                self?.hideNativeAuthOverlay()
+                // A replaced sheet's cancellation must not end the one that replaced it
+                guard let self = self, self.nativeSignInSessionId == sessionId else { return }
+                self.nativeSignInSession = nil
+                self.nativeSignInSessionId = nil
+                self.hideNativeAuthOverlay()
                 guard let callbackUrl = callbackUrl,
                       let items = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)?.queryItems
                 else {
@@ -497,6 +501,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
             showNativeAuthOverlay(message: waitingMessage)
         } else {
             nativeSignInSession = nil
+            nativeSignInSessionId = nil
             onCancel()
         }
     }
@@ -562,15 +567,14 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         }
     }
 
-    // Clerk keeps __client_uat at "0" while signed out and at the last sign in time while signed in
+    // Ask Clerk on the page: its cookies can still look signed in after an unfinished sign in or sign up
     func isSignedIn(webView: WKWebView, completion: @escaping (Bool) -> Void) {
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-            let signedIn = cookies.contains { cookie in
-                cookie.name.hasPrefix("__client_uat") &&
-                cookie.domain.hasSuffix(rootUrl.host!.replacingOccurrences(of: "www.", with: "")) &&
-                !cookie.value.isEmpty && cookie.value != "0"
+        webView.callAsyncJavaScript("return Boolean(window.Clerk?.user)", arguments: [:], in: nil, in: .page) { result in
+            if case .success(let value) = result, let signedIn = value as? Bool {
+                completion(signedIn)
+            } else {
+                completion(false)
             }
-            DispatchQueue.main.async { completion(signedIn) }
         }
     }
 
