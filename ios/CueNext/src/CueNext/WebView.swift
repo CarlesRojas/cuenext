@@ -112,6 +112,9 @@ func calcWebviewFrame(webviewView: UIView, toolbarView: UIToolbar?) -> CGRect{
 extension ViewController: WKUIDelegate, WKDownloadDelegate {
     // redirect new tabs to main webview
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        #if DEBUG
+        print("Navigation popup: \(navigationAction.request.url?.absoluteString ?? "nil")")
+        #endif
         if (navigationAction.targetFrame == nil) {
             webView.load(navigationAction.request)
         }
@@ -119,6 +122,11 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
     }
     // restrict navigation to target host, open external links in 3rd party apps
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        #if DEBUG
+        // Find which navigations take the page out of its app-bound domains (Info.plist WKAppBoundDomains)
+        let url = navigationAction.request.url
+        print("Navigation: main=\(navigationAction.targetFrame?.isMainFrame.description ?? "new window") type=\(navigationAction.navigationType.rawValue) \(url?.scheme ?? "")://\(url?.host ?? "")\(url?.path ?? "")")
+        #endif
         if (navigationAction.request.url?.scheme == "about") {
             return decisionHandler(.allow)
         }
