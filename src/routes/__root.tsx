@@ -99,6 +99,8 @@ function RootDocument({ children }: Props) {
           lang="en"
           className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden bg-neutral-950"
           data-theme="dark"
+          // Dark before the stylesheet loads, so the native sign in sheet doesn't flash white
+          style={{ backgroundColor: '#0a0a0a' }}
           suppressHydrationWarning
         >
           <head>

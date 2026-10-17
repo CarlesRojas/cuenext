@@ -4,16 +4,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { ReactNode } from 'react'
 
 interface NativeSignInStatusProps {
-  message: string
-  failed?: boolean
+  error?: string
 }
 
-// Full screen transition page for the native sign in flow, shown without the app shell
-export function NativeSignInStatus({ message, failed }: NativeSignInStatusProps) {
+// Full screen transition page for the native sign in sheet, shown without the app shell: a quiet spinner, or the error
+export function NativeSignInStatus({ error }: NativeSignInStatusProps) {
   return (
-    <main className="fixed inset-0 flex flex-col items-center justify-center gap-4 bg-neutral-950 px-6 text-center">
-      {!failed && <FontAwesomeIcon icon={faSpinner} className="size-6 animate-spin text-sky-500" />}
-      <p className="text-sm text-neutral-400">{message}</p>
+    <main className="fixed inset-0 flex items-center justify-center bg-neutral-950 px-6 text-center">
+      {error ? (
+        <p className="text-sm text-neutral-400">{error}</p>
+      ) : (
+        <FontAwesomeIcon icon={faSpinner} spin className="size-6 text-white/40" />
+      )}
     </main>
   )
 }
@@ -28,7 +30,7 @@ export function ClerkReady({ children }: ClerkReadyProps) {
   return (
     <>
       <ClerkLoading>
-        <NativeSignInStatus message="Loading..." />
+        <NativeSignInStatus />
       </ClerkLoading>
       <ClerkLoaded>{children}</ClerkLoaded>
     </>
