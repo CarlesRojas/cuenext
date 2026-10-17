@@ -53,5 +53,10 @@ function DoneFlow() {
       .catch(() => setFailed(true))
   }, [isLoaded, isSignedIn, state])
 
-  return <NativeSignInStatus message={failed ? 'Sign in failed. Close this window and try again.' : 'Signing in...'} />
+  return (
+    <NativeSignInStatus
+      failed={failed}
+      message={failed ? 'Sign in failed. Close this window and try again.' : 'Signing in...'}
+    />
+  )
 }
