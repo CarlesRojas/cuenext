@@ -409,7 +409,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
 
     func startNativeSignIn(returnTo: URL?) {
         let state = UUID().uuidString
-        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Continue in the new window to finish signing in", onCancel: {
+        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Finish signing in with Google in the window that just opened.", onCancel: {
             CueNext.webView.callAsyncJavaScript("window.Clerk?.closeSignIn()", arguments: [:], in: nil, in: .page)
         }) { items in
             guard items.first(where: { $0.name == "state" })?.value == state,
@@ -461,7 +461,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
             }
 
             let query = [URLQueryItem(name: "state", value: UUID().uuidString), URLQueryItem(name: "ticket", value: ticket)]
-            self.startNativeAuth(path: nativeSignInPath + "/connect", query: query, waitingMessage: "Continue in the new window to connect Google", onCancel: reloadUser) { _ in
+            self.startNativeAuth(path: nativeSignInPath + "/connect", query: query, waitingMessage: "Finish connecting your Google account in the window that just opened.", onCancel: reloadUser) { _ in
                 reloadUser()
             }
         }
@@ -499,19 +499,35 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         }
     }
 
-    // While the sheet is open, dim the page and say where to continue, so people who missed the new window (it can
-    // open behind the app on Mac) don't press Google again
+    // While the sheet is open, Clerk's card shows where to continue instead of its content, so people who missed the
+    // new window (on Mac it can open out of view) don't press Google again. Only the iOS app adds it.
     func showNativeAuthOverlay(message: String) {
         let script = """
             document.getElementById('native-auth-overlay')?.remove()
             const overlay = document.createElement('div')
             overlay.id = 'native-auth-overlay'
-            overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:flex-end;justify-content:center;padding:0 24px calc(env(safe-area-inset-bottom) + 48px);background:rgba(10,10,10,0.5)'
-            const label = document.createElement('p')
-            label.textContent = message
-            label.style.cssText = 'margin:0;padding:12px 20px;border-radius:9999px;background:rgba(38,38,38,0.95);color:white;font:500 14px/1.4 Montserrat,sans-serif;text-align:center'
-            overlay.appendChild(label)
-            document.body.appendChild(overlay)
+            const title = document.createElement('p')
+            title.textContent = 'Continue in the new window'
+            title.style.cssText = 'margin:0;font-size:17px;font-weight:700'
+            const body = document.createElement('p')
+            body.textContent = message
+            body.style.cssText = 'margin:0;font-size:13px;opacity:0.65'
+            overlay.append(title, body)
+
+            const card = document.querySelector('.cl-cardBox')
+            if (card) {
+                // Cover the card exactly, with its own colors
+                const cardStyle = getComputedStyle(card)
+                const isTransparent = color => color === 'transparent' || color === 'rgba(0, 0, 0, 0)'
+                const innerCard = card.querySelector('.cl-card')
+                const background = isTransparent(cardStyle.backgroundColor) && innerCard ? getComputedStyle(innerCard).backgroundColor : cardStyle.backgroundColor
+                if (cardStyle.position === 'static') card.style.position = 'relative'
+                overlay.style.cssText = `position:absolute;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:32px;text-align:center;border-radius:inherit;background:${background};color:${cardStyle.color}`
+                card.appendChild(overlay)
+            } else {
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:32px;text-align:center;background:rgba(10,10,10,0.9);color:white'
+                document.body.appendChild(overlay)
+            }
             return true
             """
         CueNext.webView.callAsyncJavaScript(script, arguments: ["message": message], in: nil, in: .page)
