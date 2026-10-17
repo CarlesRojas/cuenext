@@ -506,13 +506,25 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
             document.getElementById('native-auth-overlay')?.remove()
             const overlay = document.createElement('div')
             overlay.id = 'native-auth-overlay'
-            const title = document.createElement('p')
-            title.textContent = 'Continue in the new window'
-            title.style.cssText = 'margin:0;font-size:17px;font-weight:700'
-            const body = document.createElement('p')
-            body.textContent = message
-            body.style.cssText = 'margin:0;font-size:13px;opacity:0.65'
-            overlay.append(title, body)
+            // A window icon with a slow pulse, so it reads as waiting on the other window
+            overlay.innerHTML = `
+                <style>
+                    @keyframes native-auth-pulse { 0% { transform: scale(1); opacity: 0.4 } 100% { transform: scale(1.5); opacity: 0 } }
+                </style>
+                <div style="position:relative;width:64px;height:64px;margin-bottom:20px">
+                    <div style="position:absolute;inset:0;border-radius:9999px;border:1.5px solid currentColor;animation:native-auth-pulse 2s ease-out infinite"></div>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:9999px;background:rgba(128,128,128,0.1);background:color-mix(in srgb, currentColor 7%, transparent)">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h9A1.5 1.5 0 0 1 20 5.5v7a1.5 1.5 0 0 1-1.5 1.5H17" />
+                            <rect x="4" y="10" width="13" height="10" rx="1.5" />
+                            <path d="M4 13.5h13" />
+                        </svg>
+                    </div>
+                </div>
+                <p style="margin:0 0 6px;font-size:17px;font-weight:700;line-height:1.3">Continue in the new window</p>
+                <p data-message style="margin:0;max-width:260px;font-size:13px;line-height:1.5;opacity:0.65"></p>
+            `
+            overlay.querySelector('[data-message]').textContent = message
 
             const card = document.querySelector('.cl-cardBox')
             if (card) {
@@ -522,10 +534,10 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 const innerCard = card.querySelector('.cl-card')
                 const background = isTransparent(cardStyle.backgroundColor) && innerCard ? getComputedStyle(innerCard).backgroundColor : cardStyle.backgroundColor
                 if (cardStyle.position === 'static') card.style.position = 'relative'
-                overlay.style.cssText = `position:absolute;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:32px;text-align:center;border-radius:inherit;background:${background};color:${cardStyle.color}`
+                overlay.style.cssText = `position:absolute;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;border-radius:inherit;background:${background};color:${cardStyle.color}`
                 card.appendChild(overlay)
             } else {
-                overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:32px;text-align:center;background:rgba(10,10,10,0.9);color:white'
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;background:rgba(10,10,10,0.9);color:white'
                 document.body.appendChild(overlay)
             }
             return true
