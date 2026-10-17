@@ -409,7 +409,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
 
     func startNativeSignIn(returnTo: URL?) {
         let state = UUID().uuidString
-        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], onCancel: {
+        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Continue in the new window to finish signing in", onCancel: {
             CueNext.webView.callAsyncJavaScript("window.Clerk?.closeSignIn()", arguments: [:], in: nil, in: .page)
         }) { items in
             guard items.first(where: { $0.name == "state" })?.value == state,
@@ -461,13 +461,13 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
             }
 
             let query = [URLQueryItem(name: "state", value: UUID().uuidString), URLQueryItem(name: "ticket", value: ticket)]
-            self.startNativeAuth(path: nativeSignInPath + "/connect", query: query, onCancel: reloadUser) { _ in
+            self.startNativeAuth(path: nativeSignInPath + "/connect", query: query, waitingMessage: "Continue in the new window to connect Google", onCancel: reloadUser) { _ in
                 reloadUser()
             }
         }
     }
 
-    func startNativeAuth(path: String, query: [URLQueryItem], onCancel: @escaping () -> Void, onCallback: @escaping ([URLQueryItem]) -> Void) {
+    func startNativeAuth(path: String, query: [URLQueryItem], waitingMessage: String, onCancel: @escaping () -> Void, onCallback: @escaping ([URLQueryItem]) -> Void) {
         guard nativeSignInSession == nil else { return }
 
         var startUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
@@ -477,6 +477,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         let session = ASWebAuthenticationSession(url: startUrl.url!, callbackURLScheme: nativeSignInCallbackScheme) { [weak self] callbackUrl, _ in
             DispatchQueue.main.async {
                 self?.nativeSignInSession = nil
+                self?.hideNativeAuthOverlay()
                 guard let callbackUrl = callbackUrl,
                       let items = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)?.queryItems
                 else {
@@ -490,7 +491,34 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         // A fresh browser session every time, so signing out in the app really lets you pick another account
         session.prefersEphemeralWebBrowserSession = true
         nativeSignInSession = session
-        session.start()
+        if session.start() {
+            showNativeAuthOverlay(message: waitingMessage)
+        } else {
+            nativeSignInSession = nil
+            onCancel()
+        }
+    }
+
+    // While the sheet is open, dim the page and say where to continue, so people who missed the new window (it can
+    // open behind the app on Mac) don't press Google again
+    func showNativeAuthOverlay(message: String) {
+        let script = """
+            document.getElementById('native-auth-overlay')?.remove()
+            const overlay = document.createElement('div')
+            overlay.id = 'native-auth-overlay'
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:flex-end;justify-content:center;padding:0 24px calc(env(safe-area-inset-bottom) + 48px);background:rgba(10,10,10,0.5)'
+            const label = document.createElement('p')
+            label.textContent = message
+            label.style.cssText = 'margin:0;padding:12px 20px;border-radius:9999px;background:rgba(38,38,38,0.95);color:white;font:500 14px/1.4 Montserrat,sans-serif;text-align:center'
+            overlay.appendChild(label)
+            document.body.appendChild(overlay)
+            return true
+            """
+        CueNext.webView.callAsyncJavaScript(script, arguments: ["message": message], in: nil, in: .page)
+    }
+
+    func hideNativeAuthOverlay() {
+        CueNext.webView.callAsyncJavaScript("document.getElementById('native-auth-overlay')?.remove(); return true", arguments: [:], in: nil, in: .page)
     }
 
     func showAuthToolbar(webView: WKWebView) {
