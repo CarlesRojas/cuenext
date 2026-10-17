@@ -22,6 +22,7 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
     var toolbarView: UIToolbar!
     var nativeSignInSession: ASWebAuthenticationSession?
     var nativeSignInSessionId: UUID?
+    var nativeSignInOnCancel: (() -> Void)?
     
     var htmlIsLoaded = false;
     private var loadingMode = LoadingMode.defaultCachePolicy
@@ -278,6 +279,9 @@ extension ViewController: WKScriptMessageHandler {
         }
         if message.name == "push-token" {
             handleFCMToken()
+        }
+        if message.name == "native-auth-cancel" {
+            cancelNativeAuth()
         }
   }
 }

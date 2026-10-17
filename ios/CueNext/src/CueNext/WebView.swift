@@ -14,6 +14,7 @@ func createWebView(container: UIView, WKSMH: WKScriptMessageHandler, WKND: WKNav
     userContentController.add(WKSMH, name: "push-permission-request")
     userContentController.add(WKSMH, name: "push-permission-state")
     userContentController.add(WKSMH, name: "push-token")
+    userContentController.add(WKSMH, name: "native-auth-cancel")
 
     config.userContentController = userContentController
 
@@ -407,9 +408,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
 
     func startNativeSignIn(returnTo: URL?) {
         let state = UUID().uuidString
-        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Finish signing in with Google in the window that just opened.", onCancel: {
-            CueNext.webView.callAsyncJavaScript("window.Clerk?.closeSignIn(); window.Clerk?.closeSignUp(); return true", arguments: [:], in: nil, in: .page)
-        }) { items in
+        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Finish signing in with Google in the window that just opened.", onCancel: {}) { items in
             guard items.first(where: { $0.name == "state" })?.value == state,
                   let ticket = items.first(where: { $0.name == "ticket" })?.value
             else { return }
@@ -472,6 +471,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         nativeSignInSession?.cancel()
         let sessionId = UUID()
         nativeSignInSessionId = sessionId
+        nativeSignInOnCancel = onCancel
 
         var startUrl = URLComponents(url: rootUrl, resolvingAgainstBaseURL: false)!
         startUrl.path = path
@@ -483,6 +483,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 guard let self = self, self.nativeSignInSessionId == sessionId else { return }
                 self.nativeSignInSession = nil
                 self.nativeSignInSessionId = nil
+                self.nativeSignInOnCancel = nil
                 self.hideNativeAuthOverlay()
                 guard let callbackUrl = callbackUrl,
                       let items = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)?.queryItems
@@ -502,18 +503,31 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
         } else {
             nativeSignInSession = nil
             nativeSignInSessionId = nil
+            nativeSignInOnCancel = nil
             onCancel()
         }
     }
 
-    // While the sheet is open, Clerk's card shows where to continue instead of its content, so people who missed the
-    // new window (on Mac it can open out of view) don't press Google again. Only the iOS app adds it.
+    // The overlay's Cancel button, for when closing the sheet's window is not reported (it can happen on Mac)
+    func cancelNativeAuth() {
+        guard let session = nativeSignInSession else { return }
+        let onCancel = nativeSignInOnCancel
+        nativeSignInSession = nil
+        nativeSignInSessionId = nil
+        nativeSignInOnCancel = nil
+        session.cancel()
+        hideNativeAuthOverlay()
+        onCancel?()
+    }
+
+    // While the sheet is open, a panel over Clerk's card shows where to continue instead of its content, so people who
+    // missed the new window (on Mac it can open out of view) don't press Google again. It lives outside Clerk's DOM and
+    // follows the visible card every frame, because Clerk re-renders its card. Only the iOS app adds it.
     func showNativeAuthOverlay(message: String) {
         let script = """
             document.getElementById('native-auth-overlay')?.remove()
             const overlay = document.createElement('div')
             overlay.id = 'native-auth-overlay'
-            // A window icon with a slow pulse, so it reads as waiting on the other window
             overlay.innerHTML = `
                 <style>
                     @keyframes native-auth-pulse { 0% { transform: scale(1); opacity: 0.4 } 100% { transform: scale(1.5); opacity: 0 } }
@@ -530,30 +544,40 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 </div>
                 <p style="margin:0 0 6px;font-size:17px;font-weight:700;line-height:1.3">Continue in the new window</p>
                 <p data-message style="margin:0;max-width:260px;font-size:13px;line-height:1.5;opacity:0.65"></p>
+                <button data-cancel type="button" style="margin-top:20px;padding:6px 14px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:500;opacity:0.65;cursor:pointer">Cancel</button>
             `
             overlay.querySelector('[data-message]').textContent = message
-
-            // The visible card (sign in, sign up or Manage account): a hidden one can stay in the page
-            const card = [...document.querySelectorAll('.cl-cardBox')].reverse().find(element => {
-                const rect = element.getBoundingClientRect()
-                return rect.width > 0 && rect.height > 0
+            overlay.querySelector('[data-cancel]').addEventListener('click', () => {
+                window.webkit?.messageHandlers?.['native-auth-cancel']?.postMessage(null)
             })
-            if (card) {
-                // Cover the card exactly, with its own colors
-                const cardStyle = getComputedStyle(card)
-                const isTransparent = color => color === 'transparent' || color === 'rgba(0, 0, 0, 0)'
-                const innerCard = card.querySelector('.cl-card')
-                const background = isTransparent(cardStyle.backgroundColor) && innerCard ? getComputedStyle(innerCard).backgroundColor : cardStyle.backgroundColor
-                if (cardStyle.position === 'static') card.style.position = 'relative'
-                overlay.style.cssText = `position:absolute;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;border-radius:inherit;background:${background};color:${cardStyle.color}`
-                card.appendChild(overlay)
-            } else {
-                overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;background:rgba(10,10,10,0.9);color:white'
-                document.body.appendChild(overlay)
+            const base = 'position:fixed;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;box-sizing:border-box;text-align:center'
+            document.documentElement.appendChild(overlay)
+
+            const isTransparent = color => color === 'transparent' || color === 'rgba(0, 0, 0, 0)'
+            const follow = () => {
+                if (!overlay.isConnected) return
+                // The visible card (sign in, sign up or Manage account): a hidden one can stay in the page
+                const card = [...document.querySelectorAll('.cl-cardBox')].reverse().find(element => {
+                    const rect = element.getBoundingClientRect()
+                    return rect.width > 0 && rect.height > 0
+                })
+                if (card) {
+                    const rect = card.getBoundingClientRect()
+                    const style = getComputedStyle(card)
+                    const innerCard = card.querySelector('.cl-card')
+                    const background = isTransparent(style.backgroundColor) && innerCard ? getComputedStyle(innerCard).backgroundColor : style.backgroundColor
+                    overlay.style.cssText = `${base};top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;height:${rect.height}px;border-radius:${style.borderRadius};background:${background};color:${style.color};font-family:${style.fontFamily}`
+                } else {
+                    overlay.style.cssText = `${base};inset:0;background:rgba(10,10,10,0.9);color:white;font-family:${getComputedStyle(document.body).fontFamily}`
+                }
+                requestAnimationFrame(follow)
             }
+            follow()
             return true
             """
-        CueNext.webView.callAsyncJavaScript(script, arguments: ["message": message], in: nil, in: .page)
+        CueNext.webView.callAsyncJavaScript(script, arguments: ["message": message], in: nil, in: .page) { result in
+            if case .failure(let error) = result { print("Native auth overlay failed: \(error)") }
+        }
     }
 
     func hideNativeAuthOverlay() {
