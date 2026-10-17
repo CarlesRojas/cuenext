@@ -16,5 +16,5 @@ function Connected() {
     window.location.href = `${NATIVE_CALLBACK_URL}?${new URLSearchParams({ state, connected: '1' })}`
   }, [state])
 
-  return <NativeSignInStatus message="Returning to CueNext..." />
+  return <NativeSignInStatus />
 }

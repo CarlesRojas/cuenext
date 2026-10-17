@@ -57,9 +57,6 @@ function ConnectFlow() {
   }, [isLoaded, isSignedIn, clerk, state, ticket])
 
   return (
-    <NativeSignInStatus
-      failed={failed}
-      message={failed ? 'Could not connect Google. Close this window and try again.' : 'Opening Google...'}
-    />
+    <NativeSignInStatus error={failed ? 'Could not connect Google. Close this window and try again.' : undefined} />
   )
 }

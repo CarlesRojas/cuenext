@@ -39,5 +39,5 @@ function NativeSignInFlow() {
     })
   }, [isLoaded, isSignedIn, clerk, navigate, state])
 
-  return <NativeSignInStatus message="Opening Google..." />
+  return <NativeSignInStatus />
 }

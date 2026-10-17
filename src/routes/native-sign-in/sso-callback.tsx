@@ -7,7 +7,7 @@ export const Route = createFileRoute('/native-sign-in/sso-callback')({ component
 function SsoCallback() {
   return (
     <>
-      <NativeSignInStatus message="Signing in..." />
+      <NativeSignInStatus />
       <AuthenticateWithRedirectCallback />
     </>
   )
