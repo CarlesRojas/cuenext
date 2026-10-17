@@ -58,6 +58,7 @@ function ConnectFlow() {
 
   return (
     <NativeSignInStatus
+      failed={failed}
       message={failed ? 'Could not connect Google. Close this window and try again.' : 'Opening Google...'}
     />
   )

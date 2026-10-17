@@ -21,7 +21,7 @@ import '@fontsource/montserrat/700.css'
 import '@fontsource/montserrat/800.css'
 import '@fontsource/montserrat/900.css'
 import type { QueryClient } from '@tanstack/react-query'
-import { HeadContent, Scripts, createRootRouteWithContext, useRouteContext } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRouteWithContext, useLocation, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import type { ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
@@ -85,6 +85,8 @@ interface Props {
 
 function RootDocument({ children }: Props) {
   const context = useRouteContext({ from: Route.id })
+  // The native sign in pages are transitions inside the iOS app's sign in sheet, so they skip the app shell
+  const isNativeSignIn = useLocation({ select: location => location.pathname.startsWith('/native-sign-in') })
 
   return (
     <ClerkProvider
@@ -106,9 +108,7 @@ function RootDocument({ children }: Props) {
           <body className="size-full max-h-full min-h-full max-w-full min-w-full overflow-x-hidden bg-neutral-950 font-sans wrap-anywhere text-white antialiased selection:bg-sky-500/30">
             <AuthCacheSync />
             <ProfileSync />
-            <ToastProvider>
-              <AppShell>{children}</AppShell>
-            </ToastProvider>
+            <ToastProvider>{isNativeSignIn ? children : <AppShell>{children}</AppShell>}</ToastProvider>
             <Toaster />
 
             <Scripts />

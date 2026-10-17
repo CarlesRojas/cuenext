@@ -42,5 +42,10 @@ function CompleteFlow() {
     redeem().catch(() => setFailed(true))
   }, [isLoaded, isSignedIn, clerk, ticket, redirect])
 
-  return <NativeSignInStatus message={failed ? 'Sign in failed. Please try again.' : 'Signing in...'} />
+  return (
+    <NativeSignInStatus
+      failed={failed}
+      message={failed ? 'Sign in failed. Please try again.' : 'Finishing sign in...'}
+    />
+  )
 }
