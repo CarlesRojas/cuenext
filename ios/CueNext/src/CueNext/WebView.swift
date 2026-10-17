@@ -408,7 +408,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
 
     func startNativeSignIn(returnTo: URL?) {
         let state = UUID().uuidString
-        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Finish signing in with Google in the window that just opened.", onCancel: {}) { items in
+        startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Finish with Google in the window that just opened.", onCancel: {}) { items in
             guard items.first(where: { $0.name == "state" })?.value == state,
                   let ticket = items.first(where: { $0.name == "ticket" })?.value
             else { return }
@@ -554,13 +554,28 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
             document.documentElement.appendChild(overlay)
 
             const isTransparent = color => color === 'transparent' || color === 'rgba(0, 0, 0, 0)'
+            const isShown = element => {
+                for (let node = element; node && node !== document.documentElement; node = node.parentElement) {
+                    const style = getComputedStyle(node)
+                    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false
+                }
+                const rect = element.getBoundingClientRect()
+                return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0 && rect.top < innerHeight && rect.left < innerWidth
+            }
+            // The card people see (sign in, sign up or Manage account). Clerk can keep other cards in the page, hidden
+            // or off screen, e.g. the sign in card after switching to sign up, so prefer the one on top at its center.
+            const findCard = () => {
+                const cards = [...document.querySelectorAll('.cl-cardBox')].filter(isShown)
+                const onTop = cards.find(card => {
+                    const rect = card.getBoundingClientRect()
+                    const hit = document.elementsFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2).find(element => !overlay.contains(element))
+                    return hit && card.contains(hit)
+                })
+                return onTop ?? cards[cards.length - 1]
+            }
             const follow = () => {
                 if (!overlay.isConnected) return
-                // The visible card (sign in, sign up or Manage account): a hidden one can stay in the page
-                const card = [...document.querySelectorAll('.cl-cardBox')].reverse().find(element => {
-                    const rect = element.getBoundingClientRect()
-                    return rect.width > 0 && rect.height > 0
-                })
+                const card = findCard()
                 if (card) {
                     const rect = card.getBoundingClientRect()
                     const style = getComputedStyle(card)
@@ -573,10 +588,17 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 requestAnimationFrame(follow)
             }
             follow()
-            return true
+            // Reported in the Xcode console to debug where the notice goes
+            return [...document.querySelectorAll('.cl-cardBox')].map(card => {
+                const rect = card.getBoundingClientRect()
+                return `${card.className.split(' ').find(name => name.startsWith('cl-cardBox')) ?? 'cl-cardBox'} ${Math.round(rect.left)},${Math.round(rect.top)} ${Math.round(rect.width)}x${Math.round(rect.height)} shown:${isShown(card)} chosen:${card === findCard()}`
+            }).join(' | ') || 'no Clerk card'
             """
         CueNext.webView.callAsyncJavaScript(script, arguments: ["message": message], in: nil, in: .page) { result in
-            if case .failure(let error) = result { print("Native auth overlay failed: \(error)") }
+            switch result {
+            case .success(let cards): print("Native auth overlay cards: \(cards)")
+            case .failure(let error): print("Native auth overlay failed: \(error)")
+            }
         }
     }
 
