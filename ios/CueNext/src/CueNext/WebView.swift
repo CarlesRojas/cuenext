@@ -130,8 +130,13 @@ extension ViewController: WKUIDelegate, WKDownloadDelegate {
         if (navigationAction.request.url?.scheme == "about") {
             return decisionHandler(.allow)
         }
-        if (navigationAction.shouldPerformDownload || navigationAction.request.url?.scheme == "blob") {
+        // Blob pages in frames are not downloads, e.g. Cloudflare's captcha on Clerk's sign up
+        let isMainFrame = navigationAction.targetFrame?.isMainFrame != false
+        if (navigationAction.shouldPerformDownload || (navigationAction.request.url?.scheme == "blob" && isMainFrame)) {
             return decisionHandler(.download)
+        }
+        if (navigationAction.request.url?.scheme == "blob") {
+            return decisionHandler(.allow)
         }
 
         if let requestUrl = navigationAction.request.url{
