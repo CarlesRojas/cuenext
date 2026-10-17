@@ -423,7 +423,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 window.Clerk.closeSignUp()
                 return true
                 """
-            CueNext.webView.callAsyncJavaScript(script, arguments: ["ticket": ticket], in: nil, in: .page) { result in
+            self.runPageScript(script, arguments: ["ticket": ticket]) { result in
                 if case .success = result { return }
                 // Fall back to the full page flow, e.g. if Clerk was not ready on this page
                 self.loadNativeSignInComplete(ticket: ticket, returnTo: returnTo)
@@ -446,14 +446,14 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
     func startNativeConnect(webView: WKWebView) {
         // Refresh the user in place so Manage account shows the connected account without reloading the app
         let reloadUser = {
-            CueNext.webView.callAsyncJavaScript("await window.Clerk?.user?.reload()", arguments: [:], in: nil, in: .page)
+            self.runPageScript("await window.Clerk?.user?.reload(); return true")
         }
         let script = """
             const response = await fetch('/api/native-sign-in-ticket', { method: 'POST', headers: { 'X-CueNext-Native': '1' } })
             if (!response.ok) throw new Error('No sign in ticket')
             return (await response.json()).ticket
             """
-        webView.callAsyncJavaScript(script, arguments: [:], in: nil, in: .page) { result in
+        runPageScript(script) { result in
             guard case .success(let value) = result, let ticket = value as? String else {
                 reloadUser()
                 return
@@ -594,16 +594,19 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 return `${card.className.split(' ').find(name => name.startsWith('cl-cardBox')) ?? 'cl-cardBox'} ${Math.round(rect.left)},${Math.round(rect.top)} ${Math.round(rect.width)}x${Math.round(rect.height)} shown:${isShown(card)} chosen:${card === findCard()}`
             }).join(' | ') || 'no Clerk card'
             """
-        CueNext.webView.callAsyncJavaScript(script, arguments: ["message": message], in: nil, in: .page) { result in
+        let sessionId = nativeSignInSessionId
+        runPageScript(script, arguments: ["message": message]) { result in
             switch result {
             case .success(let cards): print("Native auth overlay cards: \(cards)")
             case .failure(let error): print("Native auth overlay failed: \(error)")
             }
+            // A retried attempt can land after the sheet already closed
+            if self.nativeSignInSessionId != sessionId || sessionId == nil { self.hideNativeAuthOverlay() }
         }
     }
 
     func hideNativeAuthOverlay() {
-        CueNext.webView.callAsyncJavaScript("document.getElementById('native-auth-overlay')?.remove(); return true", arguments: [:], in: nil, in: .page)
+        runPageScript("document.getElementById('native-auth-overlay')?.remove(); return true")
     }
 
     func showAuthToolbar(webView: WKWebView) {
@@ -615,12 +618,29 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
 
     // Ask Clerk on the page: its cookies can still look signed in after an unfinished sign in or sign up
     func isSignedIn(webView: WKWebView, completion: @escaping (Bool) -> Void) {
-        webView.callAsyncJavaScript("return Boolean(window.Clerk?.user)", arguments: [:], in: nil, in: .page) { result in
+        runPageScript("return Boolean(window.Clerk?.user)") { result in
             if case .success(let value) = result, let signedIn = value as? Bool {
                 completion(signedIn)
             } else {
                 completion(false)
             }
+        }
+    }
+
+    // Runs JavaScript on the app's page. Right after the Google navigation is cancelled, WebKit can still treat the
+    // page as leaving its app-bound domains and refuse scripts for a moment, so those attempts are retried.
+    func runPageScript(_ script: String, arguments: [String: Any] = [:], attempt: Int = 0, completion: ((Result<Any, Error>) -> Void)? = nil) {
+        CueNext.webView.callAsyncJavaScript(script, arguments: arguments, in: nil, in: .page) { result in
+            if case .failure(let error) = result,
+               (error as NSError).domain == WKError.errorDomain,
+               (error as NSError).code == WKError.javaScriptAppBoundDomain.rawValue,
+               attempt < 10 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    self.runPageScript(script, arguments: arguments, attempt: attempt + 1, completion: completion)
+                }
+                return
+            }
+            completion?(result)
         }
     }
 

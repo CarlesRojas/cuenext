@@ -125,6 +125,7 @@
 	<key>WKAppBoundDomains</key>
 	<array>
 		<string>www.cuenext.app</string>
+		<string>accounts.google.com</string>
 		<string>accounts.dev</string>
 		<string>clerk.accounts.dev</string>
 		<string>clerk.cuenext.app</string>
