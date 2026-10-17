@@ -29,6 +29,13 @@ let googleSignInHostPrefix = "accounts.google."
 let nativeSignInPath = "/native-sign-in"
 let nativeSignInCallbackScheme = "cuenext"
 
+// Sign in diagnostics in the Xcode console, all under one prefix to filter by
+func authLog(_ message: String) {
+    #if DEBUG
+    print("[CueNext auth] \(message)")
+    #endif
+}
+
 let platformCookie = Cookie(name: "app-platform", value: "iOS App Store")
 
 // UI options
