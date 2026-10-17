@@ -25,6 +25,7 @@ import { Route as NativeSignInCompleteRouteImport } from './routes/native-sign-i
 import { Route as NativeSignInConnectRouteImport } from './routes/native-sign-in/connect'
 import { Route as NativeSignInConnectedRouteImport } from './routes/native-sign-in/connected'
 import { Route as NativeSignInDoneRouteImport } from './routes/native-sign-in/done'
+import { Route as NativeSignInSignUpRouteImport } from './routes/native-sign-in/sign-up'
 import { Route as NativeSignInSsoCallbackRouteImport } from './routes/native-sign-in/sso-callback'
 import { Route as SeeAllListRouteImport } from './routes/see-all/$list'
 import { Route as LegalPrivacyPolicyIndexRouteImport } from './routes/legal/privacy-policy/index'
@@ -111,6 +112,11 @@ const NativeSignInDoneRoute = NativeSignInDoneRouteImport.update({
   path: '/native-sign-in/done',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NativeSignInSignUpRoute = NativeSignInSignUpRouteImport.update({
+  id: '/native-sign-in/sign-up',
+  path: '/native-sign-in/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NativeSignInSsoCallbackRoute = NativeSignInSsoCallbackRouteImport.update({
   id: '/native-sign-in/sso-callback',
   path: '/native-sign-in/sso-callback',
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/native-sign-in/connect': typeof NativeSignInConnectRoute
   '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
+  '/native-sign-in/sign-up': typeof NativeSignInSignUpRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/native-sign-in/': typeof NativeSignInIndexRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/native-sign-in/connect': typeof NativeSignInConnectRoute
   '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
+  '/native-sign-in/sign-up': typeof NativeSignInSignUpRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/native-sign-in': typeof NativeSignInIndexRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/native-sign-in/connect': typeof NativeSignInConnectRoute
   '/native-sign-in/connected': typeof NativeSignInConnectedRoute
   '/native-sign-in/done': typeof NativeSignInDoneRoute
+  '/native-sign-in/sign-up': typeof NativeSignInSignUpRoute
   '/native-sign-in/sso-callback': typeof NativeSignInSsoCallbackRoute
   '/see-all/$list': typeof SeeAllListRoute
   '/native-sign-in/': typeof NativeSignInIndexRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/native-sign-in/connect'
     | '/native-sign-in/connected'
     | '/native-sign-in/done'
+    | '/native-sign-in/sign-up'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
     | '/native-sign-in/'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/native-sign-in/connect'
     | '/native-sign-in/connected'
     | '/native-sign-in/done'
+    | '/native-sign-in/sign-up'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
     | '/native-sign-in'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/native-sign-in/connect'
     | '/native-sign-in/connected'
     | '/native-sign-in/done'
+    | '/native-sign-in/sign-up'
     | '/native-sign-in/sso-callback'
     | '/see-all/$list'
     | '/native-sign-in/'
@@ -296,6 +308,7 @@ export interface RootRouteChildren {
   NativeSignInConnectRoute: typeof NativeSignInConnectRoute
   NativeSignInConnectedRoute: typeof NativeSignInConnectedRoute
   NativeSignInDoneRoute: typeof NativeSignInDoneRoute
+  NativeSignInSignUpRoute: typeof NativeSignInSignUpRoute
   NativeSignInSsoCallbackRoute: typeof NativeSignInSsoCallbackRoute
   SeeAllListRoute: typeof SeeAllListRoute
   NativeSignInIndexRoute: typeof NativeSignInIndexRoute
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NativeSignInDoneRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/native-sign-in/sign-up': {
+      id: '/native-sign-in/sign-up'
+      path: '/native-sign-in/sign-up'
+      fullPath: '/native-sign-in/sign-up'
+      preLoaderRoute: typeof NativeSignInSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/native-sign-in/sso-callback': {
       id: '/native-sign-in/sso-callback'
       path: '/native-sign-in/sso-callback'
@@ -472,6 +492,7 @@ const rootRouteChildren: RootRouteChildren = {
   NativeSignInConnectRoute: NativeSignInConnectRoute,
   NativeSignInConnectedRoute: NativeSignInConnectedRoute,
   NativeSignInDoneRoute: NativeSignInDoneRoute,
+  NativeSignInSignUpRoute: NativeSignInSignUpRoute,
   NativeSignInSsoCallbackRoute: NativeSignInSsoCallbackRoute,
   SeeAllListRoute: SeeAllListRoute,
   NativeSignInIndexRoute: NativeSignInIndexRoute,

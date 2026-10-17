@@ -1,4 +1,5 @@
 import { ClerkReady, NativeSignInStatus } from '#/component/NativeSignInStatus'
+import { nativeSignInDoneUrl } from '#/lib/nativeSignIn'
 import { useAuth, useClerk } from '@clerk/tanstack-react-start'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
@@ -34,8 +35,8 @@ function NativeSignInFlow() {
 
     void clerk.client.signIn.authenticateWithRedirect({
       strategy: 'oauth_google',
-      redirectUrl: `${window.location.origin}/native-sign-in/sso-callback`,
-      redirectUrlComplete: `${window.location.origin}/native-sign-in/done?state=${encodeURIComponent(state)}`,
+      redirectUrl: `${window.location.origin}/native-sign-in/sso-callback?state=${encodeURIComponent(state)}`,
+      redirectUrlComplete: nativeSignInDoneUrl(state),
     })
   }, [isLoaded, isSignedIn, clerk, navigate, state])
 
