@@ -410,7 +410,7 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
     func startNativeSignIn(returnTo: URL?) {
         let state = UUID().uuidString
         startNativeAuth(path: nativeSignInPath, query: [URLQueryItem(name: "state", value: state)], waitingMessage: "Finish signing in with Google in the window that just opened.", onCancel: {
-            CueNext.webView.callAsyncJavaScript("window.Clerk?.closeSignIn()", arguments: [:], in: nil, in: .page)
+            CueNext.webView.callAsyncJavaScript("window.Clerk?.closeSignIn(); window.Clerk?.closeSignUp(); return true", arguments: [:], in: nil, in: .page)
         }) { items in
             guard items.first(where: { $0.name == "state" })?.value == state,
                   let ticket = items.first(where: { $0.name == "ticket" })?.value
@@ -421,7 +421,9 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
                 const signIn = await window.Clerk.client.signIn.create({ strategy: 'ticket', ticket })
                 if (signIn.status !== 'complete') throw new Error('Sign in incomplete')
                 await window.Clerk.setActive({ session: signIn.createdSessionId })
+                // Google can be started from the sign in or the sign up modal
                 window.Clerk.closeSignIn()
+                window.Clerk.closeSignUp()
                 return true
                 """
             CueNext.webView.callAsyncJavaScript(script, arguments: ["ticket": ticket], in: nil, in: .page) { result in
@@ -526,7 +528,11 @@ extension ViewController: ASWebAuthenticationPresentationContextProviding {
             `
             overlay.querySelector('[data-message]').textContent = message
 
-            const card = document.querySelector('.cl-cardBox')
+            // The visible card (sign in, sign up or Manage account): a hidden one can stay in the page
+            const card = [...document.querySelectorAll('.cl-cardBox')].reverse().find(element => {
+                const rect = element.getBoundingClientRect()
+                return rect.width > 0 && rect.height > 0
+            })
             if (card) {
                 // Cover the card exactly, with its own colors
                 const cardStyle = getComputedStyle(card)
