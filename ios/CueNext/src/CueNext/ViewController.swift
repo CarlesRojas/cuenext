@@ -21,6 +21,7 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
     @IBOutlet weak var webviewView: UIView!
     var toolbarView: UIToolbar!
     var nativeSignInSession: ASWebAuthenticationSession?
+    var nativeSignInSessionId: UUID?
     
     var htmlIsLoaded = false;
     private var loadingMode = LoadingMode.defaultCachePolicy
