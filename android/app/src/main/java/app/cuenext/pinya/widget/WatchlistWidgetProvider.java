@@ -54,6 +54,14 @@ public class WatchlistWidgetProvider extends AppWidgetProvider {
             return;
         }
 
+        if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
+            // An update leaves the launcher holding views built by the previous version,
+            // whose layout and resource ids may no longer exist, and the system doesn't
+            // reliably ask for new ones. Repaint every widget from the new code.
+            renderThenFetch(context, allWidgetIds(context));
+            return;
+        }
+
         if (ACTION_REFRESH.equals(action)) {
             // Pairing and (re)configuration want fresh data: age the cache out so the
             // fetch below actually runs.
