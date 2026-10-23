@@ -154,9 +154,7 @@ export default function AppShell({ children }: AppShellProps) {
         ref={scrollContainer}
         id="scroll-container"
       >
-        <div className={cn('h-fit w-full', isMobile && 'pb-[calc(5.25rem+env(safe-area-inset-bottom))]')}>
-          {children}
-        </div>
+        <div className={cn('h-fit w-full', isMobile && 'pb-21')}>{children}</div>
       </main>
 
       {isMobile && <MobileNavbar showHeader={showHeader} visualHeight={visualHeight} fullHeight={fullHeight} />}
