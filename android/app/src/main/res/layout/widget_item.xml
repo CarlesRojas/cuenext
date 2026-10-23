@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One grid cell: a single ImageView showing a ready-made card bitmap (poster, rounded
+     corners, progress bar and title fallback are all composited by WidgetCardRenderer).
+     The launcher inflates and binds this on its UI thread for every row that appears, so
+     the cell is kept to one view - extra views, a ProgressBar above all, cost real
+     inflation time per row. The bitmap carries no density and is drawn at its exact
+     display size, so wrap_content sizes the cell with no scaling or measure passes. -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:contentDescription="@string/widgetPosterDescription"
+    android:scaleType="center" />
