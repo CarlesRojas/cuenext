@@ -94,7 +94,9 @@ public class WidgetConfigActivity extends Activity {
         column.addView(subtitle);
 
         String currentMedia = WidgetPrefs.getMedia(this, widgetId);
-        String currentSection = WidgetPrefs.getSection(this, widgetId);
+        // A new widget has nothing highlighted, so tapping a list reads as the way to pick it.
+        // Reconfiguring one highlights the list it already shows.
+        String currentSection = WidgetPrefs.hasSection(this, widgetId) ? WidgetPrefs.getSection(this, widgetId) : null;
         boolean currentBoth = WidgetPrefs.isBothMedia(this, widgetId);
 
         addGroup(column, density, "Shows & Movies", BOTH_SECTIONS, "both", currentMedia, currentSection, currentBoth);
