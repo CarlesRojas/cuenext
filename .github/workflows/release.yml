@@ -1,7 +1,8 @@
 name: Release
 
 # Bumps the version with Bubblewrap, builds the signed bundle and creates a DRAFT production
-# release in Play Console. Review it there, add notes if you want and click "Send for review".
+# release in Play Console, with "Bug fixes and performance improvements" as its notes. Review it
+# there and click "Send for review".
 # Then commits the bump and the regenerated Android project to main.
 #
 # Deploy the site first: `bubblewrap update` reads the live web manifest, icons and shortcuts.
@@ -108,6 +109,6 @@ jobs:
           {
             echo "## v$CODE"
             echo
-            echo "Draft created in Play Console. Add notes if you want, then click **Send for review**."
+            echo "Draft created in Play Console. Review it and click **Send for review**."
             echo "The bundle is also attached to this run as an artifact."
           } >> "$GITHUB_STEP_SUMMARY"

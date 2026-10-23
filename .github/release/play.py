@@ -3,8 +3,9 @@
 Google Play step of the Release workflow (.github/workflows/release.yml).
 
   play.py upload --package app.cuenext.pinya --aab app.aab --version-code 15
-      Uploads the bundle and creates a DRAFT production release named "v15". Nothing is sent
-      for review: that stays a manual click in Play Console, where the notes can be added too.
+      Uploads the bundle and creates a DRAFT production release named "v15", with NOTES as its
+      release notes in the store listing's default language. Nothing is sent for review: that
+      stays a manual click in Play Console.
 
 The service account JSON is read from the PLAY_SERVICE_ACCOUNT_JSON environment variable. The
 account needs access to the app in Play Console (Users and permissions, "Release to
@@ -21,6 +22,10 @@ import sys
 SCOPE = "https://www.googleapis.com/auth/androidpublisher"
 API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications"
 UPLOAD = "https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications"
+
+# The same line every release: these apps update from the website, so a store release only
+# carries Android wrapper changes.
+NOTES = "Bug fixes and performance improvements"
 
 
 def session():
@@ -65,12 +70,15 @@ def cmd_upload(args):
         if uploaded["versionCode"] != args.version_code:
             sys.exit(f"Bundle has versionCode {uploaded['versionCode']}, expected {args.version_code}")
 
+        language = check(s.get(f"{base}/edits/{edit_id}/details"))["defaultLanguage"]
+
         check(s.put(f"{base}/edits/{edit_id}/tracks/production", json={
             "track": "production",
             "releases": [{
                 "name": f"v{args.version_code}",
                 "versionCodes": [str(args.version_code)],
                 "status": "draft",
+                "releaseNotes": [{"language": language, "text": NOTES}],
             }],
         }))
         check(s.post(f"{base}/edits/{edit_id}:commit"))
