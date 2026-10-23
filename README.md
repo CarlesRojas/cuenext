@@ -69,7 +69,7 @@ On an emulator, set the URL to `http://10.0.2.2:3000/` — no tunnel needed. The
 ### Notes
 
 - `android/android.keystore` (alias `cuenext_key_store`) is gitignored and cannot be regenerated. Keep it safe. Play rejects bundles signed with any other key.
-- `bubblewrap update` deletes `app/` and regenerates it. Never edit `app/` directly: `apply-assets.sh` restores the splash and icon masters (`android/splash/`, `android/icon/`) and the home-screen widget (`android/widget/`, via `apply-widget.sh`).
+- `bubblewrap update` deletes `app/` and regenerates it. Never edit `app/` directly: `apply-assets.sh` restores the splash and icon masters (`android/splash/`, `android/icon/`), `LauncherActivity` (`android/launcher/`, forces Chrome's dark scheme so light-mode phones don't get white bars) and the home-screen widget (`android/widget/`, via `apply-widget.sh`).
 - If the logo changed, run `pnpm android:assets` first to re-render the splash and icon masters.
 - If a fingerprint changes, regenerate `public/.well-known/assetlinks.json`:
 

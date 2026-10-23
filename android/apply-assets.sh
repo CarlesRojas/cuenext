@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copy our splash screens and adaptive icon layers over the ones Bubblewrap generates.
+# Copy our splash screens, adaptive icon layers and LauncherActivity over the ones Bubblewrap generates.
 # Run after `bubblewrap update`, before `bubblewrap build`.
 #
 # Both are written by `pnpm android:assets`, which explains what it changes and why. The splash is
@@ -31,7 +31,11 @@ for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
     restore "icon/mipmap-$density/ic_maskable.png" "app/src/main/res/mipmap-$density/ic_maskable.png"
 done
 
-echo "Splash screens and adaptive icon layers restored."
+# Bubblewrap's LauncherActivity lets Chrome follow the system theme, which paints white around the
+# app when the phone is in light mode. Ours always asks Chrome for dark.
+restore "launcher/LauncherActivity.java" "app/src/main/java/app/cuenext/pinya/LauncherActivity.java"
+
+echo "Splash screens, adaptive icon layers and LauncherActivity restored."
 
 # The home-screen widget lives in widget/ for the same reason the masters above live
 # outside app/: `bubblewrap update` deletes app/ wholesale.
