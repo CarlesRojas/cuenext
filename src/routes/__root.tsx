@@ -1,4 +1,3 @@
-import { AndroidEdgeToEdge } from '#/component/AndroidEdgeToEdge'
 import AppShell from '#/component/AppShell'
 import { AuthCacheSync } from '#/component/AuthCacheSync'
 import { ProfileSync } from '#/component/ProfileSync'
@@ -112,7 +111,6 @@ function RootDocument({ children }: Props) {
           </head>
 
           <body className="size-full max-h-full min-h-full max-w-full min-w-full overflow-x-hidden bg-neutral-950 font-sans wrap-anywhere text-white antialiased selection:bg-sky-500/30">
-            <AndroidEdgeToEdge />
             <AuthCacheSync />
             <ProfileSync />
             <ToastProvider>{isNativeSignIn ? children : <AppShell>{children}</AppShell>}</ToastProvider>
