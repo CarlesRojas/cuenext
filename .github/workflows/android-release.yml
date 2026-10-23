@@ -1,10 +1,10 @@
-name: Release
+name: Android Release
 
 # Bumps the version with Bubblewrap, builds the signed bundle and creates a DRAFT production
 # release in Play Console, with "Bug fixes and performance improvements" as its notes. Review it
 # there and click "Send for review".
-# Then commits the bump and the regenerated Android project to main, tags it vN and publishes
-# the bundle on GitHub Releases.
+# Then commits the bump and the regenerated Android project to main, tags it N (the tag
+# format the repo already uses) and publishes the bundle on a vN GitHub release.
 #
 # Deploy the site first: `bubblewrap update` reads the live web manifest, icons and shortcuts.
 #
@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: release
+  group: android-release
   cancel-in-progress: false
 
 permissions:
@@ -100,8 +100,8 @@ jobs:
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add android
           git commit -m "Release $CODE"
-          git tag "v$CODE"
-          git push origin HEAD:main "v$CODE"
+          git tag "$CODE"
+          git push origin HEAD:main "$CODE"
 
       - name: Publish GitHub release
         env:
@@ -109,7 +109,7 @@ jobs:
           CODE: ${{ steps.version.outputs.code }}
         run: |
           cp android/app-release-bundle.aab "cuenext_$CODE.aab"
-          gh release create "v$CODE" "cuenext_$CODE.aab" \
+          gh release create "$CODE" "cuenext_$CODE.aab" \
             --title "v$CODE" \
             --notes "Bug fixes and performance improvements"
           {
