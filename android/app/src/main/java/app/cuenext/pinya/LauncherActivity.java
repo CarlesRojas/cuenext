@@ -16,8 +16,11 @@
 package app.cuenext.pinya;
 
 import android.content.pm.ActivityInfo;
+import android.content.pm.ShortcutManager;
 import android.os.Build;
 import android.os.Bundle;
+
+import java.util.Collections;
 
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsCallback;
@@ -25,6 +28,7 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
 import com.google.androidbrowserhelper.trusted.LauncherActivityMetadata;
+import com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity;
 import com.google.androidbrowserhelper.trusted.SessionStore;
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
@@ -46,6 +50,22 @@ public class LauncherActivity
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+    }
+
+    @Override
+    protected void launchTwa() {
+        super.launchTwa();
+        // The library adds a "Site settings" shortcut on every launch, which shows first in the
+        // launcher's long-press menu. Remove it right after. Turning off enableSiteSettingsShortcut
+        // in twa-manifest.json instead drops ManageDataLauncherActivity from the manifest, which
+        // the library still tries to enable on launch.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+            if (shortcutManager != null) {
+                shortcutManager.removeDynamicShortcuts(
+                        Collections.singletonList(ManageDataLauncherActivity.SITE_SETTINGS_SHORTCUT_ID));
+            }
         }
     }
 
