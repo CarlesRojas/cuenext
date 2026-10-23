@@ -74,6 +74,12 @@ public final class WidgetPrefs {
         return prefs(context).getString("widget_" + widgetId + "_section", "next");
     }
 
+    // Whether a list was ever picked for this widget, as opposed to getSection falling back
+    // to its default.
+    public static boolean hasSection(Context context, int widgetId) {
+        return prefs(context).contains("widget_" + widgetId + "_section");
+    }
+
     public static boolean isBothMedia(Context context, int widgetId) {
         return prefs(context).getBoolean("widget_" + widgetId + "_both", true);
     }
