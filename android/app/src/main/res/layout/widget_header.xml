@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Header shared by the column-count layout variants: the section title and the
+     Shows/Movies toggle (the app's MediaTypeSelector, laid out horizontally). -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp">
+
+    <LinearLayout
+        android:id="@+id/widget_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/widget_toggle_background"
+        android:orientation="horizontal"
+        android:padding="3dp">
+
+        <FrameLayout
+            android:id="@+id/toggle_tv_wrap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="7dp">
+
+            <ImageView
+                android:id="@+id/toggle_tv"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@string/widgetToggleShows"
+                android:src="@drawable/ic_widget_tv" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/toggle_movie_wrap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:padding="7dp">
+
+            <ImageView
+                android:id="@+id/toggle_movie"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@string/widgetToggleMovies"
+                android:src="@drawable/ic_widget_clapperboard" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/widget_toggle"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="#CCFFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</RelativeLayout>
