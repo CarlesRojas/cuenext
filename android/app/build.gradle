@@ -55,7 +55,7 @@ android {
     namespace "app.cuenext.pinya"
     defaultConfig {
         applicationId "app.cuenext.pinya"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 36
         versionCode 13
         versionName "13"

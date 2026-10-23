@@ -24,6 +24,7 @@ import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
+import com.google.androidbrowserhelper.trusted.LauncherActivityMetadata;
 import com.google.androidbrowserhelper.trusted.SessionStore;
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
@@ -54,7 +55,8 @@ public class LauncherActivity
         // library hardcodes COLOR_SCHEME_SYSTEM, so with the phone in light mode Chrome paints its
         // own light surfaces (a white screen after the splash, a white navigation bar) no matter
         // which colors the manifest sets. The app has no light theme, so it is always dark.
-        return new TwaLauncher(this, null, SessionStore.makeSessionId(getTaskId()),
+        return new TwaLauncher(this, LauncherActivityMetadata.parse(this).launchingBrowser,
+                SessionStore.makeSessionId(getTaskId()),
                 new SharedPreferencesTokenStore(this)) {
             @Override
             public void launch(TrustedWebActivityIntentBuilder twaBuilder,
