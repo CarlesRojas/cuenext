@@ -11,7 +11,7 @@
   "navigationDividerColor": "#0A0A0A",
   "navigationDividerColorDark": "#0A0A0A",
   "backgroundColor": "#0A0A0A",
-  "enableNotifications": true,
+  "enableNotifications": false,
   "startUrl": "/",
   "iconUrl": "https://www.cuenext.app/maskableIcon512.png",
   "maskableIconUrl": "https://www.cuenext.app/maskableIcon512.png",
