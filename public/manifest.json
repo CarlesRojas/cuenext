@@ -66,7 +66,7 @@
         {
           "src": "shortcut/watchlist.png",
           "type": "image/png",
-          "sizes": "96x96"
+          "sizes": "192x192"
         }
       ]
     },
@@ -78,7 +78,7 @@
         {
           "src": "shortcut/upcoming.png",
           "type": "image/png",
-          "sizes": "96x96"
+          "sizes": "192x192"
         }
       ]
     },
@@ -90,7 +90,7 @@
         {
           "src": "shortcut/discover.png",
           "type": "image/png",
-          "sizes": "96x96"
+          "sizes": "192x192"
         }
       ]
     },
@@ -102,7 +102,7 @@
         {
           "src": "shortcut/profile.png",
           "type": "image/png",
-          "sizes": "96x96"
+          "sizes": "192x192"
         }
       ]
     }

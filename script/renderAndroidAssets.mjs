@@ -3,9 +3,9 @@
  * Everything else the wrapper shows is downloaded by `bubblewrap update` from the URLs in
  * android/twa-manifest.json and needs nothing from here. These two do:
  *
- * - The splash screens. Bubblewrap builds splash.png by resizing the whole icon to fill the canvas,
- *   which leaves the mark at 47.25% of it and reads as oversized on launch. These masters put it at
- *   30.67%.
+ * - The splash screens. Bubblewrap builds splash.png from the icon, but the splash only shows for a
+ *   blink before Chrome takes over, so a logo there reads as a flicker. These masters are a plain
+ *   field of the app's background colour, so launch looks like the app's own background.
  *
  * - The adaptive icon layers. They are what the launcher actually shows, and Bubblewrap downloads
  *   them from `maskableIconUrl`, so the padding around the mark is whatever the live site happens
@@ -22,9 +22,6 @@ import { deflateSync, inflateSync } from 'node:zlib'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-/* The mark on its own, transparent, for the splash. logo256.png is the same artwork cropped to its
- * edges, and either would do: the mark is sized by the pixels it draws, not by its canvas. */
-const MARK_SOURCE = 'public/logo512.png'
 const SPLASH_DIRECTORY = 'android/splash'
 
 /* The icon as designed, background and padding included, which is also what the Web Manifest serves
@@ -32,13 +29,9 @@ const SPLASH_DIRECTORY = 'android/splash'
 const ICON_SOURCE = 'public/maskableIcon512.png'
 const ICON_DIRECTORY = 'android/icon'
 
-/* The field the mark sits on for the splash. Matches `backgroundColor` in twa-manifest.json, which
+/* The splash's only colour. Matches `backgroundColor` in twa-manifest.json, which
  * is what Android paints around the splash image while the app starts. */
 const SPLASH_BACKGROUND = [0x0a, 0x0a, 0x0a]
-
-/* The mark's longer side on the splash, as a share of the canvas: 65% of the 47.25% Bubblewrap's
- * own splash gives it. */
-const MARK_FRACTION = 0.30667
 
 /* The five splash sizes Bubblewrap generates, and so the five this replaces. */
 const SPLASH_SIZES = [
@@ -71,10 +64,6 @@ const BUBBLEWRAP_INSET_DP = 8.5
  * to. Raise it towards 1 to give the mark more of the circle; the figures printed below say where
  * it lands. */
 const ICON_SCALE = VISIBLE_DP / (LAYER_DP - 2 * BUBBLEWRAP_INSET_DP)
-
-/* Alpha at or above which a pixel of the transparent master counts as drawn, so a mark with a soft
- * edge is measured by its body rather than by the faintest pixel of its falloff. */
-const INK_ALPHA = 24
 
 /* The same judgement for the opaque icon, where the mark has to be told from its background by
  * colour instead: total channel distance from the border colour. */
@@ -247,8 +236,6 @@ const markBounds = (image, file, drawn) => {
   return { left, top, width: right - left + 1, height: bottom - top + 1 }
 }
 
-const inked = (red, green, blue, alpha) => alpha >= INK_ALPHA
-
 const opaque = border => (red, green, blue) =>
   Math.abs(red - border[0]) + Math.abs(green - border[1]) + Math.abs(blue - border[2]) > BORDER_DISTANCE
 
@@ -334,28 +321,11 @@ const compose = (image, canvas, background, offsetX, offsetY) => {
 }
 
 const renderSplashScreens = () => {
-  const source = read(MARK_SOURCE)
-  const bounds = markBounds(source, MARK_SOURCE, inked)
-  const premultiplied = premultiply(source)
-  const markLongSide = Math.max(bounds.width, bounds.height)
-
-  console.log(`${MARK_SOURCE}: ${source.width}x${source.height}, mark ${bounds.width}x${bounds.height}`)
+  const nothing = { data: Buffer.alloc(0), width: 0, height: 0 }
 
   for (const { density, canvas } of SPLASH_SIZES) {
-    const scale = (canvas * MARK_FRACTION) / markLongSide
-    const mark = resample(premultiplied, Math.round(source.width * scale), Math.round(source.height * scale))
-
-    /* Centre on the mark, not on the source canvas, in case the artwork is not centred in it. */
-    const offsetX = Math.round(canvas / 2 - (bounds.left + bounds.width / 2) * scale)
-    const offsetY = Math.round(canvas / 2 - (bounds.top + bounds.height / 2) * scale)
-
-    write(
-      join(SPLASH_DIRECTORY, `drawable-${density}`, 'splash.png'),
-      compose(mark, canvas, SPLASH_BACKGROUND, offsetX, offsetY),
-    )
-
-    const drawn = Math.round(markLongSide * scale)
-    console.log(`  ${density}: ${canvas}px canvas, mark ${drawn}px (${((100 * drawn) / canvas).toFixed(2)}%)`)
+    write(join(SPLASH_DIRECTORY, `drawable-${density}`, 'splash.png'), compose(nothing, canvas, SPLASH_BACKGROUND, 0, 0))
+    console.log(`  ${density}: ${canvas}px canvas, plain background`)
   }
 }
 

@@ -3,9 +3,9 @@
 # Copy our splash screens, adaptive icon layers and LauncherActivity over the ones Bubblewrap generates.
 # Run after `bubblewrap update`, before `bubblewrap build`.
 #
-# Both are written by `pnpm android:assets`, which explains what it changes and why. The splash is
-# redrawn because Bubblewrap resizes the whole icon to fill the canvas, leaving the mark at 47.25%
-# of it rather than the 30.67% here. The icon layers are redrawn because Bubblewrap downloads them
+# The splash and icon layers are written by `pnpm android:assets`, which explains what it changes
+# and why. The splash is a plain field of the background colour, because a logo there only shows
+# for a blink before Chrome takes over. The icon layers are redrawn because Bubblewrap downloads them
 # from the live site at update time, so the padding around the mark would otherwise be whatever
 # www.cuenext.app happens to be serving that day.
 #
