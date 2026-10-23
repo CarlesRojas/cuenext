@@ -47,6 +47,9 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
       },
       { name: 'theme-color', content: '#0a0a0a' },
+      // The app has no light theme. Without this, Chrome treats the page as light when the phone is in
+      // light mode, painting a white screen after the Android splash and a white navigation bar
+      { name: 'color-scheme', content: 'dark' },
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       {
         name: 'apple-mobile-web-app-status-bar-style',
@@ -100,7 +103,7 @@ function RootDocument({ children }: Props) {
           className="dark relative w-dvw max-w-dvw min-w-dvw overflow-hidden bg-neutral-950"
           data-theme="dark"
           // Dark before the stylesheet loads, so the native sign in sheet doesn't flash white
-          style={{ backgroundColor: '#0a0a0a' }}
+          style={{ backgroundColor: '#0a0a0a', colorScheme: 'dark' }}
           suppressHydrationWarning
         >
           <head>
