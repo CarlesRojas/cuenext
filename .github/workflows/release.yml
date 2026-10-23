@@ -3,7 +3,8 @@ name: Release
 # Bumps the version with Bubblewrap, builds the signed bundle and creates a DRAFT production
 # release in Play Console, with "Bug fixes and performance improvements" as its notes. Review it
 # there and click "Send for review".
-# Then commits the bump and the regenerated Android project to main.
+# Then commits the bump and the regenerated Android project to main, tags it vN and publishes
+# the bundle on GitHub Releases.
 #
 # Deploy the site first: `bubblewrap update` reads the live web manifest, icons and shortcuts.
 #
@@ -81,12 +82,6 @@ jobs:
         id: version
         run: echo "code=$(jq -r .appVersionCode android/twa-manifest.json)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: bundle-${{ steps.version.outputs.code }}
-          path: android/app-release-bundle.aab
-          retention-days: 30
-
       - name: Create draft release in Play Console
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
@@ -105,10 +100,21 @@ jobs:
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add android
           git commit -m "Release $CODE"
-          git push origin HEAD:main
+          git tag "v$CODE"
+          git push origin HEAD:main "v$CODE"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODE: ${{ steps.version.outputs.code }}
+        run: |
+          cp android/app-release-bundle.aab "cuenext_$CODE.aab"
+          gh release create "v$CODE" "cuenext_$CODE.aab" \
+            --title "v$CODE" \
+            --notes "Bug fixes and performance improvements"
           {
             echo "## v$CODE"
             echo
             echo "Draft created in Play Console. Review it and click **Send for review**."
-            echo "The bundle is also attached to this run as an artifact."
+            echo "The bundle is on the v$CODE GitHub release."
           } >> "$GITHUB_STEP_SUMMARY"
