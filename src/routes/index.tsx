@@ -68,6 +68,7 @@ function App() {
                   title={title}
                   key={i}
                   defaultCollapsed={!['Watch next', "Haven't started"].includes(title)}
+                  twoRows
                 >
                   {Array.from({ length: 10 }).map((_, epispdeIndex) => (
                     <PosterCard key={epispdeIndex} isLoading />
@@ -94,40 +95,50 @@ function App() {
           )}
 
           {tvSections && tvSections.watchNext.length > 0 && (
-            <Section sectionKey="tv-watch-next" title="Watch next">
+            <Section
+              sectionKey="tv-watch-next"
+              title="Watch next"
+              twoRows
+              end={
+                tvSections.watchNext.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'tv' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
+            >
               {tvSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
-
-              {tvSections.watchNext.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'tv' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
 
           {tvSections && tvSections.haventStarted.length > 0 && (
-            <Section sectionKey="tv-havent-started" title="Haven't started">
+            <Section
+              sectionKey="tv-havent-started"
+              title="Haven't started"
+              twoRows
+              end={
+                tvSections.haventStarted.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'unstarted' }} search={{ media: 'tv' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
+            >
               {tvSections.haventStarted.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchEpisode key={item.id} episode={item} />
               ))}
-
-              {tvSections.haventStarted.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'unstarted' }} search={{ media: 'tv' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
 
@@ -143,6 +154,19 @@ function App() {
                   </Link>
                 </Button>
               }
+              twoRows
+              end={
+                tvSections.waitingForEpisodes.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'tv' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
             >
               {tvSections.waitingForEpisodes.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
@@ -153,22 +177,28 @@ function App() {
                   imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
-
-              {tvSections.waitingForEpisodes.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'tv' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
 
           {tvSections && tvSections.stoppedWatching.length > 0 && (
-            <Section sectionKey="tv-stopped-watching" title="Stopped watching" defaultCollapsed>
+            <Section
+              sectionKey="tv-stopped-watching"
+              title="Stopped watching"
+              defaultCollapsed
+              twoRows
+              end={
+                tvSections.stoppedWatching.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'stopped' }} search={{ media: 'tv' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
+            >
               {tvSections.stoppedWatching.slice(0, MAX_SECTION_ITEMS).map(item => {
                 const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
                 if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
@@ -184,22 +214,28 @@ function App() {
                   />
                 )
               })}
-
-              {tvSections.stoppedWatching.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'stopped' }} search={{ media: 'tv' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
 
           {tvSections && tvSections.finished.length > 0 && (
-            <Section sectionKey="tv-finished" title="Finished" defaultCollapsed>
+            <Section
+              sectionKey="tv-finished"
+              title="Finished"
+              defaultCollapsed
+              twoRows
+              end={
+                tvSections.finished.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'tv' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
+            >
               {tvSections.finished.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.id}
@@ -210,17 +246,6 @@ function App() {
                   showRate
                 />
               ))}
-
-              {tvSections.finished.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'tv' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
         </div>
@@ -232,6 +257,7 @@ function App() {
                 sectionKey={`movie-${title.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'loading'}`}
                 title={title}
                 key={i}
+                twoRows
               >
                 {Array.from({ length: 10 }).map((_, epispdeIndex) => (
                   <PosterCard key={epispdeIndex} isLoading />
@@ -257,21 +283,26 @@ function App() {
           )}
 
           {movieSections && movieSections.watchNext.length > 0 && (
-            <Section sectionKey="movie-watch-next" title="Watch next">
+            <Section
+              sectionKey="movie-watch-next"
+              title="Watch next"
+              twoRows
+              end={
+                movieSections.watchNext.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'movie' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
+            >
               {movieSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <WatchMovie key={item.tmdbId} movie={item} />
               ))}
-
-              {movieSections.watchNext.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'next' }} search={{ media: 'movie' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
 
@@ -287,6 +318,19 @@ function App() {
                   </Link>
                 </Button>
               }
+              twoRows
+              end={
+                movieSections.unreleased.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'movie' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
             >
               {movieSections.unreleased.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
@@ -297,22 +341,27 @@ function App() {
                   imagePaths={[item.poster, item.backdrop]}
                 />
               ))}
-
-              {movieSections.unreleased.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'waiting' }} search={{ media: 'movie' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
 
           {movieSections && movieSections.finished.length > 0 && (
-            <Section sectionKey="movie-finished" title="Finished">
+            <Section
+              sectionKey="movie-finished"
+              title="Finished"
+              twoRows
+              end={
+                movieSections.finished.length > MAX_SECTION_ITEMS && (
+                  <div className="flex h-full w-fit items-center justify-center">
+                    <Button asChild>
+                      <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'movie' }}>
+                        <FontAwesomeIcon icon={faArrowRight} className="size-4" />
+                        <span>View all</span>
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              }
+            >
               {movieSections.finished.slice(0, MAX_SECTION_ITEMS).map(item => (
                 <PosterCard
                   key={item.tmdbId}
@@ -323,17 +372,6 @@ function App() {
                   showRate
                 />
               ))}
-
-              {movieSections.finished.length > MAX_SECTION_ITEMS && (
-                <div className="flex h-full w-fit items-center justify-center">
-                  <Button asChild>
-                    <Link to="/list/$list" params={{ list: 'finished' }} search={{ media: 'movie' }}>
-                      <FontAwesomeIcon icon={faArrowRight} className="size-4" />
-                      <span>View all</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </Section>
           )}
         </div>

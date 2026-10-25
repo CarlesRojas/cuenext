@@ -149,20 +149,22 @@ function RouteComponent() {
             sectionKey="dropping-this-week"
             title={getListTitle(SeeAllList.UPCOMING, media, category?.label)}
             key="dropping-this-week"
+            twoRows
+            end={
+              onTheAirShows && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={seeAllSearch}>
+                      <FontAwesomeIcon icon={faForward} className="size-4" />
+                      <span>See all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )
+            }
           >
             {onTheAirShows &&
               onTheAirShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
-
-            {onTheAirShows && (
-              <div className="flex h-full w-fit items-center justify-center">
-                <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={seeAllSearch}>
-                    <FontAwesomeIcon icon={faForward} className="size-4" />
-                    <span>See all</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
 
             {!onTheAirShows &&
               onTheAirShowsLoading &&
@@ -173,22 +175,24 @@ function RouteComponent() {
             sectionKey="trending-shows"
             title={getListTitle(SeeAllList.TRENDING, media, category?.label)}
             key="trending-shows"
+            twoRows
+            end={
+              trendingShows && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={seeAllSearch}>
+                      <FontAwesomeIcon icon={faForward} className="size-4" />
+                      <span>See all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )
+            }
           >
             {trendingShows &&
               trendingShows.results.map((tv: TmdbTv, index: number) => (
                 <FollowEpisode key={tv.id} episode={tv} number={index + 1} variant="poster" />
               ))}
-
-            {trendingShows && (
-              <div className="flex h-full w-fit items-center justify-center">
-                <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={seeAllSearch}>
-                    <FontAwesomeIcon icon={faForward} className="size-4" />
-                    <span>See all</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
 
             {!trendingShows &&
               trendingShowsLoading &&
@@ -199,20 +203,22 @@ function RouteComponent() {
             sectionKey="top-rated-shows"
             title={getListTitle(SeeAllList.TOP, media, category?.label)}
             key="top-rated-shows"
+            twoRows
+            end={
+              topRatedShows && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={seeAllSearch}>
+                      <FontAwesomeIcon icon={faForward} className="size-4" />
+                      <span>See all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )
+            }
           >
             {topRatedShows &&
               topRatedShows.results.map((tv: TmdbTv) => <FollowEpisode key={tv.id} episode={tv} variant="poster" />)}
-
-            {topRatedShows && (
-              <div className="flex h-full w-fit items-center justify-center">
-                <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={seeAllSearch}>
-                    <FontAwesomeIcon icon={faForward} className="size-4" />
-                    <span>See all</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
 
             {!topRatedShows &&
               topRatedShowsLoading &&
@@ -227,22 +233,24 @@ function RouteComponent() {
             sectionKey="upcoming-movies"
             title={getListTitle(SeeAllList.UPCOMING, media, category?.label)}
             key="upcoming-movies"
+            twoRows
+            end={
+              upcomingMovies && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={seeAllSearch}>
+                      <FontAwesomeIcon icon={faForward} className="size-4" />
+                      <span>See all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )
+            }
           >
             {upcomingMovies &&
               upcomingMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
               ))}
-
-            {upcomingMovies && (
-              <div className="flex h-full w-fit items-center justify-center">
-                <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.UPCOMING }} search={seeAllSearch}>
-                    <FontAwesomeIcon icon={faForward} className="size-4" />
-                    <span>See all</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
 
             {!upcomingMovies &&
               upcomingMoviesLoading &&
@@ -253,22 +261,24 @@ function RouteComponent() {
             sectionKey="trending-movies"
             title={getListTitle(SeeAllList.TRENDING, media, category?.label)}
             key="trending-movies"
+            twoRows
+            end={
+              trendingMovies && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={seeAllSearch}>
+                      <FontAwesomeIcon icon={faForward} className="size-4" />
+                      <span>See all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )
+            }
           >
             {trendingMovies &&
               trendingMovies.results.map((movie: TmdbMovie, index: number) => (
                 <FollowMovie key={movie.id} movie={movie} number={index + 1} variant="poster" />
               ))}
-
-            {trendingMovies && (
-              <div className="flex h-full w-fit items-center justify-center">
-                <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TRENDING }} search={seeAllSearch}>
-                    <FontAwesomeIcon icon={faForward} className="size-4" />
-                    <span>See all</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
 
             {!trendingMovies &&
               trendingMoviesLoading &&
@@ -279,22 +289,24 @@ function RouteComponent() {
             sectionKey="top-rated-movies"
             title={getListTitle(SeeAllList.TOP, media, category?.label)}
             key="top-rated-movies"
+            twoRows
+            end={
+              topRatedMovies && (
+                <div className="flex h-full w-fit items-center justify-center">
+                  <Button asChild>
+                    <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={seeAllSearch}>
+                      <FontAwesomeIcon icon={faForward} className="size-4" />
+                      <span>See all</span>
+                    </Link>
+                  </Button>
+                </div>
+              )
+            }
           >
             {topRatedMovies &&
               topRatedMovies.results.map((movie: TmdbMovie) => (
                 <FollowMovie key={movie.id} movie={movie} variant="poster" />
               ))}
-
-            {topRatedMovies && (
-              <div className="flex h-full w-fit items-center justify-center">
-                <Button asChild>
-                  <Link to="/see-all/$list" params={{ list: SeeAllList.TOP }} search={seeAllSearch}>
-                    <FontAwesomeIcon icon={faForward} className="size-4" />
-                    <span>See all</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
 
             {!topRatedMovies &&
               topRatedMoviesLoading &&

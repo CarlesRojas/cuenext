@@ -17,6 +17,16 @@ interface SectionProps {
   className?: string
   below?: ReactNode
   besidesTitle?: ReactNode
+
+  // Stacks the covers two to a column so the row reads in pairs:
+  // 1 3 5 7
+  // 2 4 6 8
+  // Exception: exactly two covers sit side by side in a single row instead.
+  twoRows?: boolean
+
+  // Its own column after the covers, centred on the row's height, so a "See all"
+  // button never gets paired with a cover.
+  end?: ReactNode
 }
 
 export function Section({
@@ -28,24 +38,38 @@ export function Section({
   className,
   below,
   besidesTitle,
+  twoRows = false,
+  end,
 }: SectionProps) {
   const { width = 0 } = useWindowSize()
   const isMobile = width < 768
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(`CUENEXT-section-${sectionKey}-collapsed`, defaultCollapsed)
 
+  const items = React.Children.toArray(children).filter(Boolean)
+  const columns: Array<Array<ReactNode>> = []
+  if (!twoRows || items.length === 2) items.forEach(item => columns.push([item]))
+  else for (let index = 0; index < items.length; index += 2) columns.push(items.slice(index, index + 2))
+  if (end) columns.push([end])
+
+  const itemClassName = cn(
+    'duration-slow basis-auto transition-[margin]',
+    'first:md:ml-aside first:sidebar-collapsed:md:ml-aside-collapsed',
+    'last:md:mr-aside-collapsed last:sidebar-collapsed:md:mr-aside',
+  )
+
   return (
     <section className={cn('flex flex-col', className)}>
-      <div className={cn(
-        'px-4 flex items-center gap-4',
-        !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
-      )}>
+      <div
+        className={cn(
+          'flex items-center gap-4 px-4',
+          !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
+        )}
+      >
         <Button
           variant="link"
           size="link"
-          className={cn(
-            !canCollapse && 'pointer-events-none!',
-          )}
+          className={cn(!canCollapse && 'pointer-events-none!')}
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <h2 className="text-lg font-semibold opacity-80">{title}</h2>
@@ -86,22 +110,11 @@ export function Section({
               />
 
               <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8 md:-ml-8')}>
-                {React.Children.map(
-                  children,
-                  (child, index) =>
-                    !!child && (
-                      <CarouselItem
-                        key={index}
-                        className={cn(
-                          'duration-slow basis-auto transition-[margin]',
-                          'first:md:ml-aside first:sidebar-collapsed:md:ml-aside-collapsed',
-                          'last:md:mr-aside-collapsed last:sidebar-collapsed:md:mr-aside',
-                        )}
-                      >
-                        {child}
-                      </CarouselItem>
-                    ),
-                )}
+                {columns.map((column, index) => (
+                  <CarouselItem key={index} className={itemClassName}>
+                    {column.length === 1 ? column[0] : <div className="flex flex-col gap-4">{column}</div>}
+                  </CarouselItem>
+                ))}
               </CarouselContent>
 
               <CarouselNext className={cn('mouse:block z-10 hidden')} />
@@ -111,7 +124,7 @@ export function Section({
               <div
                 className={cn(
                   '-mt-4',
-                  !isMobile && '-mx-4 pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow transition-[padding]',
+                  !isMobile && 'pl-aside sidebar-collapsed:pl-aside-collapsed duration-slow -mx-4 transition-[padding]',
                 )}
               >
                 {below}

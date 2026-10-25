@@ -16,7 +16,7 @@ export function Recommendations({ tmdbId, media }: RecommendationsProps) {
   const showRecommendations = show.data?.recommendations
 
   return (
-    <Section sectionKey="recommendations" title={media === 'movie' ? 'Similar Movies' : 'Similar Shows'}>
+    <Section sectionKey="recommendations" twoRows title={media === 'movie' ? 'Similar Movies' : 'Similar Shows'}>
       {media === 'tv' &&
         showRecommendations &&
         showRecommendations.results.length &&

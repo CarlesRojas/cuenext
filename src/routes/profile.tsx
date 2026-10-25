@@ -380,7 +380,12 @@ function ProfilePage() {
       <div className="flex flex-col gap-6">
         {isLoadingLibrary &&
           [media === 'tv' ? 'Finished Shows' : 'Finished Movies', 'Your Reviews'].map((title, i) => (
-            <Section sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} title={title} key={i}>
+            <Section
+              sectionKey={`profile-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+              title={title}
+              key={i}
+              twoRows={i === 0}
+            >
               {Array.from({ length: 10 }).map((_, index) => (
                 <PosterCard key={index} isLoading />
               ))}
@@ -393,6 +398,7 @@ function ProfilePage() {
               sectionKey={media === 'tv' ? 'profile-shows' : 'profile-movies'}
               title={media === 'tv' ? 'Finished Shows' : 'Finished Movies'}
               besidesTitle={<RatingFilterSelect value={ratingFilter} onChange={setRatingFilter} />}
+              twoRows
             >
               {filteredLibrary.map(item => (
                 <PosterCard
