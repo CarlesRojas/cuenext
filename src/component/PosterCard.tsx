@@ -55,7 +55,7 @@ export function PosterCard(props: Props) {
       <div
         className={cn(
           'relative flex aspect-2/3 animate-pulse flex-col gap-2 overflow-hidden rounded-[22px] border border-neutral-500/40 bg-neutral-800 shadow-xl',
-          'w-[44vw] max-w-[44vw] min-w-[44vw] sm:w-52 sm:max-w-52 sm:min-w-52 lg:w-56 lg:max-w-56 lg:min-w-56 xl:w-60 xl:max-w-60 xl:min-w-60',
+          'w-[40vw] max-w-[40vw] min-w-[40vw] sm:w-52 sm:max-w-52 sm:min-w-52 lg:w-56 lg:max-w-56 lg:min-w-56 xl:w-60 xl:max-w-60 xl:min-w-60',
           'duration-slow transition-opacity',
           props.className,
         )}
@@ -93,7 +93,7 @@ export function PosterCard(props: Props) {
     <div
       className={cn(
         'group/poster relative flex aspect-2/3 flex-col gap-2',
-        'w-[44vw] max-w-[44vw] min-w-[44vw] sm:w-52 sm:max-w-52 sm:min-w-52 lg:w-56 lg:max-w-56 lg:min-w-56 xl:w-60 xl:max-w-60 xl:min-w-60',
+        'w-[40vw] max-w-[40vw] min-w-[40vw] sm:w-52 sm:max-w-52 sm:min-w-52 lg:w-56 lg:max-w-56 lg:min-w-56 xl:w-60 xl:max-w-60 xl:min-w-60',
         isWatchLoading || isFollowLoading ? 'pointer-events-none' : '',
         className,
       )}
