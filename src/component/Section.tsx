@@ -1,11 +1,11 @@
 import { Button } from '#/component/ui/button'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
+import { useAnimatedItems } from '#/hooks/useAnimatedItems'
 import { cn } from '#/lib/cn'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import React from 'react'
 import { useLocalStorage, useWindowSize } from 'usehooks-ts'
 
 interface SectionProps {
@@ -46,7 +46,9 @@ export function Section({
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(`CUENEXT-section-${sectionKey}-collapsed`, defaultCollapsed)
 
-  const items = React.Children.toArray(children).filter(Boolean)
+  // Covers fade out when they leave the row (watched, untracked...) and the rest glide
+  // into place, even when two-row mode makes one hop to another column.
+  const items = useAnimatedItems(children)
   const columns: Array<Array<ReactNode>> = []
   if (!twoRows || items.length === 2) items.forEach(item => columns.push([item]))
   else for (let index = 0; index < items.length; index += 2) columns.push(items.slice(index, index + 2))
@@ -97,28 +99,31 @@ export function Section({
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="group relative w-full overflow-hidden px-4"
           >
-            <Carousel
-              key={`${Math.floor(width / 200)}-${isMobile}`}
-              opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
-              className="w-full"
-            >
-              <CarouselPrevious
-                className={cn(
-                  'mouse:block z-10 hidden',
-                  !isMobile && 'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[left]',
-                )}
-              />
+            <LayoutGroup id={sectionKey}>
+              <Carousel
+                key={`${Math.floor(width / 200)}-${isMobile}`}
+                opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
+                className="w-full"
+              >
+                <CarouselPrevious
+                  className={cn(
+                    'mouse:block z-10 hidden',
+                    !isMobile &&
+                      'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[left]',
+                  )}
+                />
 
-              <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8 md:-ml-8')}>
-                {columns.map((column, index) => (
-                  <CarouselItem key={index} className={itemClassName}>
-                    {column.length === 1 ? column[0] : <div className="flex flex-col gap-4">{column}</div>}
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
+                <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8 md:-ml-8')}>
+                  {columns.map((column, index) => (
+                    <CarouselItem key={index} className={itemClassName}>
+                      {column.length === 1 ? column[0] : <div className="flex flex-col gap-4">{column}</div>}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
 
-              <CarouselNext className={cn('mouse:block z-10 hidden')} />
-            </Carousel>
+                <CarouselNext className={cn('mouse:block z-10 hidden')} />
+              </Carousel>
+            </LayoutGroup>
 
             {below && (
               <div
