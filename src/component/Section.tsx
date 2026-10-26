@@ -1,11 +1,11 @@
 import { Button } from '#/component/ui/button'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
+import { useAnimatedItems } from '#/hooks/useAnimatedItems'
 import { cn } from '#/lib/cn'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import React from 'react'
 import { useLocalStorage, useWindowSize } from 'usehooks-ts'
 
 interface SectionProps {
@@ -46,21 +46,9 @@ export function Section({
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(`CUENEXT-section-${sectionKey}-collapsed`, defaultCollapsed)
 
-  // Each cover gets a layoutId so, when one leaves the row (watched, untracked...), the rest
-  // glide to their new spot. A layoutId rather than plain layout because in two-row mode a
-  // cover can hop to another column, which remounts it under a new parent.
-  const items = React.Children.toArray(children)
-    .filter(Boolean)
-    .map(item => {
-      const key = React.isValidElement(item) ? item.key : null
-      if (key === null) return item
-
-      return (
-        <motion.div key={key} layoutId={String(key)} transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
-          {item}
-        </motion.div>
-      )
-    })
+  // Covers fade out when they leave the row (watched, untracked...) and the rest glide
+  // into place, even when two-row mode makes one hop to another column.
+  const items = useAnimatedItems(children)
   const columns: Array<Array<ReactNode>> = []
   if (!twoRows || items.length === 2) items.forEach(item => columns.push([item]))
   else for (let index = 0; index < items.length; index += 2) columns.push(items.slice(index, index + 2))

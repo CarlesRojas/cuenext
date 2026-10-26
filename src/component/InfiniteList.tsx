@@ -1,6 +1,8 @@
+import { useAnimatedItems } from '#/hooks/useAnimatedItems'
 import { cn } from '#/lib/cn'
 import type { PaginatedQueryReference } from 'convex/react'
 import { usePaginatedQuery } from 'convex/react'
+import { LayoutGroup } from 'motion/react'
 import type { ComponentType, ReactNode } from 'react'
 import { useIntersectionObserver } from 'usehooks-ts'
 
@@ -39,6 +41,9 @@ export function InfiniteList<TItem>({
     },
   })
 
+  // Rows fade out when they leave the list (watched, untracked...) and the rest glide up.
+  const rows = useAnimatedItems(results.map((item, index) => <Component key={getKey(item, index)} {...item} />))
+
   if (isLoading && results.length === 0)
     return <div className={cn('flex flex-col gap-4', className)}>{LoadingComponent}</div>
 
@@ -47,9 +52,7 @@ export function InfiniteList<TItem>({
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      {results.map((item, index) => (
-        <Component key={getKey(item, index)} {...item} />
-      ))}
+      <LayoutGroup id="infinite-list">{rows}</LayoutGroup>
 
       <div ref={ref} className="flex justify-center">
         {canLoadMore && LoadingComponent}

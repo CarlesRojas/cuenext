@@ -5,6 +5,7 @@ import { UserReviewCard } from '#/component/UserReviewCard'
 import { Button } from '#/component/ui/button'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '#/component/ui/carousel'
 import { movieExtrasQuery, showExtrasQuery } from '#/hooks/useMediaExtras'
+import { useAnimatedItems } from '#/hooks/useAnimatedItems'
 import { useReviewActions, useTitleReviews } from '#/hooks/useTitleReviews'
 import { cn } from '#/lib/cn'
 import { tmdbStale } from '#/lib/tmdbQuery'
@@ -14,7 +15,7 @@ import { faChevronDown, faPen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useAction } from 'convex/react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { useState } from 'react'
 import { useIntersectionObserver, useWindowSize } from 'usehooks-ts'
 
@@ -74,6 +75,16 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
   const tmdbReviews = error || !data?.pages[0] ? [] : data.pages.flatMap(page => page.results)
   const hasReviews = userReviews.length > 0 || tmdbReviews.length > 0
 
+  // Reviews fade out when deleted and the rest glide into place; a new one fades in. The
+  // wrappers stay full height so every card in the row keeps matching heights.
+  const reviewCards = useAnimatedItems(
+    [
+      ...userReviews.map(review => <UserReviewCard key={review.id} review={review} />),
+      ...tmdbReviews.map((review, index) => <ReviewCard key={`tmdb-${index}`} review={review} />),
+    ],
+    'h-full',
+  )
+
   const onWrite = () => {
     if (!isSignedIn) {
       requireSignIn()
@@ -129,51 +140,40 @@ export function Reviews({ tmdbId, media, title, poster, backdrop }: ReviewsProps
             )}
 
             {hasReviews && (
-              <Carousel
-                key={`${Math.floor(width / 200)}-${isMobile}`}
-                opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
-                className="w-full"
-              >
-                <CarouselPrevious
-                  className={cn(
-                    'mouse:block z-10 hidden',
-                    !isMobile &&
-                      'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[left]',
-                  )}
-                />
+              <LayoutGroup id="reviews">
+                <Carousel
+                  key={`${Math.floor(width / 200)}-${isMobile}`}
+                  opts={{ align: 'start', dragFree: true, slidesToScroll: 'auto' }}
+                  className="w-full"
+                >
+                  <CarouselPrevious
+                    className={cn(
+                      'mouse:block z-10 hidden',
+                      !isMobile &&
+                        'left-aside sidebar-collapsed:left-aside-collapsed duration-slow ml-2 transition-[left]',
+                    )}
+                  />
 
-                <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8 md:-ml-8')}>
-                  {userReviews.map(review => (
-                    <CarouselItem
-                      key={review.id}
-                      className={cn(
-                        'duration-slow basis-[90%] transition-[margin] md:basis-[50%] lg:basis-[40%] xl:basis-[30%]',
-                        'first:md:ml-aside first:sidebar-collapsed:md:ml-aside-collapsed',
-                        'last:md:mr-aside-collapsed last:sidebar-collapsed:md:mr-aside',
-                      )}
-                    >
-                      <UserReviewCard review={review} />
-                    </CarouselItem>
-                  ))}
+                  <CarouselContent className={cn('z-0 -ml-4 pt-3 pb-8 md:-ml-8')}>
+                    {reviewCards.map(card => (
+                      <CarouselItem
+                        key={card.key}
+                        className={cn(
+                          'duration-slow basis-[90%] transition-[margin] md:basis-[50%] lg:basis-[40%] xl:basis-[30%]',
+                          'first:md:ml-aside first:sidebar-collapsed:md:ml-aside-collapsed',
+                          'last:md:mr-aside-collapsed last:sidebar-collapsed:md:mr-aside',
+                        )}
+                      >
+                        {card}
+                      </CarouselItem>
+                    ))}
 
-                  {tmdbReviews.map((review, index) => (
-                    <CarouselItem
-                      key={`tmdb-${index}`}
-                      className={cn(
-                        'duration-slow basis-[90%] transition-[margin] md:basis-[50%] lg:basis-[40%] xl:basis-[30%]',
-                        'first:md:ml-aside first:sidebar-collapsed:md:ml-aside-collapsed',
-                        'last:md:mr-aside-collapsed last:sidebar-collapsed:md:mr-aside',
-                      )}
-                    >
-                      <ReviewCard review={review} />
-                    </CarouselItem>
-                  ))}
+                    <div ref={ref} className="col-span-full flex justify-center" />
+                  </CarouselContent>
 
-                  <div ref={ref} className="col-span-full flex justify-center" />
-                </CarouselContent>
-
-                <CarouselNext className={cn('mouse:block z-10 hidden')} />
-              </Carousel>
+                  <CarouselNext className={cn('mouse:block z-10 hidden')} />
+                </Carousel>
+              </LayoutGroup>
             )}
           </motion.div>
         )}
