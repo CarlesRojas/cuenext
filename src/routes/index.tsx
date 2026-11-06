@@ -112,8 +112,9 @@ function App() {
                 )
               }
             >
+              {/* Keyed by show so the card stays put and just updates when the next episode takes over. */}
               {tvSections.watchNext.slice(0, MAX_SECTION_ITEMS).map(item => (
-                <WatchEpisode key={item.id} episode={item} />
+                <WatchEpisode key={item.showTmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -137,7 +138,7 @@ function App() {
               }
             >
               {tvSections.haventStarted.slice(0, MAX_SECTION_ITEMS).map(item => (
-                <WatchEpisode key={item.id} episode={item} />
+                <WatchEpisode key={item.showTmdbId} episode={item} />
               ))}
             </Section>
           )}
@@ -201,11 +202,11 @@ function App() {
             >
               {tvSections.stoppedWatching.slice(0, MAX_SECTION_ITEMS).map(item => {
                 const hasEpisodesToWatch = item.episodeNumber >= 0 && item.seasonNumber >= 0
-                if (hasEpisodesToWatch) return <WatchEpisode key={item.id} episode={item} />
+                if (hasEpisodesToWatch) return <WatchEpisode key={item.showTmdbId} episode={item} />
 
                 return (
                   <PosterCard
-                    key={item.id}
+                    key={item.showTmdbId}
                     id={item.showTmdbId}
                     title={item.name}
                     media="tv"
