@@ -77,7 +77,7 @@ export const tmdbTvSchema = tmdbTvMinimalSchema.extend({
       id: z.number(),
       name: z.string(),
       overview: z.string(),
-      air_date: z.string().optional(),
+      air_date: z.string().nullable().optional(),
       episode_number: z.number(),
       season_number: z.number(),
       runtime: z.number().nullable().optional(),
@@ -119,7 +119,7 @@ export const tmdbEpisodeMinimalSchema = z.object({
 })
 
 export const tmdbEpisodeSchema = tmdbEpisodeMinimalSchema.extend({
-  production_code: z.string().optional(),
+  production_code: z.string().nullable().optional(),
   runtime: z.number().nullable().optional(),
   vote_average: z.number().optional(),
   vote_count: z.number().optional(),
